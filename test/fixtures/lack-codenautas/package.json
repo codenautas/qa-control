@@ -2,9 +2,9 @@
   "name": "tabulator",
   "description": "Put data into tables",
   "version": "0.1.12",
-  "author": "Code-lautas <code-nautas@googlegroups.com>",
+  "author": "Codenautas <codenautas@googlegroups.com>",
   "license": "MIT",
-  "repository": "otro/tabulator",
+  "repository": "codenautas/tabulator",
   "contributors": [{
     "name": "Emilio Platzer", "email": "emilioplatzer@gmail.com"
   }],

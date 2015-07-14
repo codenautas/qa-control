@@ -11,13 +11,13 @@ qaControl.msgs={
   en:{
     no_package_json: 'no package json in %',
     no_codenautas_section: 'no codenautas section in package.json',
-    no_codenautas_section_in_codenautas_project: 'no codenautas section in codenautas project',
+    no_codenautas_section_in_codenautas_project: 'no codenautas section in apparently a codenautas project',
     unparseable_package_json: 'package.json exists but cannot be parsed'
   },
   es:{
     no_package_json: 'no hay un archivo package.json en %',
     no_codenautas_section: 'falta la sección codenautas en package.json',
-    no_codenautas_section_in_codenautas_project: 'falta la sección codenautas en un proyecto de codenautas',
+    no_codenautas_section_in_codenautas_project: 'falta la sección codenautas en package.json y aparenta ser un proyecto codenautas',
     unparseable_package_json: 'existe package.json pero no puede parsearse'
   }
 }
@@ -26,7 +26,9 @@ qaControl.lang = process.env.qa_control_lang || 'en';
 
 function findCodenautas(obj, key) {
     if(_.has(obj, key)) { return [obj]; }
-    var k=_.find(obj, function(v) { return v==key; });
+    var k=_.find(obj, function(v) {
+        return typeof(v)=="string" ? new RegExp(key, 'i').test(v) : findCodenautas(v, key).length;
+    });
     if(k) { return [k]; }
     return _.flatten(_.map(obj, function(v) {
         return typeof v == "object" ? findCodenautas(v, key) : [];
@@ -63,6 +65,9 @@ qaControl.controlProject=function controlProject(projectDir){
                if(findCodenautas(json, "codenautas").length==0) {
                    warns.push({text:msgs.no_codenautas_section, params:[projectDir]});
                } else {
+                   if(!json.codenautas) {
+                       warns.push({text:msgs.no_codenautas_section_in_codenautas_project, params:[projectDir]});
+                   }
                }
            }
            return warns;

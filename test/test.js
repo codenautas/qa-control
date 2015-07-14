@@ -40,10 +40,17 @@ describe('qa-control', function(){
             }).catch(done);
         });
         var fixtures='./test/fixtures/';
-        it('should fail package.json does not have a codenautas section (#2)', function(done){
+        it('should fail with project without codenautas section or any codenautas reference (#2)', function(done){
             var projDir=fixtures+'without-codenautas';
             qac.controlProject(projDir).then(function(warns){
                 expect(warns).to.eql([{text:msgs.no_codenautas_section, params:[projDir]}]);
+                done();
+            }).catch(done);
+        });
+        it('should fail with project with codenautas references but no codenautas section(#2)', function(done){
+            var projDir=fixtures+'lack-codenautas';
+            qac.controlProject(projDir).then(function(warns){
+                expect(warns).to.eql([{text:msgs.no_codenautas_section_in_codenautas_project, params:[projDir]}]);
                 done();
             }).catch(done);
         });
