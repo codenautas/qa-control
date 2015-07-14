@@ -14,6 +14,7 @@ qaControl.msgs={
     no_codenautas_section_in_codenautas_project: 'no codenautas section in apparently a codenautas project',
     no_version_in_section_codenautas: 'the section codenautas in package.json lacks a "package-version" section',
     deprecated_version: 'version $1 is too old',
+    lack_mandatory_parameter: 'mandatory parameter "%1" is missing',
     unparseable_package_json: 'package.json exists but cannot be parsed'
   },
   es:{
@@ -22,10 +23,13 @@ qaControl.msgs={
     no_codenautas_section_in_codenautas_project: 'falta la sección codenautas en package.json y aparenta ser un proyecto codenautas',
     no_version_in_section_codenautas: 'falta la entrada para "package-version" en la sección codenautas del package.json',
     deprecated_version: 'la version $1 es demasiado vieja',
+    lack_mandatory_parameter: 'falta el parámetro obligatorio "$1"',
     unparseable_package_json: 'existe package.json pero no puede parsearse'
   }
 }
-
+qaControl.mandatory_params=[
+  {name: 'run-in'}
+];
 qaControl.lang = process.env.qa_control_lang || 'en';
 qaControl.deprecateVersionesBefore = '0.0.1';
 
@@ -76,6 +80,12 @@ qaControl.controlProject=function controlProject(projectDir){
                        warns.push({text:msgs.no_version_in_section_codenautas, params:[projectDir]});
                    } else if(json.codenautas["package-version"] < qaControl.deprecateVersionesBefore) {
                        warns.push({text:msgs.deprecated_version, params:[json.codenautas["package-version"]]});
+                   } else {
+                     _.forEach(qaControl.mandatory_params, function(param) {
+                       if(!json.codenautas[param.name]) {
+                            warns.push({text:msgs.lack_mandatory_parameter, params:[param.name]});
+                       }
+                     });
                    }
                }
            }
