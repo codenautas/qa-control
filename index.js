@@ -1,9 +1,1 @@
-/*!
- * qaControl
- * 2015 Codenautas
- * GNU Licensed
- */
-
-exports = module.exports = function qaControl(opts){
-    throw new Error("Not implemented yet!");
-}
+module.exports = require('./bin/qa-control.js')
