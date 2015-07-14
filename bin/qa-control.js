@@ -14,7 +14,8 @@ qaControl.msgs={
     no_codenautas_section_in_codenautas_project: 'no codenautas section in apparently a codenautas project',
     no_version_in_section_codenautas: 'the section codenautas in package.json lacks a "package-version" section',
     deprecated_version: 'version $1 is too old',
-    lack_mandatory_parameter: 'mandatory parameter "%1" is missing',
+    lack_of_mandatory_parameter: 'mandatory parameter "$1" is missing',
+    invalid_value_1_in_parameter_2: 'invalid value "$2" in parameter "%1"',
     unparseable_package_json: 'package.json exists but cannot be parsed'
   },
   es:{
@@ -23,14 +24,15 @@ qaControl.msgs={
     no_codenautas_section_in_codenautas_project: 'falta la sección codenautas en package.json y aparenta ser un proyecto codenautas',
     no_version_in_section_codenautas: 'falta la entrada para "package-version" en la sección codenautas del package.json',
     deprecated_version: 'la version $1 es demasiado vieja',
-    lack_mandatory_parameter: 'falta el parámetro obligatorio "$1"',
+    lack_of_mandatory_parameter: 'falta el parámetro obligatorio "$1"',
+    invalid_value_1_in_parameter_2: 'valor invalido "$2" para el parametro "%1"',
     unparseable_package_json: 'existe package.json pero no puede parsearse'
   }
 };
 
-qaControl.packageJsonDef = {
+qaControl.projectDefinition = {
   '0.0.1': {
-    sections: {
+    sections: { // podria llamarse 'json-sections'...
       'run-in': {
         mandatory: true,
         values: {
@@ -42,6 +44,13 @@ qaControl.packageJsonDef = {
       type: {
         mandatory:true
       }
+    },
+    files:{
+      'README.md':{ mandatory:true },
+      'LEEME.md':{ mandatory:true },
+      '.travis.yml':{ mandatory:true },
+      '.gitignore':{ mandatory:true },
+      'LICENSE':{ mandatory:true }
     }
   }
 };
@@ -97,10 +106,10 @@ qaControl.controlProject=function controlProject(projectDir){
                    } else if(json.codenautas["package-version"] < qaControl.deprecateVersionesBefore) {
                        warns.push({text:msgs.deprecated_version, params:[json.codenautas["package-version"]]});
                    } else {
-                     var sections = qaControl.packageJsonDef[qaControl.deprecateVersionesBefore].sections;
+                     var sections = qaControl.projectDefinition[qaControl.deprecateVersionesBefore].sections;
                      for(var param in sections) {
                         if(sections[param].mandatory) {
-                            warns.push({text:msgs.lack_mandatory_parameter, params:[param]});
+                            warns.push({text:msgs.lack_of_mandatory_parameter, params:[param]});
                         }
                      }
                    }

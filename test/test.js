@@ -68,11 +68,22 @@ describe('qa-control', function(){
                 done();
             }).catch(done);
         });
+        var projDir=fixtures+'incomplete-codenautas-section';
         it('should detect the absence of a mandatory parameter (#5)', function(done){
-            var projDir=fixtures+'incomplete-codenautas-section';
             qac.controlProject(projDir).then(function(warns){
-                expect(warns).to.eql([{text:msgs.lack_mandatory_parameter, params:['run-in']},
-                                      {text:msgs.lack_mandatory_parameter, params:['type']}]);
+                expect(warns).to.eql([{text:msgs.lack_of_mandatory_parameter, params:['run-in']},
+                                      {text:msgs.lack_of_mandatory_parameter, params:['type']}]);
+                done();
+            }).catch(done);
+        });
+        it.skip('should detect the absence of a mandatory files (#6)', function(done){
+            qac.controlProject(projDir).then(function(warns){
+                expect(warns).to.eql([{text:msgs.lack_of_mandatory_parameter, params:['README.md']},
+                                      {text:msgs.lack_of_mandatory_parameter, params:['LEEME.md']},
+                                      {text:msgs.lack_of_mandatory_parameter, params:['.travis.yml']},
+                                      {text:msgs.lack_of_mandatory_parameter, params:['.gitignore']},
+                                      {text:msgs.lack_of_mandatory_parameter, params:['LICENSE']}
+                                     ]);
                 done();
             }).catch(done);
         });
