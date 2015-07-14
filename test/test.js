@@ -54,10 +54,17 @@ describe('qa-control', function(){
                 done();
             }).catch(done);
         });
-        it('should control codenautas version (#3)', function(done){
+        it('should detect the absence of codenautas version (#3)', function(done){
             var projDir=fixtures+'lack-version';
             qac.controlProject(projDir).then(function(warns){
                 expect(warns).to.eql([{text:msgs.no_version_in_section_codenautas, params:[projDir]}]);
+                done();
+            }).catch(done);
+        });
+        it('should detect a deprecated codenautas version (#4)', function(done){
+            var projDir=fixtures+'deprecated-version';
+            qac.controlProject(projDir).then(function(warns){
+                expect(warns).to.eql([{text:msgs.deprecated_version, params:['0.0.0']}]);
                 done();
             }).catch(done);
         });

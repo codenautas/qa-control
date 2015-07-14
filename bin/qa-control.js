@@ -13,6 +13,7 @@ qaControl.msgs={
     no_codenautas_section: 'no codenautas section in package.json',
     no_codenautas_section_in_codenautas_project: 'no codenautas section in apparently a codenautas project',
     no_version_in_section_codenautas: 'the section codenautas in package.json lacks a "package-version" section',
+    deprecated_version: 'version % is too old',
     unparseable_package_json: 'package.json exists but cannot be parsed'
   },
   es:{
@@ -20,11 +21,13 @@ qaControl.msgs={
     no_codenautas_section: 'falta la sección codenautas en package.json',
     no_codenautas_section_in_codenautas_project: 'falta la sección codenautas en package.json y aparenta ser un proyecto codenautas',
     no_version_in_section_codenautas: 'falta la entrada para "package-version" en la sección codenautas del package.json',
+    deprecated_version: 'la version % es demasiado vieja',
     unparseable_package_json: 'existe package.json pero no puede parsearse'
   }
 }
 
 qaControl.lang = process.env.qa_control_lang || 'en';
+qaControl.deprecateVersionesBefore = '0.0.1';
 
 function findCodenautas(obj, key) {
     if(_.has(obj, key)) { return [obj]; }
@@ -69,10 +72,10 @@ qaControl.controlProject=function controlProject(projectDir){
                } else {
                    if(!json.codenautas) {
                        warns.push({text:msgs.no_codenautas_section_in_codenautas_project, params:[projectDir]});
-                   } else {
-                       if(! ("package-version" in json.codenautas)) {
-                           warns.push({text:msgs.no_version_in_section_codenautas, params:[projectDir]});
-                       }
+                   } else if(! ("package-version" in json.codenautas)) {
+                       warns.push({text:msgs.no_version_in_section_codenautas, params:[projectDir]});
+                   } else if(json.codenautas["package-version"] < qaControl.deprecateVersionesBefore) {
+                       warns.push({text:msgs.deprecated_version, params:[json.codenautas["package-version"]]});
                    }
                }
            }
