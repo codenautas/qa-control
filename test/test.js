@@ -32,10 +32,18 @@ describe('qa-control', function(){
     });
     describe('basic tests', function(){
         var msgs=qac.msgs[qac.lang];
-        it('should fail in the absence of package.json', function(done){
+        it('should fail in the absence of package.json (#1)', function(done){
             var projDir='./test';
             qac.controlProject(projDir).then(function(warns){
                 expect(warns).to.eql([{text:msgs.no_package_json, params:[projDir]}]);
+                done();
+            }).catch(done);
+        });
+        var fixtures='./test/fixtures/';
+        it('should fail package.json does not have a codenautas section (#2)', function(done){
+            var projDir=fixtures+'without-codenautas';
+            qac.controlProject(projDir).then(function(warns){
+                expect(warns).to.eql([{text:msgs.no_codenautas_section, params:[projDir]}]);
                 done();
             }).catch(done);
         });
