@@ -32,7 +32,7 @@ describe('qa-control', function(){
     });
     describe('basic tests', function(){
         var msgs=qac.msgs[qac.lang];
-        it('should fail in the absence of package.json (#1)', function(done){
+        it('should detect the absence of package.json (#1)', function(done){
             var projDir='./test';
             qac.controlProject(projDir).then(function(warns){
                 expect(warns).to.eql([{text:msgs.no_package_json, params:[projDir]}]);
@@ -40,17 +40,24 @@ describe('qa-control', function(){
             }).catch(done);
         });
         var fixtures='./test/fixtures/';
-        it('should fail with project without codenautas section or any codenautas reference (#2)', function(done){
+        it('should detect the absence of codenautas section or any codenautas reference (#2)', function(done){
             var projDir=fixtures+'without-codenautas';
             qac.controlProject(projDir).then(function(warns){
                 expect(warns).to.eql([{text:msgs.no_codenautas_section, params:[projDir]}]);
                 done();
             }).catch(done);
         });
-        it('should fail with project with codenautas references but no codenautas section(#2)', function(done){
+        it('should detect the absence of codenautas section in aparent codenautas project (#2)', function(done){
             var projDir=fixtures+'lack-codenautas';
             qac.controlProject(projDir).then(function(warns){
                 expect(warns).to.eql([{text:msgs.no_codenautas_section_in_codenautas_project, params:[projDir]}]);
+                done();
+            }).catch(done);
+        });
+        it('should control codenautas version (#3)', function(done){
+            var projDir=fixtures+'lack-version';
+            qac.controlProject(projDir).then(function(warns){
+                expect(warns).to.eql([{text:msgs.no_version_in_section_codenautas, params:[projDir]}]);
                 done();
             }).catch(done);
         });

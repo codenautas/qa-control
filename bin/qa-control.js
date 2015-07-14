@@ -12,12 +12,14 @@ qaControl.msgs={
     no_package_json: 'no package json in %',
     no_codenautas_section: 'no codenautas section in package.json',
     no_codenautas_section_in_codenautas_project: 'no codenautas section in apparently a codenautas project',
+    no_version_in_section_codenautas: 'the section codenautas in package.json lacks a "package-version" section',
     unparseable_package_json: 'package.json exists but cannot be parsed'
   },
   es:{
     no_package_json: 'no hay un archivo package.json en %',
     no_codenautas_section: 'falta la sección codenautas en package.json',
     no_codenautas_section_in_codenautas_project: 'falta la sección codenautas en package.json y aparenta ser un proyecto codenautas',
+    no_version_in_section_codenautas: 'falta la entrada para "package-version" en la sección codenautas del package.json',
     unparseable_package_json: 'existe package.json pero no puede parsearse'
   }
 }
@@ -67,6 +69,10 @@ qaControl.controlProject=function controlProject(projectDir){
                } else {
                    if(!json.codenautas) {
                        warns.push({text:msgs.no_codenautas_section_in_codenautas_project, params:[projectDir]});
+                   } else {
+                       if(! ("package-version" in json.codenautas)) {
+                           warns.push({text:msgs.no_version_in_section_codenautas, params:[projectDir]});
+                       }
                    }
                }
            }
