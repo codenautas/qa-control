@@ -23,7 +23,7 @@ qaControl.lang = process.env.qa_control_lang || 'en';
 
 qaControl.controlProject=function controlProject(projectDir){
     var warns=[];
-    var msgs = qaControl[qaControl.lang];
+    var msgs = qaControl.msgs[qaControl.lang];
     return Promises.start(function(){
         if(!projectDir) { throw new Error('null projectDir'); }
         return fs.exists(projectDir);

@@ -4,7 +4,7 @@ var expect = require('expect.js');
 var qac = require('..');
 
 describe('qa-control', function(){
-    describe('input tests', function(){
+    describe('tests that abort on wrong input', function(){
         it('should fail if path is null', function(done){
             qac.controlProject(null).then(function(warns){
                 done(warns);
@@ -28,6 +28,16 @@ describe('qa-control', function(){
                 expect(err).to.match(/is not a directory/);
                 done();
             });
+        });
+    });
+    describe('basic tests', function(){
+        var msgs=qac.msgs[qac.lang];
+        it('should fail in the absence of package.json', function(done){
+            var projDir='./test';
+            qac.controlProject(projDir).then(function(warns){
+                expect(warns).to.eql([{text:msgs.no_package_json, params:[projDir]}]);
+                done();
+            }).catch(done);
         });
     });
 });
