@@ -9,19 +9,19 @@ var qaControl={};
 
 qaControl.msgs={
   en:{
-    no_package_json: 'no package json in %',
+    no_package_json: 'no package json in $1',
     no_codenautas_section: 'no codenautas section in package.json',
     no_codenautas_section_in_codenautas_project: 'no codenautas section in apparently a codenautas project',
     no_version_in_section_codenautas: 'the section codenautas in package.json lacks a "package-version" section',
-    deprecated_version: 'version % is too old',
+    deprecated_version: 'version $1 is too old',
     unparseable_package_json: 'package.json exists but cannot be parsed'
   },
   es:{
-    no_package_json: 'no hay un archivo package.json en %',
+    no_package_json: 'no hay un archivo package.json en $1',
     no_codenautas_section: 'falta la sección codenautas en package.json',
     no_codenautas_section_in_codenautas_project: 'falta la sección codenautas en package.json y aparenta ser un proyecto codenautas',
     no_version_in_section_codenautas: 'falta la entrada para "package-version" en la sección codenautas del package.json',
-    deprecated_version: 'la version % es demasiado vieja',
+    deprecated_version: 'la version $1 es demasiado vieja',
     unparseable_package_json: 'existe package.json pero no puede parsearse'
   }
 }
