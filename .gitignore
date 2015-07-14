@@ -1,6 +1,8 @@
 # Logs
 logs
 *.log
+# para los que usamos vim
+*.swp
 
 # Runtime data
 pids

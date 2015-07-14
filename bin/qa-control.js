@@ -26,10 +26,26 @@ qaControl.msgs={
     lack_mandatory_parameter: 'falta el parámetro obligatorio "$1"',
     unparseable_package_json: 'existe package.json pero no puede parsearse'
   }
-}
-qaControl.mandatory_params=[
-  {name: 'run-in'}
-];
+};
+
+qaControl.packageJsonDef = {
+  '0.0.1': {
+    sections: {
+      'run-in': {
+        mandatory: true,
+        values: {
+          server:{},
+          both:{},
+          client:{}
+        }
+      },
+      type: {
+        mandatory:true
+      }
+    }
+  }
+};
+
 qaControl.lang = process.env.qa_control_lang || 'en';
 qaControl.deprecateVersionesBefore = '0.0.1';
 
@@ -81,11 +97,12 @@ qaControl.controlProject=function controlProject(projectDir){
                    } else if(json.codenautas["package-version"] < qaControl.deprecateVersionesBefore) {
                        warns.push({text:msgs.deprecated_version, params:[json.codenautas["package-version"]]});
                    } else {
-                     _.forEach(qaControl.mandatory_params, function(param) {
-                       if(!json.codenautas[param.name]) {
-                            warns.push({text:msgs.lack_mandatory_parameter, params:[param.name]});
-                       }
-                     });
+                     var sections = qaControl.packageJsonDef[qaControl.deprecateVersionesBefore].sections;
+                     for(var param in sections) {
+                        if(sections[param].mandatory) {
+                            warns.push({text:msgs.lack_mandatory_parameter, params:[param]});
+                        }
+                     }
                    }
                }
            }
