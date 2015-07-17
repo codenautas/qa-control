@@ -79,6 +79,16 @@ qaControl.projectDefinition = {
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/npm-version.png',
                 docDescription: ''
             },
+            downloads:{mandatory:true},
+                md:'[![downloads](https://img.shields.io/npm/dm/yyy.svg)](https://npmjs.org/package/yyy)',
+                imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/downloads.png',
+                docDescription: ''
+            },
+            build:{mandatory:true},
+                md:'[![build](https://img.shields.io/travis/xxx/yyy/master.svg)](https://travis-ci.org/xxx/yyy)',
+                imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/medalla-ejemplo-linux.png',
+                docDescription: 'linux/build'
+            },
             windows:{mandatory:true},
                 md:'[![windows](https://ci.appveyor.com/api/projects/status/github/xxx/yyy?svg=true)](https://ci.appveyor.com/project/xxx/yyy)',
                 imgExample:'https://ci.appveyor.com/api/projects/status/github/codenautas/pg-promise-strict?svg=true',
