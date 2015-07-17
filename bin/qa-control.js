@@ -8,51 +8,58 @@ var _ = require('lodash');
 var qaControl={};
 
 qaControl.msgs={
-  en:{
-    no_package_json: 'no package json in $1',
-    no_codenautas_section: 'no codenautas section in package.json',
-    no_codenautas_section_in_codenautas_project: 'no codenautas section in apparently a codenautas project',
-    no_version_in_section_codenautas: 'the section codenautas in package.json lacks a "package-version" section',
-    deprecated_version: 'version $1 is too old',
-    lack_of_mandatory_parameter: 'mandatory parameter "$1" is missing',
-    invalid_value_1_in_parameter_2: 'invalid value "$2" in parameter "%1"',
-    unparseable_package_json: 'package.json exists but cannot be parsed'
-  },
-  es:{
-    no_package_json: 'no hay un archivo package.json en $1',
-    no_codenautas_section: 'falta la sección codenautas en package.json',
-    no_codenautas_section_in_codenautas_project: 'falta la sección codenautas en package.json y aparenta ser un proyecto codenautas',
-    no_version_in_section_codenautas: 'falta la entrada para "package-version" en la sección codenautas del package.json',
-    deprecated_version: 'la version $1 es demasiado vieja',
-    lack_of_mandatory_parameter: 'falta el parámetro obligatorio "$1"',
-    invalid_value_1_in_parameter_2: 'valor invalido "$2" para el parametro "%1"',
-    unparseable_package_json: 'existe package.json pero no puede parsearse'
-  }
+    en:{
+        no_package_json: 'no package json in $1',
+        no_codenautas_section: 'no codenautas section in package.json',
+        no_codenautas_section_in_codenautas_project: 'no codenautas section in apparently a codenautas project',
+        no_version_in_section_codenautas: 'the section codenautas in package.json lacks a "package-version" section',
+        deprecated_version: 'version $1 is too old',
+        lack_of_mandatory_parameter: 'mandatory parameter "$1" is missing',
+        invalid_value_1_in_parameter_2: 'invalid value "$2" in parameter "%1"',
+        unparseable_package_json: 'package.json exists but cannot be parsed'
+    },
+    es:{
+        no_package_json: 'no hay un archivo package.json en $1',
+        no_codenautas_section: 'falta la sección codenautas en package.json',
+        no_codenautas_section_in_codenautas_project: 'falta la sección codenautas en package.json y aparenta ser un proyecto codenautas',
+        no_version_in_section_codenautas: 'falta la entrada para "package-version" en la sección codenautas del package.json',
+        deprecated_version: 'la version $1 es demasiado vieja',
+        lack_of_mandatory_parameter: 'falta el parámetro obligatorio "$1"',
+        invalid_value_1_in_parameter_2: 'valor invalido "$2" para el parametro "%1"',
+        unparseable_package_json: 'existe package.json pero no puede parsearse'
+    }
 };
 
 qaControl.projectDefinition = {
-  '0.0.1': {
-    sections: { // podria llamarse 'json-sections'...
-      'run-in': {
-        mandatory: true,
-        values: {
-          server:{},
-          both:{},
-          client:{}
+    '0.0.1': {
+        sections: { // podria llamarse 'json-sections'...
+            'run-in': {
+                mandatory: true,
+                values: {
+                    server:{},
+                    both:{},
+                    client:{}
+                }
+            },
+            type: {
+                mandatory:true
+            }
+        },
+        files:{
+            'README.md':{ mandatory:true },
+            'LEEME.md':{ mandatory:true },
+            '.travis.yml':{ mandatory:true },
+            '.gitignore':{ mandatory:true },
+            'LICENSE':{ mandatory:true },
+            'appveyor.yml':{
+                presentIf:function(packageJson){
+                    return !!packageJson.codenautas["test-appveyor"];
+                }
+            }
+        },
+        cucardas:{
         }
-      },
-      type: {
-        mandatory:true
-      }
-    },
-    files:{
-      'README.md':{ mandatory:true },
-      'LEEME.md':{ mandatory:true },
-      '.travis.yml':{ mandatory:true },
-      '.gitignore':{ mandatory:true },
-      'LICENSE':{ mandatory:true }
     }
-  }
 };
 
 qaControl.lang = process.env.qa_control_lang || 'en';

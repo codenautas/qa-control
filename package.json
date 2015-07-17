@@ -17,6 +17,7 @@
     "lodash": ">=3.9.3",
     "parameters": ">=0.1.5",
     "commander": ">=2.8.1",
+    "semver": "~5.0.1",
     
     "best-promise": ">=0.1.3"
   },
