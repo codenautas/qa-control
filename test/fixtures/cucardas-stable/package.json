@@ -1,0 +1,8 @@
+{
+  "name": "the-project",
+  "repository": "codetrip/the-project",
+  "version": "1.0.0",
+  "codenautas": {
+    "package-version": "0.0.1",
+  }
+}
