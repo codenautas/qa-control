@@ -68,7 +68,7 @@ qaControl.projectDefinition = {
             },
             extending:{
                 check: function(packageJson){ 
-                    return semver.satisfies(packageJson.version,'>0.x.x' ) && packageJson.codenautas.purpose==null
+                    return semver.satisfies(packageJson.version,'0.x.x') && packageJson.codenautas.purpose==null && !semver.satisfies(packageJson.version,'0.0.x')
                 },
                 md:'![extending](https://img.shields.io/badge/stability-extending-orange.svg)',
                 imgExample:'https://img.shields.io/badge/stability-extending-orange.svg',
@@ -83,6 +83,21 @@ qaControl.projectDefinition = {
                 md:'[![windows](https://ci.appveyor.com/api/projects/status/github/xxx/yyy?svg=true)](https://ci.appveyor.com/project/xxx/yyy)',
                 imgExample:'https://ci.appveyor.com/api/projects/status/github/codenautas/pg-promise-strict?svg=true',
                 docDescription: 'casos especiales'
+            },
+            coverage:{mandatory:true},
+                md:'[![coverage](https://img.shields.io/coveralls/xxx/yyy/master.svg)](https://coveralls.io/r/xxx/yyy)',
+                imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/coverage.png',
+                docDescription: ''
+            },
+            climate:{mandatory:true},
+                md:'[![climate](https://img.shields.io/codeclimate/github/xxx/yyy.svg)](https://codeclimate.com/github/xxx/yyy)',
+                imgExample:'![climate](https://raw.githubusercontent.com/codenautas/codenautas/master/img/climate.png)',
+                docDescription: ''
+            },
+            dependencias:{mandatory:true},
+                md:'[![dependencies](https://img.shields.io/david/xxx/yyy.svg)](https://david-dm.org/xxx/yyy)',
+                imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/medalla-ejemplo-dependencies.png',
+                docDescription: ''
             }
         }
     }
