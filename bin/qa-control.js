@@ -73,11 +73,16 @@ qaControl.projectDefinition = {
                 md:'![extending](https://img.shields.io/badge/stability-extending-orange.svg)',
                 imgExample:'https://img.shields.io/badge/stability-extending-orange.svg',
                 docDescription: 'opt. manual'
-            }
+            },
             npm-version:{mandatory:true},
-                md:'![version](https://img.shields.io/npm/v/yyy.svg)](https://npmjs.org/package/yyy)',
-                imgExample:'!https://raw.githubusercontent.com/codenautas/codenautas/master/img/npm-version.png',
+                md:'[![version](https://img.shields.io/npm/v/yyy.svg)](https://npmjs.org/package/yyy)',
+                imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/npm-version.png',
                 docDescription: ''
+            },
+            windows:{mandatory:true},
+                md:'[![windows](https://ci.appveyor.com/api/projects/status/github/xxx/yyy?svg=true)](https://ci.appveyor.com/project/xxx/yyy)',
+                imgExample:'https://ci.appveyor.com/api/projects/status/github/codenautas/pg-promise-strict?svg=true',
+                docDescription: 'casos especiales'
             }
         }
     }
