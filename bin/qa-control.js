@@ -66,6 +66,19 @@ qaControl.projectDefinition = {
                 imgExample:'https://img.shields.io/badge/stability-desgining-red.svg',
                 docDescription: 'opt. manual'
             },
+            extending:{
+                check: function(packageJson){ 
+                    return semver.satisfies(packageJson.version,'>0.x.x' ) && packageJson.codenautas.purpose==null
+                },
+                md:'![extending](https://img.shields.io/badge/stability-extending-orange.svg)',
+                imgExample:'https://img.shields.io/badge/stability-extending-orange.svg',
+                docDescription: 'opt. manual'
+            }
+            npm-version:{mandatory:true},
+                md:'![version](https://img.shields.io/npm/v/yyy.svg)](https://npmjs.org/package/yyy)',
+                imgExample:'!https://raw.githubusercontent.com/codenautas/codenautas/master/img/npm-version.png',
+                docDescription: ''
+            }
         }
     }
 };
