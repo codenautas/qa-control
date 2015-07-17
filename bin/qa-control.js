@@ -58,6 +58,14 @@ qaControl.projectDefinition = {
             }
         },
         cucardas:{
+            designing:{
+                check: function(packageJson){ 
+                    return semver.satisfies(packageJson.version,'0.0.x') && packageJson.codenautas.purpose==null
+                },
+                md:'![designing](https://img.shields.io/badge/stability-desgining-red.svg)',
+                imgExample:'https://img.shields.io/badge/stability-desgining-red.svg',
+                docDescription: 'opt. manual'
+            },
         }
     }
 };
