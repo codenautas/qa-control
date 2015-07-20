@@ -74,37 +74,44 @@ qaControl.projectDefinition = {
                 imgExample:'https://img.shields.io/badge/stability-extending-orange.svg',
                 docDescription: 'opt. manual'
             },
-            npm-version:{mandatory:true},
+            'npm-version':{
+                mandatory:true,
                 md:'[![version](https://img.shields.io/npm/v/yyy.svg)](https://npmjs.org/package/yyy)',
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/npm-version.png',
                 docDescription: ''
             },
-            downloads:{mandatory:true},
+            downloads:{
+                mandatory:true,
                 md:'[![downloads](https://img.shields.io/npm/dm/yyy.svg)](https://npmjs.org/package/yyy)',
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/downloads.png',
                 docDescription: ''
             },
-            build:{mandatory:true},
+            build:{
+                mandatory:true,
                 md:'[![build](https://img.shields.io/travis/xxx/yyy/master.svg)](https://travis-ci.org/xxx/yyy)',
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/medalla-ejemplo-linux.png',
                 docDescription: 'linux/build'
             },
-            windows:{mandatory:true},
+            windows:{
+                mandatory:true,
                 md:'[![windows](https://ci.appveyor.com/api/projects/status/github/xxx/yyy?svg=true)](https://ci.appveyor.com/project/xxx/yyy)',
                 imgExample:'https://ci.appveyor.com/api/projects/status/github/codenautas/pg-promise-strict?svg=true',
                 docDescription: 'casos especiales'
             },
-            coverage:{mandatory:true},
+            coverage:{
+                mandatory:true,
                 md:'[![coverage](https://img.shields.io/coveralls/xxx/yyy/master.svg)](https://coveralls.io/r/xxx/yyy)',
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/coverage.png',
                 docDescription: ''
             },
-            climate:{mandatory:true},
+            climate:{
+                mandatory:true,
                 md:'[![climate](https://img.shields.io/codeclimate/github/xxx/yyy.svg)](https://codeclimate.com/github/xxx/yyy)',
                 imgExample:'![climate](https://raw.githubusercontent.com/codenautas/codenautas/master/img/climate.png)',
                 docDescription: ''
             },
-            dependencias:{mandatory:true},
+            dependencias:{
+                mandatory:true,
                 md:'[![dependencies](https://img.shields.io/david/xxx/yyy.svg)](https://david-dm.org/xxx/yyy)',
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/medalla-ejemplo-dependencies.png',
                 docDescription: ''
