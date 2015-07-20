@@ -23,7 +23,7 @@ var fixtures=[{
         info.packageJson.codenautas['type']='invalid-type-for-test';
     },
     expected:[{
-        text:qaControl.msgs.es.invalid_value_1_in_parameter_2,
+        rule:'invalid_value_1_in_parameter_2',
         params:['invalid-type-for-test','type']
     }]
 }]
@@ -69,7 +69,7 @@ describe('qa-control', function(){
                     return qaControl.controlInfo(clonedInfo);
                 }).then(function(warnings){
                     if(!fixture.expected){
-                        fixture.expected=[{text:qaControl.msgs.es[fixture.test], params:[]}];
+                        fixture.expected=[{rule:fixture.test, params:[]}];
                         if(fixture.expectedParams){
                             fixture.expected.params=fixture.expectedParams;
                         }
@@ -111,7 +111,7 @@ describe('qa-control', function(){
         it('should detect the absence of package.json (#1)', function(done){
             var projDir='./test';
             qac.controlProject(projDir).then(function(warns){
-                expect(warns).to.eql([{text:msgs.no_package_json, params:[projDir]}]);
+                expect(warns).to.eql([{rule:'no_package_json_1', params:[projDir]}]);
                 done();
             }).catch(done);
         });
