@@ -9,7 +9,7 @@ var qaControl={};
 
 qaControl.msgs={
     en:{
-        no_package_json: 'no package json in $1',
+        no_package_json_1: 'no package json in $1',
         no_codenautas_section: 'no codenautas section in package.json',
         no_codenautas_section_in_codenautas_project: 'no codenautas section in apparently a codenautas project',
         no_version_in_section_codenautas: 'the section codenautas in package.json lacks a "package-version" section',
@@ -19,7 +19,7 @@ qaControl.msgs={
         unparseable_package_json: 'package.json exists but cannot be parsed'
     },
     es:{
-        no_package_json: 'no hay un archivo package.json en $1',
+        no_package_json_1: 'no hay un archivo package.json en $1',
         no_codenautas_section: 'falta la sección codenautas en package.json',
         no_codenautas_section_in_codenautas_project: 'falta la sección codenautas en package.json y aparenta ser un proyecto codenautas',
         no_version_in_section_codenautas: 'falta la entrada para "package-version" en la sección codenautas del package.json',
@@ -107,7 +107,7 @@ qaControl.projectDefinition = {
             climate:{
                 mandatory:true,
                 md:'[![climate](https://img.shields.io/codeclimate/github/xxx/yyy.svg)](https://codeclimate.com/github/xxx/yyy)',
-                imgExample:'![climate](https://raw.githubusercontent.com/codenautas/codenautas/master/img/climate.png)',
+                imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/climate.png',
                 docDescription: ''
             },
             dependencias:{
@@ -135,6 +135,14 @@ function findCodenautas(obj, key) {
 }
 
 qaControl.controlProject=function controlProject(projectDir){
+    return Promises.start(function(){
+        return qaControl.loadProject();
+    }).then(function(info){
+        return qaControl.controlInfo(info);
+    });
+}
+
+qaControl.obsoleteControlProject=function controlProject(projectDir){
     var warns=[];
     var msgs = qaControl.msgs[qaControl.lang];
     var packageJSon=path.normalize(projectDir+'/package.json');

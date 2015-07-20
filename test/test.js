@@ -3,7 +3,83 @@
 var expect = require('expect.js');
 var qac = require('..');
 
+var fixtures=[{
+    base:'stable-project',
+    test:'no_package_json_1',
+    change:function(info){
+        delete info.files['package.json'];
+    },
+    expectedParams:['stable-project']
+},{
+    base:'stable-project',
+    test:'no_codenautas_section',
+    change:function(info){
+        delete info.packageJson.codenautas;
+    }
+},{
+    base:'stable-project',
+    test:'invalid_value_1_in_parameter_2',
+    change:function(info){
+        info.packageJson.codenautas['type']='invalid-type-for-test';
+    },
+    expected:[{
+        text:qaControl.msgs.es.invalid_value_1_in_parameter_2,
+        params:['invalid-type-for-test','type']
+    }]
+}]
+
 describe('qa-control', function(){
+    describe('load project', function(){
+        it('loads ok', function(done){
+            qaControl.loadProject('./test/fixures/stable-project').then(function(info){
+                expect(Object.keys(info)).to.eql([
+                    'packageJsonText',
+                    'packageJson',
+                    'files'
+                ]);
+                expect(info.packageJsonText).to.match(/^{\n  "name": "stable-project"/);
+                expect(info.packageJson.name).to.be('stable-project');
+                expect(info.packageJson.codenautas["package-version"]).to.eql("0.0.1");
+                expect(info.file['README.md'].content).to.match(/^<!--multilang v0 en:README.md es:LEEME.md -->/);
+            }).catch(done);
+        });
+    });
+    describe('text qa-control by fixtures', function(){
+        var perfectProjects={};
+        fixtures.forEach(function(fixture){
+            var fixtureName='fixture '+fixture.test;
+            if(fixture.skipped){
+                it.skipped(fixtureName, function(){});
+                return;
+            }
+            if(fixtureName,function(done){
+                Promises.start(function(){
+                    if(!perfectProject[fixture.base]){
+                        return qaControl.loadProject(fixture.base).then(function(info){
+                            perfectProject[fixture.base]=info;
+                            return info;
+                        });
+                    }else{
+                        return perfectProject[fixture.base];
+                    }
+                }).then(function(info){
+                    return cloneProject(info);
+                }).then(function(clonedInfo){
+                    fixture.change(clonedInfo);
+                    return qaControl.controlInfo(clonedInfo);
+                }).then(function(warnings){
+                    if(!fixture.expected){
+                        fixture.expected=[{text:qaControl.msgs.es[fixture.test], params:[]}];
+                        if(fixture.expectedParams){
+                            fixture.expected.params=fixture.expectedParams;
+                        }
+                    }
+                    expect(warnings).to.eql(fixture.expected);
+                    done();
+                }).catch(done);
+            });
+        });
+    });
     describe('tests that abort on wrong input', function(){
         it('should fail if path is null', function(done){
             qac.controlProject(null).then(function(warns){
