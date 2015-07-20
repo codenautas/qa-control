@@ -68,7 +68,7 @@ qaControl.projectDefinition = {
             },
             extending:{
                 check: function(packageJson){ 
-                    return semver.satisfies(packageJson.version,'0.x.x') && packageJson.codenautas.purpose==null && !semver.satisfies(packageJson.version,'0.0.x')
+                    return semver.satisfies(packageJson.version,'0.x.x') && !semver.satisfies(packageJson.version,'0.0.x') && packageJson.codenautas.purpose==null;
                 },
                 md:'![extending](https://img.shields.io/badge/stability-extending-orange.svg)',
                 imgExample:'https://img.shields.io/badge/stability-extending-orange.svg',
