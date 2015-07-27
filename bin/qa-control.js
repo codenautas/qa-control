@@ -9,24 +9,18 @@ var qaControl={};
 
 qaControl.msgs={
     en:{
-        no_package_json_1: 'no package json in $1',
-        no_codenautas_section: 'no codenautas section in package.json',
-        no_codenautas_section_in_codenautas_project: 'no codenautas section in apparently a codenautas project',
-        no_version_in_section_codenautas: 'the section codenautas in package.json lacks a "package-version" section',
-        deprecated_version: 'version $1 is too old',
-        lack_of_mandatory_parameter: 'mandatory parameter "$1" is missing',
-        invalid_value_1_in_parameter_2: 'invalid value "$2" in parameter "%1"',
-        unparseable_package_json: 'package.json exists but cannot be parsed'
+        no_package_json: 'package.json must exist',
     },
     es:{
-        no_package_json_1: 'no hay un archivo package.json en $1',
-        no_codenautas_section: 'falta la sección codenautas en package.json',
+        no_package_json: 'falta el archivo package.json',
+        no_qa_control_section_in_package_json: 'falta la sección qa-control en package.json',
         no_codenautas_section_in_codenautas_project: 'falta la sección codenautas en package.json y aparenta ser un proyecto codenautas',
         no_version_in_section_codenautas: 'falta la entrada para "package-version" en la sección codenautas del package.json',
         deprecated_version: 'la version $1 es demasiado vieja',
         lack_of_mandatory_parameter: 'falta el parámetro obligatorio "$1"',
-        invalid_value_1_in_parameter_2: 'valor invalido "$2" para el parametro "%1"',
-        unparseable_package_json: 'existe package.json pero no puede parsearse'
+        invalid_value_1_in_parameter_2: 'valor invalido "$2" para el parametro "$1" en la sección qa-control',
+        unparseable_package_json: 'existe package.json pero no puede parsearse',
+        no_multilang_section_in_readme: 'falta la sección multilang en el archivo README.md',
     }
 };
 
@@ -120,6 +114,52 @@ qaControl.projectDefinition = {
     }
 };
 
+qaControl.rules={
+    exist_package_json:{
+        checks:[{
+            warnings:function(info){
+                if(!info.files['package.json']){
+                    return [{warning:'no_package_json'}];
+                }
+                return [];
+            }
+        }],
+        shouldAbort:true
+    },
+    qa_control_section_in_package_json:{
+        checks:[{
+            warnings:function(info){
+                if(!info.packageJson['qa-control']){
+                    return [{warning:'no_qa_control_section_in_package_json'}];
+                }
+                return [];
+            }
+        }],
+        shouldAbort:true
+    },
+    valid_values_for_qa_control_keys:{
+        checks:[{
+            warnings:function(info){
+                var warns=[];
+                var qaControlSection=info.packageJson['qa-control'];
+                var sections=qaControl.projectDefinition[qaControlSection['package-version']].sections;
+                for(var sectionName in sections){
+                    var sectionDef=sections[sectionName];
+                    if(sectionDef.mandatory && !(sectionName in qaControlSection)){
+                        warns.push({warning:'lack_of_mandatory_section_1',params:[sectionName]});
+                    }else{
+                        var observedValue=qaControlSection[sectionName];
+                        if(sectionDef.values && !(observedValue in sectionDef.values)){
+                            warns.push({warning:'invalid_value_1_in_parameter_2',params:[observedValue,sectionName]});
+                        }
+                    }
+                };
+                return warns;
+            }
+        }]
+    },
+};
+
 qaControl.lang = process.env.qa_control_lang || 'en';
 qaControl.deprecateVersionesBefore = '0.0.1';
 
@@ -149,7 +189,7 @@ qaControl.loadProject = function loadProject(projectDir) {
         if(files.indexOf('package.json') != -1) {
             info['packageJson'] = {};
         }
-        return Promise.all(files.map(function(file){
+        return Promises.all(files.map(function(file){
             var iFile = path.normalize(projectDir+'/'+file);
             return fs.readFile(iFile, 'utf8').then(function(content){
                 info['files'][file].content = content;
@@ -162,6 +202,23 @@ qaControl.loadProject = function loadProject(projectDir) {
         return info;
     });
 };
+
+qaControl.controlInfo=function controlInfo(info){
+    var resultWarnings=[];
+    for(var ruleName in qaControl.rules){
+        var rule=qaControl.rules[ruleName];
+        var fails=0;
+        rule.checks.forEach(function(checkInfo){
+            var warningsOfThisRule=checkInfo.warnings(info);
+            fails+=warningsOfThisRule.length;
+            resultWarnings=resultWarnings.concat(warningsOfThisRule);
+        });
+        if(fails && rule.shouldAbort){
+            break;
+        }
+    }
+    return resultWarnings;
+}
 
 qaControl.controlProject=function controlProject(projectDir){
     return Promises.start(function(){

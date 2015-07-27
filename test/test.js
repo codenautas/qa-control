@@ -1,24 +1,47 @@
 "use strict";
 
+var _ = require('lodash');
 var expect = require('expect.js');
 var qac = require('..');
+var Promises = require('best-promise');
 
 var fixtures=[{
     base:'stable-project',
-    test:'no_package_json_1',
+    test:'no_package_json',
     change:function(info){
         delete info.files['package.json'];
-    },
-    expectedParams:['stable-project']
-},{
-    base:'stable-project',
-    test:'no_codenautas_section',
-    change:function(info){
-        delete info.packageJson.codenautas;
     }
 },{
     base:'stable-project',
+    test:'no_qa_control_section_in_package_json',
+    change:function(info){
+        delete info.packageJson['qa-control'];
+    }
+},{
+    base:'stable-project',
+    test:'lack_of_mandatory_attribute_1',
+    change:function(info){
+        delete info.packageJson['qa-control']['run-in'];
+        delete info.packageJson['qa-control']['type'];
+    },
+    expected:[
+        { warning:'lack_of_mandatory_section_1',params:['run-in']},
+        { warning:'lack_of_mandatory_section_1',params:['type']}
+    ]
+},{
+    base:'stable-project',
     test:'invalid_value_1_in_parameter_2',
+    change:function(info){
+        info.packageJson['qa-control']['run-in']='invalid-run-in-for-test';
+    },
+    expected:[{
+        warning:'invalid_value_1_in_parameter_2',
+        params:['invalid-run-in-for-test','run-in']
+    }]
+},{
+    skipped:true,
+    base:'stable-project',
+    test:'no_multilang_section_in_readme',
     change:function(info){
         info.packageJson.codenautas['type']='invalid-type-for-test';
     },
@@ -27,6 +50,10 @@ var fixtures=[{
         params:['invalid-type-for-test','type']
     }]
 }]
+
+function cloneProject(info){
+    return _.cloneDeep(info);
+}
 
 describe('qa-control', function(){
     describe('load project', function(){
@@ -38,29 +65,29 @@ describe('qa-control', function(){
                 ]);
                 expect(info.files['package.json'].content).to.match(/^{\n  "name": "stable-project"/);
                 expect(info.packageJson.name).to.be('stable-project');
-                expect(info.packageJson.codenautas["package-version"]).to.eql("0.0.1");
+                expect(info.packageJson["qa-control"]["package-version"]).to.eql("0.0.1");
                 expect(info.files['README.md'].content).to.match(/^<!--multilang v0 en:README.md es:LEEME.md -->/);
                 done();
             }).catch(done);
         });
     });
-    describe.skip('test qa-control by fixtures', function(){
+    describe('test qa-control by fixtures', function(){
         var perfectProjects={};
         fixtures.forEach(function(fixture){
             var fixtureName='fixture '+fixture.test;
             if(fixture.skipped){
-                it.skipped(fixtureName, function(){});
+                it.skip(fixtureName, function(){});
                 return;
             }
-            if(fixtureName,function(done){
+            it(fixtureName,function(done){
                 Promises.start(function(){
-                    if(!perfectProject[fixture.base]){
-                        return qac.loadProject(fixture.base).then(function(info){
-                            perfectProject[fixture.base]=info;
+                    if(!perfectProjects[fixture.base]){
+                        return qac.loadProject('test/fixtures/'+fixture.base).then(function(info){
+                            perfectProjects[fixture.base]=info;
                             return info;
                         });
                     }else{
-                        return perfectProject[fixture.base];
+                        return perfectProjects[fixture.base];
                     }
                 }).then(function(info){
                     return cloneProject(info);
@@ -69,7 +96,7 @@ describe('qa-control', function(){
                     return qac.controlInfo(clonedInfo);
                 }).then(function(warnings){
                     if(!fixture.expected){
-                        fixture.expected=[{rule:fixture.test, params:[]}];
+                        fixture.expected=[{warning:fixture.test}];
                         if(fixture.expectedParams){
                             fixture.expected.params=fixture.expectedParams;
                         }
@@ -111,7 +138,7 @@ describe('qa-control', function(){
         it('should detect the absence of package.json (#1)', function(done){
             var projDir='./test';
             qac.controlProject(projDir).then(function(warns){
-                expect(warns).to.eql([{rule:'no_package_json_1', params:[projDir]}]);
+                expect(warns).to.eql([{rule:'no_package_json', params:[projDir]}]);
                 done();
             }).catch(done);
         });
