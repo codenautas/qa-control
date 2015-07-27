@@ -134,9 +134,38 @@ function findCodenautas(obj, key) {
     }), true);
 }
 
+qaControl.loadProject = function loadProject(projectDir) {
+    var info = {};
+    return Promises.start(function(){
+        return fs.stat(projectDir);
+    }).then(function(stat){
+        if(! stat.isDirectory()) {
+            throw new Error("'"+projectDir+"' is not a directory");
+        }
+        return fs.readdir(projectDir);
+    }).then(function(files) {
+        info['files'] = {};
+        for(var f in files) { info['files'][files[f]] = {}; }
+        if(files.indexOf('package.json') != -1) {
+            info['packageJson'] = {};
+        }
+        return Promise.all(files.map(function(file){
+            var iFile = path.normalize(projectDir+'/'+file);
+            return fs.readFile(iFile, 'utf8').then(function(content){
+                info['files'][file].content = content;
+                if(file==='package.json') {
+                    info['packageJson'] = JSON.parse(content);
+                }
+            });
+        }));
+    }).then(function() {
+        return info;
+    });
+};
+
 qaControl.controlProject=function controlProject(projectDir){
     return Promises.start(function(){
-        return qaControl.loadProject();
+        return qaControl.loadProject(projectDir);
     }).then(function(info){
         return qaControl.controlInfo(info);
     });
