@@ -159,7 +159,7 @@ describe('qa-control', function(){
             });
         });
     });
-    describe.skip('tests that abort on wrong input', function(){
+    describe('tests that abort on wrong input', function(){
         it('should fail if path is null', function(done){
             qac.controlProject(null).then(function(warns){
                 done(warns);
@@ -168,7 +168,7 @@ describe('qa-control', function(){
                 done();
             });
         });
-        it('should fail if path does not exists', function(done){
+        it.skip('should fail if path does not exists', function(done){
             qac.controlProject('/non existent path/').then(function(info){
                 done(info);
             }).catch(function(err){
@@ -176,7 +176,7 @@ describe('qa-control', function(){
                 done();
             });
         });
-        it('should fail if path is not a directory', function(done){
+        it.skip('should fail if path is not a directory', function(done){
             qac.controlProject('./package.json').then(function(info){
                 done(info);
             }).catch(function(err){
