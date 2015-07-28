@@ -26,10 +26,10 @@ qaControl.msgs={
         no_package_version_in_qa_control_section: 'falta la sección "package-version" en la sección qa-control',
         no_qa_control_section_in_package_json: 'falta la sección qa-control en package.json',
         no_version_in_section_codenautas: 'falta la entrada para "package-version" en la sección codenautas del package.json',
-        unparseable_package_json: 'existe package.json pero no puede parsearse',
-        lack_of_cockade_marker_in_readme:'',
-        lack_of_mandatory_cockade_1: '',
-        wrong_format_in_cockade_1: '',
+        //unparseable_package_json: 'existe package.json pero no puede parsearse',
+        lack_of_cockade_marker_in_readme:'falta la sección "cucardas" en README.md',
+        lack_of_mandatory_cockade_1: 'falta la cucarda oblicatoria $1',
+        wrong_format_in_cockade_1: 'la cucarda "$1" tiene formato incorrecto',
     }
 };
 
@@ -61,6 +61,30 @@ qaControl.projectDefinition = {
             }
         },
         cucardas:{
+            'npm-version':{
+                mandatory:true,
+                md:'[![version](https://img.shields.io/npm/v/yyy.svg)](https://npmjs.org/package/yyy)',
+                imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/npm-version.png',
+                docDescription: ''
+            },
+            downloads:{
+                mandatory:true,
+                md:'[![downloads](https://img.shields.io/npm/dm/yyy.svg)](https://npmjs.org/package/yyy)',
+                imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/downloads.png',
+                docDescription: ''
+            },
+            build:{
+                mandatory:true,
+                md:'[![linux](https://img.shields.io/travis/xxx/yyy/master.svg)](https://travis-ci.org/xxx/yyy)',
+                imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/medalla-ejemplo-linux.png',
+                docDescription: 'linux/build'
+            },
+            dependencies:{
+                mandatory:true,
+                md:'[![dependencies](https://img.shields.io/david/xxx/yyy.svg)](https://david-dm.org/xxx/yyy)',
+                imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/medalla-ejemplo-dependencies.png',
+                docDescription: ''
+            },
             designing:{
                 check: function(packageJson){ 
                     return semver.satisfies(packageJson.version,'0.0.x') && packageJson.codenautas.purpose==null
@@ -77,46 +101,19 @@ qaControl.projectDefinition = {
                 imgExample:'https://img.shields.io/badge/stability-extending-orange.svg',
                 docDescription: 'opt. manual'
             },
-            'npm-version':{
-                mandatory:true,
-                md:'[![version](https://img.shields.io/npm/v/yyy.svg)](https://npmjs.org/package/yyy)',
-                imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/npm-version.png',
-                docDescription: ''
-            },
-            downloads:{
-                mandatory:true,
-                md:'[![downloads](https://img.shields.io/npm/dm/yyy.svg)](https://npmjs.org/package/yyy)',
-                imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/downloads.png',
-                docDescription: ''
-            },
-            build:{
-                mandatory:true,
-                md:'[![build](https://img.shields.io/travis/xxx/yyy/master.svg)](https://travis-ci.org/xxx/yyy)',
-                imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/medalla-ejemplo-linux.png',
-                docDescription: 'linux/build'
-            },
             windows:{
-                mandatory:true,
                 md:'[![windows](https://ci.appveyor.com/api/projects/status/github/xxx/yyy?svg=true)](https://ci.appveyor.com/project/xxx/yyy)',
                 imgExample:'https://ci.appveyor.com/api/projects/status/github/codenautas/pg-promise-strict?svg=true',
                 docDescription: 'casos especiales'
             },
             coverage:{
-                mandatory:true,
                 md:'[![coverage](https://img.shields.io/coveralls/xxx/yyy/master.svg)](https://coveralls.io/r/xxx/yyy)',
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/coverage.png',
                 docDescription: ''
             },
             climate:{
-                mandatory:true,
                 md:'[![climate](https://img.shields.io/codeclimate/github/xxx/yyy.svg)](https://codeclimate.com/github/xxx/yyy)',
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/climate.png',
-                docDescription: ''
-            },
-            dependencias:{
-                mandatory:true,
-                md:'[![dependencies](https://img.shields.io/david/xxx/yyy.svg)](https://david-dm.org/xxx/yyy)',
-                imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/medalla-ejemplo-dependencies.png',
                 docDescription: ''
             }
         }
@@ -124,7 +121,7 @@ qaControl.projectDefinition = {
 };
 
 qaControl.lang = process.env.qa_control_lang || 'en';
-qaControl.deprecateVersionesBefore = '0.0.1';
+qaControl.currentVersion = '0.0.1';
 
 qaControl.rules={
     exist_package_json:{
@@ -178,7 +175,7 @@ qaControl.rules={
         checks:[{
             warnings:function(info) {
                 var ver=info.packageJson['qa-control']['package-version'];
-                if(semver.lt(ver, qaControl.deprecateVersionesBefore)){
+                if(semver.lt(ver, qaControl.currentVersion)){
                     return [{warning:'deprecated_qa_control_version',params:[ver]}];
                 }
                 return [];
@@ -237,8 +234,23 @@ qaControl.rules={
         checks:[{
             warnings:function(info){
                 var warns=[];
-                if(! info.files['README.md'].content.match(/<!-- cucardas -->/)) {
+                var readme=info.files['README.md'].content;
+                if(! readme.match(/<!-- cucardas -->/)) {
                     warns.push({warning:'lack_of_cockade_marker_in_readme'});
+                }
+                var cucardas=qaControl.projectDefinition[qaControl.currentVersion].cucardas;
+                var modulo=info.packageJson.name;
+                var repo=info.packageJson.repository.replace('/'+modulo,'');
+                //console.log("modulo", modulo, "repo", repo);
+                for(var nombreCucarda in cucardas) {
+                    var cucarda = cucardas[nombreCucarda];
+                    var cucaStr = cucarda.md.replace(/\bxxx\b/g,repo).replace(/\byyy\b/g,modulo);
+                    //if(nombreCucarda=="windows")  console.log(cucaStr);
+                    if(cucarda.mandatory) {
+                        //if(! readme.match()) {
+                            
+                        //}
+                    }
                 }
                 //missing_mandatory_cockade_1 wrong_format_in_cockade_1
                 return warns;
