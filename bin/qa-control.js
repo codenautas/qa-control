@@ -233,17 +233,6 @@ qaControl.rules={
     },
 };
 
-function findCodenautas(obj, key) {
-    if(_.has(obj, key)) { return [obj]; }
-    var k=_.find(obj, function(v) {
-        return typeof(v)=="string" ? new RegExp(key, 'i').test(v) : findCodenautas(v, key).length;
-    });
-    if(k) { return [k]; }
-    return _.flatten(_.map(obj, function(v) {
-        return typeof v == "object" ? findCodenautas(v, key) : [];
-    }), true);
-}
-
 qaControl.loadProject = function loadProject(projectDir) {
     var info = {};
     return Promises.start(function(){
@@ -301,56 +290,5 @@ qaControl.controlProject=function controlProject(projectDir){
         return qaControl.controlInfo(info);
     });
 }
-
-qaControl.obsoleteControlProject=function controlProject(projectDir){
-    var warns=[];
-    var msgs = qaControl.msgs[qaControl.lang];
-    var packageJSon=path.normalize(projectDir+'/package.json');
-    return Promises.start(function(){
-        if(!projectDir) { throw new Error('null projectDir'); }
-        return fs.exists(projectDir);
-    }).then(function(exists) {
-        if(!exists) { throw new Error("'"+projectDir+"' does not exists"); }
-        return fs.stat(projectDir);
-    }).then(function(stat) {
-        if(! stat.isDirectory()) {  }
-        if(stat.isDirectory()) {
-            return fs.exists(path.normalize(packageJSon));
-        }
-        throw new Error("'"+projectDir+"' is not a directory");
-    }).then(function(existsPJSon) {
-        if(!existsPJSon) {
-            warns.push({text:msgs.no_package_json, params:[projectDir]});
-            return warns;
-        }
-        return fs.readJson(packageJSon).catch(function(err) {
-            return {errorInJSon:true};
-        }).then(function(json) {
-           if(json.errorInJSon) {
-               warns.push({text:msgs.unparseable_package_json, params:[projectDir]});
-           } else {
-               if(findCodenautas(json, "codenautas").length==0) {
-                   warns.push({text:msgs.no_codenautas_section, params:[projectDir]});
-               } else {
-                   if(!json.codenautas) {
-                       warns.push({text:msgs.no_codenautas_section_in_qa_control_project, params:[projectDir]});
-                   } else if(! ("package-version" in json.codenautas)) {
-                       warns.push({text:msgs.no_version_in_section_codenautas, params:[projectDir]});
-                   } else if(json.codenautas["package-version"] < qaControl.deprecateVersionesBefore) {
-                       warns.push({text:msgs.deprecated_version, params:[json.codenautas["package-version"]]});
-                   } else {
-                     var sections = qaControl.projectDefinition[qaControl.deprecateVersionesBefore].sections;
-                     for(var param in sections) {
-                        if(sections[param].mandatory) {
-                            warns.push({text:msgs.lack_of_mandatory_parameter, params:[param]});
-                        }
-                     }
-                   }
-               }
-           }
-           return warns;
-        });
-    });
-};
 
 module.exports = qaControl;
