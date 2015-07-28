@@ -4,6 +4,7 @@ var Promises = require('best-promise');
 var fs = require('fs-promise');
 var path = require('path');
 var _ = require('lodash');
+var semver = require('semver');
 
 var qaControl={};
 
@@ -15,6 +16,7 @@ qaControl.msgs={
         no_package_json: 'falta el archivo package.json',
         no_qa_control_section_in_package_json: 'falta la sección qa-control en package.json',
         no_package_version_in_qa_control_section: 'falta la sección "package-version" en la sección qa-control',
+        invalid_qa_control_version: 'la sección "package-version" en qa-control contiene un valor incorrecto',
         lack_of_mandatory_section_1: 'falta la sección obligatoria "$1" en la sección qa-control',
         invalid_value_1_in_parameter_2: 'valor invalido "$2" para el parametro "$1" en la sección qa-control',
         
@@ -146,6 +148,18 @@ qaControl.rules={
             warnings:function(info){
                 if(!info.packageJson['qa-control']['package-version']){
                     return [{warning:'no_package_version_in_qa_control_section'}];
+                }
+                return [];
+            }
+        }],
+        shouldAbort:true
+    },
+    invalid_qa_control_version: {
+        checks:[{
+            warnings:function(info){
+                var ver=info.packageJson['qa-control']['package-version'];
+                if(! semver.valid(ver)){
+                    return [{warning:'invalid_qa_control_version',params:[ver]}];
                 }
                 return [];
             }

@@ -27,6 +27,15 @@ var fixtures=[{
     }
 },{
     base:'stable-project',
+    test:'invalid_qa_control_version',
+    change:function(info){
+        info.packageJson['qa-control']['package-version']='not-a-version-number';
+    },
+    expected:[
+        { warning:'invalid_qa_control_version',params:['not-a-version-number']},
+    ]
+},{
+    base:'stable-project',
     test:'lack_of_mandatory_attribute_1',
     change:function(info){
         delete info.packageJson['qa-control']['run-in'];
