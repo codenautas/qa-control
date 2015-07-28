@@ -121,6 +121,20 @@ var fixtures=[{
         { warning:'missing_mandatory_cockade_1',params:['build']},
         { warning:'missing_mandatory_cockade_1',params:['dependencies']}
     ]
+},{
+    base:'stable-project',
+    title:'missing optional cockades in README.md should not create warnings(#8)',
+    test:'missing_mandatory_cockade_1',
+    change:function(info){
+        
+        var readme=info.files['README.md'].content;
+        info.files['README.md'].content = readme.replace('![designing]','')
+                                                .replace('![extending]','')
+                                                .replace('![windows]','')
+                                                .replace('![coverage]','')
+                                                .replace('![climate]','');
+    },
+    expected:[]
 }];
 
 function cloneProject(info){
