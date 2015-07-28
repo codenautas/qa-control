@@ -87,7 +87,7 @@ var fixtures=[{
     base:'stable-project',
     test:'no_multilang_section_in_readme',
     change:function(info){
-        info.files['README.md'].content = "content without multilang section";
+        info.files['README.md'].content = info.files['README.md'].content.replace('multilang v0','');
     }
 },{
     base:'stable-project',
@@ -95,6 +95,12 @@ var fixtures=[{
     test:'no_codenautas_section_in_qa_control_project',
     change:function(info){
         delete info.packageJson['qa-control'];
+    }
+},{
+    base:'stable-project',
+    test:'lack_of_cockade_marker_in_readme',
+    change:function(info){
+        info.files['README.md'].content = info.files['README.md'].content.replace('<!-- cucardas -->','');
     }
 }];
 

@@ -27,6 +27,9 @@ qaControl.msgs={
         no_qa_control_section_in_package_json: 'falta la sección qa-control en package.json',
         no_version_in_section_codenautas: 'falta la entrada para "package-version" en la sección codenautas del package.json',
         unparseable_package_json: 'existe package.json pero no puede parsearse',
+        lack_of_cockade_marker_in_readme:'',
+        lack_of_mandatory_cockade_1: '',
+        wrong_format_in_cockade_1: '',
     }
 };
 
@@ -230,7 +233,20 @@ qaControl.rules={
             }
         }]
     },
+    cockades:{
+        checks:[{
+            warnings:function(info){
+                var warns=[];
+                if(! info.files['README.md'].content.match(/<!-- cucardas -->/)) {
+                    warns.push({warning:'lack_of_cockade_marker_in_readme'});
+                }
+                //missing_mandatory_cockade_1 wrong_format_in_cockade_1
+                return warns;
+            }
+        }]
+    }
 };
+
 
 qaControl.loadProject = function loadProject(projectDir) {
     var info = {};
