@@ -135,6 +135,23 @@ var fixtures=[{
                                                 .replace('![climate]','');
     },
     expected:[]
+},{
+    base:'stable-project',
+    title:'wrong format in mandatory cockades in README.md (#8)',
+    test:'wrong_format_in_cockade_1',
+    change:function(info){
+        var readme=info.files['README.md'].content;
+        info.files['README.md'].content = readme.replace('![version](https://img.shields.io/npm','![version](https://HHHimg.shields.io/npm')
+                                                .replace('[![downloads](https://img.shields.io/npm/','[![downloads](https://im__shields.io/npm/')
+                                                .replace('[![linux](https://img.shields.io/travis','[![linux](http://img.shields.io/travis')
+                                                .replace('[![dependencies](https://img.shields.io','[![dependencies](https://EEimg.shields.io');
+    },
+    expected:[
+        { warning:'wrong_format_in_cockade_1',params:['npm-version']},
+        { warning:'wrong_format_in_cockade_1',params:['downloads']},
+        { warning:'wrong_format_in_cockade_1',params:['build']},
+        { warning:'wrong_format_in_cockade_1',params:['dependencies']}
+    ]
 }];
 
 function cloneProject(info){

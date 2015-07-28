@@ -254,6 +254,9 @@ qaControl.rules={
                             warns.push({warning:'missing_mandatory_cockade_1', params:[nombreCucarda]});
                         }
                     } else {
+                        if('check' in cucarda && ! cucarda.check(info.packageJson)) {
+                            warns.push({warning:'wrong_format_in_cockade_1', params:[nombreCucarda]});
+                        }
                         if(readme.indexOf(cucaStr) == -1) {
                             // si tengo cucarda mal formada, devuelvo warning aunque no sea obligatoria
                             // porque existió la intención de definirla
