@@ -39,16 +39,11 @@ var fixtures=[{
         params:['invalid-run-in-for-test','run-in']
     }]
 },{
-    skipped:true,
     base:'stable-project',
     test:'no_multilang_section_in_readme',
     change:function(info){
-        info.packageJson.codenautas['type']='invalid-type-for-test';
-    },
-    expected:[{
-        rule:'invalid_value_1_in_parameter_2',
-        params:['invalid-type-for-test','type']
-    }]
+        info.files['README.md'].content = "content without multilang section";
+    }
 }]
 
 function cloneProject(info){
@@ -63,9 +58,14 @@ describe('qa-control', function(){
                     'files',
                     'packageJson'
                 ]);
+                expect(Object.keys(info.files)).to.eql(['.gitignore','.travis.yml','LEEME.md','LICENSE','README.md','appveyor.yml','package.json']);
                 expect(info.files['package.json'].content).to.match(/^{\n  "name": "stable-project"/);
                 expect(info.packageJson.name).to.be('stable-project');
                 expect(info.packageJson["qa-control"]["package-version"]).to.eql("0.0.1");
+                expect(info.packageJson["qa-control"]["run-in"]).to.eql("server");
+                expect(info.packageJson["qa-control"]["test-appveyor"]).to.eql(true);
+                expect(info.packageJson["qa-control"]["type"]).to.eql("lib");
+                expect(info.packageJson["qa-control"]["coverage"]).to.eql(100);
                 expect(info.files['README.md'].content).to.match(/^<!--multilang v0 en:README.md es:LEEME.md -->/);
                 done();
             }).catch(done);
