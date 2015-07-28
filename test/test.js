@@ -184,13 +184,5 @@ describe('qa-control', function(){
                 done();
             }).catch(done);
         });
-        var projDir=fixtures+'incomplete-codenautas-section';
-        it('should detect the absence of a mandatory parameter (#5)', function(done){
-            qac.controlProject(projDir).then(function(warns){
-                expect(warns).to.eql([{text:msgs.lack_of_mandatory_parameter, params:['run-in']},
-                                      {text:msgs.lack_of_mandatory_parameter, params:['type']}]);
-                done();
-            }).catch(done);
-        });
     });
 });
