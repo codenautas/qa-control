@@ -1,6 +1,0 @@
-{
-  "codenautas": {
-    "run-in": "server",
-    "test-appveyor": true
-  }
-}

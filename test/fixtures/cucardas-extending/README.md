@@ -1,3 +1,0 @@
-= README without cuardas
-
-yes!

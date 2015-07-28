@@ -1,9 +1,0 @@
-{
-  "name": "the-project",
-  "repository": "sourcenauta/the-project",
-  "version": "0.9.0",
-  "codenautas": {
-    "package-version": "0.0.1",
-    "coverage": 90
-  }
-}

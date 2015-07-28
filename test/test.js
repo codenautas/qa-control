@@ -185,15 +185,4 @@ describe('qa-control', function(){
             });
         });
     });
-    describe.skip('basic tests', function(){
-        var msgs=qac.msgs[qac.lang];
-        var fixtures='./test/fixtures/';
-        it('should detect the absence of codenautas section in aparent codenautas project (#2)', function(done){
-            var projDir=fixtures+'lack-codenautas';
-            qac.controlProject(projDir).then(function(warns){
-                expect(warns).to.eql([{text:msgs.no_codenautas_section_in_qa_control_project, params:[projDir]}]);
-                done();
-            }).catch(done);
-        });
-    });
 });
