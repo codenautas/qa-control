@@ -96,7 +96,7 @@ var fixtures=[{
     change:function(info){
         delete info.packageJson['qa-control'];
     }
-}]
+}];
 
 function cloneProject(info){
     return _.cloneDeep(info);

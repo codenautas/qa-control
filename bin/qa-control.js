@@ -10,24 +10,23 @@ var qaControl={};
 
 qaControl.msgs={
     en:{
-        no_package_json: 'package.json must exist',
+        // TODO
     },
     es:{
-        no_package_json: 'falta el archivo package.json',
-        no_qa_control_section_in_package_json: 'falta la sección qa-control en package.json',
-        no_package_version_in_qa_control_section: 'falta la sección "package-version" en la sección qa-control',
-        invalid_qa_control_version: 'la sección "package-version" en qa-control contiene un valor incorrecto',
         deprecated_qa_control_version: 'la versión de qa-control es vieja',
-        lack_of_mandatory_section_1: 'falta la sección obligatoria "$1" en la sección qa-control',
-        lack_of_mandatory_file_1: 'falta el archivo obligatorio "$1"',
-        invalid_value_1_in_parameter_2: 'valor invalido "$2" para el parametro "$1" en la sección qa-control',
-        no_codenautas_section_in_qa_control_project: 'falta la sección codenautas en package.json y aparenta ser un proyecto codenautas',
-        no_version_in_section_codenautas: 'falta la entrada para "package-version" en la sección codenautas del package.json',
         deprecated_version: 'la version $1 es demasiado vieja',
+        invalid_qa_control_version: 'la sección "package-version" en qa-control contiene un valor incorrecto',
+        invalid_value_1_in_parameter_2: 'valor invalido "$2" para el parametro "$1" en la sección qa-control',
+        lack_of_mandatory_file_1: 'falta el archivo obligatorio "$1"',
         lack_of_mandatory_parameter: 'falta el parámetro obligatorio "$1"',
-        
-        unparseable_package_json: 'existe package.json pero no puede parsearse',
+        lack_of_mandatory_section_1: 'falta la sección obligatoria "$1" en la sección qa-control',
+        no_codenautas_section_in_qa_control_project: 'falta la sección codenautas en package.json y aparenta ser un proyecto codenautas',
         no_multilang_section_in_readme: 'falta la sección multilang en el archivo README.md',
+        no_package_json: 'falta el archivo package.json',
+        no_package_version_in_qa_control_section: 'falta la sección "package-version" en la sección qa-control',
+        no_qa_control_section_in_package_json: 'falta la sección qa-control en package.json',
+        no_version_in_section_codenautas: 'falta la entrada para "package-version" en la sección codenautas del package.json',
+        unparseable_package_json: 'existe package.json pero no puede parsearse',
     }
 };
 
