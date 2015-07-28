@@ -98,11 +98,29 @@ var fixtures=[{
     }
 },{
     base:'stable-project',
-    title:'cockades marker must exist in README.md',
+    title:'cockades marker must exist in README.md (#8)',
     test:'lack_of_cockade_marker_in_readme',
     change:function(info){
         info.files['README.md'].content = info.files['README.md'].content.replace('<!-- cucardas -->','');
     }
+},{
+    base:'stable-project',
+    title:'missing mandatory cockades in README.md (#8)',
+    test:'missing_mandatory_cockade_1',
+    change:function(info){
+        
+        var readme=info.files['README.md'].content;
+        info.files['README.md'].content = readme.replace('![version]','')
+                                                .replace('![downloads]','')
+                                                .replace('![linux]','')
+                                                .replace('![dependencies]','');
+    },
+    expected:[
+        { warning:'missing_mandatory_cockade_1',params:['npm-version']},
+        { warning:'missing_mandatory_cockade_1',params:['downloads']},
+        { warning:'missing_mandatory_cockade_1',params:['build']},
+        { warning:'missing_mandatory_cockade_1',params:['dependencies']}
+    ]
 }];
 
 function cloneProject(info){
