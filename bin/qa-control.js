@@ -17,11 +17,11 @@ qaControl.msgs={
         no_qa_control_section_in_package_json: 'falta la sección qa-control en package.json',
         no_package_version_in_qa_control_section: 'falta la sección "package-version" en la sección qa-control',
         invalid_qa_control_version: 'la sección "package-version" en qa-control contiene un valor incorrecto',
+        deprecated_qa_control_version: 'la versión de qa-control es vieja',
         lack_of_mandatory_section_1: 'falta la sección obligatoria "$1" en la sección qa-control',
         lack_of_mandatory_file_1: 'falta el archivo obligatorio "$1"',
         invalid_value_1_in_parameter_2: 'valor invalido "$2" para el parametro "$1" en la sección qa-control',
-        
-        no_codenautas_section_in_codenautas_project: 'falta la sección codenautas en package.json y aparenta ser un proyecto codenautas',
+        no_codenautas_section_in_qa_control_project: 'falta la sección codenautas en package.json y aparenta ser un proyecto codenautas',
         no_version_in_section_codenautas: 'falta la entrada para "package-version" en la sección codenautas del package.json',
         deprecated_version: 'la version $1 es demasiado vieja',
         lack_of_mandatory_parameter: 'falta el parámetro obligatorio "$1"',
@@ -133,6 +133,17 @@ qaControl.rules={
         }],
         shouldAbort:true
     },
+    // codenautas_section_in_codenautas_project:{
+      // checks:[{
+         // warnings:function(info) {
+             // if(info.files['package.json'].content.match(/codenautas/) && !info.packageJson['qa-control']) {
+                 // return [{warning:'no_codenautas_section_in_qa_control_project'}];
+             // }
+             // return [];
+         // }
+        // }],
+        // shouldAbort:true
+    // },
     qa_control_section_in_package_json:{
         checks:[{
             warnings:function(info){
@@ -167,6 +178,23 @@ qaControl.rules={
         }],
         shouldAbort:true
     },
+    deprecated_control_version: {
+        checks:[{
+            warnings:function(info) {
+                var ver=info.packageJson['qa-control']['package-version'];
+                var currentVer=false;
+                var versions = Object.keys(qaControl.projectDefinition);
+                for(var verKey in versions) {
+                    currentVer = versions[verKey];
+                }
+                if(semver.lt(ver, currentVer)){
+                    return [{warning:'deprecated_qa_control_version',params:[ver]}];
+                }
+                return [];
+            }
+        }],
+        shouldAbort:true
+    },
     mandatory_files:{
       checks:[{
          warnings:function(info) {
@@ -178,9 +206,10 @@ qaControl.rules={
                      warns.push({warning:'lack_of_mandatory_file_1', params:[fileName]});
                  }
              }
-             return warns;
-         } 
+            return warns;
+         }
       }],
+      shouldAbort:true
     },
     valid_values_for_qa_control_keys:{
         checks:[{
@@ -314,7 +343,7 @@ qaControl.obsoleteControlProject=function controlProject(projectDir){
                    warns.push({text:msgs.no_codenautas_section, params:[projectDir]});
                } else {
                    if(!json.codenautas) {
-                       warns.push({text:msgs.no_codenautas_section_in_codenautas_project, params:[projectDir]});
+                       warns.push({text:msgs.no_codenautas_section_in_qa_control_project, params:[projectDir]});
                    } else if(! ("package-version" in json.codenautas)) {
                        warns.push({text:msgs.no_version_in_section_codenautas, params:[projectDir]});
                    } else if(json.codenautas["package-version"] < qaControl.deprecateVersionesBefore) {

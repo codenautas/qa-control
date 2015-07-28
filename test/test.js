@@ -36,6 +36,16 @@ var fixtures=[{
     ]
 },{
     base:'stable-project',
+    title:'abort on deprecated qa-control section version (#4)',
+    test:'deprecated_qa_control_version',
+    change:function(info){
+        info.packageJson['qa-control']['package-version']='0.0.0';
+    },
+    expected:[
+        { warning:'deprecated_qa_control_version',params:['0.0.0']},
+    ]
+},{
+    base:'stable-project',
     test:'lack_of_mandatory_section_1',
     change:function(info){
         delete info.packageJson['qa-control']['run-in'];
@@ -77,6 +87,14 @@ var fixtures=[{
     test:'no_multilang_section_in_readme',
     change:function(info){
         info.files['README.md'].content = "content without multilang section";
+    }
+},{
+    skipped:true,
+    base:'stable-project',
+    title:'no "qa-control" section in "codenautas" project',
+    test:'no_codenautas_section_in_qa_control_project',
+    change:function(info){
+        delete info.packageJson['qa-control'];
     }
 }]
 
@@ -173,14 +191,7 @@ describe('qa-control', function(){
         it('should detect the absence of codenautas section in aparent codenautas project (#2)', function(done){
             var projDir=fixtures+'lack-codenautas';
             qac.controlProject(projDir).then(function(warns){
-                expect(warns).to.eql([{text:msgs.no_codenautas_section_in_codenautas_project, params:[projDir]}]);
-                done();
-            }).catch(done);
-        });
-        it('should detect a deprecated codenautas version (#4)', function(done){
-            var projDir=fixtures+'deprecated-version';
-            qac.controlProject(projDir).then(function(warns){
-                expect(warns).to.eql([{text:msgs.deprecated_version, params:['0.0.0']}]);
+                expect(warns).to.eql([{text:msgs.no_codenautas_section_in_qa_control_project, params:[projDir]}]);
                 done();
             }).catch(done);
         });
