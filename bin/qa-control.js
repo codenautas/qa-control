@@ -121,6 +121,9 @@ qaControl.projectDefinition = {
     }
 };
 
+qaControl.lang = process.env.qa_control_lang || 'en';
+qaControl.deprecateVersionesBefore = '0.0.1';
+
 qaControl.rules={
     exist_package_json:{
         checks:[{
@@ -182,12 +185,7 @@ qaControl.rules={
         checks:[{
             warnings:function(info) {
                 var ver=info.packageJson['qa-control']['package-version'];
-                var currentVer=false;
-                var versions = Object.keys(qaControl.projectDefinition);
-                for(var verKey in versions) {
-                    currentVer = versions[verKey];
-                }
-                if(semver.lt(ver, currentVer)){
+                if(semver.lt(ver, qaControl.deprecateVersionesBefore)){
                     return [{warning:'deprecated_qa_control_version',params:[ver]}];
                 }
                 return [];
@@ -243,9 +241,6 @@ qaControl.rules={
         }]
     },
 };
-
-qaControl.lang = process.env.qa_control_lang || 'en';
-qaControl.deprecateVersionesBefore = '0.0.1';
 
 function findCodenautas(obj, key) {
     if(_.has(obj, key)) { return [obj]; }
