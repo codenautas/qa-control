@@ -234,25 +234,31 @@ qaControl.rules={
         checks:[{
             warnings:function(info){
                 var warns=[];
+                var cucaMarker = '<!-- cucardas -->';
+                var cucaMarkerRE = '/'+cucaMarker+'/';
                 var readme=info.files['README.md'].content;
-                if(! readme.match(/<!-- cucardas -->/)) {
+                if(readme.indexOf(cucaMarker) == -1) {
                     warns.push({warning:'lack_of_cockade_marker_in_readme'});
                 }
                 var cucardas=qaControl.projectDefinition[qaControl.currentVersion].cucardas;
                 var modulo=info.packageJson.name;
                 var repo=info.packageJson.repository.replace('/'+modulo,'');
                 //console.log("modulo", modulo, "repo", repo);
+                var cucaFileContent =  cucaMarker+'\n';
                 for(var nombreCucarda in cucardas) {
                     var cucarda = cucardas[nombreCucarda];
                     var cucaStr = cucarda.md.replace(/\bxxx\b/g,repo).replace(/\byyy\b/g,modulo);
-                    //if(nombreCucarda=="windows")  console.log(cucaStr);
+                    cucaFileContent += cucaStr +'\n';
+                    var cucaID = '!['+/!\[([a-z]+)]/.exec(cucarda.md)[1]+']';
                     if(cucarda.mandatory) {
-                        //if(! readme.match()) {
-                            
-                        //}
+                        if(readme.indexOf(cucaID) == -1) {
+                            warns.push({warning:'missing_mandatory_cockade_1', params:[nombreCucarda]});
+                        } else if(readme.indexOf(cucaStr) == -1) {
+                            warns.push({warning:'wrong_format_in_cockade_1', params:[nombreCucarda]});
+                        }
                     }
                 }
-                //missing_mandatory_cockade_1 wrong_format_in_cockade_1
+                fs.writeFileSync("cucardas.log", cucaFileContent);
                 return warns;
             }
         }]

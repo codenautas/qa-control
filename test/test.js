@@ -98,6 +98,7 @@ var fixtures=[{
     }
 },{
     base:'stable-project',
+    title:'cockades marker must exist in README.md',
     test:'lack_of_cockade_marker_in_readme',
     change:function(info){
         info.files['README.md'].content = info.files['README.md'].content.replace('<!-- cucardas -->','');
