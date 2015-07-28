@@ -248,6 +248,9 @@ qaControl.loadProject = function loadProject(projectDir) {
     var info = {};
     return Promises.start(function(){
         if(!projectDir) { throw new Error('null projectDir'); }
+        return fs.exists(projectDir);
+    }).then(function(exists) {
+        if(!exists) { throw new Error("'"+projectDir+"' does not exists"); }
         return fs.stat(projectDir);
     }).then(function(stat){
         if(! stat.isDirectory()) {
