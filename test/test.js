@@ -17,6 +17,7 @@ var fixtures=[{
     test:'no_qa_control_section_in_package_json',
     change:function(info){
         delete info.packageJson['qa-control'];
+        info.files['package.json'].content = "otro contenido";        
     }
 },{
     base:'stable-project',
@@ -89,7 +90,6 @@ var fixtures=[{
         info.files['README.md'].content = "content without multilang section";
     }
 },{
-    skipped:true,
     base:'stable-project',
     title:'no "qa-control" section in "codenautas" project',
     test:'no_codenautas_section_in_qa_control_project',

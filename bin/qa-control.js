@@ -136,22 +136,13 @@ qaControl.rules={
         }],
         shouldAbort:true
     },
-    // codenautas_section_in_codenautas_project:{
-      // checks:[{
-         // warnings:function(info) {
-             // if(info.files['package.json'].content.match(/codenautas/) && !info.packageJson['qa-control']) {
-                 // return [{warning:'no_codenautas_section_in_qa_control_project'}];
-             // }
-             // return [];
-         // }
-        // }],
-        // shouldAbort:true
-    // },
     qa_control_section_in_package_json:{
         checks:[{
             warnings:function(info){
                 if(!info.packageJson['qa-control']){
-                    return [{warning:'no_qa_control_section_in_package_json'}];
+                    return [{warning:info.files['package.json'].content.match(/codenautas/)?
+                                'no_codenautas_section_in_qa_control_project':
+                                'no_qa_control_section_in_package_json'}];
                 }
                 return [];
             }
