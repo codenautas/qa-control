@@ -14,6 +14,7 @@ qaControl.msgs={
     es:{
         no_package_json: 'falta el archivo package.json',
         no_qa_control_section_in_package_json: 'falta la sección qa-control en package.json',
+        no_package_version_in_qa_control_section: 'falta la sección "package-version" en la sección qa-control',
         lack_of_mandatory_section_1: 'falta la sección obligatoria "$1" en la sección qa-control',
         invalid_value_1_in_parameter_2: 'valor invalido "$2" para el parametro "$1" en la sección qa-control',
         
@@ -140,6 +141,17 @@ qaControl.rules={
         }],
         shouldAbort:true
     },
+    package_version_in_qa_control_section:{
+        checks:[{
+            warnings:function(info){
+                if(!info.packageJson['qa-control']['package-version']){
+                    return [{warning:'no_package_version_in_qa_control_section'}];
+                }
+                return [];
+            }
+        }],
+        shouldAbort:true
+    },
     valid_values_for_qa_control_keys:{
         checks:[{
             warnings:function(info){
@@ -169,8 +181,7 @@ qaControl.rules={
                 }
                 return [];
             }
-        }],
-        shouldAbort:true
+        }]
     },
 };
 
