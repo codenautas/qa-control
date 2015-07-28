@@ -36,7 +36,7 @@ var fixtures=[{
     ]
 },{
     base:'stable-project',
-    test:'lack_of_mandatory_attribute_1',
+    test:'lack_of_mandatory_section_1',
     change:function(info){
         delete info.packageJson['qa-control']['run-in'];
         delete info.packageJson['qa-control']['type'];
@@ -44,6 +44,23 @@ var fixtures=[{
     expected:[
         { warning:'lack_of_mandatory_section_1',params:['run-in']},
         { warning:'lack_of_mandatory_section_1',params:['type']}
+    ]
+},{
+    base:'stable-project',
+    title:'lack of mandatory files (#6)',
+    test:'lack_of_mandatory_file_1',
+    change:function(info){
+        //delete info.files['README.md']; // si saco este salta no_multilang_section_in_readme
+        delete info.files['LEEME.md'];
+        delete info.files['.travis.yml'];
+        delete info.files['.gitignore'];
+        delete info.files['LICENSE'];
+    },
+    expected:[
+        { warning:'lack_of_mandatory_file_1',params:['LEEME.md']},
+        { warning:'lack_of_mandatory_file_1',params:['.travis.yml']},
+        { warning:'lack_of_mandatory_file_1',params:['.gitignore']},
+        { warning:'lack_of_mandatory_file_1',params:['LICENSE']}
     ]
 },{
     base:'stable-project',
@@ -172,17 +189,6 @@ describe('qa-control', function(){
             qac.controlProject(projDir).then(function(warns){
                 expect(warns).to.eql([{text:msgs.lack_of_mandatory_parameter, params:['run-in']},
                                       {text:msgs.lack_of_mandatory_parameter, params:['type']}]);
-                done();
-            }).catch(done);
-        });
-        it.skip('should detect the absence of a mandatory files (#6)', function(done){
-            qac.controlProject(projDir).then(function(warns){
-                expect(warns).to.eql([{text:msgs.lack_of_mandatory_parameter, params:['README.md']},
-                                      {text:msgs.lack_of_mandatory_parameter, params:['LEEME.md']},
-                                      {text:msgs.lack_of_mandatory_parameter, params:['.travis.yml']},
-                                      {text:msgs.lack_of_mandatory_parameter, params:['.gitignore']},
-                                      {text:msgs.lack_of_mandatory_parameter, params:['LICENSE']}
-                                     ]);
                 done();
             }).catch(done);
         });

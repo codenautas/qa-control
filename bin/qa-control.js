@@ -18,6 +18,7 @@ qaControl.msgs={
         no_package_version_in_qa_control_section: 'falta la sección "package-version" en la sección qa-control',
         invalid_qa_control_version: 'la sección "package-version" en qa-control contiene un valor incorrecto',
         lack_of_mandatory_section_1: 'falta la sección obligatoria "$1" en la sección qa-control',
+        lack_of_mandatory_file_1: 'falta el archivo obligatorio "$1"',
         invalid_value_1_in_parameter_2: 'valor invalido "$2" para el parametro "$1" en la sección qa-control',
         
         no_codenautas_section_in_codenautas_project: 'falta la sección codenautas en package.json y aparenta ser un proyecto codenautas',
@@ -165,6 +166,21 @@ qaControl.rules={
             }
         }],
         shouldAbort:true
+    },
+    mandatory_files:{
+      checks:[{
+         warnings:function(info) {
+             var warns =[];
+             var mandatoryFiles=qaControl.projectDefinition[info.packageJson['qa-control']['package-version']].files;
+             for(var fileName in mandatoryFiles) {
+                 var file = mandatoryFiles[fileName];
+                 if(! info.files[fileName]) {
+                     warns.push({warning:'lack_of_mandatory_file_1', params:[fileName]});
+                 }
+             }
+             return warns;
+         } 
+      }],
     },
     valid_values_for_qa_control_keys:{
         checks:[{
