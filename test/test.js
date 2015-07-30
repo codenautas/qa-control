@@ -49,6 +49,13 @@ var fixtures=[{
         rule:'invalid_value_1_in_parameter_2',
         params:['invalid-type-for-test','type']
     }]
+},{
+    skipped:true,
+    base:'stable-project',
+    test:'firts_lines_does_not_matchs',
+    change:function(info){
+        info.packageJson.files['stable-project.js'].content='// a comment in the first line\n'+info.packageJson.files['stable-project.js'].content;
+    }
 }]
 
 function cloneProject(info){
@@ -57,6 +64,15 @@ function cloneProject(info){
 
 describe('qa-control', function(){
     describe('load project', function(){
+        it('waits for config already readed', function(done){
+            qac.loadProject('./test/fixtures/stable-project').then(function(info){
+                expect(qac.configReady).to.ok();
+                expect(
+                    qac.projectDefinition['0.0.1'].sections['run-in'].values.server.firstLines
+                ).to.match(/^"use strict";/);
+                done();
+            }).catch(done);
+        });
         it('loads ok', function(done){
             qac.loadProject('./test/fixtures/stable-project').then(function(info){
                 expect(Object.keys(info)).to.eql([

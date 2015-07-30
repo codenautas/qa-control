@@ -114,6 +114,28 @@ qaControl.projectDefinition = {
     }
 };
 
+qaControl.configReady=false;
+var configReading=Promises.all(_.map(qaControl.projectDefinition,function(definition, version){
+    return Promises.all(_.map(definition.sections['run-in'].values,function(properties, value){
+        return fs.readFile(__dirname+'/first-lines-'+value+'.txt',{encoding: 'utf8'}).then(function(content){
+            properties.firstLines=content;
+        });
+    }));
+})).then(function(){
+    // only for test, in production this sleep must gone
+    return Promises.sleep(500);
+}).then(function(){
+    qaControl.configReady=true;
+    if("Diego, cuando lo hayas visto quitá este console.log"){
+        console.log('******',qaControl.projectDefinition['0.0.1'].sections['run-in']);
+        console.log('*********');
+    }
+}).catch(function(err){
+    console.log('UNABLE TO LOAD CONFIGURATION');
+    console.log('error',err);
+    console.log('stack',err.stack);
+});
+
 qaControl.rules={
     exist_package_json:{
         checks:[{
@@ -177,6 +199,8 @@ function findCodenautas(obj, key) {
 qaControl.loadProject = function loadProject(projectDir) {
     var info = {};
     return Promises.start(function(){
+        if(!qaControl.configReady) return configReading;
+    }).then(function(){
         return fs.stat(projectDir);
     }).then(function(stat){
         if(! stat.isDirectory()) {
