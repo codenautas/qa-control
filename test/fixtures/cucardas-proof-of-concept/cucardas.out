@@ -1,7 +1,0 @@
-<!-- cucardas -->
-![proof-of-concept](https://img.shields.io/badge/stability-proof_of_concept-ff70c0.svg)
-[![npm-version](https://img.shields.io/npm/v/the-project.svg)](https://npmjs.org/package/the-project)
-[![downloads](https://img.shields.io/npm/dm/the-project.svg)](https://npmjs.org/package/the-project)
-[![build](https://img.shields.io/travis/sourcenauta/the-project/master.svg)](https://travis-ci.org/sourcenauta/the-project)
-[![windows](https://ci.appveyor.com/api/projects/status/github/sourcenauta/pg-promise-strict?svg=true)](https://ci.appveyor.com/project/sourcenauta/the-project)
-[![dependencies](https://img.shields.io/david/sourcenauta/the-project.svg)](https://david-dm.org/sourcenauta/the-project)

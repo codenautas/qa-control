@@ -13,13 +13,41 @@ var fixtures=[{
     }
 },{
     base:'stable-project',
+    title:'no qa-control section in package.json(#2)',
     test:'no_qa_control_section_in_package_json',
     change:function(info){
         delete info.packageJson['qa-control'];
+        info.files['package.json'].content = "otro contenido";        
     }
 },{
     base:'stable-project',
-    test:'lack_of_mandatory_attribute_1',
+    title:'no package-version in qa-control section (#3)',
+    test:'no_package_version_in_qa_control_section',
+    change:function(info){
+        delete info.packageJson['qa-control']['package-version'];
+    }
+},{
+    base:'stable-project',
+    test:'invalid_qa_control_version',
+    change:function(info){
+        info.packageJson['qa-control']['package-version']='not-a-version-number';
+    },
+    expected:[
+        { warning:'invalid_qa_control_version',params:['not-a-version-number']},
+    ]
+},{
+    base:'stable-project',
+    title:'abort on deprecated qa-control section version (#4)',
+    test:'deprecated_qa_control_version',
+    change:function(info){
+        info.packageJson['qa-control']['package-version']='0.0.0';
+    },
+    expected:[
+        { warning:'deprecated_qa_control_version',params:['0.0.0']},
+    ]
+},{
+    base:'stable-project',
+    test:'lack_of_mandatory_section_1',
     change:function(info){
         delete info.packageJson['qa-control']['run-in'];
         delete info.packageJson['qa-control']['type'];
@@ -27,6 +55,23 @@ var fixtures=[{
     expected:[
         { warning:'lack_of_mandatory_section_1',params:['run-in']},
         { warning:'lack_of_mandatory_section_1',params:['type']}
+    ]
+},{
+    base:'stable-project',
+    title:'lack of mandatory files (#6)',
+    test:'lack_of_mandatory_file_1',
+    change:function(info){
+        //delete info.files['README.md']; // si saco este salta no_multilang_section_in_readme
+        delete info.files['LEEME.md'];
+        delete info.files['.travis.yml'];
+        delete info.files['.gitignore'];
+        delete info.files['LICENSE'];
+    },
+    expected:[
+        { warning:'lack_of_mandatory_file_1',params:['LEEME.md']},
+        { warning:'lack_of_mandatory_file_1',params:['.travis.yml']},
+        { warning:'lack_of_mandatory_file_1',params:['.gitignore']},
+        { warning:'lack_of_mandatory_file_1',params:['LICENSE']}
     ]
 },{
     base:'stable-project',
@@ -39,24 +84,82 @@ var fixtures=[{
         params:['invalid-run-in-for-test','run-in']
     }]
 },{
-    skipped:true,
     base:'stable-project',
     test:'no_multilang_section_in_readme',
     change:function(info){
-        info.packageJson.codenautas['type']='invalid-type-for-test';
+        info.files['README.md'].content = info.files['README.md'].content.replace('multilang v0','');
+    }
+},{
+    base:'stable-project',
+    title:'no "qa-control" section in "codenautas" project',
+    test:'no_codenautas_section_in_qa_control_project',
+    change:function(info){
+        delete info.packageJson['qa-control'];
+    }
+},{
+    base:'stable-project',
+    title:'cockades marker must exist in README.md (#8)',
+    test:'lack_of_cockade_marker_in_readme',
+    change:function(info){
+        info.files['README.md'].content = info.files['README.md'].content.replace('<!-- cucardas -->','');
+    }
+},{
+    base:'stable-project',
+    title:'missing mandatory cockades in README.md (#8)',
+    test:'missing_mandatory_cockade_1',
+    change:function(info){
+        
+        var readme=info.files['README.md'].content;
+        info.files['README.md'].content = readme.replace('![version]','')
+                                                .replace('![downloads]','')
+                                                .replace('![linux]','')
+                                                .replace('![dependencies]','');
     },
-    expected:[{
-        rule:'invalid_value_1_in_parameter_2',
-        params:['invalid-type-for-test','type']
-    }]
+    expected:[
+        { warning:'missing_mandatory_cockade_1',params:['npm-version']},
+        { warning:'missing_mandatory_cockade_1',params:['downloads']},
+        { warning:'missing_mandatory_cockade_1',params:['build']},
+        { warning:'missing_mandatory_cockade_1',params:['dependencies']}
+    ]
+},{
+    base:'stable-project',
+    title:'missing optional cockades in README.md should not create warnings(#8)',
+    test:'missing_mandatory_cockade_1',
+    change:function(info){
+        
+        var readme=info.files['README.md'].content;
+        info.files['README.md'].content = readme.replace('![designing]','')
+                                                .replace('![extending]','')
+                                                .replace('![windows]','')
+                                                .replace('![coverage]','')
+                                                .replace('![climate]','');
+    },
+    expected:[]
+},{
+    base:'stable-project',
+    title:'wrong format in mandatory cockades in README.md (#8)',
+    test:'wrong_format_in_cockade_1',
+    change:function(info){
+        var readme=info.files['README.md'].content;
+        info.files['README.md'].content = readme.replace('![version](https://img.shields.io/npm','![version](https://HHHimg.shields.io/npm')
+                                                .replace('[![downloads](https://img.shields.io/npm/','[![downloads](https://im__shields.io/npm/')
+                                                .replace('[![linux](https://img.shields.io/travis','[![linux](http://img.shields.io/travis')
+                                                .replace('[![dependencies](https://img.shields.io','[![dependencies](https://EEimg.shields.io');
+    },
+    expected:[
+        { warning:'wrong_format_in_cockade_1',params:['npm-version']},
+        { warning:'wrong_format_in_cockade_1',params:['downloads']},
+        { warning:'wrong_format_in_cockade_1',params:['build']},
+        { warning:'wrong_format_in_cockade_1',params:['dependencies']}
+    ]
 },{
     skipped:true,
     base:'stable-project',
     test:'firts_lines_does_not_matchs',
     change:function(info){
-        info.packageJson.files['stable-project.js'].content='// a comment in the first line\n'+info.packageJson.files['stable-project.js'].content;
+        info.files['stable-project.js'].content='// a comment in the first line\n'+info.files['stable-project.js'].content;
     }
-}]
+}];
 
 function cloneProject(info){
     return _.cloneDeep(info);
@@ -79,9 +182,14 @@ describe('qa-control', function(){
                     'files',
                     'packageJson'
                 ]);
+                expect(Object.keys(info.files)).to.eql(['.gitignore','.travis.yml','LEEME.md','LICENSE','README.md','appveyor.yml','package.json','stable-project.js']);
                 expect(info.files['package.json'].content).to.match(/^{\n  "name": "stable-project"/);
                 expect(info.packageJson.name).to.be('stable-project');
                 expect(info.packageJson["qa-control"]["package-version"]).to.eql("0.0.1");
+                expect(info.packageJson["qa-control"]["run-in"]).to.eql("server");
+                expect(info.packageJson["qa-control"]["test-appveyor"]).to.eql(true);
+                expect(info.packageJson["qa-control"]["type"]).to.eql("lib");
+                expect(info.packageJson["qa-control"]["coverage"]).to.eql(100);
                 expect(info.files['README.md'].content).to.match(/^<!--multilang v0 en:README.md es:LEEME.md -->/);
                 done();
             }).catch(done);
@@ -90,7 +198,7 @@ describe('qa-control', function(){
     describe('test qa-control by fixtures', function(){
         var perfectProjects={};
         fixtures.forEach(function(fixture){
-            var fixtureName='fixture '+fixture.test;
+            var fixtureName='fixture '+(fixture.title ? fixture.title :fixture.test);
             if(fixture.skipped){
                 it.skip(fixtureName, function(){});
                 return;
@@ -123,7 +231,7 @@ describe('qa-control', function(){
             });
         });
     });
-    describe.skip('tests that abort on wrong input', function(){
+    describe('tests that abort on wrong input', function(){
         it('should fail if path is null', function(done){
             qac.controlProject(null).then(function(warns){
                 done(warns);
@@ -147,64 +255,6 @@ describe('qa-control', function(){
                 expect(err).to.match(/is not a directory/);
                 done();
             });
-        });
-    });
-    describe.skip('basic tests', function(){
-        var msgs=qac.msgs[qac.lang];
-        it('should detect the absence of package.json (#1)', function(done){
-            var projDir='./test';
-            qac.controlProject(projDir).then(function(warns){
-                expect(warns).to.eql([{rule:'no_package_json', params:[projDir]}]);
-                done();
-            }).catch(done);
-        });
-        var fixtures='./test/fixtures/';
-        it('should detect the absence of codenautas section or any codenautas reference (#2)', function(done){
-            var projDir=fixtures+'without-codenautas';
-            qac.controlProject(projDir).then(function(warns){
-                expect(warns).to.eql([{text:msgs.no_codenautas_section, params:[projDir]}]);
-                done();
-            }).catch(done);
-        });
-        it('should detect the absence of codenautas section in aparent codenautas project (#2)', function(done){
-            var projDir=fixtures+'lack-codenautas';
-            qac.controlProject(projDir).then(function(warns){
-                expect(warns).to.eql([{text:msgs.no_codenautas_section_in_codenautas_project, params:[projDir]}]);
-                done();
-            }).catch(done);
-        });
-        it('should detect the absence of codenautas version (#3)', function(done){
-            var projDir=fixtures+'lack-version';
-            qac.controlProject(projDir).then(function(warns){
-                expect(warns).to.eql([{text:msgs.no_version_in_section_codenautas, params:[projDir]}]);
-                done();
-            }).catch(done);
-        });
-        it('should detect a deprecated codenautas version (#4)', function(done){
-            var projDir=fixtures+'deprecated-version';
-            qac.controlProject(projDir).then(function(warns){
-                expect(warns).to.eql([{text:msgs.deprecated_version, params:['0.0.0']}]);
-                done();
-            }).catch(done);
-        });
-        var projDir=fixtures+'incomplete-codenautas-section';
-        it('should detect the absence of a mandatory parameter (#5)', function(done){
-            qac.controlProject(projDir).then(function(warns){
-                expect(warns).to.eql([{text:msgs.lack_of_mandatory_parameter, params:['run-in']},
-                                      {text:msgs.lack_of_mandatory_parameter, params:['type']}]);
-                done();
-            }).catch(done);
-        });
-        it.skip('should detect the absence of a mandatory files (#6)', function(done){
-            qac.controlProject(projDir).then(function(warns){
-                expect(warns).to.eql([{text:msgs.lack_of_mandatory_parameter, params:['README.md']},
-                                      {text:msgs.lack_of_mandatory_parameter, params:['LEEME.md']},
-                                      {text:msgs.lack_of_mandatory_parameter, params:['.travis.yml']},
-                                      {text:msgs.lack_of_mandatory_parameter, params:['.gitignore']},
-                                      {text:msgs.lack_of_mandatory_parameter, params:['LICENSE']}
-                                     ]);
-                done();
-            }).catch(done);
         });
     });
 });

@@ -1,8 +1,0 @@
-<!-- cucardas -->
-![extending](https://img.shields.io/badge/stability-extending-orange.svg)
-[![npm-version](https://img.shields.io/npm/v/the-project.svg)](https://npmjs.org/package/the-project)
-[![downloads](https://img.shields.io/npm/dm/the-project.svg)](https://npmjs.org/package/the-project)
-[![build](https://img.shields.io/travis/sourcenauta/the-project/master.svg)](https://travis-ci.org/sourcenauta/the-project)
-[![coverage](https://img.shields.io/coveralls/sourcenauta/the-project/master.svg)](https://coveralls.io/r/sourcenauta/the-project)
-[![climate](https://img.shields.io/codeclimate/github/sourcenauta/the-project.svg)](https://codeclimate.com/github/sourcenauta/the-project)
-[![dependencies](https://img.shields.io/david/sourcenauta/the-project.svg)](https://david-dm.org/sourcenauta/the-project)

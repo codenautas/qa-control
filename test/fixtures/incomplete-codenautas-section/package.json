@@ -1,7 +1,0 @@
-{
-  "name": "example",
-  "codenautas": {
-    "package-version": "0.0.1",
-    "test-appveyor": true
-  }
-}
