@@ -176,13 +176,13 @@ var fixtures=[{
     title:'must respect costums (#12)',
     test:'file_1_does_not_match_costum_2',
     change:function(info){
-        info.files['stable-project.js'].content =
-            info.files['stable-project.js'].content.replace('Path.sep===','Path.sep==')
+        info.files['simple.js'].content =
+            info.files['simple.js'].content.replace('Path.sep===','Path.sep==')
                                                    .replace('eid(id){ return document.getElementById(id); }','eid(elId){ return document.getElementById(elId); }');
     },
     expected:[
-        { warning:'file_1_does_not_match_costum_2',params:['stable-project.js', 'funtion_eid']},
-        { warning:'file_1_does_not_match_costum_2',params:['stable-project.js', 'var_winos']}
+        { warning:'file_1_does_not_match_costum_2',params:['simple.js', 'funtion_eid']},
+        { warning:'file_1_does_not_match_costum_2',params:['simple.js', 'var_winos']}
     ]
 }];
 
@@ -207,7 +207,7 @@ describe('qa-control', function(){
                     'files',
                     'packageJson'
                 ]);
-                expect(Object.keys(info.files)).to.eql(['.gitignore','.travis.yml','LEEME.md','LICENSE','README.md','appveyor.yml','package.json','stable-project.js']);
+                expect(Object.keys(info.files)).to.eql(['.gitignore','.travis.yml','LEEME.md','LICENSE','README.md','appveyor.yml','package.json','simple.js','stable-project.js']);
                 expect(info.files['package.json'].content).to.match(/^{\n  "name": "stable-project"/);
                 expect(info.packageJson.name).to.be('stable-project');
                 expect(info.packageJson["qa-control"]["package-version"]).to.eql("0.0.1");
