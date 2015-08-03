@@ -127,12 +127,12 @@ qaControl.projectDefinition = {
 };
 
 qaControl.lang = process.env.qa_control_lang || 'en';
-qaControl.currentVersion = '0.0.1';
+qaControl.deprecatedVersions = '< 0.0.1';
 
 qaControl.configReady=false;
 var configReading=Promises.all(_.map(qaControl.projectDefinition,function(definition, version){
     return Promises.all(_.map(definition.sections['run-in'].values,function(properties, value){
-        return fs.readFile(__dirname+'/first-lines-'+value+'.txt',{encoding: 'utf8'}).then(function(content){
+        return fs.readFile(__dirname+'/'+version+'/first-lines-'+value+'.txt',{encoding: 'utf8'}).then(function(content){
             properties.firstLines=content;
         });
     }));
@@ -141,10 +141,6 @@ var configReading=Promises.all(_.map(qaControl.projectDefinition,function(defini
     return Promises.sleep(500);
 }).then(function(){
     qaControl.configReady=true;
-    if(false && "Diego, cuando lo hayas visto quitá este console.log"){
-        console.log('******',qaControl.projectDefinition[qaControl.currentVersion].sections['run-in']);
-        console.log('*********');
-    }
 }).catch(function(err){
     console.log('UNABLE TO LOAD CONFIGURATION');
     console.log('error',err);
@@ -216,7 +212,7 @@ qaControl.rules={
         checks:[{
             warnings:function(info) {
                 var ver=info.packageJson['qa-control']['package-version'];
-                if(semver.lt(ver, qaControl.currentVersion)){
+                if(semver.satisfies(ver, qaControl.deprecatedVersions)){
                     return [{warning:'deprecated_qa_control_version',params:[ver]}];
                 }
                 return [];
@@ -293,7 +289,7 @@ qaControl.rules={
                 if(readme.indexOf(cucaMarker) == -1) {
                     warns.push({warning:'lack_of_cockade_marker_in_readme'});
                 }
-                var cucardas=qaControl.projectDefinition[qaControl.currentVersion].cucardas;
+                var cucardas=qaControl.projectDefinition[info.packageJson['qa-control']['package-version']].cucardas;
                 var modulo=info.packageJson.name;
                 var repo=info.packageJson.repository.replace('/'+modulo,'');
                 var cucaFileContent =  cucaMarker+'\n';
@@ -335,7 +331,7 @@ qaControl.rules={
                                 && content.indexOf(costume.match)==-1)
                             {
                                 warns.push({warning:'file_1_does_not_match_costum_2', params:[file,costumeName]});
-                           }
+                            }
                         }
                     }
                 }
