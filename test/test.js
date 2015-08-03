@@ -160,6 +160,17 @@ var fixtures=[{
     change:function(info){
         info.files['stable-project.js'].content='// a comment in the first line\n'+info.files['stable-project.js'].content;
     }
+},{
+    base:'stable-project',
+    title:'lack of mandatory lines in .gitignore (#10)',
+    test:'lack_of_mandatory_line_1_in_file_2',
+    change:function(info){
+        info.files['.gitignore'].content = info.files['.gitignore'].content.replace('local-*','').replace('*-local.*','');
+    },
+    expected:[
+        { warning:'lack_of_mandatory_line_1_in_file_2',params:['local-*', '.gitignore']},
+        { warning:'lack_of_mandatory_line_1_in_file_2',params:['*-local.*', '.gitignore']}
+    ]
 }];
 
 function cloneProject(info){

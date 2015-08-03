@@ -30,6 +30,7 @@ qaControl.msgs={
         lack_of_cockade_marker_in_readme:'falta la sección "cucardas" en README.md',
         lack_of_mandatory_cockade_1: 'falta la cucarda oblicatoria $1',
         wrong_format_in_cockade_1: 'la cucarda "$1" tiene formato incorrecto',
+        lack_of_mandatory_line_1_in_file_2: 'falta la linea obligatoria $1 en el archivo $2'
     }
 };
 
@@ -52,7 +53,10 @@ qaControl.projectDefinition = {
             'README.md':{ mandatory:true },
             'LEEME.md':{ mandatory:true },
             '.travis.yml':{ mandatory:true },
-            '.gitignore':{ mandatory:true },
+            '.gitignore':{
+                mandatory:true,
+                mandatoryLines:['local-*','*-local.*']
+            },
             'LICENSE':{ mandatory:true },
             'appveyor.yml':{
                 presentIf:function(packageJson){
@@ -214,8 +218,18 @@ qaControl.rules={
                  var file = mandatoryFiles[fileName];
                  if(file.mandatory && !info.files[fileName]) {
                      warns.push({warning:'lack_of_mandatory_file_1', params:[fileName]});
-                 } else if(file.presentIf && !file.presentIf(info.packageJson)) {
-                     warns.push({warning:'lack_of_mandatory_file_1', params:[fileName]});
+                 } else {
+                     if(file.presentIf && !file.presentIf(info.packageJson)) {
+                         warns.push({warning:'lack_of_mandatory_file_1', params:[fileName]});
+                     } else if(file.mandatoryLines) {
+                         var fileContent = info.files[fileName].content;
+                         file.mandatoryLines.forEach(function(mandatoryLine) {
+                            // agrego '\n' antes para no utilizar expresiones regulares
+                            if(fileContent.indexOf('\n'+mandatoryLine)==-1) {
+                                warns.push({warning:'lack_of_mandatory_line_1_in_file_2', params:[mandatoryLine, fileName]});
+                            }
+                         });
+                     }
                  }
              }
             return warns;
