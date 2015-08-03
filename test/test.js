@@ -85,6 +85,7 @@ var fixtures=[{
     }]
 },{
     base:'stable-project',
+    title:'no "multilang" section in README.md (#7)',
     test:'no_multilang_section_in_readme',
     change:function(info){
         info.files['README.md'].content = info.files['README.md'].content.replace('multilang v0','');

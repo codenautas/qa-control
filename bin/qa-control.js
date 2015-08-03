@@ -135,8 +135,8 @@ var configReading=Promises.all(_.map(qaControl.projectDefinition,function(defini
     return Promises.sleep(500);
 }).then(function(){
     qaControl.configReady=true;
-    if("Diego, cuando lo hayas visto quitá este console.log"){
-        console.log('******',qaControl.projectDefinition['0.0.1'].sections['run-in']);
+    if(false && "Diego, cuando lo hayas visto quitá este console.log"){
+        console.log('******',qaControl.projectDefinition[qaControl.currentVersion].sections['run-in']);
         console.log('*********');
     }
 }).catch(function(err){
