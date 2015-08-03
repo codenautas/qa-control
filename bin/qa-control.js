@@ -56,7 +56,7 @@ qaControl.projectDefinition = {
             'LICENSE':{ mandatory:true },
             'appveyor.yml':{
                 presentIf:function(packageJson){
-                    return !!packageJson.codenautas["test-appveyor"];
+                    return !!packageJson['qa-control']["test-appveyor"];
                 }
             }
         },
@@ -212,7 +212,9 @@ qaControl.rules={
              var mandatoryFiles=qaControl.projectDefinition[info.packageJson['qa-control']['package-version']].files;
              for(var fileName in mandatoryFiles) {
                  var file = mandatoryFiles[fileName];
-                 if(! info.files[fileName]) {
+                 if(file.mandatory && !info.files[fileName]) {
+                     warns.push({warning:'lack_of_mandatory_file_1', params:[fileName]});
+                 } else if(file.presentIf && !file.presentIf(info.packageJson)) {
                      warns.push({warning:'lack_of_mandatory_file_1', params:[fileName]});
                  }
              }
