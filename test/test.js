@@ -173,16 +173,16 @@ var fixtures=[{
     ]
 },{
     base:'stable-project',
-    title:'best practices/costums (#12)',
-    test:'file_1_does_not_match_practice_2',
+    title:'must respect costums (#12)',
+    test:'file_1_does_not_match_costum_2',
     change:function(info){
         info.files['stable-project.js'].content =
             info.files['stable-project.js'].content.replace('Path.sep===','Path.sep==')
                                                    .replace('eid(id){ return document.getElementById(id); }','eid(elId){ return document.getElementById(elId); }');
     },
     expected:[
-        { warning:'file_1_does_not_match_practice_2',params:['stable-project.js', 'funtion_eid']},
-        { warning:'file_1_does_not_match_practice_2',params:['stable-project.js', 'var_winos']}
+        { warning:'file_1_does_not_match_costum_2',params:['stable-project.js', 'funtion_eid']},
+        { warning:'file_1_does_not_match_costum_2',params:['stable-project.js', 'var_winos']}
     ]
 }];
 
