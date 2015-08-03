@@ -2,8 +2,9 @@
 
 var _ = require('lodash');
 var expect = require('expect.js');
-var qac = require('..');
+var qaControl = require('..');
 var Promises = require('best-promise');
+var fs = require('fs-promise');
 
 var fixtures=[{
     base:'stable-project',
@@ -99,15 +100,15 @@ var fixtures=[{
     }
 },{
     base:'stable-project',
-    title:'cockades marker must exist in README.md (#8)',
-    test:'lack_of_cockade_marker_in_readme',
+    title:'cucardas marker must exist in README.md (#8)',
+    test:'lack_of_cucarda_marker_in_readme',
     change:function(info){
         info.files['README.md'].content = info.files['README.md'].content.replace('<!-- cucardas -->','');
     }
 },{
     base:'stable-project',
-    title:'missing mandatory cockades in README.md (#8)',
-    test:'missing_mandatory_cockade_1',
+    title:'missing mandatory cucardas in README.md (#8)',
+    test:'missing_mandatory_cucarda_1',
     change:function(info){
         
         var readme=info.files['README.md'].content;
@@ -117,15 +118,15 @@ var fixtures=[{
                                                 .replace('![dependencies]','');
     },
     expected:[
-        { warning:'missing_mandatory_cockade_1',params:['npm-version']},
-        { warning:'missing_mandatory_cockade_1',params:['downloads']},
-        { warning:'missing_mandatory_cockade_1',params:['build']},
-        { warning:'missing_mandatory_cockade_1',params:['dependencies']}
+        { warning:'missing_mandatory_cucarda_1',params:['npm-version']},
+        { warning:'missing_mandatory_cucarda_1',params:['downloads']},
+        { warning:'missing_mandatory_cucarda_1',params:['build']},
+        { warning:'missing_mandatory_cucarda_1',params:['dependencies']}
     ]
 },{
     base:'stable-project',
-    title:'missing optional cockades in README.md must not create warnings(#8)',
-    test:'missing_mandatory_cockade_1',
+    title:'missing optional cucardas in README.md must not create warnings(#8)',
+    test:'missing_mandatory_cucarda_1',
     change:function(info){
         
         var readme=info.files['README.md'].content;
@@ -138,8 +139,8 @@ var fixtures=[{
     expected:[]
 },{
     base:'stable-project',
-    title:'wrong format in mandatory cockades in README.md (#8)',
-    test:'wrong_format_in_cockade_1',
+    title:'wrong format in mandatory cucardas in README.md (#8)',
+    test:'wrong_format_in_cucarda_1',
     change:function(info){
         var readme=info.files['README.md'].content;
         info.files['README.md'].content = readme.replace('![version](https://img.shields.io/npm','![version](https://HHHimg.shields.io/npm')
@@ -148,10 +149,10 @@ var fixtures=[{
                                                 .replace('[![dependencies](https://img.shields.io','[![dependencies](https://EEimg.shields.io');
     },
     expected:[
-        { warning:'wrong_format_in_cockade_1',params:['npm-version']},
-        { warning:'wrong_format_in_cockade_1',params:['downloads']},
-        { warning:'wrong_format_in_cockade_1',params:['build']},
-        { warning:'wrong_format_in_cockade_1',params:['dependencies']}
+        { warning:'wrong_format_in_cucarda_1',params:['npm-version']},
+        { warning:'wrong_format_in_cucarda_1',params:['downloads']},
+        { warning:'wrong_format_in_cucarda_1',params:['build']},
+        { warning:'wrong_format_in_cucarda_1',params:['dependencies']}
     ]
 },{
     skipped:true,
@@ -194,16 +195,16 @@ function cloneProject(info){
 describe('qa-control', function(){
     describe('load project', function(){
         it('waits for config already readed', function(done){
-            qac.loadProject('./test/fixtures/stable-project').then(function(info){
-                expect(qac.configReady).to.ok();
+            qaControl.loadProject('./test/fixtures/stable-project').then(function(info){
+                expect(qaControl.configReady).to.ok();
                 expect(
-                    qac.projectDefinition['0.0.1'].sections['run-in'].values.server.firstLines
+                    qaControl.projectDefinition['0.0.1'].sections['run-in'].values.server.firstLines
                 ).to.match(/^"use strict";/);
                 done();
             }).catch(done);
         });
         it('loads ok', function(done){
-            qac.loadProject('./test/fixtures/stable-project').then(function(info){
+            qaControl.loadProject('./test/fixtures/stable-project').then(function(info){
                 expect(Object.keys(info)).to.eql([
                     'files',
                     'packageJson'
@@ -232,7 +233,7 @@ describe('qa-control', function(){
             it(fixtureName,function(done){
                 Promises.start(function(){
                     if(!perfectProjects[fixture.base]){
-                        return qac.loadProject('test/fixtures/'+fixture.base).then(function(info){
+                        return qaControl.loadProject('test/fixtures/'+fixture.base).then(function(info){
                             perfectProjects[fixture.base]=info;
                             return info;
                         });
@@ -243,7 +244,7 @@ describe('qa-control', function(){
                     return cloneProject(info);
                 }).then(function(clonedInfo){
                     fixture.change(clonedInfo);
-                    return qac.controlInfo(clonedInfo);
+                    return qaControl.controlInfo(clonedInfo);
                 }).then(function(warnings){
                     if(!fixture.expected){
                         fixture.expected=[{warning:fixture.test}];
@@ -259,7 +260,7 @@ describe('qa-control', function(){
     });
     describe('tests that abort on wrong input', function(){
         it('must fail if path is null', function(done){
-            qac.controlProject(null).then(function(warns){
+            qaControl.controlProject(null).then(function(warns){
                 done(warns);
             }).catch(function(err){
                 expect(err).to.match(/null projectDir/);
@@ -267,7 +268,7 @@ describe('qa-control', function(){
             });
         });
         it('must fail if path does not exist', function(done){
-            qac.controlProject('/non existent path/').then(function(info){
+            qaControl.controlProject('/non existent path/').then(function(info){
                 done(info);
             }).catch(function(err){
                 expect(err).to.match(/does not exists/);
@@ -275,11 +276,38 @@ describe('qa-control', function(){
             });
         });
         it('must fail if path is not a directory', function(done){
-            qac.controlProject('./package.json').then(function(info){
+            qaControl.controlProject('./package.json').then(function(info){
                 done(info);
             }).catch(function(err){
                 expect(err).to.match(/is not a directory/);
                 done();
+            });
+        });
+    });
+    var path='./test/fixtures';
+    console.log('__dirname',__dirname);
+    console.log('process.cwd',process.cwd());
+    fs.readdir(path).then(function(files){
+        describe('cucardas', function(){
+            files.forEach(function(file){
+                if(file.match(/^cucardas-/i)){
+                    it.skip('test cucardas by '+file+' fixture',function(done){
+                        var packageJson;
+                        var warnings;
+                        fs.readJson(path+'/'+file+'/package.json').then(function(o){
+                            packageJson=o;
+                            return fs.readJson(path+'/'+file+'/warnings.json');
+                        }).then(function(o){
+                            warnings=o;
+                            qaControl.projectVersion['soloCucardas']={};
+                            qaControl.projectVersion['soloCucardas'].rules=qaControl.projectVersion[packageJson['qa-control']['package-version']].rules;
+                            qaControl.projectVersion['soloCucardas'].definitions={};
+                            qaControl.projectVersion['soloCucardas'].definitions.cucardas=qaControl.projectVersion[packageJson['qa-control']['package-version']].definitions.cucardas;
+                            packageJson['qa-control']['package-version']='soloCucardas';
+                        });
+                        done();
+                    });
+                }
             });
         });
     });

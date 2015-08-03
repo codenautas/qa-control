@@ -27,9 +27,9 @@ qaControl.msgs={
         no_qa_control_section_in_package_json: 'falta la sección qa-control en package.json',
         no_version_in_section_codenautas: 'falta la entrada para "package-version" en la sección codenautas del package.json',
         //unparseable_package_json: 'existe package.json pero no puede parsearse',
-        lack_of_cockade_marker_in_readme:'falta la sección "cucardas" en README.md',
-        lack_of_mandatory_cockade_1: 'falta la cucarda oblicatoria $1',
-        wrong_format_in_cockade_1: 'la cucarda "$1" tiene formato incorrecto',
+        lack_of_cucarda_marker_in_readme:'falta la sección "cucardas" en README.md',
+        lack_of_mandatory_cucarda_1: 'falta la cucarda oblicatoria $1',
+        wrong_format_in_cucarda_1: 'la cucarda "$1" tiene formato incorrecto',
         lack_of_mandatory_line_1_in_file_2: 'falta la linea obligatoria $1 en el archivo $2',
         file_1_does_not_match_costum_2: '$1 no respeta la costumbre $2',
         first_line_does_not_match_in_file_1: 'las primeras líneas no coinciden en $1'
@@ -279,7 +279,7 @@ qaControl.rules={
             }
         }]
     },
-    cockades:{
+    cucardas:{
         checks:[{
             warnings:function(info){
                 var warns=[];
@@ -287,7 +287,7 @@ qaControl.rules={
                 var cucaMarkerRE = '/'+cucaMarker+'/';
                 var readme=info.files['README.md'].content;
                 if(readme.indexOf(cucaMarker) == -1) {
-                    warns.push({warning:'lack_of_cockade_marker_in_readme'});
+                    warns.push({warning:'lack_of_cucarda_marker_in_readme'});
                 }
                 var cucardas=qaControl.projectDefinition[info.packageJson['qa-control']['package-version']].cucardas;
                 var modulo=info.packageJson.name;
@@ -300,16 +300,16 @@ qaControl.rules={
                     var cucaID = '!['+/!\[([a-z]+)]/.exec(cucarda.md)[1]+']';
                     if(readme.indexOf(cucaID) == -1) {
                         if(cucarda.mandatory) {
-                            warns.push({warning:'missing_mandatory_cockade_1', params:[nombreCucarda]});
+                            warns.push({warning:'missing_mandatory_cucarda_1', params:[nombreCucarda]});
                         }
                     } else {
                         if('check' in cucarda && ! cucarda.check(info.packageJson)) {
-                            warns.push({warning:'wrong_format_in_cockade_1', params:[nombreCucarda]});
+                            warns.push({warning:'wrong_format_in_cucarda_1', params:[nombreCucarda]});
                         }
                         if(readme.indexOf(cucaStr) == -1) {
                             // si tengo cucarda mal formada, devuelvo warning aunque no sea obligatoria
                             // porque existió la intención de definirla
-                            warns.push({warning:'wrong_format_in_cockade_1', params:[nombreCucarda]});
+                            warns.push({warning:'wrong_format_in_cucarda_1', params:[nombreCucarda]});
                         }
                     }
                 }
