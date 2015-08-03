@@ -124,7 +124,7 @@ var fixtures=[{
     ]
 },{
     base:'stable-project',
-    title:'missing optional cockades in README.md should not create warnings(#8)',
+    title:'missing optional cockades in README.md must not create warnings(#8)',
     test:'missing_mandatory_cockade_1',
     change:function(info){
         
@@ -156,7 +156,7 @@ var fixtures=[{
 },{
     skipped:true,
     base:'stable-project',
-    test:'firts_lines_does_not_matchs',
+    test:'first_lines_do_not_match',
     change:function(info){
         info.files['stable-project.js'].content='// a comment in the first line\n'+info.files['stable-project.js'].content;
     }
@@ -170,6 +170,19 @@ var fixtures=[{
     expected:[
         { warning:'lack_of_mandatory_line_1_in_file_2',params:['local-*', '.gitignore']},
         { warning:'lack_of_mandatory_line_1_in_file_2',params:['*-local.*', '.gitignore']}
+    ]
+},{
+    base:'stable-project',
+    title:'best practices/costums (#12)',
+    test:'file_1_does_not_match_practice_2',
+    change:function(info){
+        info.files['stable-project.js'].content =
+            info.files['stable-project.js'].content.replace('Path.sep===','Path.sep==')
+                                                   .replace('eid(id){ return document.getElementById(id); }','eid(elId){ return document.getElementById(elId); }');
+    },
+    expected:[
+        { warning:'file_1_does_not_match_practice_2',params:['stable-project.js', 'funtion_eid']},
+        { warning:'file_1_does_not_match_practice_2',params:['stable-project.js', 'var_winos']}
     ]
 }];
 
@@ -244,7 +257,7 @@ describe('qa-control', function(){
         });
     });
     describe('tests that abort on wrong input', function(){
-        it('should fail if path is null', function(done){
+        it('must fail if path is null', function(done){
             qac.controlProject(null).then(function(warns){
                 done(warns);
             }).catch(function(err){
@@ -252,7 +265,7 @@ describe('qa-control', function(){
                 done();
             });
         });
-        it('should fail if path does not exists', function(done){
+        it('must fail if path does not exist', function(done){
             qac.controlProject('/non existent path/').then(function(info){
                 done(info);
             }).catch(function(err){
@@ -260,7 +273,7 @@ describe('qa-control', function(){
                 done();
             });
         });
-        it('should fail if path is not a directory', function(done){
+        it('must fail if path is not a directory', function(done){
             qac.controlProject('./package.json').then(function(info){
                 done(info);
             }).catch(function(err){

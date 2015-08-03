@@ -30,7 +30,8 @@ qaControl.msgs={
         lack_of_cockade_marker_in_readme:'falta la sección "cucardas" en README.md',
         lack_of_mandatory_cockade_1: 'falta la cucarda oblicatoria $1',
         wrong_format_in_cockade_1: 'la cucarda "$1" tiene formato incorrecto',
-        lack_of_mandatory_line_1_in_file_2: 'falta la linea obligatoria $1 en el archivo $2'
+        lack_of_mandatory_line_1_in_file_2: 'falta la linea obligatoria $1 en el archivo $2',
+        file_1_does_not_match_practice_2: '$1 no respeta la costumbre $2'
     }
 };
 
@@ -148,6 +149,19 @@ var configReading=Promises.all(_.map(qaControl.projectDefinition,function(defini
     console.log('error',err);
     console.log('stack',err.stack);
 });
+
+qaControl.definitions={
+    costums:{
+        funtion_eid:{
+            detect:'function eid',
+            match:'function eid(id){ return document.getElementById(id); }'
+        },
+        var_winos:{
+            detect:'var winos',
+            match:"var winOS = Path.sep==='\\\\';"
+        }
+    }
+};
 
 qaControl.rules={
     exist_package_json:{
@@ -306,9 +320,29 @@ qaControl.rules={
                 return warns;
             }
         }]
+    },
+    costums:{
+        checks:[{
+            warnings:function(info) {
+                var warns=[];
+                for(var file in info.files) {
+                    if(file.match(/(.js)$/)) {
+                        for(var costumeName in qaControl.definitions.costums) {
+                            var content = info.files[file].content;
+                            var costume = qaControl.definitions.costums[costumeName];
+                            if(content.toLowerCase().indexOf(costume.detect) !== -1
+                                && content.indexOf(costume.match)==-1)
+                            {
+                                warns.push({warning:'file_1_does_not_match_practice_2', params:[file,costumeName]});
+                           }
+                        }
+                    }
+                }
+                return warns;
+            }
+        }]
     }
 };
-
 
 qaControl.loadProject = function loadProject(projectDir) {
     var info = {};
