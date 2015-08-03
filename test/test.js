@@ -156,7 +156,8 @@ var fixtures=[{
 },{
     skipped:true,
     base:'stable-project',
-    test:'first_lines_do_not_match',
+    title:'first line does not match in file (#14)',
+    test:'first_line_does_not_match_in_file_1',
     change:function(info){
         info.files['stable-project.js'].content='// a comment in the first line\n'+info.files['stable-project.js'].content;
     }

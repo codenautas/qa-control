@@ -31,7 +31,8 @@ qaControl.msgs={
         lack_of_mandatory_cockade_1: 'falta la cucarda oblicatoria $1',
         wrong_format_in_cockade_1: 'la cucarda "$1" tiene formato incorrecto',
         lack_of_mandatory_line_1_in_file_2: 'falta la linea obligatoria $1 en el archivo $2',
-        file_1_does_not_match_costum_2: '$1 no respeta la costumbre $2'
+        file_1_does_not_match_costum_2: '$1 no respeta la costumbre $2',
+        first_line_does_not_match_in_file_1: 'las primeras líneas no coinciden en $1'
     }
 };
 
@@ -336,6 +337,33 @@ qaControl.rules={
                                 warns.push({warning:'file_1_does_not_match_costum_2', params:[file,costumeName]});
                            }
                         }
+                    }
+                }
+                return warns;
+            }
+        }]
+    },
+    first_lines:{
+        checks:[{
+            warnings:function(info) {
+                var warns=[];
+                var qaControlSection=info.packageJson['qa-control'];
+                var whichRunIn=qaControlSection['run-in'];
+                var codeCheck=qaControl.projectDefinition[qaControlSection['package-version']].sections['run-in']['values'][whichRunIn];
+                if(codeCheck) {
+                // transformar el nombre de proyecto
+                    var parts = info.packageJson.name.split('-');
+                    var project = '';
+                    for(var p=0; p<parts.length; ++p) {
+                        var part=parts[p];
+                        project += part.substring(0, 1).toUpperCase()+part.substring(1);
+                    }
+                    var mainName = ('main' in info.packageJson) ? info.packageJson.main : 'index.js';
+                    var realCheck = codeCheck.firstLines.replace('nombreDelModulo', project).replace('\r','');
+                    var mainJS = info.files[mainName].content.replace('\r','');
+                    if(mainJS.indexOf(realCheck) == -1) {
+                        //console.log("{"+realCheck+"}");
+                        //console.log("{"+mainJS.substring(0, realCheck.length)+"}");
                     }
                 }
                 return warns;
