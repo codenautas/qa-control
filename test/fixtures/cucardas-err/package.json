@@ -2,7 +2,7 @@
   "name": "the-project",
   "repository": "sourcenauta/other/the-project",
   "version": "0.0.11",
-  "codenautas": {
+  "qa-control": {
     "package-version": "0.0.1",
     "purpose": "proof-of-concept",
     "test-appveyor": true

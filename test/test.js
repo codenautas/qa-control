@@ -295,8 +295,11 @@ describe('qa-control', function(){
                             packageJson=o;
                             return fs.readJson(path+'/'+file+'/warnings.json');
                         }).then(function(o){
-                            console.log("DIR:", file);
+                            //console.log("DIR:", file);
                             warnings=o;
+                            var project = qaControl.projectDefinition[packageJson['qa-control']['package-version']];
+                            var cucardasCheck = project.rules.cucardas.checks;
+                            //console.log("PROYECTO", cucardasCheck);
                             //console.log(packageJson);
                             //console.log(warnings);
                             // qaControl.projectVersion['soloCucardas']={};
@@ -305,9 +308,9 @@ describe('qa-control', function(){
                             // qaControl.projectVersion['soloCucardas'].definitions.cucardas=qaControl.projectVersion[packageJson['qa-control']['package-version']].definitions.cucardas;
                             // packageJson['qa-control']['package-version']='soloCucardas';
                             done();
-                        }).catch(function(err){
-                            //console.log(err.stack);
-                            console.log("DIR:", file);
+                        }).catch(function(err){ // OJO: este es el fixture sin warnings.json !!!
+                            //console.log(err);
+                            //console.log("DIR:", file);
                            done();
                         });
                     });

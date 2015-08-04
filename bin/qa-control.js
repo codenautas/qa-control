@@ -138,7 +138,7 @@ qaControl.projectDefinition = {
                 docDescription: ''
             }
         },
-        customs:{
+        definitions:{
             funtion_eid:{
                 detect:'function eid',
                 match:'function eid(id){ return document.getElementById(id); }'
@@ -311,7 +311,7 @@ qaControl.projectDefinition = {
                 checks:[{
                     warnings:function(info) {
                         var warns=[];
-                        var customs = qaControl.projectDefinition[info.packageVersion].customs;
+                        var customs = qaControl.projectDefinition[info.packageVersion].definitions;
                         for(var file in info.files) {
                             if(file.match(/(.js)$/)) {
                                 for(var customeName in customs) {
