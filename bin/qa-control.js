@@ -45,8 +45,10 @@ qaControl.generateCucardas = function generateCucardas(cucardas, packageJson) {
     var repo=packageJson.repository.replace('/'+modulo,'');
     for(var nombreCucarda in cucardas) {
         var cucarda = cucardas[nombreCucarda];
-        var cucaStr = cucarda.md.replace(/\bxxx\b/g,repo).replace(/\byyy\b/g,modulo);
-        cucaFileContent += cucaStr +'\n';
+        if(!cucarda.check || cucarda.check(packageJson)) {
+            var cucaStr = cucarda.md.replace(/\bxxx\b/g,repo).replace(/\byyy\b/g,modulo);
+            cucaFileContent += cucaStr +'\n';
+        }
     }
     return cucaFileContent;
 };
@@ -116,7 +118,7 @@ qaControl.projectDefinition = {
             },
             extending:{
                 check: function(packageJson){ 
-                    return semver.satisfies(packageJson.version,'0.x.x') && !semver.satisfies(packageJson.version,'0.0.x') && packageJson.codenautas.purpose==null;
+                    return semver.satisfies(packageJson.version,'0.x.x') && !semver.satisfies(packageJson.version,'0.0.x') && packageJson['qa-control'].purpose==null;
                 },
                 md:'![extending](https://img.shields.io/badge/stability-extending-orange.svg)',
                 imgExample:'https://img.shields.io/badge/stability-extending-orange.svg',
