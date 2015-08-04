@@ -110,7 +110,6 @@ var fixtures=[{
     title:'missing mandatory cucardas in README.md (#8)',
     test:'missing_mandatory_cucarda_1',
     change:function(info){
-        
         var readme=info.files['README.md'].content;
         info.files['README.md'].content = readme.replace('![version]','')
                                                 .replace('![downloads]','')
@@ -155,13 +154,13 @@ var fixtures=[{
         { warning:'wrong_format_in_cucarda_1',params:['dependencies']}
     ]
 },{
-    skipped:true,
     base:'stable-project',
     title:'first line does not match in file (#14)',
     test:'first_line_does_not_match_in_file_1',
     change:function(info){
         info.files['stable-project.js'].content='// a comment in the first line\n'+info.files['stable-project.js'].content;
-    }
+    },
+    expected:[{ warning:'first_line_does_not_match_in_file_1',params:['stable-project.js']}]
 },{
     base:'stable-project',
     title:'lack of mandatory lines in .gitignore (#10)',

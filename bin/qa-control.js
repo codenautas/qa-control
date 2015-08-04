@@ -289,7 +289,7 @@ qaControl.projectDefinition = {
                                 }
                             }
                         }
-                        fs.writeFileSync("cucardas.log", cucaFileContent);
+                        if(warns.length) { fs.writeFileSync("cucardas.log", cucaFileContent); }
                         return warns;
                     }
                 }]
@@ -332,11 +332,16 @@ qaControl.projectDefinition = {
                                 project += part.substring(0, 1).toUpperCase()+part.substring(1);
                             }
                             var mainName = ('main' in info.packageJson) ? info.packageJson.main : 'index.js';
-                            var realCheck = codeCheck.firstLines.replace('nombreDelModulo', project).replace('\r','');
-                            var mainJS = info.files[mainName].content.replace('\r','');
-                            if(mainJS.indexOf(realCheck) == -1) {
-                                //console.log("{"+realCheck+"}");
-                                //console.log("{"+mainJS.substring(0, realCheck.length)+"}");
+                            var linesRE = /(\r\n|\r(?!\n)|\n)/;
+                            var firstLines = codeCheck.firstLines.replace('nombreDelModulo', project).split(linesRE);
+                            var checkLines = info.files[mainName].content.split(linesRE);
+                            var chopRE =/([\t\r\n ]*)$/g;
+                            for(var n=0; n<firstLines.length; ++n) {
+                                if(firstLines[n].replace(chopRE,'') !== checkLines[n].replace(chopRE,'')) {
+                                    //console.log("diferentes '"+firstLines[n]+"' y '"+checkLines[n]+"'");
+                                    warns.push({warning:'first_line_does_not_match_in_file_1', params:[mainName]});
+                                    break;
+                                }
                             }
                         }
                         return warns;
