@@ -289,28 +289,52 @@ describe('qa-control', function(){
             files.forEach(function(file){
                 if(file.match(/^cucardas-/i)){
                     it('test cucardas by '+file+' fixture',function(done){
+                        console.log("DIR:", file);
                         var packageJson;
-                        var warnings;
-                        fs.readJson(path+'/'+file+'/package.json').then(function(o){
+                        var warnings=false;
+                        var cucardasOut=false;
+                        var base = path+'/'+file+'/';
+                        fs.readJson(base+'package.json').then(function(o){
                             packageJson=o;
-                            return fs.readJson(path+'/'+file+'/warnings.json');
+                            return fs.readJson(base+'warnings.json');
+                        }).catch(function(err) {
+                            //console.log("  warnings.json ERROR: ", err.stack);
+                            return false;
                         }).then(function(o){
-                            //console.log("DIR:", file);
+                            //console.log("warnings?", o);
                             warnings=o;
-                            var project = qaControl.projectDefinition[packageJson['qa-control']['package-version']];
-                            var cucardasCheck = project.rules.cucardas.checks;
-                            //console.log("PROYECTO", cucardasCheck);
-                            //console.log(packageJson);
+                            return fs.exists(base+'cucardas.out');
+                        }).catch(function(err) {
+                            //console.log("  cucardas.out ERROR: ", err.stack);
+                            return false;
+                        }).then(function(o) {
+                            cucardasOut = o;
+                            if(cucardasOut) {
+                                return fs.readFile(base+'cucardas.out', {encoding: 'utf8'});
+                            }
+                            return o;
+                        }).then(function(cucaOutContent) {
+                            if(cucardasOut) { cucardasOut = cucaOutContent; }
+                            return fs.exists(base+'README.md');
+                        }).then(function(hayReadme) {
+                            //console.log("  packageJson", packageJson);
+                            var packVer = packageJson['qa-control']['package-version'];
+                            var project = qaControl.projectDefinition[packVer];
+                            var cucardas = qaControl.projectDefinition[packVer].cucardas;
+                            var check = project.rules.cucardas.checks;
+                            if(cucardasOut) {
+                                
+                            }
+                            console.log("  warnings", warnings ? "true" : "false");
+                            console.log("  cucardasOut", cucardasOut ? "true" : "false");
+                            console.log("  hayReadme", hayReadme);
+                            //console.log("  cucardas", cucardas);
+                            //console.log("  check", check);
                             //console.log(warnings);
-                            // qaControl.projectVersion['soloCucardas']={};
-                            // qaControl.projectVersion['soloCucardas'].rules=qaControl.projectVersion[packageJson['qa-control']['package-version']].rules;
-                            // qaControl.projectVersion['soloCucardas'].definitions={};
-                            // qaControl.projectVersion['soloCucardas'].definitions.cucardas=qaControl.projectVersion[packageJson['qa-control']['package-version']].definitions.cucardas;
-                            // packageJson['qa-control']['package-version']='soloCucardas';
                             done();
                         }).catch(function(err){ // OJO: este es el fixture sin warnings.json !!!
-                            //console.log(err);
-                            //console.log("DIR:", file);
+                           console.log(err);
+                           console.log("ERROR DIR:", file);
                            done();
                         });
                     });
