@@ -163,6 +163,9 @@ qaControl.projectDefinition = {
                     warnings:function(info){
                         if(!info.packageJson['qa-control']['package-version']){
                             return [{warning:'no_package_version_in_qa_control_section'}];
+                        } else {
+                            // defino la version para para siguientes checks
+                            info.packageVersion = info.packageJson['qa-control']['package-version'];
                         }
                         return [];
                     }
@@ -172,7 +175,7 @@ qaControl.projectDefinition = {
             invalid_qa_control_version: {
                 checks:[{
                     warnings:function(info){
-                        var ver=info.packageJson['qa-control']['package-version'];
+                        var ver=info.packageVersion;
                         if(! semver.valid(ver)){
                             return [{warning:'invalid_qa_control_version',params:[ver]}];
                         }
@@ -184,7 +187,7 @@ qaControl.projectDefinition = {
             deprecated_control_version: {
                 checks:[{
                     warnings:function(info) {
-                        var ver=info.packageJson['qa-control']['package-version'];
+                        var ver=info.packageVersion;
                         if(semver.satisfies(ver, qaControl.deprecatedVersions)){
                             return [{warning:'deprecated_qa_control_version',params:[ver]}];
                         }
@@ -197,7 +200,7 @@ qaControl.projectDefinition = {
               checks:[{
                  warnings:function(info) {
                      var warns =[];
-                     var mandatoryFiles=qaControl.projectDefinition[info.packageJson['qa-control']['package-version']].files;
+                     var mandatoryFiles=qaControl.projectDefinition[info.packageVersion].files;
                      for(var fileName in mandatoryFiles) {
                          var file = mandatoryFiles[fileName];
                          if(file.mandatory && !info.files[fileName]) {
@@ -226,7 +229,7 @@ qaControl.projectDefinition = {
                     warnings:function(info){
                         var warns=[];
                         var qaControlSection=info.packageJson['qa-control'];
-                        var sections=qaControl.projectDefinition[qaControlSection['package-version']].sections;
+                        var sections=qaControl.projectDefinition[info.packageVersion].sections;
                         for(var sectionName in sections){
                             var sectionDef=sections[sectionName];
                             if(sectionDef.mandatory && !(sectionName in qaControlSection)){
@@ -262,7 +265,7 @@ qaControl.projectDefinition = {
                         if(readme.indexOf(cucaMarker) == -1) {
                             warns.push({warning:'lack_of_cucarda_marker_in_readme'});
                         }
-                        var cucardas=qaControl.projectDefinition[info.packageJson['qa-control']['package-version']].cucardas;
+                        var cucardas=qaControl.projectDefinition[info.packageVersion].cucardas;
                         var modulo=info.packageJson.name;
                         var repo=info.packageJson.repository.replace('/'+modulo,'');
                         var cucaFileContent =  cucaMarker+'\n';
@@ -295,7 +298,7 @@ qaControl.projectDefinition = {
                 checks:[{
                     warnings:function(info) {
                         var warns=[];
-                        var customs = qaControl.projectDefinition[info.packageJson['qa-control']['package-version']].customs;
+                        var customs = qaControl.projectDefinition[info.packageVersion].customs;
                         for(var file in info.files) {
                             if(file.match(/(.js)$/)) {
                                 for(var costumeName in customs) {
@@ -319,7 +322,7 @@ qaControl.projectDefinition = {
                         var warns=[];
                         var qaControlSection=info.packageJson['qa-control'];
                         var whichRunIn=qaControlSection['run-in'];
-                        var codeCheck=qaControl.projectDefinition[qaControlSection['package-version']].sections['run-in']['values'][whichRunIn];
+                        var codeCheck=qaControl.projectDefinition[info.packageVersion].sections['run-in']['values'][whichRunIn];
                         if(codeCheck) {
                         // transformar el nombre de proyecto
                             var parts = info.packageJson.name.split('-');
@@ -404,8 +407,7 @@ qaControl.loadProject = function loadProject(projectDir) {
 
 qaControl.controlInfo=function controlInfo(info){
     var resultWarnings=[];
-    var version = qaControl.currentVersion;
-    var rules = qaControl.projectDefinition[version].rules;
+    var rules = qaControl.projectDefinition[qaControl.currentVersion].rules;
     for(var ruleName in rules){
         var rule=rules[ruleName];
         var fails=0;
