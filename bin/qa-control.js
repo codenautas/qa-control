@@ -340,8 +340,6 @@ qaControl.projectDefinition = {
                                 }
                             } else {
                                 if('check' in cucarda && ! cucarda.check(info.packageJson)) {
-                                    console.log('cucarda', nombreCucarda, info.packageJson);
-                                    console.log('cucaID', cucaID);
                                     warns.push({warning:'wrong_format_in_cucarda_1', params:[nombreCucarda]});
                                 }
                                 if(readme.indexOf(cucaStr) == -1) {
