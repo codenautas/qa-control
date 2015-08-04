@@ -104,7 +104,9 @@ qaControl.projectDefinition = {
             },
             extending:{
                 check: function(packageJson){ 
-                    return semver.satisfies(packageJson.version,'0.x.x') && !semver.satisfies(packageJson.version,'0.0.x') && packageJson['qa-control'].purpose==null;
+                    return semver.satisfies(packageJson.version,'0.x.x')
+                              && !semver.satisfies(packageJson.version,'0.0.x')
+                              && packageJson['qa-control'].purpose==null;
                 },
                 md:'![extending](https://img.shields.io/badge/stability-extending-orange.svg)',
                 imgExample:'https://img.shields.io/badge/stability-extending-orange.svg',
@@ -112,6 +114,7 @@ qaControl.projectDefinition = {
             },
             'npm-version':{
                 mandatory:true,
+                //md:'[![npm-version](https://img.shields.io/npm/v/yyy.svg)](https://npmjs.org/package/yyy)',
                 md:'[![version](https://img.shields.io/npm/v/yyy.svg)](https://npmjs.org/package/yyy)',
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/npm-version.png',
                 docDescription: ''
@@ -129,16 +132,25 @@ qaControl.projectDefinition = {
                 docDescription: 'linux/build'
             },
             windows:{
+                check: function(packageJson){ 
+                    return packageJson['qa-control']['test-appveyor']==true;
+                },
                 md:'[![windows](https://ci.appveyor.com/api/projects/status/github/xxx/yyy?svg=true)](https://ci.appveyor.com/project/xxx/yyy)',
                 imgExample:'https://ci.appveyor.com/api/projects/status/github/codenautas/pg-promise-strict?svg=true',
                 docDescription: 'casos especiales'
             },
             coverage:{
+                check: function(packageJson){ 
+                    return packageJson['qa-control']['coverage'];
+                },
                 md:'[![coverage](https://img.shields.io/coveralls/xxx/yyy/master.svg)](https://coveralls.io/r/xxx/yyy)',
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/coverage.png',
                 docDescription: ''
             },
             climate:{
+                check: function(packageJson){ 
+                    return packageJson['qa-control']['coverage'] || packageJson['qa-control'].purpose==null;
+                },
                 md:'[![climate](https://img.shields.io/codeclimate/github/xxx/yyy.svg)](https://codeclimate.com/github/xxx/yyy)',
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/climate.png',
                 docDescription: ''
@@ -306,7 +318,7 @@ qaControl.projectDefinition = {
                         var repo=info.packageJson.repository.replace('/'+modulo,'');
                         for(var nombreCucarda in cucardas) {
                             var cucarda = cucardas[nombreCucarda];
-                            var cucaID = '!['+/!\[([a-z]+)]/.exec(cucarda.md)[1]+']';
+                            var cucaID = '!['+/!\[([-a-z]+)]/.exec(cucarda.md)[1]+']';
                             var cucaStr = cucarda.md.replace(/\bxxx\b/g,repo).replace(/\byyy\b/g,modulo);
                             if(readme.indexOf(cucaID) == -1) {
                                 if(cucarda.mandatory) {
