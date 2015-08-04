@@ -1,6 +1,0 @@
-[
-  {
-    "code": "repository_name_not_found",
-    "decription": "pacakgeJson.repository no tiene el formato /{[-a-zA-Z0-9_.]+}\/[-a-zA-Z0-9_.]+/"
-  }
-]

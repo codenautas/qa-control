@@ -343,8 +343,8 @@ describe('qa-control', function(){
                                 
                             } if(cucardasOut) {
                                 var cucaContent = qaControl.generateCucardas(cucardas,packageJson);
-                                fs.writeFileSync('./'+file+'_cucardas.out', qaControl.fixEOL(cucardasOut));
-                                fs.writeFileSync('./'+file+'_cucardas.log', qaControl.fixEOL(cucaContent));
+                                //fs.writeFileSync('./'+file+'_cucardas.out', qaControl.fixEOL(cucardasOut));
+                                //fs.writeFileSync('./'+file+'_cucardas.log', qaControl.fixEOL(cucaContent));
                                 //expect(qaControl.fixEOL(cucardasOut)).to.eql(qaControl.fixEOL(cucaContent));
                             }
                             done();
