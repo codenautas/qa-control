@@ -143,7 +143,7 @@ qaControl.projectDefinition = {
                 check: function(packageJson){ 
                     return !!packageJson['qa-control']['test-appveyor'];
                 },
-                md:'[![linux](https://img.shields.io/travis/xxx/yyy/master.svg)](https://travis-ci.org/xxx/yyy)',
+                md:'[![build](https://img.shields.io/travis/xxx/yyy/master.svg)](https://travis-ci.org/xxx/yyy)',
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/medalla-ejemplo-linux.png',
                 hideInManual: true,
             },
