@@ -285,8 +285,6 @@ describe('qa-control', function(){
         });
     });
     var path='./test/fixtures';
-    console.log('__dirname',__dirname);
-    console.log('process.cwd',process.cwd());
     fs.readdir(path).then(function(files){
         describe('cucardas', function(){
             files.forEach(function(file){
