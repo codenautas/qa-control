@@ -132,12 +132,221 @@ qaControl.projectDefinition = {
                 detect:'var winos',
                 match:"var winOS = Path.sep==='\\\\';"
             }
+        },
+        rules:{
+            exist_package_json:{
+                checks:[{
+                    warnings:function(info){
+                        if(!info.files['package.json']){
+                            return [{warning:'no_package_json'}];
+                        }
+                        return [];
+                    }
+                }],
+                shouldAbort:true
+            },
+            qa_control_section_in_package_json:{
+                checks:[{
+                    warnings:function(info){
+                        if(!info.packageJson['qa-control']){
+                            return [{warning:info.files['package.json'].content.match(/codenautas/)?
+                                        'no_codenautas_section_in_qa_control_project':
+                                        'no_qa_control_section_in_package_json'}];
+                        }
+                        return [];
+                    }
+                }],
+                shouldAbort:true
+            },
+            package_version_in_qa_control_section:{
+                checks:[{
+                    warnings:function(info){
+                        if(!info.packageJson['qa-control']['package-version']){
+                            return [{warning:'no_package_version_in_qa_control_section'}];
+                        }
+                        return [];
+                    }
+                }],
+                shouldAbort:true
+            },
+            invalid_qa_control_version: {
+                checks:[{
+                    warnings:function(info){
+                        var ver=info.packageJson['qa-control']['package-version'];
+                        if(! semver.valid(ver)){
+                            return [{warning:'invalid_qa_control_version',params:[ver]}];
+                        }
+                        return [];
+                    }
+                }],
+                shouldAbort:true
+            },
+            deprecated_control_version: {
+                checks:[{
+                    warnings:function(info) {
+                        var ver=info.packageJson['qa-control']['package-version'];
+                        if(semver.satisfies(ver, qaControl.deprecatedVersions)){
+                            return [{warning:'deprecated_qa_control_version',params:[ver]}];
+                        }
+                        return [];
+                    }
+                }],
+                shouldAbort:true
+            },
+            mandatory_files:{
+              checks:[{
+                 warnings:function(info) {
+                     var warns =[];
+                     var mandatoryFiles=qaControl.projectDefinition[info.packageJson['qa-control']['package-version']].files;
+                     for(var fileName in mandatoryFiles) {
+                         var file = mandatoryFiles[fileName];
+                         if(file.mandatory && !info.files[fileName]) {
+                             warns.push({warning:'lack_of_mandatory_file_1', params:[fileName]});
+                         } else {
+                             if(file.presentIf && !file.presentIf(info.packageJson)) {
+                                 warns.push({warning:'lack_of_mandatory_file_1', params:[fileName]});
+                             } else if(file.mandatoryLines) {
+                                 var fileContent = info.files[fileName].content;
+                                 file.mandatoryLines.forEach(function(mandatoryLine) {
+                                    // agrego '\n' antes para no utilizar expresiones regulares
+                                    if(fileContent.indexOf('\n'+mandatoryLine)==-1) {
+                                        warns.push({warning:'lack_of_mandatory_line_1_in_file_2', params:[mandatoryLine, fileName]});
+                                    }
+                                 });
+                             }
+                         }
+                     }
+                    return warns;
+                 }
+              }],
+              shouldAbort:true
+            },
+            valid_values_for_qa_control_keys:{
+                checks:[{
+                    warnings:function(info){
+                        var warns=[];
+                        var qaControlSection=info.packageJson['qa-control'];
+                        var sections=qaControl.projectDefinition[qaControlSection['package-version']].sections;
+                        for(var sectionName in sections){
+                            var sectionDef=sections[sectionName];
+                            if(sectionDef.mandatory && !(sectionName in qaControlSection)){
+                                warns.push({warning:'lack_of_mandatory_section_1',params:[sectionName]});
+                            }else{
+                                var observedValue=qaControlSection[sectionName];
+                                if(sectionDef.values && !(observedValue in sectionDef.values)){
+                                    warns.push({warning:'invalid_value_1_in_parameter_2',params:[observedValue,sectionName]});
+                                }
+                            }
+                        };
+                        return warns;
+                    }
+                }]
+            },
+            no_multilang_section_in_readme:{
+                checks:[{
+                    warnings:function(info){
+                        if(! info.files['README.md'].content.match(/<!--multilang v[0-9]+\s+(.+)(-->)/)) {
+                            return [{warning:'no_multilang_section_in_readme'}];
+                        }
+                        return [];
+                    }
+                }]
+            },
+            cucardas:{
+                checks:[{
+                    warnings:function(info){
+                        var warns=[];
+                        var cucaMarker = '<!-- cucardas -->';
+                        var cucaMarkerRE = '/'+cucaMarker+'/';
+                        var readme=info.files['README.md'].content;
+                        if(readme.indexOf(cucaMarker) == -1) {
+                            warns.push({warning:'lack_of_cucarda_marker_in_readme'});
+                        }
+                        var cucardas=qaControl.projectDefinition[info.packageJson['qa-control']['package-version']].cucardas;
+                        var modulo=info.packageJson.name;
+                        var repo=info.packageJson.repository.replace('/'+modulo,'');
+                        var cucaFileContent =  cucaMarker+'\n';
+                        for(var nombreCucarda in cucardas) {
+                            var cucarda = cucardas[nombreCucarda];
+                            var cucaStr = cucarda.md.replace(/\bxxx\b/g,repo).replace(/\byyy\b/g,modulo);
+                            cucaFileContent += cucaStr +'\n';
+                            var cucaID = '!['+/!\[([a-z]+)]/.exec(cucarda.md)[1]+']';
+                            if(readme.indexOf(cucaID) == -1) {
+                                if(cucarda.mandatory) {
+                                    warns.push({warning:'missing_mandatory_cucarda_1', params:[nombreCucarda]});
+                                }
+                            } else {
+                                if('check' in cucarda && ! cucarda.check(info.packageJson)) {
+                                    warns.push({warning:'wrong_format_in_cucarda_1', params:[nombreCucarda]});
+                                }
+                                if(readme.indexOf(cucaStr) == -1) {
+                                    // si tengo cucarda mal formada, devuelvo warning aunque no sea obligatoria
+                                    // porque existió la intención de definirla
+                                    warns.push({warning:'wrong_format_in_cucarda_1', params:[nombreCucarda]});
+                                }
+                            }
+                        }
+                        fs.writeFileSync("cucardas.log", cucaFileContent);
+                        return warns;
+                    }
+                }]
+            },
+            customs:{
+                checks:[{
+                    warnings:function(info) {
+                        var warns=[];
+                        var customs = qaControl.projectDefinition[info.packageJson['qa-control']['package-version']].customs;
+                        for(var file in info.files) {
+                            if(file.match(/(.js)$/)) {
+                                for(var costumeName in customs) {
+                                    var content = info.files[file].content;
+                                    var costume = customs[costumeName];
+                                    if(content.toLowerCase().indexOf(costume.detect) !== -1
+                                        && content.indexOf(costume.match)==-1)
+                                    {
+                                        warns.push({warning:'file_1_does_not_match_costum_2', params:[file,costumeName]});
+                                    }
+                                }
+                            }
+                        }
+                        return warns;
+                    }
+                }]
+            },
+            first_lines:{
+                checks:[{
+                    warnings:function(info) {
+                        var warns=[];
+                        var qaControlSection=info.packageJson['qa-control'];
+                        var whichRunIn=qaControlSection['run-in'];
+                        var codeCheck=qaControl.projectDefinition[qaControlSection['package-version']].sections['run-in']['values'][whichRunIn];
+                        if(codeCheck) {
+                        // transformar el nombre de proyecto
+                            var parts = info.packageJson.name.split('-');
+                            var project = '';
+                            for(var p=0; p<parts.length; ++p) {
+                                var part=parts[p];
+                                project += part.substring(0, 1).toUpperCase()+part.substring(1);
+                            }
+                            var mainName = ('main' in info.packageJson) ? info.packageJson.main : 'index.js';
+                            var realCheck = codeCheck.firstLines.replace('nombreDelModulo', project).replace('\r','');
+                            var mainJS = info.files[mainName].content.replace('\r','');
+                            if(mainJS.indexOf(realCheck) == -1) {
+                                //console.log("{"+realCheck+"}");
+                                //console.log("{"+mainJS.substring(0, realCheck.length)+"}");
+                            }
+                        }
+                        return warns;
+                    }
+                }]
+            }
         }
     }
 };
 
 qaControl.lang = process.env.qa_control_lang || 'en';
 qaControl.deprecatedVersions = '< 0.0.1';
+qaControl.currentVersion = '0.0.1';
 
 qaControl.configReady=false;
 var configReading=Promises.all(_.map(qaControl.projectDefinition,function(definition, version){
@@ -156,215 +365,6 @@ var configReading=Promises.all(_.map(qaControl.projectDefinition,function(defini
     console.log('error',err);
     console.log('stack',err.stack);
 });
-
-qaControl.rules={
-    exist_package_json:{
-        checks:[{
-            warnings:function(info){
-                if(!info.files['package.json']){
-                    return [{warning:'no_package_json'}];
-                }
-                return [];
-            }
-        }],
-        shouldAbort:true
-    },
-    qa_control_section_in_package_json:{
-        checks:[{
-            warnings:function(info){
-                if(!info.packageJson['qa-control']){
-                    return [{warning:info.files['package.json'].content.match(/codenautas/)?
-                                'no_codenautas_section_in_qa_control_project':
-                                'no_qa_control_section_in_package_json'}];
-                }
-                return [];
-            }
-        }],
-        shouldAbort:true
-    },
-    package_version_in_qa_control_section:{
-        checks:[{
-            warnings:function(info){
-                if(!info.packageJson['qa-control']['package-version']){
-                    return [{warning:'no_package_version_in_qa_control_section'}];
-                }
-                return [];
-            }
-        }],
-        shouldAbort:true
-    },
-    invalid_qa_control_version: {
-        checks:[{
-            warnings:function(info){
-                var ver=info.packageJson['qa-control']['package-version'];
-                if(! semver.valid(ver)){
-                    return [{warning:'invalid_qa_control_version',params:[ver]}];
-                }
-                return [];
-            }
-        }],
-        shouldAbort:true
-    },
-    deprecated_control_version: {
-        checks:[{
-            warnings:function(info) {
-                var ver=info.packageJson['qa-control']['package-version'];
-                if(semver.satisfies(ver, qaControl.deprecatedVersions)){
-                    return [{warning:'deprecated_qa_control_version',params:[ver]}];
-                }
-                return [];
-            }
-        }],
-        shouldAbort:true
-    },
-    mandatory_files:{
-      checks:[{
-         warnings:function(info) {
-             var warns =[];
-             var mandatoryFiles=qaControl.projectDefinition[info.packageJson['qa-control']['package-version']].files;
-             for(var fileName in mandatoryFiles) {
-                 var file = mandatoryFiles[fileName];
-                 if(file.mandatory && !info.files[fileName]) {
-                     warns.push({warning:'lack_of_mandatory_file_1', params:[fileName]});
-                 } else {
-                     if(file.presentIf && !file.presentIf(info.packageJson)) {
-                         warns.push({warning:'lack_of_mandatory_file_1', params:[fileName]});
-                     } else if(file.mandatoryLines) {
-                         var fileContent = info.files[fileName].content;
-                         file.mandatoryLines.forEach(function(mandatoryLine) {
-                            // agrego '\n' antes para no utilizar expresiones regulares
-                            if(fileContent.indexOf('\n'+mandatoryLine)==-1) {
-                                warns.push({warning:'lack_of_mandatory_line_1_in_file_2', params:[mandatoryLine, fileName]});
-                            }
-                         });
-                     }
-                 }
-             }
-            return warns;
-         }
-      }],
-      shouldAbort:true
-    },
-    valid_values_for_qa_control_keys:{
-        checks:[{
-            warnings:function(info){
-                var warns=[];
-                var qaControlSection=info.packageJson['qa-control'];
-                var sections=qaControl.projectDefinition[qaControlSection['package-version']].sections;
-                for(var sectionName in sections){
-                    var sectionDef=sections[sectionName];
-                    if(sectionDef.mandatory && !(sectionName in qaControlSection)){
-                        warns.push({warning:'lack_of_mandatory_section_1',params:[sectionName]});
-                    }else{
-                        var observedValue=qaControlSection[sectionName];
-                        if(sectionDef.values && !(observedValue in sectionDef.values)){
-                            warns.push({warning:'invalid_value_1_in_parameter_2',params:[observedValue,sectionName]});
-                        }
-                    }
-                };
-                return warns;
-            }
-        }]
-    },
-    no_multilang_section_in_readme:{
-        checks:[{
-            warnings:function(info){
-                if(! info.files['README.md'].content.match(/<!--multilang v[0-9]+\s+(.+)(-->)/)) {
-                    return [{warning:'no_multilang_section_in_readme'}];
-                }
-                return [];
-            }
-        }]
-    },
-    cucardas:{
-        checks:[{
-            warnings:function(info){
-                var warns=[];
-                var cucaMarker = '<!-- cucardas -->';
-                var cucaMarkerRE = '/'+cucaMarker+'/';
-                var readme=info.files['README.md'].content;
-                if(readme.indexOf(cucaMarker) == -1) {
-                    warns.push({warning:'lack_of_cucarda_marker_in_readme'});
-                }
-                var cucardas=qaControl.projectDefinition[info.packageJson['qa-control']['package-version']].cucardas;
-                var modulo=info.packageJson.name;
-                var repo=info.packageJson.repository.replace('/'+modulo,'');
-                var cucaFileContent =  cucaMarker+'\n';
-                for(var nombreCucarda in cucardas) {
-                    var cucarda = cucardas[nombreCucarda];
-                    var cucaStr = cucarda.md.replace(/\bxxx\b/g,repo).replace(/\byyy\b/g,modulo);
-                    cucaFileContent += cucaStr +'\n';
-                    var cucaID = '!['+/!\[([a-z]+)]/.exec(cucarda.md)[1]+']';
-                    if(readme.indexOf(cucaID) == -1) {
-                        if(cucarda.mandatory) {
-                            warns.push({warning:'missing_mandatory_cucarda_1', params:[nombreCucarda]});
-                        }
-                    } else {
-                        if('check' in cucarda && ! cucarda.check(info.packageJson)) {
-                            warns.push({warning:'wrong_format_in_cucarda_1', params:[nombreCucarda]});
-                        }
-                        if(readme.indexOf(cucaStr) == -1) {
-                            // si tengo cucarda mal formada, devuelvo warning aunque no sea obligatoria
-                            // porque existió la intención de definirla
-                            warns.push({warning:'wrong_format_in_cucarda_1', params:[nombreCucarda]});
-                        }
-                    }
-                }
-                fs.writeFileSync("cucardas.log", cucaFileContent);
-                return warns;
-            }
-        }]
-    },
-    customs:{
-        checks:[{
-            warnings:function(info) {
-                var warns=[];
-                var customs = qaControl.projectDefinition[info.packageJson['qa-control']['package-version']].customs;
-                for(var file in info.files) {
-                    if(file.match(/(.js)$/)) {
-                        for(var costumeName in customs) {
-                            var content = info.files[file].content;
-                            var costume = customs[costumeName];
-                            if(content.toLowerCase().indexOf(costume.detect) !== -1
-                                && content.indexOf(costume.match)==-1)
-                            {
-                                warns.push({warning:'file_1_does_not_match_costum_2', params:[file,costumeName]});
-                            }
-                        }
-                    }
-                }
-                return warns;
-            }
-        }]
-    },
-    first_lines:{
-        checks:[{
-            warnings:function(info) {
-                var warns=[];
-                var qaControlSection=info.packageJson['qa-control'];
-                var whichRunIn=qaControlSection['run-in'];
-                var codeCheck=qaControl.projectDefinition[qaControlSection['package-version']].sections['run-in']['values'][whichRunIn];
-                if(codeCheck) {
-                // transformar el nombre de proyecto
-                    var parts = info.packageJson.name.split('-');
-                    var project = '';
-                    for(var p=0; p<parts.length; ++p) {
-                        var part=parts[p];
-                        project += part.substring(0, 1).toUpperCase()+part.substring(1);
-                    }
-                    var mainName = ('main' in info.packageJson) ? info.packageJson.main : 'index.js';
-                    var realCheck = codeCheck.firstLines.replace('nombreDelModulo', project).replace('\r','');
-                    var mainJS = info.files[mainName].content.replace('\r','');
-                    if(mainJS.indexOf(realCheck) == -1) {
-                        //console.log("{"+realCheck+"}");
-                        //console.log("{"+mainJS.substring(0, realCheck.length)+"}");
-                    }
-                }
-                return warns;
-            }
-        }]
-    }
-};
 
 qaControl.loadProject = function loadProject(projectDir) {
     var info = {};
@@ -404,8 +404,10 @@ qaControl.loadProject = function loadProject(projectDir) {
 
 qaControl.controlInfo=function controlInfo(info){
     var resultWarnings=[];
-    for(var ruleName in qaControl.rules){
-        var rule=qaControl.rules[ruleName];
+    var version = qaControl.currentVersion;
+    var rules = qaControl.projectDefinition[version].rules;
+    for(var ruleName in rules){
+        var rule=rules[ruleName];
         var fails=0;
         rule.checks.forEach(function(checkInfo){
             var warningsOfThisRule=checkInfo.warnings(info);
