@@ -31,7 +31,7 @@ qaControl.msgs={
         lack_of_mandatory_cucarda_1: 'falta la cucarda oblicatoria $1',
         wrong_format_in_cucarda_1: 'la cucarda "$1" tiene formato incorrecto',
         lack_of_mandatory_line_1_in_file_2: 'falta la linea obligatoria $1 en el archivo $2',
-        file_1_does_not_match_costum_2: '$1 no respeta la costumbre $2',
+        file_1_does_not_match_custom_2: '$1 no respeta la custombre $2',
         first_line_does_not_match_in_file_1: 'las primeras líneas no coinciden en $1'
     }
 };
@@ -301,13 +301,13 @@ qaControl.projectDefinition = {
                         var customs = qaControl.projectDefinition[info.packageVersion].customs;
                         for(var file in info.files) {
                             if(file.match(/(.js)$/)) {
-                                for(var costumeName in customs) {
+                                for(var customeName in customs) {
                                     var content = info.files[file].content;
-                                    var costume = customs[costumeName];
-                                    if(content.toLowerCase().indexOf(costume.detect) !== -1
-                                        && content.indexOf(costume.match)==-1)
+                                    var custome = customs[customeName];
+                                    if(content.toLowerCase().indexOf(custome.detect) !== -1
+                                        && content.indexOf(custome.match)==-1)
                                     {
-                                        warns.push({warning:'file_1_does_not_match_costum_2', params:[file,costumeName]});
+                                        warns.push({warning:'file_1_does_not_match_custom_2', params:[file,customeName]});
                                     }
                                 }
                             }

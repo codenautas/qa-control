@@ -175,15 +175,15 @@ var fixtures=[{
 },{
     base:'stable-project',
     title:'must respect customs (#12)',
-    test:'file_1_does_not_match_costum_2',
+    test:'file_1_does_not_match_custom_2',
     change:function(info){
         info.files['simple.js'].content =
             info.files['simple.js'].content.replace('Path.sep===','Path.sep==')
                                                    .replace('eid(id){ return document.getElementById(id); }','eid(elId){ return document.getElementById(elId); }');
     },
     expected:[
-        { warning:'file_1_does_not_match_costum_2',params:['simple.js', 'funtion_eid']},
-        { warning:'file_1_does_not_match_costum_2',params:['simple.js', 'var_winos']}
+        { warning:'file_1_does_not_match_custom_2',params:['simple.js', 'funtion_eid']},
+        { warning:'file_1_does_not_match_custom_2',params:['simple.js', 'var_winos']}
     ]
 }];
 
