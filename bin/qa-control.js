@@ -108,7 +108,7 @@ qaControl.projectDefinition = {
             },
             designing:{
                 check: function(packageJson){ 
-                    return semver.satisfies(packageJson.version,'0.0.x') && packageJson.codenautas.purpose==null
+                    return semver.satisfies(packageJson.version,'0.0.x') && packageJson['qa-control'].purpose==null
                 },
                 md:'![designing](https://img.shields.io/badge/stability-desgining-red.svg)',
                 imgExample:'https://img.shields.io/badge/stability-desgining-red.svg',
@@ -205,6 +205,17 @@ qaControl.projectDefinition = {
                         var ver=info.packageVersion;
                         if(semver.satisfies(ver, qaControl.deprecatedVersions)){
                             return [{warning:'deprecated_qa_control_version',params:[ver]}];
+                        }
+                        return [];
+                    }
+                }],
+                shouldAbort:true
+            },
+            repository_name_format: {
+                checks:[{
+                    warnings:function(info) {
+                        if(! info.packageJson.repository.match(/^([-a-zA-Z0-9_.]+\/[-a-zA-Z0-9_.]+)$/)){
+                            return [{warning:'repository_name_not_found'}];
                         }
                         return [];
                     }

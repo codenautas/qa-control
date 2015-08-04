@@ -185,6 +185,12 @@ var fixtures=[{
         { warning:'file_1_does_not_match_custom_2',params:['simple.js', 'funtion_eid']},
         { warning:'file_1_does_not_match_custom_2',params:['simple.js', 'var_winos']}
     ]
+},{
+    base:'stable-project',
+    test:'repository_name_not_found',
+    change:function(info){
+        info.packageJson.repository = "sourcenauta/other/the-project";
+    }
 }];
 
 function cloneProject(info){
@@ -288,54 +294,64 @@ describe('qa-control', function(){
         describe('cucardas (#9)', function(){
             files.forEach(function(file){
                 if(file.match(/^cucardas-/i)){
+                    //if(file === 'cucardas-extending' || file === 'cucardas-proof-of-concept') { return; }
                     it('test cucardas by '+file+' fixture',function(done){
-                        console.log("DIR:", file);
+                        //console.log("DIR:", file);
                         var packageJson;
                         var warnings=false;
                         var cucardasOut=false;
-                        var base = path+'/'+file+'/';
-                        fs.readJson(base+'package.json').then(function(o){
+                        var base = path+'/'+file;
+                        fs.readJson(base+'/package.json').then(function(o){
                             packageJson=o;
-                            return fs.readJson(base+'warnings.json');
+                            return fs.readJson(base+'/warnings.json');
                         }).catch(function(err) {
                             //console.log("  warnings.json ERROR: ", err.stack);
                             return false;
                         }).then(function(o){
-                            //console.log("warnings?", o);
                             warnings=o;
-                            return fs.exists(base+'cucardas.out');
+                            return fs.exists(base+'/cucardas.out');
                         }).catch(function(err) {
                             //console.log("  cucardas.out ERROR: ", err.stack);
                             return false;
                         }).then(function(o) {
                             cucardasOut = o;
                             if(cucardasOut) {
-                                return fs.readFile(base+'cucardas.out', {encoding: 'utf8'});
+                                return fs.readFile(base+'/cucardas.out', {encoding: 'utf8'});
                             }
                             return o;
-                        }).then(function(cucaOutContent) {
-                            if(cucardasOut) { cucardasOut = cucaOutContent; }
-                            return fs.exists(base+'README.md');
-                        }).then(function(hayReadme) {
-                            //console.log("  packageJson", packageJson);
+                        }).then(function(o) {
+                            cucardasOut = o;
+                            return fs.exists(base+'/README.md');
+                        }).then(function(readme) {
                             var packVer = packageJson['qa-control']['package-version'];
                             var project = qaControl.projectDefinition[packVer];
                             var cucardas = qaControl.projectDefinition[packVer].cucardas;
-                            var check = project.rules.cucardas.checks;
-                            if(cucardasOut) {
-                                
-                            }
-                            console.log("  warnings", warnings ? "true" : "false");
-                            console.log("  cucardasOut", cucardasOut ? "true" : "false");
-                            console.log("  hayReadme", hayReadme);
+                            var check = project.rules.cucardas['checks'][0].warnings;
+                            //console.log("  warnings", warnings ? "true" : "false");
+                            //console.log("  cucardasOut", cucardasOut ? "true" : "false");
+                            //console.log("  readme", readme);
                             //console.log("  cucardas", cucardas);
                             //console.log("  check", check);
                             //console.log(warnings);
+                            if(false && warnings) {
+                                return check(qaControl.loadProject(base)).then(function(warns) {
+                                //return qaControl.controlProject(base).then(function(warns) {
+                                    console.log("warns", warns);
+                                    expect(warns).to.eql(warnings);
+                                    done();
+                                });
+                                
+                            } if(cucardasOut) {
+                                var cucaContent = qaControl.generateCucardas(cucardas,packageJson);
+                                //fs.writeFileSync('./'+file+'_cucardas.out', cucardasOut);
+                                //fs.writeFileSync('./'+file+'_cucardas.log', cucaContent);
+                                //expect(cucardasOut).to.eql(cucaContent);
+                            }
                             done();
                         }).catch(function(err){ // OJO: este es el fixture sin warnings.json !!!
-                           console.log(err);
-                           console.log("ERROR DIR:", file);
-                           done();
+                           console.log(err.stack);
+                           console.log("ERROR en DIR:", file);
+                           done(err);
                         });
                     });
                 }
