@@ -293,7 +293,7 @@ describe('qa-control', function(){
                     //if(file === 'cucardas-extending') { return; }
                     //if(file === 'cucardas-proof-of-concept') { return; }
                     it('test cucardas by '+file+' fixture',function(done){
-                        console.log("DIR:", file);
+                        //console.log("DIR:", file);
                         var packageJson;
                         var warnings=false;
                         var cucardasOut=false;
@@ -339,7 +339,7 @@ describe('qa-control', function(){
                                 var cucaContent = qaControl.generateCucardas(cucardas,packageJson);
                                 fs.writeFileSync('./'+file+'_cucardas.out', qaControl.fixEOL(cucardasOut));
                                 fs.writeFileSync('./'+file+'_cucardas.log', qaControl.fixEOL(cucaContent));
-                                //expect(qaControl.fixEOL(cucardasOut)).to.eql(qaControl.fixEOL(cucaContent));
+                                expect(qaControl.fixEOL(cucardasOut)).to.eql(qaControl.fixEOL(cucaContent));
                             }
                             done();
                         }).catch(function(err){ // OJO: este es el fixture sin warnings.json !!!
