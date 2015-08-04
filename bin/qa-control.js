@@ -38,13 +38,13 @@ qaControl.msgs={
 };
 
 // devuelve un buffer con los \n, \r\n, \r como \n
-qaControl.sanitizeEOL = function sanitizeEOL(buf) {
+qaControl.fixEOL = function fixEOL(buf) {
     return buf.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 };
 
 // bufTest debe empezar con bufStart
 qaControl.startsWith = function startsWith(bufTest, bufStart) {
-    return qaControl.sanitizeEOL(bufTest).indexOf(qaControl.sanitizeEOL(bufStart))==0;
+    return qaControl.fixEOL(bufTest).indexOf(qaControl.fixEOL(bufStart))==0;
 };
 
 // devuelve el contenido para el archivo de salida (p.e. cucardas.log)
@@ -94,6 +94,22 @@ qaControl.projectDefinition = {
             }
         },
         cucardas:{
+            designing:{
+                check: function(packageJson){ 
+                    return semver.satisfies(packageJson.version,'0.0.x') && packageJson['qa-control'].purpose==null
+                },
+                md:'![designing](https://img.shields.io/badge/stability-desgining-red.svg)',
+                imgExample:'https://img.shields.io/badge/stability-desgining-red.svg',
+                docDescription: 'opt. manual'
+            },
+            extending:{
+                check: function(packageJson){ 
+                    return semver.satisfies(packageJson.version,'0.x.x') && !semver.satisfies(packageJson.version,'0.0.x') && packageJson['qa-control'].purpose==null;
+                },
+                md:'![extending](https://img.shields.io/badge/stability-extending-orange.svg)',
+                imgExample:'https://img.shields.io/badge/stability-extending-orange.svg',
+                docDescription: 'opt. manual'
+            },
             'npm-version':{
                 mandatory:true,
                 md:'[![version](https://img.shields.io/npm/v/yyy.svg)](https://npmjs.org/package/yyy)',
@@ -112,28 +128,6 @@ qaControl.projectDefinition = {
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/medalla-ejemplo-linux.png',
                 docDescription: 'linux/build'
             },
-            dependencies:{
-                mandatory:true,
-                md:'[![dependencies](https://img.shields.io/david/xxx/yyy.svg)](https://david-dm.org/xxx/yyy)',
-                imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/medalla-ejemplo-dependencies.png',
-                docDescription: ''
-            },
-            designing:{
-                check: function(packageJson){ 
-                    return semver.satisfies(packageJson.version,'0.0.x') && packageJson['qa-control'].purpose==null
-                },
-                md:'![designing](https://img.shields.io/badge/stability-desgining-red.svg)',
-                imgExample:'https://img.shields.io/badge/stability-desgining-red.svg',
-                docDescription: 'opt. manual'
-            },
-            extending:{
-                check: function(packageJson){ 
-                    return semver.satisfies(packageJson.version,'0.x.x') && !semver.satisfies(packageJson.version,'0.0.x') && packageJson['qa-control'].purpose==null;
-                },
-                md:'![extending](https://img.shields.io/badge/stability-extending-orange.svg)',
-                imgExample:'https://img.shields.io/badge/stability-extending-orange.svg',
-                docDescription: 'opt. manual'
-            },
             windows:{
                 md:'[![windows](https://ci.appveyor.com/api/projects/status/github/xxx/yyy?svg=true)](https://ci.appveyor.com/project/xxx/yyy)',
                 imgExample:'https://ci.appveyor.com/api/projects/status/github/codenautas/pg-promise-strict?svg=true',
@@ -147,6 +141,12 @@ qaControl.projectDefinition = {
             climate:{
                 md:'[![climate](https://img.shields.io/codeclimate/github/xxx/yyy.svg)](https://codeclimate.com/github/xxx/yyy)',
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/climate.png',
+                docDescription: ''
+            },
+            dependencies:{
+                mandatory:true,
+                md:'[![dependencies](https://img.shields.io/david/xxx/yyy.svg)](https://david-dm.org/xxx/yyy)',
+                imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/medalla-ejemplo-dependencies.png',
                 docDescription: ''
             }
         },

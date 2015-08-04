@@ -343,9 +343,9 @@ describe('qa-control', function(){
                                 
                             } if(cucardasOut) {
                                 var cucaContent = qaControl.generateCucardas(cucardas,packageJson);
-                                //fs.writeFileSync('./'+file+'_cucardas.out', cucardasOut);
-                                //fs.writeFileSync('./'+file+'_cucardas.log', cucaContent);
-                                //expect(cucardasOut).to.eql(cucaContent);
+                                // fs.writeFileSync('./'+file+'_cucardas.out', qaControl.fixEOL(cucardasOut));
+                                // fs.writeFileSync('./'+file+'_cucardas.log', qaControl.fixEOL(cucaContent));
+                                //expect(qaControl.fixEOL(cucardasOut)).to.eql(qaControl.fixEOL(cucaContent));
                             }
                             done();
                         }).catch(function(err){ // OJO: este es el fixture sin warnings.json !!!
