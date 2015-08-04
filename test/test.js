@@ -285,24 +285,31 @@ describe('qa-control', function(){
     });
     var path='./test/fixtures';
     fs.readdir(path).then(function(files){
-        describe('cucardas', function(){
+        describe('cucardas (#9)', function(){
             files.forEach(function(file){
                 if(file.match(/^cucardas-/i)){
-                    it.skip('test cucardas by '+file+' fixture',function(done){
+                    it('test cucardas by '+file+' fixture',function(done){
                         var packageJson;
                         var warnings;
                         fs.readJson(path+'/'+file+'/package.json').then(function(o){
                             packageJson=o;
                             return fs.readJson(path+'/'+file+'/warnings.json');
                         }).then(function(o){
+                            console.log("DIR:", file);
                             warnings=o;
-                            qaControl.projectVersion['soloCucardas']={};
-                            qaControl.projectVersion['soloCucardas'].rules=qaControl.projectVersion[packageJson['qa-control']['package-version']].rules;
-                            qaControl.projectVersion['soloCucardas'].definitions={};
-                            qaControl.projectVersion['soloCucardas'].definitions.cucardas=qaControl.projectVersion[packageJson['qa-control']['package-version']].definitions.cucardas;
-                            packageJson['qa-control']['package-version']='soloCucardas';
+                            //console.log(packageJson);
+                            //console.log(warnings);
+                            // qaControl.projectVersion['soloCucardas']={};
+                            // qaControl.projectVersion['soloCucardas'].rules=qaControl.projectVersion[packageJson['qa-control']['package-version']].rules;
+                            // qaControl.projectVersion['soloCucardas'].definitions={};
+                            // qaControl.projectVersion['soloCucardas'].definitions.cucardas=qaControl.projectVersion[packageJson['qa-control']['package-version']].definitions.cucardas;
+                            // packageJson['qa-control']['package-version']='soloCucardas';
+                            done();
+                        }).catch(function(err){
+                            //console.log(err.stack);
+                            console.log("DIR:", file);
+                           done();
                         });
-                        done();
                     });
                 }
             });

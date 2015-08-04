@@ -32,8 +32,23 @@ qaControl.msgs={
         wrong_format_in_cucarda_1: 'la cucarda "$1" tiene formato incorrecto',
         lack_of_mandatory_line_1_in_file_2: 'falta la linea obligatoria $1 en el archivo $2',
         file_1_does_not_match_custom_2: '$1 no respeta la custombre $2',
-        first_line_does_not_match_in_file_1: 'las primeras líneas no coinciden en $1'
+        first_line_does_not_match_in_file_1: 'las primeras líneas no coinciden en $1',
+        repository_name_not_found: 'pacakgeJson.repository no tiene el formato /{[-a-zA-Z0-9_.]+}\/[-a-zA-Z0-9_.]+/'
     }
+};
+
+// devuelve el contenido para el archivo de salida (p.e. cucardas.log)
+qaControl.cucaMarker = '<!-- cucardas -->';
+qaControl.generateCucardas = function generateCucardas(cucardas, packageJson) {
+    var cucaFileContent = qaControl.cucaMarker+'\n';
+    var modulo=packageJson.name;
+    var repo=packageJson.repository.replace('/'+modulo,'');
+    for(var nombreCucarda in cucardas) {
+        var cucarda = cucardas[nombreCucarda];
+        var cucaStr = cucarda.md.replace(/\bxxx\b/g,repo).replace(/\byyy\b/g,modulo);
+        cucaFileContent += cucaStr +'\n';
+    }
+    return cucaFileContent;
 };
 
 qaControl.projectDefinition = {
@@ -259,21 +274,17 @@ qaControl.projectDefinition = {
                 checks:[{
                     warnings:function(info){
                         var warns=[];
-                        var cucaMarker = '<!-- cucardas -->';
-                        var cucaMarkerRE = '/'+cucaMarker+'/';
                         var readme=info.files['README.md'].content;
-                        if(readme.indexOf(cucaMarker) == -1) {
+                        if(readme.indexOf(qaControl.cucaMarker) == -1) {
                             warns.push({warning:'lack_of_cucarda_marker_in_readme'});
                         }
                         var cucardas=qaControl.projectDefinition[info.packageVersion].cucardas;
                         var modulo=info.packageJson.name;
                         var repo=info.packageJson.repository.replace('/'+modulo,'');
-                        var cucaFileContent =  cucaMarker+'\n';
                         for(var nombreCucarda in cucardas) {
                             var cucarda = cucardas[nombreCucarda];
-                            var cucaStr = cucarda.md.replace(/\bxxx\b/g,repo).replace(/\byyy\b/g,modulo);
-                            cucaFileContent += cucaStr +'\n';
                             var cucaID = '!['+/!\[([a-z]+)]/.exec(cucarda.md)[1]+']';
+                            var cucaStr = cucarda.md.replace(/\bxxx\b/g,repo).replace(/\byyy\b/g,modulo);
                             if(readme.indexOf(cucaID) == -1) {
                                 if(cucarda.mandatory) {
                                     warns.push({warning:'missing_mandatory_cucarda_1', params:[nombreCucarda]});
@@ -289,7 +300,9 @@ qaControl.projectDefinition = {
                                 }
                             }
                         }
-                        if(warns.length) { fs.writeFileSync("cucardas.log", cucaFileContent); }
+                        if(warns.length) {
+                            fs.writeFileSync("cucardas.log", qaControl.generateCucardas(cucardas, info.packageJson));
+                        }
                         return warns;
                     }
                 }]

@@ -1,6 +1,6 @@
 [
   {
-    "code": "REPOSITORY_NAME_NOT_FOUND",
-    "decription": "pacakgeJson.repository has not the form /{[-a-zA-Z0-9_.]+}\/[-a-zA-Z0-9_.]+/"
+    "code": "repository_name_not_found",
+    "decription": "pacakgeJson.repository no tiene el formato /{[-a-zA-Z0-9_.]+}\/[-a-zA-Z0-9_.]+/"
   }
 ]
