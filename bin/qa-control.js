@@ -122,6 +122,16 @@ qaControl.projectDefinition = {
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/climate.png',
                 docDescription: ''
             }
+        },
+        customs:{
+            funtion_eid:{
+                detect:'function eid',
+                match:'function eid(id){ return document.getElementById(id); }'
+            },
+            var_winos:{
+                detect:'var winos',
+                match:"var winOS = Path.sep==='\\\\';"
+            }
         }
     }
 };
@@ -146,19 +156,6 @@ var configReading=Promises.all(_.map(qaControl.projectDefinition,function(defini
     console.log('error',err);
     console.log('stack',err.stack);
 });
-
-qaControl.definitions={
-    costums:{
-        funtion_eid:{
-            detect:'function eid',
-            match:'function eid(id){ return document.getElementById(id); }'
-        },
-        var_winos:{
-            detect:'var winos',
-            match:"var winOS = Path.sep==='\\\\';"
-        }
-    }
-};
 
 qaControl.rules={
     exist_package_json:{
@@ -318,15 +315,16 @@ qaControl.rules={
             }
         }]
     },
-    costums:{
+    customs:{
         checks:[{
             warnings:function(info) {
                 var warns=[];
+                var customs = qaControl.projectDefinition[info.packageJson['qa-control']['package-version']].customs;
                 for(var file in info.files) {
                     if(file.match(/(.js)$/)) {
-                        for(var costumeName in qaControl.definitions.costums) {
+                        for(var costumeName in customs) {
                             var content = info.files[file].content;
-                            var costume = qaControl.definitions.costums[costumeName];
+                            var costume = customs[costumeName];
                             if(content.toLowerCase().indexOf(costume.detect) !== -1
                                 && content.indexOf(costume.match)==-1)
                             {

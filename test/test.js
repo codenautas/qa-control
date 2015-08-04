@@ -175,7 +175,7 @@ var fixtures=[{
     ]
 },{
     base:'stable-project',
-    title:'must respect costums (#12)',
+    title:'must respect customs (#12)',
     test:'file_1_does_not_match_costum_2',
     change:function(info){
         info.files['simple.js'].content =
