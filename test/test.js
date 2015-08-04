@@ -111,15 +111,13 @@ var fixtures=[{
     test:'missing_mandatory_cucarda_1',
     change:function(info){
         var readme=info.files['README.md'].content;
-        info.files['README.md'].content = readme.replace('![version]','')
+        info.files['README.md'].content = readme.replace('![npm-version]','')
                                                 .replace('![downloads]','')
-                                                .replace('![linux]','')
                                                 .replace('![dependencies]','');
     },
     expected:[
         { warning:'missing_mandatory_cucarda_1',params:['npm-version']},
         { warning:'missing_mandatory_cucarda_1',params:['downloads']},
-        { warning:'missing_mandatory_cucarda_1',params:['build']},
         { warning:'missing_mandatory_cucarda_1',params:['dependencies']}
     ]
 },{
@@ -142,15 +140,13 @@ var fixtures=[{
     test:'wrong_format_in_cucarda_1',
     change:function(info){
         var readme=info.files['README.md'].content;
-        info.files['README.md'].content = readme.replace('![version](https://img.shields.io/npm','![version](https://HHHimg.shields.io/npm')
+        info.files['README.md'].content = readme.replace('![npm-version](https://img.shields.io/npm','![npm-version](https://HHHimg.shields.io/npm')
                                                 .replace('[![downloads](https://img.shields.io/npm/','[![downloads](https://im__shields.io/npm/')
-                                                .replace('[![linux](https://img.shields.io/travis','[![linux](http://img.shields.io/travis')
                                                 .replace('[![dependencies](https://img.shields.io','[![dependencies](https://EEimg.shields.io');
     },
     expected:[
         { warning:'wrong_format_in_cucarda_1',params:['npm-version']},
         { warning:'wrong_format_in_cucarda_1',params:['downloads']},
-        { warning:'wrong_format_in_cucarda_1',params:['build']},
         { warning:'wrong_format_in_cucarda_1',params:['dependencies']}
     ]
 },{
@@ -343,9 +339,9 @@ describe('qa-control', function(){
                                 
                             } if(cucardasOut) {
                                 var cucaContent = qaControl.generateCucardas(cucardas,packageJson);
-                                //fs.writeFileSync('./'+file+'_cucardas.out', qaControl.fixEOL(cucardasOut));
-                                //fs.writeFileSync('./'+file+'_cucardas.log', qaControl.fixEOL(cucaContent));
-                                //expect(qaControl.fixEOL(cucardasOut)).to.eql(qaControl.fixEOL(cucaContent));
+                                fs.writeFileSync('./'+file+'_cucardas.out', qaControl.fixEOL(cucardasOut));
+                                fs.writeFileSync('./'+file+'_cucardas.log', qaControl.fixEOL(cucaContent));
+                                expect(qaControl.fixEOL(cucardasOut)).to.eql(qaControl.fixEOL(cucaContent));
                             }
                             done();
                         }).catch(function(err){ // OJO: este es el fixture sin warnings.json !!!

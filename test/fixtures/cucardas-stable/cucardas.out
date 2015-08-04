@@ -2,4 +2,5 @@
 [![npm-version](https://img.shields.io/npm/v/the-project.svg)](https://npmjs.org/package/the-project)
 [![downloads](https://img.shields.io/npm/dm/the-project.svg)](https://npmjs.org/package/the-project)
 [![build](https://img.shields.io/travis/codetrip/the-project/master.svg)](https://travis-ci.org/codetrip/the-project)
+[![climate](https://img.shields.io/codeclimate/github/codetrip/the-project.svg)](https://codeclimate.com/github/codetrip/the-project)
 [![dependencies](https://img.shields.io/david/codetrip/the-project.svg)](https://david-dm.org/codetrip/the-project)

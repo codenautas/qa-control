@@ -94,6 +94,13 @@ qaControl.projectDefinition = {
             }
         },
         cucardas:{
+            'proof-of-concept':{
+                check: function(packageJson){ 
+                    return packageJson['qa-control'].purpose=='proof-of-concept';
+                },
+                md:'![proof-of-concept](https://img.shields.io/badge/stability-proof_of_concept-ff70c0.svg)',
+                imgExample:'https://img.shields.io/badge/stability-desgining-red.svg'
+            },
             designing:{
                 check: function(packageJson){ 
                     return semver.satisfies(packageJson.version,'0.0.x') && packageJson['qa-control'].purpose==null
@@ -114,8 +121,7 @@ qaControl.projectDefinition = {
             },
             'npm-version':{
                 mandatory:true,
-                //md:'[![npm-version](https://img.shields.io/npm/v/yyy.svg)](https://npmjs.org/package/yyy)',
-                md:'[![version](https://img.shields.io/npm/v/yyy.svg)](https://npmjs.org/package/yyy)',
+                md:'[![npm-version](https://img.shields.io/npm/v/yyy.svg)](https://npmjs.org/package/yyy)',
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/npm-version.png',
                 docDescription: ''
             },
@@ -126,14 +132,24 @@ qaControl.projectDefinition = {
                 docDescription: ''
             },
             build:{
-                mandatory:true,
-                md:'[![linux](https://img.shields.io/travis/xxx/yyy/master.svg)](https://travis-ci.org/xxx/yyy)',
+                check: function(packageJson){ 
+                    return !packageJson['qa-control']['test-appveyor'];
+                },
+                md:'[![build](https://img.shields.io/travis/xxx/yyy/master.svg)](https://travis-ci.org/xxx/yyy)',
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/medalla-ejemplo-linux.png',
                 docDescription: 'linux/build'
             },
+            linux:{
+                check: function(packageJson){ 
+                    return !!packageJson['qa-control']['test-appveyor'];
+                },
+                md:'[![linux](https://img.shields.io/travis/xxx/yyy/master.svg)](https://travis-ci.org/xxx/yyy)',
+                imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/medalla-ejemplo-linux.png',
+                hideInManual: true,
+            },
             windows:{
                 check: function(packageJson){ 
-                    return packageJson['qa-control']['test-appveyor']==true;
+                    return !!packageJson['qa-control']['test-appveyor'];
                 },
                 md:'[![windows](https://ci.appveyor.com/api/projects/status/github/xxx/yyy?svg=true)](https://ci.appveyor.com/project/xxx/yyy)',
                 imgExample:'https://ci.appveyor.com/api/projects/status/github/codenautas/pg-promise-strict?svg=true',
@@ -326,6 +342,8 @@ qaControl.projectDefinition = {
                                 }
                             } else {
                                 if('check' in cucarda && ! cucarda.check(info.packageJson)) {
+                                    console.log('cucarda', nombreCucarda, info.packageJson);
+                                    console.log('cucaID', cucaID);
                                     warns.push({warning:'wrong_format_in_cucarda_1', params:[nombreCucarda]});
                                 }
                                 if(readme.indexOf(cucaStr) == -1) {

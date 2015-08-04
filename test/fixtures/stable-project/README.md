@@ -7,7 +7,7 @@ the description
 [!--lang:*-->
 
 <!-- cucardas -->
-[![version](https://img.shields.io/npm/v/stable-project.svg)](https://npmjs.org/package/stable-project)
+[![npm-version](https://img.shields.io/npm/v/stable-project.svg)](https://npmjs.org/package/stable-project)
 [![downloads](https://img.shields.io/npm/dm/stable-project.svg)](https://npmjs.org/package/stable-project)
 [![linux](https://img.shields.io/travis/codenautas/stable-project/master.svg)](https://travis-ci.org/codenautas/stable-project)
 [![windows](https://ci.appveyor.com/api/projects/status/github/codenautas/stable-project?svg=true)](https://ci.appveyor.com/project/codenautas/stable-project)
