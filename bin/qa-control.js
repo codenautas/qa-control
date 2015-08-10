@@ -2,7 +2,7 @@
 
 var Promises = require('best-promise');
 var fs = require('fs-promise');
-var path = require('path');
+var Path = require('path');
 var _ = require('lodash');
 var semver = require('semver');
 
@@ -176,7 +176,13 @@ qaControl.projectDefinition = {
                 docDescription: ''
             }
         },
-        definitions:{
+        
+        customs:{
+            softRegExp:function(realRegex) {
+                var re=realRegex;
+                
+                return re;
+            },
             funtion_eid:{
                 detect:'function eid',
                 match:'function eid(id){ return document.getElementById(id); }'
@@ -184,6 +190,10 @@ qaControl.projectDefinition = {
             var_winos:{
                 detect:'var winos',
                 match:"var winOS = Path.sep==='\\\\';"
+            },
+            var_path:{
+                detect:new RegExp("var path", "i"),
+                match:"var Path = require('path');"
             }
         },
         rules:{
@@ -360,14 +370,15 @@ qaControl.projectDefinition = {
                 checks:[{
                     warnings:function(info) {
                         var warns=[];
-                        var customs = qaControl.projectDefinition[info.packageVersion].definitions;
+                        var customs = qaControl.projectDefinition[info.packageVersion].customs;
                         for(var file in info.files) {
                             if(file.match(/(.js)$/)) {
                                 for(var customeName in customs) {
                                     var content = info.files[file].content;
-                                    var custome = customs[customeName];
-                                    if(content.toLowerCase().indexOf(custome.detect) !== -1
-                                        && content.indexOf(custome.match)==-1)
+                                    var custom = customs[customeName];
+                                    //console.log("custom.detect '" + custom.detect + "' es un ", typeof custom.detect, " regexp:", _.isRegExp(custom.detect));
+                                    if(content.toLowerCase().indexOf(custom.detect) !== -1
+                                        && content.indexOf(custom.match)==-1)
                                     {
                                         warns.push({warning:'file_1_does_not_match_custom_2', params:[file,customeName]});
                                     }
@@ -452,7 +463,7 @@ qaControl.loadProject = function loadProject(projectDir) {
             info['packageJson'] = {};
         }
         return Promises.all(files.map(function(file){
-            var iFile = path.normalize(projectDir+'/'+file);
+            var iFile = Path.normalize(projectDir+'/'+file);
             return fs.readFile(iFile, 'utf8').then(function(content){
                 info['files'][file].content = content;
                 if(file==='package.json') {

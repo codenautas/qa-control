@@ -291,7 +291,6 @@ describe('qa-control', function(){
             files.forEach(function(file){
                 if(file.match(/^cucardas-/i)){
                     it('test cucardas by '+file+' fixture',function(done){
-                        //console.log("DIR:", file);
                         var packageJson;
                         var warnings=false;
                         var cucardasOut=false;
@@ -300,13 +299,11 @@ describe('qa-control', function(){
                             packageJson=o;
                             return fs.readJson(base+'/warnings.json');
                         }).catch(function(err) {
-                            //console.log("  warnings.json ERROR: ", err.stack);
                             return false;
                         }).then(function(o){
                             warnings=o;
                             return fs.exists(base+'/cucardas.out');
                         }).catch(function(err) {
-                            //console.log("  cucardas.out ERROR: ", err.stack);
                             return false;
                         }).then(function(o) {
                             cucardasOut = o;
@@ -330,11 +327,9 @@ describe('qa-control', function(){
                             }
                             if(warnings) {
                                 return qaControl.loadProject(base).then(function(info) {
-                                    //console.log(info);
                                     info.packageVersion = info.packageJson['qa-control']['package-version'];
                                     return check(info);
                                 }).then(function(warns) {
-                                    //console.log("warns", warns);
                                     expect(warns).to.eql(warnings);
                                     done();
                                 });
