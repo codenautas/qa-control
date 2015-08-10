@@ -192,7 +192,7 @@ qaControl.projectDefinition = {
                 match:"var winOS = Path.sep==='\\\\';"
             },
             var_path:{
-                detect:new RegExp("var path", "i"),
+                detect:/var path/i,
                 match:"var Path = require('path');"
             }
         },
@@ -371,15 +371,54 @@ qaControl.projectDefinition = {
                     warnings:function(info) {
                         var warns=[];
                         var customs = qaControl.projectDefinition[info.packageVersion].customs;
+                        function mkDetect(strOrRegexp) {
+                            var r;
+                            switch(typeof strOrRegexp) {
+                                case 'object':
+                                case 'string':
+                                    if(strOrRegexp instanceof RegExp) {
+                                        r=function(str) { return strOrRegexp.test(str); };
+                                    } else {
+                                        r=function(str) { return str.toLowerCase().indexOf(strOrRegexp) !== -1; };
+                                    }
+                                    break;
+                                default:
+                                    r=function(str) { return false; };
+                            }
+                            return r;
+                        }
+                        function mkMatch(strOrRegexp) {
+                            var r;
+                            switch(typeof strOrRegexp) {
+                                case 'object':
+                                case 'string':
+                                    if(strOrRegexp instanceof RegExp) {
+                                        r=function(str) { return strOrRegexp.test(str); };
+                                    } else {
+                                        r=function(str) {
+                                            return str.indexOf(strOrRegexp) !== -1;
+                                        };
+                                    }
+                                    break;
+                                default:
+                                    r=function(str) { return false; };
+                            }
+                            return r;
+                        }
                         for(var file in info.files) {
                             if(file.match(/(.js)$/)) {
                                 for(var customeName in customs) {
                                     var content = info.files[file].content;
                                     var custom = customs[customeName];
-                                    //console.log("custom.detect '" + custom.detect + "' es un ", typeof custom.detect, " regexp:", _.isRegExp(custom.detect));
-                                    if(content.toLowerCase().indexOf(custom.detect) !== -1
-                                        && content.indexOf(custom.match)==-1)
-                                    {
+                                    var detect = mkDetect(custom.detect);
+                                    var match = mkMatch(custom.match);
+                                    // if(file === 'simple.js') {
+                                        // console.log("----------------------------------------------------");
+                                        // console.log(file, "content", content);
+                                        // console.log(" detect:", detect(content), custom.detect);
+                                        // console.log("  match:", match(content), custom.match);
+                                    // }
+                                    if(detect(content) && ! match(content)) {
                                         warns.push({warning:'file_1_does_not_match_custom_2', params:[file,customeName]});
                                     }
                                 }
