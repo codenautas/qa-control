@@ -184,20 +184,19 @@ qaControl.projectDefinition = {
                                 .replace(/ /g, '\\s+')
                                 .replace(/\(/g, '\\(')
                                 .replace(/\)/g, '\\)');
-                return new RegExp(re, 'gim');
+                return new RegExp(re, 'im');
             },
             funtion_eid:{
                 detect:'function eid',
                 match:'function eid(id){ return document.getElementById(id); }'
             },
             var_winos:{
-                detect:'var winos',
+                detect:'var winos=',
                 match:"var winOS = Path.sep==='\\\\';"
             },
             var_path:{
-                detect:/var path/i,
+                detect:'var path=',
                 match:"var Path = require('path');"
-                //match:/var\s+Path\s*=\s*require\('path'\);/img
             }
         },
         rules:{
@@ -375,39 +374,34 @@ qaControl.projectDefinition = {
                     warnings:function(info) {
                         var warns=[];
                         var customs = qaControl.projectDefinition[info.packageVersion].customs;
-                        function mkCheck(strOrRegexp, isMatchFunc) {
-                            var r;
-                            switch(typeof strOrRegexp) {
-                                case 'object':
-                                case 'string':
-                                    if(strOrRegexp instanceof RegExp) {
-                                        r=function(str) {
-                                            //console.log("va RE", strOrRegexp.source);
-                                            //console.log(" y ", strOrRegexp.test(str) ? "matchea" : "NO matchea");
-                                            return strOrRegexp.test(str);
-                                          };
+                        function makeCheck(strOrRegexp, isMatchFunc) {
+                            var checker;
+                            if(strOrRegexp == null){
+                                checker=function(str) { return false; };
+                            }else if(strOrRegexp instanceof RegExp) {
+                                checker=function(str) {
+                                    //console.log("va RE", strOrRegexp.source);
+                                    //console.log(" y ", strOrRegexp.test(str) ? "matchea" : "NO matchea");
+                                    return strOrRegexp.test(str);
+                                };
+                            } else {
+                                checker=function(str) {
+                                    if(isMatchFunc) {
+                                        return str.indexOf(strOrRegexp) !== -1;
                                     } else {
-                                        r=function(str) {
-                                            if(! isMatchFunc) {
-                                                return str.toLowerCase().indexOf(strOrRegexp) !== -1;
-                                            } else {
-                                                return customs.softRegExp(strOrRegexp).test(str);
-                                            }
-                                          };
+                                        return customs.softRegExp(strOrRegexp).test(str);
                                     }
-                                    break;
-                                default:
-                                    r=function(str) { return false; };
+                                };
                             }
-                            return r;
+                            return checker;
                         }
                         for(var file in info.files) {
                             if(file.match(/(.js)$/)) {
                                 for(var customeName in customs) {
                                     var content = info.files[file].content;
                                     var custom = customs[customeName];
-                                    var detect = mkCheck(custom.detect);
-                                    var match = mkCheck(custom.match, true);
+                                    var detect = makeCheck(custom.detect);
+                                    var match = makeCheck(custom.match, true);
                                     //console.log(file, " detect:", detect(content), " match: ", match(content))
                                     if(detect(content) && ! match(content)) {
                                         warns.push({warning:'file_1_does_not_match_custom_2', params:[file,customeName]});

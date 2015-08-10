@@ -189,7 +189,9 @@ var fixtures=[{
         info.files['simple.js'].content =
             info.files['simple.js'].content.replace("var Path = require('path');","var path= require('path');");
     },
-    expected:[]
+    expected:[
+        { warning:'file_1_does_not_match_custom_2',params:['simple.js', 'var_path']},
+    ]
 },{
     base:'stable-project',
     test:'repository_name_not_found',
