@@ -184,7 +184,6 @@ qaControl.projectDefinition = {
                                 .replace(/ /g, '\\s+')
                                 .replace(/\(/g, '\\(')
                                 .replace(/\)/g, '\\)');
-                //console.log("softRegExp("+re+")");
                 return new RegExp(re, 'gim');
             },
             funtion_eid:{
@@ -198,7 +197,7 @@ qaControl.projectDefinition = {
             var_path:{
                 detect:/var path/i,
                 match:"var Path = require('path');"
-                //match:/var Path = require('path')/
+                //match:/var\s+Path\s*=\s*require\('path'\);/img
             }
         },
         rules:{
@@ -383,6 +382,8 @@ qaControl.projectDefinition = {
                                 case 'string':
                                     if(strOrRegexp instanceof RegExp) {
                                         r=function(str) {
+                                            //console.log("va RE", strOrRegexp.source);
+                                            //console.log(" y ", strOrRegexp.test(str) ? "matchea" : "NO matchea");
                                             return strOrRegexp.test(str);
                                           };
                                     } else {
@@ -407,6 +408,7 @@ qaControl.projectDefinition = {
                                     var custom = customs[customeName];
                                     var detect = mkCheck(custom.detect);
                                     var match = mkCheck(custom.match, true);
+                                    //console.log(file, " detect:", detect(content), " match: ", match(content))
                                     if(detect(content) && ! match(content)) {
                                         warns.push({warning:'file_1_does_not_match_custom_2', params:[file,customeName]});
                                     }
