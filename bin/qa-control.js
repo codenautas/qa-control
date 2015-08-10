@@ -371,23 +371,7 @@ qaControl.projectDefinition = {
                     warnings:function(info) {
                         var warns=[];
                         var customs = qaControl.projectDefinition[info.packageVersion].customs;
-                        function mkDetect(strOrRegexp) {
-                            var r;
-                            switch(typeof strOrRegexp) {
-                                case 'object':
-                                case 'string':
-                                    if(strOrRegexp instanceof RegExp) {
-                                        r=function(str) { return strOrRegexp.test(str); };
-                                    } else {
-                                        r=function(str) { return str.toLowerCase().indexOf(strOrRegexp) !== -1; };
-                                    }
-                                    break;
-                                default:
-                                    r=function(str) { return false; };
-                            }
-                            return r;
-                        }
-                        function mkMatch(strOrRegexp) {
+                        function mkCheck(strOrRegexp, makeLowerCase) {
                             var r;
                             switch(typeof strOrRegexp) {
                                 case 'object':
@@ -396,8 +380,9 @@ qaControl.projectDefinition = {
                                         r=function(str) { return strOrRegexp.test(str); };
                                     } else {
                                         r=function(str) {
+                                            if(makeLowerCase) { str = str.toLowerCase(); }
                                             return str.indexOf(strOrRegexp) !== -1;
-                                        };
+                                          };
                                     }
                                     break;
                                 default:
@@ -410,14 +395,8 @@ qaControl.projectDefinition = {
                                 for(var customeName in customs) {
                                     var content = info.files[file].content;
                                     var custom = customs[customeName];
-                                    var detect = mkDetect(custom.detect);
-                                    var match = mkMatch(custom.match);
-                                    // if(file === 'simple.js') {
-                                        // console.log("----------------------------------------------------");
-                                        // console.log(file, "content", content);
-                                        // console.log(" detect:", detect(content), custom.detect);
-                                        // console.log("  match:", match(content), custom.match);
-                                    // }
+                                    var detect = mkCheck(custom.detect, true);
+                                    var match = mkCheck(custom.match);
                                     if(detect(content) && ! match(content)) {
                                         warns.push({warning:'file_1_does_not_match_custom_2', params:[file,customeName]});
                                     }
