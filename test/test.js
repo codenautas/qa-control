@@ -183,15 +183,13 @@ var fixtures=[{
     ]
 },{
     base:'stable-project',
-    title:'must respect customs using regular expressions (#12)',
+    title:'must soften strings to match customs (#12)',
     test:'file_1_does_not_match_custom_2',
     change:function(info){
         info.files['simple.js'].content =
-            info.files['simple.js'].content.replace("var Path = require('path');","var path = require('path');");
+            info.files['simple.js'].content.replace("var Path = require('path');","var path= require('path');");
     },
-    expected:[
-        {warning:'file_1_does_not_match_custom_2',params:['simple.js', 'var_path']}
-    ]
+    expected:[]
 },{
     base:'stable-project',
     test:'repository_name_not_found',

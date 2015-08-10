@@ -179,9 +179,13 @@ qaControl.projectDefinition = {
         
         customs:{
             softRegExp:function(realRegex) {
-                var re=realRegex;
-                
-                return re;
+                var re=realRegex.replace(/\\/g, '\\\\')
+                                .replace(/\s*(=+)\s*/g,'\\s*$1\\s*')
+                                .replace(/ /g, '\\s+')
+                                .replace(/\(/g, '\\(')
+                                .replace(/\)/g, '\\)');
+                //console.log("softRegExp("+re+")");
+                return new RegExp(re, 'gim');
             },
             funtion_eid:{
                 detect:'function eid',
@@ -194,6 +198,7 @@ qaControl.projectDefinition = {
             var_path:{
                 detect:/var path/i,
                 match:"var Path = require('path');"
+                //match:/var Path = require('path')/
             }
         },
         rules:{
@@ -371,17 +376,22 @@ qaControl.projectDefinition = {
                     warnings:function(info) {
                         var warns=[];
                         var customs = qaControl.projectDefinition[info.packageVersion].customs;
-                        function mkCheck(strOrRegexp, makeLowerCase) {
+                        function mkCheck(strOrRegexp, isMatchFunc) {
                             var r;
                             switch(typeof strOrRegexp) {
                                 case 'object':
                                 case 'string':
                                     if(strOrRegexp instanceof RegExp) {
-                                        r=function(str) { return strOrRegexp.test(str); };
+                                        r=function(str) {
+                                            return strOrRegexp.test(str);
+                                          };
                                     } else {
                                         r=function(str) {
-                                            if(makeLowerCase) { str = str.toLowerCase(); }
-                                            return str.indexOf(strOrRegexp) !== -1;
+                                            if(! isMatchFunc) {
+                                                return str.toLowerCase().indexOf(strOrRegexp) !== -1;
+                                            } else {
+                                                return customs.softRegExp(strOrRegexp).test(str);
+                                            }
                                           };
                                     }
                                     break;
@@ -395,8 +405,8 @@ qaControl.projectDefinition = {
                                 for(var customeName in customs) {
                                     var content = info.files[file].content;
                                     var custom = customs[customeName];
-                                    var detect = mkCheck(custom.detect, true);
-                                    var match = mkCheck(custom.match);
+                                    var detect = mkCheck(custom.detect);
+                                    var match = mkCheck(custom.match, true);
                                     if(detect(content) && ! match(content)) {
                                         warns.push({warning:'file_1_does_not_match_custom_2', params:[file,customeName]});
                                     }
