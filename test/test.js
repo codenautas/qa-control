@@ -93,8 +93,8 @@ var fixtures=[{
     }
 },{
     base:'stable-project',
-    title:'no "qa-control" section in "codenautas" project',
-    test:'no_codenautas_section_in_qa_control_project',
+    title:'no "qa-control" section in "codenautas" project (#21)',
+    test:'no_qa_control_section_in_codenautas_project',
     change:function(info){
         delete info.packageJson['qa-control'];
     }

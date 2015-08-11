@@ -20,7 +20,7 @@ qaControl.msgs={
         lack_of_mandatory_file_1: 'falta el archivo obligatorio "$1"',
         lack_of_mandatory_parameter: 'falta el parámetro obligatorio "$1"',
         lack_of_mandatory_section_1: 'falta la sección obligatoria "$1" en la sección qa-control',
-        no_codenautas_section_in_qa_control_project: 'falta la sección codenautas en package.json y aparenta ser un proyecto codenautas',
+        no_qa_control_section_in_codenautas_project: 'falta la sección "qa-control" en package.json y aparenta ser un proyecto codenautas',
         no_multilang_section_in_readme: 'falta la sección multilang en el archivo README.md',
         no_package_json: 'falta el archivo package.json',
         no_package_version_in_qa_control_section: 'falta la sección "package-version" en la sección qa-control',
@@ -216,7 +216,7 @@ qaControl.projectDefinition = {
                     warnings:function(info){
                         if(!info.packageJson['qa-control']){
                             return [{warning:info.files['package.json'].content.match(/codenautas/)?
-                                        'no_codenautas_section_in_qa_control_project':
+                                        'no_qa_control_section_in_codenautas_project':
                                         'no_qa_control_section_in_package_json'}];
                         }
                         return [];
