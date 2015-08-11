@@ -449,7 +449,7 @@ qaControl.projectDefinition = {
                         for(var file in info.files) {
                             if(file.match(/(.js)$/)) {
                                 var content = info.files[file].content;
-                                if(content.match(/require\('promise'\)/)) {
+                                if(content.match(/require\(["'](promise|q|rsvp|es6promise)['"]\)/m)) {
                                     warns.push({warning:'using_normal_promise_in_file_1', params:[file]});
                                 }
                             }

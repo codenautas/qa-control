@@ -208,7 +208,20 @@ var fixtures=[{
                 "var Promise = require('promise');\n\n" + info.files['simple.js'].content;
     },
     expected:[
-        { warning:'using_normal_promise_in_file_1',params:['simple.js']},
+        { warning:'using_normal_promise_in_file_1',params:['simple.js']}
+    ]
+},{
+    base:'stable-project',
+    title:'must warn the use of non best-promise\'s Promises for every file (#13)',
+    test:'using_normal_promise_in_file_1',
+    change:function(info){
+        info.files['simple.js'].content += '\n\nvar promise = require("rsvp");\n\n';
+        info.files['stable-project.js'].content += '\n\nvar Promise = require("q");\n\n';
+        
+    },
+    expected:[
+        { warning:'using_normal_promise_in_file_1',params:['stable-project.js']},
+        { warning:'using_normal_promise_in_file_1',params:['simple.js']}
     ]
 }];
 
