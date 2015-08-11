@@ -296,6 +296,25 @@ describe('qa-control', function(){
             });
         });
     });
+   describe('add-hoc tests', function(){
+        it.skip('promises control project', function(done){
+            qaControl.loadProject('./test/fixtures/stable-project').then(function(info){
+                //console.log(info);
+                info.files['.gitignore'].content =
+                 info.files['.gitignore'].content.replace('local-*','')
+                                                 .replace('*-local.*','');
+                return qaControl.controlInfo(info);
+            }).then(function(warns){
+                //console.log("warns", warns);
+                var expectedWarns = [
+                    { warning:'lack_of_mandatory_line_1_in_file_2',params:['local-*', '.gitignore']},
+                    { warning:'lack_of_mandatory_line_1_in_file_2',params:['*-local.*', '.gitignore']}
+                ];
+                expect(warns).to.eql(expectedWarns);
+                done();
+            });
+        });
+    });
     var path='./test/fixtures';
     fs.readdir(path).then(function(files){
         describe('cucardas (#9)', function(){

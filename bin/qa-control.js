@@ -33,7 +33,8 @@ qaControl.msgs={
         lack_of_mandatory_line_1_in_file_2: 'falta la linea obligatoria $1 en el archivo $2',
         file_1_does_not_match_custom_2: '$1 no respeta la custombre $2',
         first_line_does_not_match_in_file_1: 'las primeras líneas no coinciden en $1',
-        repository_name_not_found: 'pacakgeJson.repository no tiene el formato /{[-a-zA-Z0-9_.]+}\/[-a-zA-Z0-9_.]+/'
+        repository_name_not_found: 'pacakgeJson.repository no tiene el formato /{[-a-zA-Z0-9_.]+}\/[-a-zA-Z0-9_.]+/',
+        using_normal_promise_in_file_1: 'se han usado Promise(s) normales en "$1"'
     }
 };
 
@@ -429,7 +430,10 @@ qaControl.projectDefinition = {
                                 project += part.substring(0, 1).toUpperCase()+part.substring(1);
                             }
                             var mainName = ('main' in info.packageJson) ? info.packageJson.main : 'index.js';
-                            
+                            // si mainName esta en un subdirectorio (por ejemplo bin/index.js), hay que leerlo
+                            if(! info.files[mainName]) {
+                                info.files[mainName]
+                            }
                             if(! qaControl.startsWith(info.files[mainName].content, codeCheck.firstLines.replace('nombreDelModulo', project))) {
                                 warns.push({warning:'first_line_does_not_match_in_file_1', params:[mainName]});
                             }
@@ -437,7 +441,23 @@ qaControl.projectDefinition = {
                         return warns;
                     }
                 }]
-            }
+            }/*,
+            normal_promises:{
+                checks:[{
+                    warnings:function(info){
+                        for(var file in info.files) {
+                            if(file.match(/(.js)$/)) {
+                                var content = info.files[file].content;
+                                if(content.match(/require('promise')/)
+                            }
+                        }
+                        if(! info.files['README.md'].content.match(/<!--multilang v[0-9]+\s+(.+)(-->)/)) {
+                            return [{warning:'using_normal_promise_in_file_1'}];
+                        }
+                        return [];
+                    }
+                }]
+            }*/
         }
     }
 };
@@ -505,6 +525,34 @@ qaControl.loadProject = function loadProject(projectDir) {
     });
 };
 
+qaControl.controlInfoP=function controlInfoP(info){
+    var resultWarnings=[];
+    var rules = qaControl.projectDefinition[qaControl.currentVersion].rules;
+    var cadenaDePromesas = Promises.start();
+    for(var ruleName in rules){
+        var rule=rules[ruleName];
+        rule.checks.forEach(function(checkInfo){
+            console.log(ruleName, " check: ", checkInfo);
+            cadenaDePromesas = cadenaDePromesas.then(function() {
+                return checkInfo.warnings(info);
+            }).then(function(warningsOfThisRule) {
+                console.log(ruleName, " result: ", warningsOfThisRule);
+                if(warningsOfThisRule.length) {
+                    resultWarnings=resultWarnings.concat(warningsOfThisRule);
+                    if(rule.shouldAbort) { throw Error("ruleIsAborting"); }
+                }
+                return resultWarnings;
+            });
+        });
+    }
+    cadenaDePromesas=cadenaDePromesas.catch(function(err) {
+        if(err.message !== 'rulIsAborting') { throw err; };
+    }).then(function(){
+        return resultWarnings;
+    });
+    return cadenaDePromesas;
+}
+
 qaControl.controlInfo=function controlInfo(info){
     var resultWarnings=[];
     var rules = qaControl.projectDefinition[qaControl.currentVersion].rules;
@@ -529,6 +577,7 @@ qaControl.controlProject=function controlProject(projectDir){
     }).then(function(info){
         return qaControl.controlInfo(info);
     });
+    
 }
 
 module.exports = qaControl;
