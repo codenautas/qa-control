@@ -470,7 +470,6 @@ qaControl.loadProject = function loadProject(projectDir) {
         if(!qaControl.configReady) return configReading;
     }).then(function(){
         if(!projectDir) { throw new Error('null projectDir'); }
-
         return fs.exists(projectDir);
     }).then(function(exists) {
         if(!exists) { throw new Error("'"+projectDir+"' does not exists"); }
@@ -488,10 +487,16 @@ qaControl.loadProject = function loadProject(projectDir) {
         }
         return Promises.all(files.map(function(file){
             var iFile = Path.normalize(projectDir+'/'+file);
-            return fs.readFile(iFile, 'utf8').then(function(content){
-                info['files'][file].content = content;
-                if(file==='package.json') {
-                    info['packageJson'] = JSON.parse(content);
+            return Promises.start(function() {
+                return fs.stat(iFile);
+            }).then(function(stat) {
+                if(! stat.isDirectory()) {
+                    return fs.readFile(iFile, 'utf8').then(function(content){
+                        info['files'][file].content = content;
+                        if(file==='package.json') {
+                            info['packageJson'] = JSON.parse(content);
+                        }
+                    });
                 }
             });
         }));
