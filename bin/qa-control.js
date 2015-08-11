@@ -441,23 +441,23 @@ qaControl.projectDefinition = {
                         return warns;
                     }
                 }]
-            }/*,
+            },
             normal_promises:{
                 checks:[{
                     warnings:function(info){
+                        var warns = [];
                         for(var file in info.files) {
                             if(file.match(/(.js)$/)) {
                                 var content = info.files[file].content;
-                                if(content.match(/require('promise')/)
+                                if(content.match(/require\('promise'\)/)) {
+                                    warns.push({warning:'using_normal_promise_in_file_1', params:[file]});
+                                }
                             }
                         }
-                        if(! info.files['README.md'].content.match(/<!--multilang v[0-9]+\s+(.+)(-->)/)) {
-                            return [{warning:'using_normal_promise_in_file_1'}];
-                        }
-                        return [];
+                        return warns;
                     }
                 }]
-            }*/
+            }
         }
     }
 };

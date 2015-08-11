@@ -198,6 +198,18 @@ var fixtures=[{
     change:function(info){
         info.packageJson.repository = "sourcenauta/other/the-project";
     }
+},{
+    base:'stable-project',
+    title:'must warn the use of non best-promise\'s Promises (#13)',
+    test:'using_normal_promise_in_file_1',
+    change:function(info){
+        info.files['simple.js'].content =
+            info.files['simple.js'].content = 
+                "var Promise = require('promise');\n\n" + info.files['simple.js'].content;
+    },
+    expected:[
+        { warning:'using_normal_promise_in_file_1',params:['simple.js']},
+    ]
 }];
 
 function cloneProject(info){
@@ -303,7 +315,7 @@ describe('qa-control', function(){
                 info.files['.gitignore'].content =
                  info.files['.gitignore'].content.replace('local-*','')
                                                  .replace('*-local.*','');
-                return qaControl.controlInfo(info);
+                return qaControl.controlInfoP(info);
             }).then(function(warns){
                 //console.log("warns", warns);
                 var expectedWarns = [
