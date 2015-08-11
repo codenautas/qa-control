@@ -490,7 +490,7 @@ qaControl.loadProject = function loadProject(projectDir) {
             return Promises.start(function() {
                 return fs.stat(iFile);
             }).then(function(stat) {
-                if(! stat.isDirectory()) {
+                if(stat.isFile()) {
                     return fs.readFile(iFile, 'utf8').then(function(content){
                         info['files'][file].content = content;
                         if(file==='package.json') {
