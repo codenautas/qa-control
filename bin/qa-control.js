@@ -513,10 +513,29 @@ qaControl.loadProject = function loadProject(projectDir) {
                             info['packageJson'] = JSON.parse(content);
                         }
                     });
+                } else {
+                    delete info['files'][file]; // not a file, we erase it
                 }
             });
         }));
-    }).then(function() {
+    })/*.then(function() {
+        var mainFile;
+        var mainName = info['packageJson'].main;
+        console.log("HHHH")
+        console.log("mainName". info.packageJson);
+        
+        if(info['packageJson'].main && ! mainName in info['files']) {
+            info['files'][mainName] = {};
+            mainFile = Path.normalize(projectDir+'/'+mainName);
+            return fs.stat(mainFile).then(function(stat) {
+                if(stat.isFile()) {
+                    return fs.readFile(mainFile, 'utf8').then(function(content) {
+                        info['files'][mainName].content = content;
+                    });
+                }
+            });
+        }
+    })*/.then(function() {
         return info;
     });
 };

@@ -321,22 +321,23 @@ describe('qa-control', function(){
             });
         });
     });
-   describe('add-hoc tests', function(){
-        it('promises control project', function(done){
+    describe('packageJson tests', function(){
+        it.skip('packageJson.main must be loaded from subdirectory', function(done){
             qaControl.loadProject('./test/fixtures/stable-project').then(function(info){
                 //console.log(info);
-                info.files['.gitignore'].content =
-                 info.files['.gitignore'].content.replace('local-*','')
-                                                 .replace('*-local.*','');
+                //info.packageJson.main = 'bin/main.js';
                 return qaControl.controlInfo(info);
             }).then(function(warns){
                 //console.log("warns", warns);
-                var expectedWarns = [
-                    { warning:'lack_of_mandatory_line_1_in_file_2',params:['local-*', '.gitignore']},
-                    { warning:'lack_of_mandatory_line_1_in_file_2',params:['*-local.*', '.gitignore']}
-                ];
-                expect(warns).to.eql(expectedWarns);
+                // var expectedWarns = [
+                    // { warning:'lack_of_mandatory_line_1_in_file_2',params:['local-*', '.gitignore']},
+                    // { warning:'lack_of_mandatory_line_1_in_file_2',params:['*-local.*', '.gitignore']}
+                // ];
+                //expect(warns).to.eql(expectedWarns);
                 done();
+            }).catch(function(err) {
+                console.log("mal", err);
+                done(err);
             });
         });
     });
