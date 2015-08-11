@@ -220,8 +220,8 @@ var fixtures=[{
         
     },
     expected:[
-        { warning:'using_normal_promise_in_file_1',params:['stable-project.js']},
-        { warning:'using_normal_promise_in_file_1',params:['simple.js']}
+        { warning:'using_normal_promise_in_file_1',params:['simple.js']},
+        { warning:'using_normal_promise_in_file_1',params:['stable-project.js']}
     ]
 }];
 

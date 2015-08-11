@@ -430,10 +430,6 @@ qaControl.projectDefinition = {
                                 project += part.substring(0, 1).toUpperCase()+part.substring(1);
                             }
                             var mainName = ('main' in info.packageJson) ? info.packageJson.main : 'index.js';
-                            // si mainName esta en un subdirectorio (por ejemplo bin/index.js), hay que leerlo
-                            if(! info.files[mainName]) {
-                                info.files[mainName]
-                            }
                             if(! qaControl.startsWith(info.files[mainName].content, codeCheck.firstLines.replace('nombreDelModulo', project))) {
                                 warns.push({warning:'first_line_does_not_match_in_file_1', params:[mainName]});
                             }
