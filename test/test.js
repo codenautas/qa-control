@@ -322,13 +322,13 @@ describe('qa-control', function(){
         });
     });
    describe('add-hoc tests', function(){
-        it.skip('promises control project', function(done){
+        it('promises control project', function(done){
             qaControl.loadProject('./test/fixtures/stable-project').then(function(info){
                 //console.log(info);
                 info.files['.gitignore'].content =
                  info.files['.gitignore'].content.replace('local-*','')
                                                  .replace('*-local.*','');
-                return qaControl.controlInfoP(info);
+                return qaControl.controlInfo(info);
             }).then(function(warns){
                 //console.log("warns", warns);
                 var expectedWarns = [

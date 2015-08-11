@@ -521,51 +521,33 @@ qaControl.loadProject = function loadProject(projectDir) {
     });
 };
 
-qaControl.controlInfoP=function controlInfoP(info){
+qaControl.controlInfo=function controlInfo(info){
     var resultWarnings=[];
     var rules = qaControl.projectDefinition[qaControl.currentVersion].rules;
     var cadenaDePromesas = Promises.start();
-    for(var ruleName in rules){
-        var rule=rules[ruleName];
+    _.forEach(rules, function(rule, ruleName) {
         rule.checks.forEach(function(checkInfo){
-            console.log(ruleName, " check: ", checkInfo);
             cadenaDePromesas = cadenaDePromesas.then(function() {
                 return checkInfo.warnings(info);
             }).then(function(warningsOfThisRule) {
-                console.log(ruleName, " result: ", warningsOfThisRule);
                 if(warningsOfThisRule.length) {
                     resultWarnings=resultWarnings.concat(warningsOfThisRule);
-                    if(rule.shouldAbort) { throw Error("ruleIsAborting"); }
+                    if(rule.shouldAbort) { throw new Error("ruleIsAborting"); }
                 }
                 return resultWarnings;
             });
         });
-    }
+    });
     cadenaDePromesas=cadenaDePromesas.catch(function(err) {
-        if(err.message !== 'rulIsAborting') { throw err; };
+        if(err.message !== 'ruleIsAborting') {
+            throw err;
+        };
     }).then(function(){
         return resultWarnings;
     });
     return cadenaDePromesas;
-}
+};
 
-qaControl.controlInfo=function controlInfo(info){
-    var resultWarnings=[];
-    var rules = qaControl.projectDefinition[qaControl.currentVersion].rules;
-    for(var ruleName in rules){
-        var rule=rules[ruleName];
-        var fails=0;
-        rule.checks.forEach(function(checkInfo){
-            var warningsOfThisRule=checkInfo.warnings(info);
-            fails+=warningsOfThisRule.length;
-            resultWarnings=resultWarnings.concat(warningsOfThisRule);
-        });
-        if(fails && rule.shouldAbort){
-            break;
-        }
-    }
-    return resultWarnings;
-}
 
 qaControl.controlProject=function controlProject(projectDir){
     return Promises.start(function(){
