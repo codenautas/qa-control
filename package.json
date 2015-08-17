@@ -10,6 +10,9 @@
   },{
     "name": "Diego Florio", "email": "diegoefe@gmail.com"
   }],
+  "bin": {
+    "qa-control": "./bin/qa-control-run.js"
+  },
   "dependencies": {
     "fs-extra": "^0.22.1",
     "fs-promise": ">=0.3.1",

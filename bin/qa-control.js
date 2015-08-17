@@ -586,4 +586,10 @@ qaControl.controlProject=function controlProject(projectDir){
     
 }
 
+qaControl.main=function main(parameters){
+    return qaControl.controlProject(parameters.projectDir).then(function(warns) {
+       console.log(warns); 
+    });
+};
+
 module.exports = qaControl;
