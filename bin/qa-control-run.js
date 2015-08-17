@@ -12,7 +12,8 @@ program
     .version(require('../package').version)
     .usage('[[options] projectDirectory|--list-langs]')
     .option('-l, --lang [lang]', 'Language to generate')
-    .option('-s, --silent', 'Don\'t output anything')
+    //.option('-v, --verbose', 'Show progress information')
+    //.option('-s, --silent', 'Don\'t output anything')
     .option('-L, --list-langs', 'List available languages')
     .parse(process.argv);
     
@@ -24,7 +25,8 @@ if( ( !program.listLangs && (""==program.args && !program.projectDir))
 
 var params = {};
 params.projectDir = program.args[0];
-params.silent = program.silent;
+//params.verbose = program.verbose;
+//params.silent = program.silent;
 params.listLangs = program.listLangs;
 params.lang = program.lang;
 

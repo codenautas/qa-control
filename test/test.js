@@ -163,10 +163,12 @@ var fixtures=[{
         info.files['README.md'].content = readme.replace('![npm-version](https://img.shields.io/npm','![npm-version](https://HHHimg.shields.io/npm')
                                                 .replace('[![downloads](https://img.shields.io/npm/','[![downloads](https://im__shields.io/npm/')
                                                 .replace('[![dependencies](https://img.shields.io','[![dependencies](https://EEimg.shields.io');
+        delete info.packageJson['qa-control']["coverage"];
     },
     expected:[
         { warning:'wrong_format_in_cucarda_1',params:['npm-version']},
         { warning:'wrong_format_in_cucarda_1',params:['downloads']},
+        { warning:'wrong_format_in_cucarda_1',params:['coverage']},
         { warning:'wrong_format_in_cucarda_1',params:['dependencies']}
     ]
 },{
