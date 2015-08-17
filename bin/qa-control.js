@@ -10,7 +10,8 @@ var qaControl={};
 
 qaControl.msgs={
     en:{
-        // TODO
+        deprecated_qa_control_version: 'deprecated qa-control version',
+        repository_name_not_found: 'pacakgeJson.repository must be in format /{[-a-zA-Z0-9_.]+}\/[-a-zA-Z0-9_.]+/'
     },
     es:{
         deprecated_qa_control_version: 'la versión de qa-control es vieja',
@@ -473,6 +474,15 @@ var configReading=Promises.all(_.map(qaControl.projectDefinition,function(defini
         });
     }));
 })).then(function(){
+    // fix english messages
+    var en = qaControl.msgs.en;
+    for(var warn in qaControl.msgs.es) {
+        var msg = qaControl.msgs.es[warn];
+        if(false === warn in en) {
+            en[warn] = warn.replace(/_(\d+)/g,' -$1').replace(/-/g, '$').replace(/_/g,' ');
+        }
+    }
+}).then(function(){
     // only for test, in production this sleep must gone
     return Promises.sleep(500);
 }).then(function(){

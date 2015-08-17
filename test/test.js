@@ -268,6 +268,37 @@ describe('qa-control', function(){
                 done();
             }).catch(done);
         });
+       it('generates english messages from spanish warnings', function(done){
+            qaControl.loadProject('./test/fixtures/stable-project').then(function(info){
+                var en=qaControl.msgs.en;
+                var es=qaControl.msgs.es;
+                expect(_.keys(en).sort()).to.eql(_.keys(es).sort());
+                //console.log(qaControl.msgs.en);
+                expect(en['deprecated_qa_control_version']).to.be('deprecated qa-control version');
+                expect(en['deprecated_version']).to.be('deprecated version');
+                expect(en['invalid_qa_control_version']).to.be('invalid qa control version');
+                expect(en['invalid_value_1_in_parameter_2']).to.be('invalid value $1 in parameter $2');
+                expect(en['lack_of_mandatory_file_1']).to.be('lack of mandatory file $1');
+                expect(en['lack_of_mandatory_parameter']).to.be('lack of mandatory parameter');
+                expect(en['lack_of_mandatory_section_1']).to.be('lack of mandatory section $1');
+                expect(en['no_qa_control_section_in_codenautas_project']).to.be('no qa control section in codenautas project');
+                expect(en['no_multilang_section_in_readme']).to.be('no multilang section in readme');
+                expect(en['no_package_json']).to.be('no package json');
+                expect(en['no_package_version_in_qa_control_section']).to.be('no package version in qa control section');
+                expect(en['no_qa_control_section_in_package_json']).to.be('no qa control section in package json');
+                expect(en['no_version_in_section_codenautas']).to.be('no version in section codenautas');
+                expect(en['lack_of_cucarda_marker_in_readme']).to.be('lack of cucarda marker in readme');
+                expect(en['lack_of_mandatory_cucarda_1']).to.be('lack of mandatory cucarda $1');
+                expect(en['wrong_format_in_cucarda_1']).to.be('wrong format in cucarda $1');
+                expect(en['lack_of_mandatory_line_1_in_file_2']).to.be('lack of mandatory line $1 in file $2');
+                expect(en['file_1_does_not_match_custom_2']).to.be('file $1 does not match custom $2');
+                expect(en['first_line_does_not_match_in_file_1']).to.be('first line does not match in file $1');
+                expect(en['repository_name_not_found']).to.be('pacakgeJson.repository must be in format /{[-a-zA-Z0-9_.]+}\/[-a-zA-Z0-9_.]+/');
+                expect(en['using_normal_promise_in_file_1']).to.be('using normal promise in file $1');
+                expect(en['packagejson_main_file_1_does_not_exists']).to.be('packagejson main file $1 does not exists');
+                done();
+            }).catch(done);
+        });
     });
     describe('test qa-control by fixtures', function(){
         var perfectProjects={};
