@@ -34,7 +34,8 @@ qaControl.msgs={
         file_1_does_not_match_custom_2: '$1 no respeta la custombre $2',
         first_line_does_not_match_in_file_1: 'las primeras líneas no coinciden en $1',
         repository_name_not_found: 'pacakgeJson.repository no tiene el formato /{[-a-zA-Z0-9_.]+}\/[-a-zA-Z0-9_.]+/',
-        using_normal_promise_in_file_1: 'se han usado Promise(s) normales en "$1"'
+        using_normal_promise_in_file_1: 'se han usado Promise(s) normales en "$1"',
+        packagejson_main_file_1_does_not_exists: 'no existe el archivo "main" ($1) declarado en package.json'
     }
 };
 
@@ -430,7 +431,9 @@ qaControl.projectDefinition = {
                                 project += part.substring(0, 1).toUpperCase()+part.substring(1);
                             }
                             var mainName = ('main' in info.packageJson) ? info.packageJson.main : 'index.js';
-                            if(! qaControl.startsWith(info.files[mainName].content, codeCheck.firstLines.replace('nombreDelModulo', project))) {
+                            if(false == mainName in info.files) {
+                                warns.push({warning:'packagejson_main_file_1_does_not_exists', params:[mainName]})
+                            } else if(! qaControl.startsWith(info.files[mainName].content, codeCheck.firstLines.replace('nombreDelModulo', project))) {
                                 warns.push({warning:'first_line_does_not_match_in_file_1', params:[mainName]});
                             }
                         }

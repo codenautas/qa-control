@@ -223,6 +223,16 @@ var fixtures=[{
         { warning:'using_normal_promise_in_file_1',params:['simple.js']},
         { warning:'using_normal_promise_in_file_1',params:['stable-project.js']}
     ]
+},{
+    base:'stable-project-main-in-subdir',
+    title:'must warn if package.json main file does not exists (#22)',
+    test:'lack_of_mandatory_file_1',
+    change:function(info){
+        delete info.files['bin/main.js'];
+    },
+    expected:[
+        { warning:'packagejson_main_file_1_does_not_exists',params:['bin/main.js']}
+    ]
 }];
 
 function cloneProject(info){
