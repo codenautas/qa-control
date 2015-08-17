@@ -438,3 +438,24 @@ describe('qa-control', function(){
         });
     });
 });
+
+function generateWarningsArray(lang) {
+    var warns = [];
+    var messages = qaControl.msgs[lang];
+    for(var msgName in messages) {
+        var msg = messages[msgName];
+    }
+    return warns;
+}
+
+describe('qa-control main', function(){
+    describe('tests of warning output', function(){
+        it.skip('stringize warnings in lang "es"', function(done){
+            qaControl.stringizeWarnings('es', generateWarningsArray('es')).then(function(warnStr){
+                console.log(warnStr);
+                //expect(qaControl.configReady).to.ok();
+                done();
+            }).catch(done);
+        });
+    });
+});

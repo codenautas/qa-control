@@ -17,7 +17,7 @@ program
     .parse(process.argv);
     
 if( ( !program.listLangs && (""==program.args && !program.projectDir))
-    || (false === program.lang in qaControl.msgs) )
+    || (program.lang && false === program.lang in qaControl.msgs) )
 {
     program.help();
 }

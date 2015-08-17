@@ -579,7 +579,8 @@ qaControl.controlInfo=function controlInfo(info){
 qaControl.stringizeWarnings = function stringizeWarnings(warns, lang) {
     var warnStr = '';
     return Promises.start(function() {
-        console.log("stringizeWarnings(", warns, ",", lang);
+        console.log("stringizeWarnings(", warns, ",", lang, ")");
+        return warnStr;
     });
 }
 
