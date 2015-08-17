@@ -247,6 +247,7 @@ var fixtures=[{
     ]
 },{
     base:'stable-project-main-in-subdir',
+    skipped:'#23',
     title:'must warn if package.json main file does not exists (#22)',
     test:'lack_of_mandatory_file_1',
     change:function(info){
@@ -385,7 +386,7 @@ describe('qa-control', function(){
         });
     });
     describe('packageJson tests', function(){
-        it('packageJson.main must be loaded from subdirectory', function(done){
+        it.skip/*#23*/('packageJson.main must be loaded from subdirectory', function(done){
             qaControl.loadProject('./test/fixtures/stable-project-main-in-subdir').then(function(info){
                 expect(info['files']).to.have.key('bin/main.js');
                 expect(info['files']['bin/main.js'].content).to.contain('StableProject');
