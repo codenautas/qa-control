@@ -322,18 +322,13 @@ describe('qa-control', function(){
         });
     });
     describe('packageJson tests', function(){
-        it.skip('packageJson.main must be loaded from subdirectory', function(done){
-            qaControl.loadProject('./test/fixtures/stable-project').then(function(info){
-                //console.log(info);
-                //info.packageJson.main = 'bin/main.js';
+        it('packageJson.main must be loaded from subdirectory', function(done){
+            qaControl.loadProject('./test/fixtures/stable-project-main-in-subdir').then(function(info){
+                expect(info['files']).to.have.key('bin/main.js');
+                expect(info['files']['bin/main.js'].content).to.contain('StableProject');
                 return qaControl.controlInfo(info);
             }).then(function(warns){
-                //console.log("warns", warns);
-                // var expectedWarns = [
-                    // { warning:'lack_of_mandatory_line_1_in_file_2',params:['local-*', '.gitignore']},
-                    // { warning:'lack_of_mandatory_line_1_in_file_2',params:['*-local.*', '.gitignore']}
-                // ];
-                //expect(warns).to.eql(expectedWarns);
+                expect(warns).to.eql([]);
                 done();
             }).catch(function(err) {
                 console.log("mal", err);
