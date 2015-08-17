@@ -16,7 +16,7 @@ program
     .option('-L, --list-langs', 'List available languages')
     .parse(process.argv);
     
-if( (""==program.args && !program.projectDir) )
+if( !program.listLangs && (""==program.args && !program.projectDir) )
 {
     program.help();
 }
@@ -30,8 +30,7 @@ params.lang = program.lang;
 //console.log(params); process.exit(0);
 
 qaControl.main(params).then(function(){
-    process.stderr.write("Done!");
+    //process.stderr.write("Done!");
 }).catch(function(err){
-    //console.log("ELSE", err);
     process.stderr.write("ERROR: "+err.message);
 });

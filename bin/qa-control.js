@@ -583,12 +583,19 @@ qaControl.controlProject=function controlProject(projectDir){
     }).then(function(info){
         return qaControl.controlInfo(info);
     });
-    
 }
 
-qaControl.main=function main(parameters){
-    return qaControl.controlProject(parameters.projectDir).then(function(warns) {
-       console.log(warns); 
+qaControl.main=function main(parameters) {
+    return Promises.start(function() {
+        if(parameters.listLangs) {
+            process.stdout.write("Available languages:");
+            for(var lang in qaControl.msgs) { process.stdout.write(" "+lang); }
+            process.stdout.write("\n");
+        } else {
+            return qaControl.controlProject(parameters.projectDir).then(function(warns) {
+                console.log(warns); 
+            });
+        }        
     });
 };
 
