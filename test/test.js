@@ -450,7 +450,7 @@ function generateWarningsArray(lang) {
         if(numParams) {
             var params = [];
             for(var p=0; p<numParams.length; ++p) {
-                params.push('file'+parseInt(p+1));
+                params.push('param'+parseInt(p+1));
             }
             warn['params'] = params;
         }
@@ -470,9 +470,9 @@ describe('qa-control main', function(){
                 expect(warnStr).to.eql('la versión de qa-control es vieja\n'
                                       +'la version es demasiado vieja\n'
                                       +'la sección "package-version" en qa-control contiene un valor incorrecto\n'
-                                      +'valor invalido "file2" para el parametro "file1" en la sección qa-control\n'
-                                      +'falta el archivo obligatorio "file1"\n'
-                                      +'falta la sección obligatoria "file1" en la sección qa-control\n'
+                                      +'valor invalido "param2" para el parametro "param1" en la sección qa-control\n'
+                                      +'falta el archivo obligatorio "param1"\n'
+                                      +'falta la sección obligatoria "param1" en la sección qa-control\n'
                                       +'falta la sección "qa-control" en package.json y aparenta ser un proyecto codenautas\n'
                                       +'falta la sección multilang en el archivo README.md\n'
                                       +'falta el archivo package.json\n'
@@ -480,14 +480,14 @@ describe('qa-control main', function(){
                                       +'falta la sección qa-control en package.json\n'
                                       +'falta la entrada para "package-version" en la sección codenautas del package.json\n'
                                       +'falta la sección "cucardas" en README.md\n'
-                                      +'falta la cucarda oblicatoria file1\n'
-                                      +'la cucarda "file1" tiene formato incorrecto\n'
-                                      +'falta la linea obligatoria file1 en el archivo file2\n'
-                                      +'file1 no respeta la custombre file2\n'
-                                      +'las primeras líneas no coinciden en file1\n'
+                                      +'falta la cucarda oblicatoria param1\n'
+                                      +'la cucarda "param1" tiene formato incorrecto\n'
+                                      +'falta la linea obligatoria param1 en el archivo param2\n'
+                                      +'param1 no respeta la custombre param2\n'
+                                      +'las primeras líneas no coinciden en param1\n'
                                       +'pacakgeJson.repository no tiene el formato /{[-a-zA-Z0-9_.]+}/[-a-zA-Z0-9_.]+/\n'
-                                      +'se han usado Promise(s) normales en "file1"\n'
-                                      +'no existe el archivo "main" (file1) declarado en package.json\n');
+                                      +'se han usado Promise(s) normales en "param1"\n'
+                                      +'no existe el archivo "main" (param1) declarado en package.json\n');
                 done();
             }).catch(done);
         });
@@ -501,9 +501,9 @@ describe('qa-control main', function(){
                                        +'pacakgeJson.repository must be in format /{[-a-zA-Z0-9_.]+}/[-a-zA-Z0-9_.]+/\n'
                                        +'deprecated version\n'
                                        +'invalid qa control version\n'
-                                       +'invalid value file1 in parameter file2\n'
-                                       +'lack of mandatory file file1\n'
-                                       +'lack of mandatory section file1\n'
+                                       +'invalid value param1 in parameter param2\n'
+                                       +'lack of mandatory file param1\n'
+                                       +'lack of mandatory section param1\n'
                                        +'no qa control section in codenautas project\n'
                                        +'no multilang section in readme\n'
                                        +'no package json\n'
@@ -511,13 +511,13 @@ describe('qa-control main', function(){
                                        +'no qa control section in package json\n'
                                        +'no version in section codenautas\n'
                                        +'lack of cucarda marker in readme\n'
-                                       +'lack of mandatory cucarda file1\n'
-                                       +'wrong format in cucarda file1\n'
-                                       +'lack of mandatory line file1 in file file2\n'
-                                       +'file file1 does not match custom file2\n'
-                                       +'first line does not match in file file1\n'
-                                       +'using normal promise in file file1\n'
-                                       +'packagejson main file file1 does not exists\n');
+                                       +'lack of mandatory cucarda param1\n'
+                                       +'wrong format in cucarda param1\n'
+                                       +'lack of mandatory line param1 in file param2\n'
+                                       +'file param1 does not match custom param2\n'
+                                       +'first line does not match in file param1\n'
+                                       +'using normal promise in file param1\n'
+                                       +'packagejson main file param1 does not exists\n');
 
                 done();
             }).catch(done);
