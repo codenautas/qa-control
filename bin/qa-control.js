@@ -15,11 +15,11 @@ qaControl.msgs={
     },
     es:{
         deprecated_qa_control_version: 'la versión de qa-control es vieja',
-        deprecated_version: 'la version $1 es demasiado vieja',
+        deprecated_version: 'la version es demasiado vieja',
         invalid_qa_control_version: 'la sección "package-version" en qa-control contiene un valor incorrecto',
         invalid_value_1_in_parameter_2: 'valor invalido "$2" para el parametro "$1" en la sección qa-control',
         lack_of_mandatory_file_1: 'falta el archivo obligatorio "$1"',
-        lack_of_mandatory_parameter: 'falta el parámetro obligatorio "$1"',
+        //lack_of_mandatory_parameter_1: 'falta el parámetro obligatorio "$1"',
         lack_of_mandatory_section_1: 'falta la sección obligatoria "$1" en la sección qa-control',
         no_qa_control_section_in_codenautas_project: 'falta la sección "qa-control" en package.json y aparenta ser un proyecto codenautas',
         no_multilang_section_in_readme: 'falta la sección multilang en el archivo README.md',
@@ -583,7 +583,20 @@ qaControl.controlInfo=function controlInfo(info){
 qaControl.stringizeWarnings = function stringizeWarnings(warns, lang) {
     var warnStr = '';
     return Promises.start(function() {
-        console.log("stringizeWarnings(", warns, ",", lang, ")");
+        //console.log("stringizeWarnings(", warns, ",", lang, ")");
+        var messages = qaControl.msgs[lang];
+        warns.forEach(function(warn) {
+            var msg = messages[warn.warning];
+            //console.log("message", msg, warn);
+            var numParams = warn.warning.match(/\d/g);
+            if(numParams) {
+                //console.log(warn.warning, msg, " tiene ", numParams.length, " parametros y params tiene ", warn.params)
+                 for(var p=0; p<numParams.length; ++p) {
+                    msg = msg.replace('$'+parseInt(p+1), warn.params[p]);
+                }
+            }
+            warnStr += msg + '\n';
+        });
         return warnStr;
     });
 }
@@ -607,7 +620,9 @@ qaControl.main=function main(parameters) {
                 if(parameters.lang) {
                     console.log("lang: ", parameters.lang);
                 }
-                return qaControl.stringizeWarnings(parameters.lang || "en", warns);
+                return qaControl.stringizeWarnings(warns, parameters.lang || "en");
+            }).then(function(warnString) {
+                process.stdout.write(warnString);
             });
         }        
     });

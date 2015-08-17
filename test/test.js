@@ -279,7 +279,7 @@ describe('qa-control', function(){
                 expect(en['invalid_qa_control_version']).to.be('invalid qa control version');
                 expect(en['invalid_value_1_in_parameter_2']).to.be('invalid value $1 in parameter $2');
                 expect(en['lack_of_mandatory_file_1']).to.be('lack of mandatory file $1');
-                expect(en['lack_of_mandatory_parameter']).to.be('lack of mandatory parameter');
+                //expect(en['lack_of_mandatory_parameter']).to.be('lack of mandatory parameter');
                 expect(en['lack_of_mandatory_section_1']).to.be('lack of mandatory section $1');
                 expect(en['no_qa_control_section_in_codenautas_project']).to.be('no qa control section in codenautas project');
                 expect(en['no_multilang_section_in_readme']).to.be('no multilang section in readme');
@@ -446,7 +446,7 @@ function generateWarningsArray(lang) {
     for(var msgName in messages) {
         var msg = messages[msgName];
         var warn = { warning:msgName };
-        var numParams = msgName.match(/\d/g);
+        var numParams = msgName.match(/\d+/g);
         if(numParams) {
             var params = [];
             for(var p=0; p<numParams.length; ++p) {
@@ -459,15 +459,66 @@ function generateWarningsArray(lang) {
     return warns;
 }
     
-describe.skip('qa-control main', function(){
+describe('qa-control main', function(){
     describe('tests of warning output', function(){
         it('stringize warnings in lang "es"', function(done){
             qaControl.fixMessages(qaControl.msgs.en).then(function(){
                 //console.log(qaControl.msgs.en);
-                return qaControl.stringizeWarnings('es', generateWarningsArray('es'));
+                return qaControl.stringizeWarnings(generateWarningsArray('es'), 'es');
             }).then(function(warnStr){
-                console.log(warnStr);
-                //expect(qaControl.configReady).to.ok();
+                //console.log(warnStr);
+                expect(warnStr).to.eql('la versión de qa-control es vieja\n'
+                                      +'la version es demasiado vieja\n'
+                                      +'la sección "package-version" en qa-control contiene un valor incorrecto\n'
+                                      +'valor invalido "file2" para el parametro "file1" en la sección qa-control\n'
+                                      +'falta el archivo obligatorio "file1"\n'
+                                      +'falta la sección obligatoria "file1" en la sección qa-control\n'
+                                      +'falta la sección "qa-control" en package.json y aparenta ser un proyecto codenautas\n'
+                                      +'falta la sección multilang en el archivo README.md\n'
+                                      +'falta el archivo package.json\n'
+                                      +'falta la sección "package-version" en la sección qa-control\n'
+                                      +'falta la sección qa-control en package.json\n'
+                                      +'falta la entrada para "package-version" en la sección codenautas del package.json\n'
+                                      +'falta la sección "cucardas" en README.md\n'
+                                      +'falta la cucarda oblicatoria file1\n'
+                                      +'la cucarda "file1" tiene formato incorrecto\n'
+                                      +'falta la linea obligatoria file1 en el archivo file2\n'
+                                      +'file1 no respeta la custombre file2\n'
+                                      +'las primeras líneas no coinciden en file1\n'
+                                      +'pacakgeJson.repository no tiene el formato /{[-a-zA-Z0-9_.]+}/[-a-zA-Z0-9_.]+/\n'
+                                      +'se han usado Promise(s) normales en "file1"\n'
+                                      +'no existe el archivo "main" (file1) declarado en package.json\n');
+                done();
+            }).catch(done);
+        });
+        it('stringize warnings in lang "en"', function(done){
+            qaControl.fixMessages(qaControl.msgs.en).then(function(){
+                //console.log(qaControl.msgs.en);
+                return qaControl.stringizeWarnings(generateWarningsArray('en'), 'en');
+            }).then(function(warnStr){
+                //console.log(warnStr);
+                expect(warnStr).to.eql('deprecated qa-control version\n'
+                                       +'pacakgeJson.repository must be in format /{[-a-zA-Z0-9_.]+}/[-a-zA-Z0-9_.]+/\n'
+                                       +'deprecated version\n'
+                                       +'invalid qa control version\n'
+                                       +'invalid value file1 in parameter file2\n'
+                                       +'lack of mandatory file file1\n'
+                                       +'lack of mandatory section file1\n'
+                                       +'no qa control section in codenautas project\n'
+                                       +'no multilang section in readme\n'
+                                       +'no package json\n'
+                                       +'no package version in qa control section\n'
+                                       +'no qa control section in package json\n'
+                                       +'no version in section codenautas\n'
+                                       +'lack of cucarda marker in readme\n'
+                                       +'lack of mandatory cucarda file1\n'
+                                       +'wrong format in cucarda file1\n'
+                                       +'lack of mandatory line file1 in file file2\n'
+                                       +'file file1 does not match custom file2\n'
+                                       +'first line does not match in file file1\n'
+                                       +'using normal promise in file file1\n'
+                                       +'packagejson main file file1 does not exists\n');
+
                 done();
             }).catch(done);
         });
