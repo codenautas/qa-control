@@ -576,6 +576,12 @@ qaControl.controlInfo=function controlInfo(info){
     return cadenaDePromesas;
 };
 
+qaControl.stringizeWarnings = function stringizeWarnings(warns, lang) {
+    var warnStr = '';
+    return Promises.start(function() {
+        console.log("stringizeWarnings(", warns, ",", lang);
+    });
+}
 
 qaControl.controlProject=function controlProject(projectDir){
     return Promises.start(function(){
@@ -593,7 +599,10 @@ qaControl.main=function main(parameters) {
             process.stdout.write("\n");
         } else {
             return qaControl.controlProject(parameters.projectDir).then(function(warns) {
-                console.log(warns); 
+                if(parameters.lang) {
+                    console.log("lang: ", parameters.lang);
+                }
+                return qaControl.stringizeWarnings(parameters.lang || "en", warns);
             });
         }        
     });

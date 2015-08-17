@@ -16,7 +16,8 @@ program
     .option('-L, --list-langs', 'List available languages')
     .parse(process.argv);
     
-if( !program.listLangs && (""==program.args && !program.projectDir) )
+if( ( !program.listLangs && (""==program.args && !program.projectDir))
+    || (false === program.lang in qaControl.msgs) )
 {
     program.help();
 }
