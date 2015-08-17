@@ -12,13 +12,14 @@ NO MODIFIQUE ESTE ARCHIVO. FUE GENERADO AUTOMÁTICAMENTE POR multilang.js
 # stable-project
 **stable-project** descripción en castellano
 
-[![version](https://img.shields.io/npm/v/pg-promise-strict.svg)](https://npmjs.org/package/pg-promise-strict)
-[![downloads](https://img.shields.io/npm/dm/pg-promise-strict.svg)](https://npmjs.org/package/pg-promise-strict)
-[![linux](https://img.shields.io/travis/codenautas/pg-promise-strict/master.svg)](https://travis-ci.org/codenautas/pg-promise-strict)
-[![windows](https://ci.appveyor.com/api/projects/status/github/codenautas/pg-promise-strict?svg=true)](https://ci.appveyor.com/project/emilioplatzer/pg-promise-strict)
-[![coverage](https://img.shields.io/coveralls/codenautas/pg-promise-strict/master.svg)](https://coveralls.io/r/codenautas/pg-promise-strict)
-[![climate](https://img.shields.io/codeclimate/github/codenautas/pg-promise-strict.svg)](https://codeclimate.com/github/codenautas/pg-promise-strict)
-[![dependencies](https://img.shields.io/david/codenautas/pg-promise-strict.svg)](https://david-dm.org/codenautas/stable-project)
+<!-- cucardas -->
+[![npm-version](https://img.shields.io/npm/v/stable-project.svg)](https://npmjs.org/package/stable-project)
+[![downloads](https://img.shields.io/npm/dm/stable-project.svg)](https://npmjs.org/package/stable-project)
+[![linux](https://img.shields.io/travis/codenautas/stable-project/master.svg)](https://travis-ci.org/codenautas/stable-project)
+[![windows](https://ci.appveyor.com/api/projects/status/github/codenautas/stable-project?svg=true)](https://ci.appveyor.com/project/codenautas/stable-project)
+[![coverage](https://img.shields.io/coveralls/codenautas/stable-project/master.svg)](https://coveralls.io/r/codenautas/stable-project)
+[![climate](https://img.shields.io/codeclimate/github/codenautas/stable-project.svg)](https://codeclimate.com/github/codenautas/stable-project)
+[![dependencies](https://img.shields.io/david/codenautas/stable-project.svg)](https://david-dm.org/codenautas/stable-project)
 
 <!--multilang buttons-->
 
