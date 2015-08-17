@@ -442,16 +442,30 @@ describe('qa-control', function(){
 function generateWarningsArray(lang) {
     var warns = [];
     var messages = qaControl.msgs[lang];
+    //console.log(messages);
     for(var msgName in messages) {
         var msg = messages[msgName];
+        var warn = { warning:msgName };
+        var numParams = msgName.match(/\d/g);
+        if(numParams) {
+            var params = [];
+            for(var p=0; p<numParams.length; ++p) {
+                params.push('file'+parseInt(p+1));
+            }
+            warn['params'] = params;
+        }
+        warns.push(warn);
     }
     return warns;
 }
-
-describe('qa-control main', function(){
+    
+describe.skip('qa-control main', function(){
     describe('tests of warning output', function(){
-        it.skip('stringize warnings in lang "es"', function(done){
-            qaControl.stringizeWarnings('es', generateWarningsArray('es')).then(function(warnStr){
+        it('stringize warnings in lang "es"', function(done){
+            qaControl.fixMessages(qaControl.msgs.en).then(function(){
+                //console.log(qaControl.msgs.en);
+                return qaControl.stringizeWarnings('es', generateWarningsArray('es'));
+            }).then(function(warnStr){
                 console.log(warnStr);
                 //expect(qaControl.configReady).to.ok();
                 done();

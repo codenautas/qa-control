@@ -466,6 +466,17 @@ qaControl.lang = process.env.qa_control_lang || 'en';
 qaControl.deprecatedVersions = '< 0.0.1';
 qaControl.currentVersion = '0.0.1';
 
+qaControl.fixMessages = function fixMessages(messagesToFix) {
+    return Promises.start(function() {
+        for(var warn in qaControl.msgs.es) {
+            var msg = qaControl.msgs.es[warn];
+            if(false === warn in messagesToFix) {
+                messagesToFix[warn] = warn.replace(/_(\d+)/g,' -$1').replace(/-/g, '$').replace(/_/g,' ');
+            }
+        }
+    });
+}
+
 qaControl.configReady=false;
 var configReading=Promises.all(_.map(qaControl.projectDefinition,function(definition, version){
     return Promises.all(_.map(definition.sections['run-in'].values,function(properties, value){
@@ -474,14 +485,7 @@ var configReading=Promises.all(_.map(qaControl.projectDefinition,function(defini
         });
     }));
 })).then(function(){
-    // fix english messages
-    var en = qaControl.msgs.en;
-    for(var warn in qaControl.msgs.es) {
-        var msg = qaControl.msgs.es[warn];
-        if(false === warn in en) {
-            en[warn] = warn.replace(/_(\d+)/g,' -$1').replace(/-/g, '$').replace(/_/g,' ');
-        }
-    }
+    return qaControl.fixMessages(qaControl.msgs.en);
 }).then(function(){
     // only for test, in production this sleep must gone
     return Promises.sleep(500);
