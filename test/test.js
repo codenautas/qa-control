@@ -67,6 +67,26 @@ var fixtures=[{
         delete info.files['.travis.yml'];
         delete info.files['.gitignore'];
         delete info.files['LICENSE'];
+        delete info.files['appveyor.yml'];
+        info.packageJson['qa-control']["test-appveyor"]=false;
+    },
+    expected:[
+        { warning:'lack_of_mandatory_file_1',params:['LEEME.md']},
+        { warning:'lack_of_mandatory_file_1',params:['.travis.yml']},
+        { warning:'lack_of_mandatory_file_1',params:['.gitignore']},
+        { warning:'lack_of_mandatory_file_1',params:['LICENSE']},
+        { warning:'lack_of_mandatory_file_1',params:['appveyor.yml']}
+    ]
+},{
+    base:'stable-project',
+    title:'lack of mandatory files (#6)',
+    test:'lack_of_mandatory_file_1',
+    change:function(info){
+        //delete info.files['README.md']; // si saco este salta no_multilang_section_in_readme
+        delete info.files['LEEME.md'];
+        delete info.files['.travis.yml'];
+        delete info.files['.gitignore'];
+        delete info.files['LICENSE'];
     },
     expected:[
         { warning:'lack_of_mandatory_file_1',params:['LEEME.md']},
