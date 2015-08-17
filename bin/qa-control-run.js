@@ -12,7 +12,7 @@ program
     .version(require('../package').version)
     .usage('[[options] projectDirectory|--list-langs]')
     .option('-l, --lang [lang]', 'Language to generate')
-    //.option('-v, --verbose', 'Show progress information')
+    .option('-v, --verbose', 'Show progress information')
     //.option('-s, --silent', 'Don\'t output anything')
     .option('-L, --list-langs', 'List available languages')
     .parse(process.argv);
@@ -25,15 +25,17 @@ if( ( !program.listLangs && (""==program.args && !program.projectDir))
 
 var params = {};
 params.projectDir = program.args[0];
-//params.verbose = program.verbose;
+params.verbose = program.verbose;
 //params.silent = program.silent;
 params.listLangs = program.listLangs;
 params.lang = program.lang;
 
 //console.log(params); process.exit(0);
 
-qaControl.main(params).then(function(){
-    //process.stderr.write("Done!");
+qaControl.main(params).then(function(warnStr){
+    if(params.verbose) {
+        process.stderr.write("Done"+(""===warnStr ? " without warnings!":"!"));
+    }
 }).catch(function(err){
     process.stderr.write("ERROR: "+err.message);
 });

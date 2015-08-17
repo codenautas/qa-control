@@ -65,6 +65,7 @@ qaControl.generateCucardas = function generateCucardas(cucardas, packageJson) {
     }
     return cucaFileContent;
 };
+qaControl.verbose = false;
 
 qaControl.projectDefinition = {
     '0.0.1': {
@@ -499,9 +500,11 @@ var configReading=Promises.all(_.map(qaControl.projectDefinition,function(defini
 
 qaControl.loadProject = function loadProject(projectDir) {
     var info = {};
+    if(qaControl.verbose) { process.stdout.write("Starting qa-control on '"+projectDir+"'...\n"); }
     return Promises.start(function(){
         if(!qaControl.configReady) return configReading;
     }).then(function(){
+        if(qaControl.verbose) { process.stdout.write("Loaded default configuration.\n"); }
         if(!projectDir) { throw new Error('null projectDir'); }
         return fs.exists(projectDir);
     }).then(function(exists) {
@@ -511,6 +514,7 @@ qaControl.loadProject = function loadProject(projectDir) {
         if(! stat.isDirectory()) {
             throw new Error("'"+projectDir+"' is not a directory");
         }
+        if(qaControl.verbose) { process.stdout.write("Reading project directory...\n"); }
         return fs.readdir(projectDir);
     }).then(function(files) {
         info['files'] = {};
@@ -524,6 +528,7 @@ qaControl.loadProject = function loadProject(projectDir) {
                 return fs.stat(iFile);
             }).then(function(stat) {
                 if(stat.isFile()) {
+                    if(qaControl.verbose) { process.stdout.write("Reading '"+iFile+"'...\n"); }
                     return fs.readFile(iFile, 'utf8').then(function(content){
                         info['files'][file].content = content;
                         if(file==='package.json') {
@@ -531,6 +536,7 @@ qaControl.loadProject = function loadProject(projectDir) {
                         }
                     });
                 } else {
+                    if(qaControl.verbose) { process.stdout.write("Skipping directory '"+iFile+"'.\n"); }
                     delete info['files'][file]; // not a file, we erase it
                 }
             });
@@ -539,6 +545,7 @@ qaControl.loadProject = function loadProject(projectDir) {
             if(info['packageJson'].main && false === mainName in info['files']) {
                 info['files'][mainName] = {};
                 var mainFile = Path.normalize(projectDir+'/'+mainName);
+                if(qaControl.verbose) { process.stdout.write("Reading 'main' from '"+mainFile+"'...\n"); }
                 return fs.stat(mainFile).then(function(stat) {
                     if(stat.isFile()) {
                         return fs.readFile(mainFile, 'utf8').then(function(content) {
@@ -556,10 +563,12 @@ qaControl.loadProject = function loadProject(projectDir) {
 qaControl.controlInfo=function controlInfo(info){
     var resultWarnings=[];
     var rules = qaControl.projectDefinition[qaControl.currentVersion].rules;
+    if(qaControl.verbose) { process.stdout.write("Controlling project information...\n"); }
     var cadenaDePromesas = Promises.start();
     _.forEach(rules, function(rule, ruleName) {
         rule.checks.forEach(function(checkInfo){
             cadenaDePromesas = cadenaDePromesas.then(function() {
+                if(qaControl.verbose) { process.stdout.write("Checking rule '"+ruleName+"'...\n"); }
                 return checkInfo.warnings(info);
             }).then(function(warningsOfThisRule) {
                 if(warningsOfThisRule.length) {
@@ -584,6 +593,7 @@ qaControl.stringizeWarnings = function stringizeWarnings(warns, lang) {
     var warnStr = '';
     return Promises.start(function() {
         //console.log("stringizeWarnings(", warns, ",", lang, ")");
+        if(qaControl.verbose && warns.length) { process.stdout.write("Making warnings readable...\n"); }
         var messages = qaControl.msgs[lang];
         warns.forEach(function(warn) {
             var msg = messages[warn.warning];
@@ -594,6 +604,9 @@ qaControl.stringizeWarnings = function stringizeWarnings(warns, lang) {
                  for(var p=0; p<numParams.length; ++p) {
                     msg = msg.replace('$'+parseInt(p+1), warn.params[p]);
                 }
+            }
+            if(qaControl.verbose) {
+                warnStr += 'WARNING: ';
             }
             warnStr += msg + '\n';
         });
@@ -611,6 +624,7 @@ qaControl.controlProject=function controlProject(projectDir){
 
 qaControl.main=function main(parameters) {
     return Promises.start(function() {
+        qaControl.verbose = parameters.verbose;
         if(parameters.listLangs) {
             process.stdout.write("Available languages:");
             for(var lang in qaControl.msgs) { process.stdout.write(" "+lang); }
@@ -623,6 +637,7 @@ qaControl.main=function main(parameters) {
                 return qaControl.stringizeWarnings(warns, parameters.lang || "en");
             }).then(function(warnString) {
                 process.stdout.write(warnString);
+                return warnString;
             });
         }        
     });
