@@ -278,31 +278,31 @@ qaControl.projectDefinition = {
                 shouldAbort:true
             },
             mandatory_files:{
-              checks:[{
-                 warnings:function(info) {
-                     var warns =[];
-                     var mandatoryFiles=qaControl.projectDefinition[info.packageVersion].files;
-                     for(var fileName in mandatoryFiles) {
-                         var file = mandatoryFiles[fileName];
-                         if(file.mandatory && !info.files[fileName]) {
-                             warns.push({warning:'lack_of_mandatory_file_1', params:[fileName]});
-                         } else {
-                             if(file.presentIf && !file.presentIf(info.packageJson)) {
-                                 warns.push({warning:'lack_of_mandatory_file_1', params:[fileName]});
-                             } else if(file.mandatoryLines) {
-                                 var fileContent = info.files[fileName].content;
-                                 file.mandatoryLines.forEach(function(mandatoryLine) {
-                                    // agrego '\n' antes para no utilizar expresiones regulares
-                                    if(fileContent.indexOf('\n'+mandatoryLine)==-1) {
-                                        warns.push({warning:'lack_of_mandatory_line_1_in_file_2', params:[mandatoryLine, fileName]});
-                                    }
-                                 });
-                             }
-                         }
-                     }
-                    return warns;
-                 }
-              }],
+                checks:[{
+                    warnings:function(info) {
+                        var warns =[];
+                        var files=qaControl.projectDefinition[info.packageVersion].files;
+                        for(var fileName in files) {
+                            var file = files[fileName];
+                            if(file.mandatory && !info.files[fileName]) {
+                                warns.push({warning:'lack_of_mandatory_file_1', params:[fileName]});
+                            } else {
+                                if(file.presentIf && file.presentIf(info.packageJson) && !info.files[fileName]) {
+                                    warns.push({warning:'lack_of_mandatory_file_1', params:[fileName]});
+                                } else if(file.mandatoryLines) {
+                                    var fileContent = info.files[fileName].content;
+                                    file.mandatoryLines.forEach(function(mandatoryLine) {
+                                       // agrego '\n' antes para no utilizar expresiones regulares
+                                       if(fileContent.indexOf('\n'+mandatoryLine)==-1) {
+                                           warns.push({warning:'lack_of_mandatory_line_1_in_file_2', params:[mandatoryLine, fileName]});
+                                       }
+                                    });
+                                }
+                            }
+                        }
+                        return warns;
+                    }
+                }],
               shouldAbort:true
             },
             valid_values_for_qa_control_keys:{
