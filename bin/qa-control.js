@@ -39,7 +39,8 @@ qaControl.msgs={
         using_normal_promise_in_file_1: 'se han usado Promise(s) normales en "$1"',
         packagejson_main_file_1_does_not_exists: 'no existe el archivo "main" ($1) declarado en package.json',
         jshint_warnings_in_file_1: 'el archivo "$1" tiene warnings de JSHint',
-        incorrect_jshint_options_in_package_json: 'las opciones para JSHint en package.json son incorrectas',
+        lack_of_jshintconfig_section_in_package_json: 'falta la sección "jshintConfig" en package.json',
+        incorrect_jshint_options_in_package_json: 'las opciones para JSHint en package.json son incorrectas'
     }
 };
 
@@ -491,9 +492,20 @@ qaControl.projectDefinition = {
                                 var errors = jsh.JSHINT.data().errors;
                                 if(errors) {
                                     //console.log(errors);
-                                    warns.push({warning:'jshint_warnings_in_file_1', params:[file]});                                    
+                                    warns.push({warning:'jshint_warnings_in_file_1', params:[file]});
                                 }
                             }
+                        }
+                        return warns;
+                    }
+                }]
+            },
+            jshint_config:{
+                checks:[{
+                    warnings:function(info){
+                        var warns = [];
+                        if(false ==  'jshintConfig' in info['packageJson']) {
+                            warns.push({warning:'lack_of_jshintconfig_section_in_package_json'});
                         }
                         return warns;
                     }
