@@ -364,6 +364,7 @@ describe('qa-control', function(){
                 expect(en['jshint_warnings_in_file_1']).to.be('jshint warnings in file $1');
                 expect(en['lack_of_jshintconfig_section_in_package_json']).to.be('lack of jshintconfig section in package json');
                 expect(en['incorrect_jshintconfig_option_1_in_package_json']).to.be('incorrect jshintconfig option $1 in package json');
+                //expect(en['readme_not_sinchronized_with_multilang']).to.be('readme not sinchronized with multilang');
                 done();
             }).catch(done);
         });

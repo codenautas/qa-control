@@ -6,6 +6,7 @@ var Path = require('path');
 var _ = require('lodash');
 var semver = require('semver');
 var jsh = require('jshint');
+var multilang = require('multilang');
 
 var qaControl={};
 
@@ -40,7 +41,8 @@ qaControl.msgs={
         packagejson_main_file_1_does_not_exists: 'no existe el archivo "main" ($1) declarado en package.json',
         jshint_warnings_in_file_1: 'el archivo "$1" tiene warnings de JSHint',
         lack_of_jshintconfig_section_in_package_json: 'falta la sección "jshintConfig" en package.json',
-        incorrect_jshintconfig_option_1_in_package_json: 'la opcion "$1" en "jshintConfig" es incorrecta en package.json'
+        incorrect_jshintconfig_option_1_in_package_json: 'la opcion "$1" en "jshintConfig" es incorrecta en package.json'/*,
+        readme_not_sinchronized_with_multilang: 'README.md no esta sincronizado con multilang'*/
     }
 };
 
