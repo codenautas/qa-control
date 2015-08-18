@@ -3,12 +3,12 @@
     "warning": "lack_of_cucarda_marker_in_readme"
   },
   {
-    "warning": "missing_mandatory_cucarda_1", "params": ["npm-version"]
+    "warning": "lack_of_mandatory_cucarda_1", "params": ["npm-version"]
   },
   {
-    "warning": "missing_mandatory_cucarda_1", "params": ["downloads"]
+    "warning": "lack_of_mandatory_cucarda_1", "params": ["downloads"]
   },
   {
-    "warning": "missing_mandatory_cucarda_1", "params": ["dependencies"]
+    "warning": "lack_of_mandatory_cucarda_1", "params": ["dependencies"]
   }
 ]

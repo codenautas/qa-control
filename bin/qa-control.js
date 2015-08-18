@@ -353,7 +353,7 @@ qaControl.projectDefinition = {
                             var cucaStr = cucarda.md.replace(/\bxxx\b/g,repo).replace(/\byyy\b/g,modulo);
                             if(readme.indexOf(cucaID) == -1) {
                                 if(cucarda.mandatory) {
-                                    warns.push({warning:'missing_mandatory_cucarda_1', params:[nombreCucarda]});
+                                    warns.push({warning:'lack_of_mandatory_cucarda_1', params:[nombreCucarda]});
                                 }
                             } else {
                                 if('check' in cucarda && ! cucarda.check(info.packageJson)) {

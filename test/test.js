@@ -127,7 +127,7 @@ var fixtures=[{
 },{
     base:'stable-project',
     title:'missing mandatory cucardas in README.md (#8)',
-    test:'missing_mandatory_cucarda_1',
+    test:'lack_of_mandatory_cucarda_1',
     change:function(info){
         var readme=info.files['README.md'].content;
         info.files['README.md'].content = readme.replace('![npm-version]','')
@@ -135,14 +135,14 @@ var fixtures=[{
                                                 .replace('![dependencies]','');
     },
     expected:[
-        { warning:'missing_mandatory_cucarda_1',params:['npm-version']},
-        { warning:'missing_mandatory_cucarda_1',params:['downloads']},
-        { warning:'missing_mandatory_cucarda_1',params:['dependencies']}
+        { warning:'lack_of_mandatory_cucarda_1',params:['npm-version']},
+        { warning:'lack_of_mandatory_cucarda_1',params:['downloads']},
+        { warning:'lack_of_mandatory_cucarda_1',params:['dependencies']}
     ]
 },{
     base:'stable-project',
     title:'missing optional cucardas in README.md must not create warnings(#8)',
-    test:'missing_mandatory_cucarda_1',
+    test:'lack_of_mandatory_cucarda_1',
     change:function(info){
         
         var readme=info.files['README.md'].content;
@@ -403,6 +403,41 @@ describe('qa-control', function(){
             }).then(function(warns){
                 expect(warns).to.eql([]);
                 done();
+            }).catch(function(err) {
+                console.log("mal", err);
+                done(err);
+            });
+        });
+    });
+    describe('integrity tests', function(){
+        it('verify that qa-control.js only uses existent warning IDs (#24)', function(done){
+            fs.readFile('./bin/qa-control.js', {encoding: 'utf8'}).then(function(content) {
+                //console.log("con", content);
+                var re = /\bwarning\b\s*:\s*['"]([^'"]+)['"]/;
+                var numWarns=0;
+                for(var msg in qaControl.msgs) {
+                    if(msg !== "en") {
+                        // no captura cosas raras, pero obtengo line-number
+                        var lines = content.split('\n');
+                        for(var ln=0; ln<lines.length; ++ln) {
+                            var line = lines[ln];
+                            var matches = re.exec(line);
+                            if(matches) {
+                                var warn = matches[1];
+                                //console.log(ln+1, ":", warn);
+                                if(false === warn in qaControl.msgs[msg]) {
+                                    console.log("Inexistent warning '"+warn+"' on line #"+parseInt(ln+1));
+                                    ++numWarns;
+                                }
+                            }
+                        }
+                    }
+                }
+                if(numWarns) {
+                    done('Tengo '+numWarns+' warnings');
+                } else {
+                    done();
+                }
             }).catch(function(err) {
                 console.log("mal", err);
                 done(err);
