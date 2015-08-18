@@ -112,6 +112,16 @@ var fixtures=[{
     }
 },{
     base:'stable-project',
+    title:'README.md (multilang) not sinchronized (#7)',
+    test:'readme_multilang_not_sincronized_with_file_1',
+    change:function(info){
+        info.files['LEEME.md'].content = info.files['LEEME.md'].content.replace('NO MODIFIQUE ESTE ARCHIVO','');
+    },
+    expected:[{
+        warning:'readme_multilang_not_sincronized_with_file_1', params:['LEEME.md']
+    }]
+},{
+    base:'stable-project',
     title:'no "qa-control" section in "codenautas" project (#21)',
     test:'no_qa_control_section_in_codenautas_project',
     change:function(info){
@@ -123,7 +133,11 @@ var fixtures=[{
     test:'lack_of_cucarda_marker_in_readme',
     change:function(info){
         info.files['README.md'].content = info.files['README.md'].content.replace('<!-- cucardas -->','');
-    }
+    },
+    expected:[
+        { warning:'lack_of_cucarda_marker_in_readme' },
+        { warning:'readme_multilang_not_sincronized_with_file_1', params:['LEEME.md']}
+    ]
 },{
     base:'stable-project',
     title:'missing mandatory cucardas in README.md (#8)',
@@ -137,7 +151,8 @@ var fixtures=[{
     expected:[
         { warning:'lack_of_mandatory_cucarda_1',params:['npm-version']},
         { warning:'lack_of_mandatory_cucarda_1',params:['downloads']},
-        { warning:'lack_of_mandatory_cucarda_1',params:['dependencies']}
+        { warning:'lack_of_mandatory_cucarda_1',params:['dependencies']},
+        { warning:'readme_multilang_not_sincronized_with_file_1', params:['LEEME.md']}
     ]
 },{
     base:'stable-project',
@@ -151,7 +166,7 @@ var fixtures=[{
                                                 .replace('![coverage]','')
                                                 .replace('![climate]','');
     },
-    expected:[]
+    expected:[ { warning:'readme_multilang_not_sincronized_with_file_1', params:['LEEME.md'] } ]
 },{
     base:'stable-project',
     title:'wrong format in mandatory cucardas in README.md (#8)',
@@ -167,7 +182,8 @@ var fixtures=[{
         { warning:'wrong_format_in_cucarda_1',params:['npm-version']},
         { warning:'wrong_format_in_cucarda_1',params:['downloads']},
         { warning:'wrong_format_in_cucarda_1',params:['coverage']},
-        { warning:'wrong_format_in_cucarda_1',params:['dependencies']}
+        { warning:'wrong_format_in_cucarda_1',params:['dependencies']},
+        { warning:'readme_multilang_not_sincronized_with_file_1', params:['LEEME.md']}
     ]
 },{
     base:'stable-project',
@@ -364,7 +380,7 @@ describe('qa-control', function(){
                 expect(en['jshint_warnings_in_file_1']).to.be('jshint warnings in file $1');
                 expect(en['lack_of_jshintconfig_section_in_package_json']).to.be('lack of jshintconfig section in package json');
                 expect(en['incorrect_jshintconfig_option_1_in_package_json']).to.be('incorrect jshintconfig option $1 in package json');
-                //expect(en['readme_not_sinchronized_with_multilang']).to.be('readme not sinchronized with multilang');
+                expect(en['readme_multilang_not_sincronized_with_file_1']).to.be('readme multilang not sincronized with file $1');
                 done();
             }).catch(done);
         });
@@ -599,7 +615,8 @@ describe('qa-control main', function(){
                                       +'no existe el archivo "main" (param1) declarado en package.json\n'
                                       +'el archivo "param1" tiene warnings de JSHint\n'
                                       +'falta la sección "jshintConfig" en package.json\n'
-                                      +'la opcion "param1" en "jshintConfig" es incorrecta en package.json\n');
+                                      +'la opcion "param1" en "jshintConfig" es incorrecta en package.json\n'
+                                      +'README.md no esta sincronizado con "param1" para multilang\n');
                 done();
             }).catch(done);
         });
@@ -632,7 +649,8 @@ describe('qa-control main', function(){
                                        +'packagejson main file param1 does not exists\n'
                                        +'jshint warnings in file param1\n'
                                        +'lack of jshintconfig section in package json\n'
-                                       +'incorrect jshintconfig option param1 in package json\n');
+                                       +'incorrect jshintconfig option param1 in package json\n'
+                                       +'readme multilang not sincronized with file param1\n');
                 done();
             }).catch(done);
         });

@@ -41,8 +41,8 @@ qaControl.msgs={
         packagejson_main_file_1_does_not_exists: 'no existe el archivo "main" ($1) declarado en package.json',
         jshint_warnings_in_file_1: 'el archivo "$1" tiene warnings de JSHint',
         lack_of_jshintconfig_section_in_package_json: 'falta la sección "jshintConfig" en package.json',
-        incorrect_jshintconfig_option_1_in_package_json: 'la opcion "$1" en "jshintConfig" es incorrecta en package.json'/*,
-        readme_not_sinchronized_with_multilang: 'README.md no esta sincronizado con multilang'*/
+        incorrect_jshintconfig_option_1_in_package_json: 'la opcion "$1" en "jshintConfig" es incorrecta en package.json',
+        readme_multilang_not_sincronized_with_file_1: 'README.md no esta sincronizado con "$1" para multilang'
     }
 };
 
@@ -515,6 +515,26 @@ qaControl.projectDefinition = {
                             for(var op in requiredOptions) {
                                 if((false === op in checkedOptions) || checkedOptions[op] !== requiredOptions[op]) {
                                     warns.push({warning:'incorrect_jshintconfig_option_1_in_package_json', params:[op]});
+                                }
+                            }
+                        }
+                        return warns;
+                    }
+                }]
+            },
+            multilang:{
+                checks:[{
+                    warnings:function(info) {
+                        var warns = [];
+                        var content = info.files['README.md'].content;
+                        var obtainedLangs = multilang.obtainLangs(content);
+                        //console.log("OL", obtainedLangs.langs);
+                        for(var lang in obtainedLangs.langs) {
+                            var file=obtainedLangs.langs[lang].fileName;
+                            if(file !== 'README.md') {
+                                var mlContent = multilang.changeDoc(content, lang);
+                                if(mlContent != info.files[file].content) {
+                                    warns.push({warning:'readme_multilang_not_sincronized_with_file_1', params:[file]});
                                 }
                             }
                         }
