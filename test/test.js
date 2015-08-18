@@ -328,6 +328,7 @@ describe('qa-control', function(){
                 expect(en['repository_name_not_found']).to.be('pacakgeJson.repository must be in format /{[-a-zA-Z0-9_.]+}\/[-a-zA-Z0-9_.]+/');
                 expect(en['using_normal_promise_in_file_1']).to.be('using normal promise in file $1');
                 expect(en['packagejson_main_file_1_does_not_exists']).to.be('packagejson main file $1 does not exists');
+                expect(en['jshint_warnings_in_file_1']).to.be('jshint warnings in file $1');
                 done();
             }).catch(done);
         });
@@ -554,7 +555,8 @@ describe('qa-control main', function(){
                                       +'las primeras líneas no coinciden en param1\n'
                                       +'pacakgeJson.repository no tiene el formato /{[-a-zA-Z0-9_.]+}/[-a-zA-Z0-9_.]+/\n'
                                       +'se han usado Promise(s) normales en "param1"\n'
-                                      +'no existe el archivo "main" (param1) declarado en package.json\n');
+                                      +'no existe el archivo "main" (param1) declarado en package.json\n'
+                                      +'el archivo "param1" tiene warnings de JSHint\n');
                 done();
             }).catch(done);
         });
@@ -584,7 +586,8 @@ describe('qa-control main', function(){
                                        +'file param1 does not match custom param2\n'
                                        +'first lines does not match in file param1\n'
                                        +'using normal promise in file param1\n'
-                                       +'packagejson main file param1 does not exists\n');
+                                       +'packagejson main file param1 does not exists\n'
+                                       +'jshint warnings in file param1\n');
 
                 done();
             }).catch(done);

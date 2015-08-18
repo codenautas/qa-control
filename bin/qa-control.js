@@ -36,7 +36,8 @@ qaControl.msgs={
         first_lines_does_not_match_in_file_1: 'las primeras líneas no coinciden en $1',
         repository_name_not_found: 'pacakgeJson.repository no tiene el formato /{[-a-zA-Z0-9_.]+}\/[-a-zA-Z0-9_.]+/',
         using_normal_promise_in_file_1: 'se han usado Promise(s) normales en "$1"',
-        packagejson_main_file_1_does_not_exists: 'no existe el archivo "main" ($1) declarado en package.json'
+        packagejson_main_file_1_does_not_exists: 'no existe el archivo "main" ($1) declarado en package.json',
+        jshint_warnings_in_file_1: 'el archivo "$1" tiene warnings de JSHint'
     }
 };
 
