@@ -414,7 +414,8 @@ describe('qa-control', function(){
         it('verify that qa-control.js only uses existent warning IDs (#24)', function(done){
             fs.readFile('./bin/qa-control.js', {encoding: 'utf8'}).then(function(content) {
                 //console.log("con", content);
-                var re = /\bwarning\b\s*:\s*['"]([^'"]+)['"]/;
+                var reWarn = /\bwarning\b\s*:\s*['"]([^'"]+)['"]/;
+                var reIncompleteWarn = /\bwarning\b\s*:\s*$/;
                 var numWarns=0;
                 for(var msg in qaControl.msgs) {
                     if(msg !== "en") {
@@ -422,7 +423,7 @@ describe('qa-control', function(){
                         var lines = content.split('\n');
                         for(var ln=0; ln<lines.length; ++ln) {
                             var line = lines[ln];
-                            var matches = re.exec(line);
+                            var matches = reWarn.exec(line);
                             if(matches) {
                                 var warn = matches[1];
                                 //console.log(ln+1, ":", warn);
@@ -430,6 +431,10 @@ describe('qa-control', function(){
                                     console.log("Inexistent warning '"+warn+"' on line #"+parseInt(ln+1));
                                     ++numWarns;
                                 }
+                            }
+                            if(reIncompleteWarn.test(line)) {
+                                console.log("Incomplete warning on line #"+parseInt(ln+1));
+                                ++numWarns;
                             }
                         }
                     }

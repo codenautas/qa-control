@@ -476,7 +476,23 @@ qaControl.projectDefinition = {
                         return warns;
                     }
                 }]
-            }
+            }/*,
+            jshint:{
+                checks:[{
+                    warnings:function(info){
+                        var warns = [];
+                        for(var file in info.files) {
+                            if(file.match(/(.js)$/)) {
+                                var content = info.files[file].content;
+                                if(content.match(/require\(["'](promise|q|rsvp|es6promise)['"]\)/m)) {
+                                    warns.push({warning:'jshint_warnings_in_file_1', params:[file]});
+                                }
+                            }
+                        }
+                        return warns;
+                    }
+                }]
+            }*/
         }
     }
 };
