@@ -14,7 +14,7 @@ var fixtures=[{
     }
 },{
     base:'stable-project',
-    title:'no qa-control section in package.json(#2)',
+    title:'no qa-control section in package.json (#2)',
     test:'no_qa_control_section_in_package_json',
     change:function(info){
         delete info.packageJson['qa-control'];
@@ -141,10 +141,9 @@ var fixtures=[{
     ]
 },{
     base:'stable-project',
-    title:'missing optional cucardas in README.md must not create warnings(#8)',
+    title:'missing optional cucardas in README.md must not create warnings (#8)',
     test:'lack_of_mandatory_cucarda_1',
     change:function(info){
-        
         var readme=info.files['README.md'].content;
         info.files['README.md'].content = readme.replace('![designing]','')
                                                 .replace('![extending]','')
@@ -271,6 +270,22 @@ var fixtures=[{
     change:function(info){
         delete info['packageJson']['jshintConfig'];
     }
+},{
+    base:'stable-project',
+    title:'incorrect "jshintConfig" options in package.json (#27)',
+    test:'incorrect_jshintconfig_option_1_in_package_json',
+    change:function(info){
+        var jsh = info['packageJson']['jshintConfig'];
+        jsh.asi = true;
+        jsh.curly = false;
+        jsh.forin = false;
+        info['packageJson']['jshintConfig'] = jsh;
+    },
+    expected:[
+        { warning:'incorrect_jshintconfig_option_1_in_package_json',params:['asi']},
+        { warning:'incorrect_jshintconfig_option_1_in_package_json',params:['curly']},
+        { warning:'incorrect_jshintconfig_option_1_in_package_json',params:['forin']}
+    ]
 }];
 
 function cloneProject(info){
