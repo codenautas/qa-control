@@ -5,6 +5,7 @@ var fs = require('fs-promise');
 var Path = require('path');
 var _ = require('lodash');
 var semver = require('semver');
+var jsh = require('jshint');
 
 var qaControl={};
 
@@ -476,23 +477,27 @@ qaControl.projectDefinition = {
                         return warns;
                     }
                 }]
-            }/*,
+            },
             jshint:{
                 checks:[{
                     warnings:function(info){
                         var warns = [];
+                        var jshOptions = { "asi": false, "curly": true, "forin": true };
                         for(var file in info.files) {
                             if(file.match(/(.js)$/)) {
                                 var content = info.files[file].content;
-                                if(content.match(/require\(["'](promise|q|rsvp|es6promise)['"]\)/m)) {
-                                    warns.push({warning:'jshint_warnings_in_file_1', params:[file]});
+                                jsh.JSHINT(content, jshOptions, false);
+                                var errors = jsh.JSHINT.data().errors;
+                                if(errors) {
+                                    //console.log(errors);
+                                    warns.push({warning:'jshint_warnings_in_file_1', params:[file]});                                    
                                 }
                             }
                         }
                         return warns;
                     }
                 }]
-            }*/
+            }
         }
     }
 };

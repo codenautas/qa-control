@@ -21,6 +21,7 @@
     "parameters": ">=0.1.5",
     "commander": ">=2.8.1",
     "semver": "~5.0.1",
+    "jshint": ">=2.8.0",
     
     "best-promise": ">=0.2.3"
   },

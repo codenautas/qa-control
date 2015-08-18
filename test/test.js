@@ -256,7 +256,6 @@ var fixtures=[{
     ]
 },{
     base:'stable-project',
-    skipped: '#26',
     title:'must warn if JSHINT haves warnings (#26)',
     test:'jshint_warnings_in_file_1',
     change:function(info){
