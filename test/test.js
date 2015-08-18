@@ -272,7 +272,19 @@ var fixtures=[{
     }
 },{
     base:'stable-project',
-    title:'incorrect "jshintConfig" options in package.json (#27)',
+    title:'missing options in jshintConfig in package.json (#27)',
+    test:'incorrect_jshintconfig_option_1_in_package_json',
+    change:function(info){
+        delete info['packageJson']['jshintConfig']['curly'];
+        delete info['packageJson']['jshintConfig']['forin'];
+    },
+    expected:[
+        { warning:'incorrect_jshintconfig_option_1_in_package_json',params:['curly']},
+        { warning:'incorrect_jshintconfig_option_1_in_package_json',params:['forin']}
+    ]
+},{
+    base:'stable-project',
+    title:'incorrect options in jshintConfig in package.json (#27)',
     test:'incorrect_jshintconfig_option_1_in_package_json',
     change:function(info){
         var jsh = info['packageJson']['jshintConfig'];
