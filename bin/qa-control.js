@@ -40,7 +40,7 @@ qaControl.msgs={
         packagejson_main_file_1_does_not_exists: 'no existe el archivo "main" ($1) declarado en package.json',
         jshint_warnings_in_file_1: 'el archivo "$1" tiene warnings de JSHint',
         lack_of_jshintconfig_section_in_package_json: 'falta la sección "jshintConfig" en package.json',
-        incorrect_jshint_options_in_package_json: 'las opciones para JSHint en package.json son incorrectas'
+        incorrect_jshintconfig_option_1_in_package_json: 'la opcion "$1" en "jshintConfig" es incorrecta en package.json'
     }
 };
 
@@ -184,7 +184,6 @@ qaControl.projectDefinition = {
                 docDescription: ''
             }
         },
-        
         customs:{
             softRegExp:function(realRegex) {
                 var re=realRegex.replace(/\\/g, '\\\\')
@@ -207,6 +206,7 @@ qaControl.projectDefinition = {
                 match:"var Path = require('path');"
             }
         },
+        jshint_options: { "asi": false, "curly": true, "forin": true },
         rules:{
             exist_package_json:{
                 checks:[{
@@ -488,7 +488,7 @@ qaControl.projectDefinition = {
                         for(var file in info.files) {
                             if(file.match(/(.js)$/)) {
                                 var content = info.files[file].content;
-                                jsh.JSHINT(content, jshOptions, false);
+                                jsh.JSHINT(content, qaControl.projectDefinition[info.packageVersion].jshint_options, false);
                                 var errors = jsh.JSHINT.data().errors;
                                 if(errors) {
                                     //console.log(errors);
@@ -506,6 +506,15 @@ qaControl.projectDefinition = {
                         var warns = [];
                         if(false ==  'jshintConfig' in info['packageJson']) {
                             warns.push({warning:'lack_of_jshintconfig_section_in_package_json'});
+                        }
+                        else {
+                            var requiredOptions = qaControl.projectDefinition[info.packageVersion].jshint_options;
+                            var checkedOptions = info['packageJson']['jshintConfig'];
+                            for(var op in requiredOptions) {
+                                if((false === op in checkedOptions) || checkedOptions[op] !== requiredOptions[op]) {
+                                    warns.push({warning:'incorrect_jshintconfig_option_1_in_package_json', params:[op]});
+                                }
+                            }
                         }
                         return warns;
                     }

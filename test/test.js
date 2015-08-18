@@ -336,7 +336,7 @@ describe('qa-control', function(){
                 expect(en['packagejson_main_file_1_does_not_exists']).to.be('packagejson main file $1 does not exists');
                 expect(en['jshint_warnings_in_file_1']).to.be('jshint warnings in file $1');
                 expect(en['lack_of_jshintconfig_section_in_package_json']).to.be('lack of jshintconfig section in package json');
-                expect(en['incorrect_jshint_options_in_package_json']).to.be('incorrect jshint options in package json');
+                expect(en['incorrect_jshintconfig_option_1_in_package_json']).to.be('incorrect jshintconfig option $1 in package json');
                 done();
             }).catch(done);
         });
@@ -571,7 +571,7 @@ describe('qa-control main', function(){
                                       +'no existe el archivo "main" (param1) declarado en package.json\n'
                                       +'el archivo "param1" tiene warnings de JSHint\n'
                                       +'falta la sección "jshintConfig" en package.json\n'
-                                      +'las opciones para JSHint en package.json son incorrectas\n');
+                                      +'la opcion "param1" en "jshintConfig" es incorrecta en package.json\n');
                 done();
             }).catch(done);
         });
@@ -604,8 +604,7 @@ describe('qa-control main', function(){
                                        +'packagejson main file param1 does not exists\n'
                                        +'jshint warnings in file param1\n'
                                        +'lack of jshintconfig section in package json\n'
-                                       +'incorrect jshint options in package json\n');
-
+                                       +'incorrect jshintconfig option param1 in package json\n');
                 done();
             }).catch(done);
         });
