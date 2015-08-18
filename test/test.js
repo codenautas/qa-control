@@ -254,6 +254,17 @@ var fixtures=[{
     expected:[
         { warning:'packagejson_main_file_1_does_not_exists',params:['bin/main.js']}
     ]
+},{
+    base:'stable-project',
+    skipped: '#26',
+    title:'must warn if JSHINT haves warnings (#26)',
+    test:'jshint_warnings_in_file_1',
+    change:function(info){
+        info.files['stable-project.js'].content=info.files['stable-project.js'].content.replace('};//;','}//');
+    },
+    expected:[
+        { warning:'jshint_warnings_in_file_1',params:['stable-project.js']}
+    ]
 }];
 
 function cloneProject(info){
