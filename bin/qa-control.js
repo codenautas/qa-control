@@ -33,7 +33,7 @@ qaControl.msgs={
         wrong_format_in_cucarda_1: 'la cucarda "$1" tiene formato incorrecto',
         lack_of_mandatory_line_1_in_file_2: 'falta la linea obligatoria $1 en el archivo $2',
         file_1_does_not_match_custom_2: '$1 no respeta la custombre $2',
-        first_line_does_not_match_in_file_1: 'las primeras líneas no coinciden en $1',
+        first_lines_does_not_match_in_file_1: 'las primeras líneas no coinciden en $1',
         repository_name_not_found: 'pacakgeJson.repository no tiene el formato /{[-a-zA-Z0-9_.]+}\/[-a-zA-Z0-9_.]+/',
         using_normal_promise_in_file_1: 'se han usado Promise(s) normales en "$1"',
         packagejson_main_file_1_does_not_exists: 'no existe el archivo "main" ($1) declarado en package.json'
@@ -42,7 +42,7 @@ qaControl.msgs={
 
 // devuelve un buffer con los \n, \r\n, \r como \n
 qaControl.fixEOL = function fixEOL(buf) {
-    return buf.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    return buf.replace(/\s*\r?\n/g, '\n').replace(/\s*\r/g, '\n');
 };
 
 // bufTest debe empezar con bufStart
@@ -427,16 +427,33 @@ qaControl.projectDefinition = {
                         if(codeCheck) {
                         // transformar el nombre de proyecto
                             var parts = info.packageJson.name.split('-');
-                            var project = '';
-                            for(var p=0; p<parts.length; ++p) {
-                                var part=parts[p];
-                                project += part.substring(0, 1).toUpperCase()+part.substring(1);
+                            var first=function(toWhat){
+                                return function(part){
+                                    return part.substring(0, 1)[toWhat]()+part.substring(1);
+                                }
                             }
+                            var ProjectName = parts.map(first("toUpperCase")).join('');
+                            var projectName = first("toLowerCase")(ProjectName);
                             var mainName = ('main' in info.packageJson) ? info.packageJson.main : 'index.js';
                             if(false == mainName in info.files) {
                                 warns.push({warning:'packagejson_main_file_1_does_not_exists', params:[mainName]})
-                            } else if(! qaControl.startsWith(info.files[mainName].content, codeCheck.firstLines.replace('nombreDelModulo', project))) {
-                                warns.push({warning:'first_line_does_not_match_in_file_1', params:[mainName]});
+                            } else if(!qaControl.startsWith(info.files[mainName].content, codeCheck.firstLines.replace(/nombreDelModulo/g, ProjectName)) && 
+                                      !qaControl.startsWith(info.files[mainName].content, codeCheck.firstLines.replace(/nombreDelModulo/g, projectName))
+                            ) {
+                                if(qaControl.verbose){
+                                    var code=qaControl.fixEOL(info.files[mainName].content);
+                                    var model1=qaControl.fixEOL(codeCheck.firstLines.replace(/nombreDelModulo/g, projectName));
+                                    var model2=qaControl.fixEOL(codeCheck.firstLines.replace(/nombreDelModulo/g, ProjectName));
+                                    for(var i=0; i<model1.length; i++){
+                                        if(code[i]!=model1[i] && code[i]!=model2[i]){
+                                            console.log('DIF STARTS IN:',JSON.stringify(code.substring(i, Math.min(model1.length, i+20))));
+                                            console.log('MODEL 1      :',JSON.stringify(model1.substring(i, Math.min(model1.length, i+20))));
+                                            console.log('MODEL 2      :',JSON.stringify(model2.substring(i, Math.min(model1.length, i+20))));
+                                            break;
+                                        }
+                                    }
+                                }
+                                warns.push({warning:'first_lines_does_not_match_in_file_1', params:[mainName]});
                             }
                         }
                         return warns;
@@ -596,7 +613,7 @@ qaControl.stringizeWarnings = function stringizeWarnings(warns, lang) {
         if(qaControl.verbose && warns.length) { process.stdout.write("Making warnings readable...\n"); }
         var messages = qaControl.msgs[lang];
         warns.forEach(function(warn) {
-            var msg = messages[warn.warning];
+            var msg = messages[warn.warning] || warn.warning;
             //console.log("message", msg, warn);
             var numParams = warn.warning.match(/\d/g);
             if(numParams) {

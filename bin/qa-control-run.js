@@ -37,5 +37,6 @@ qaControl.main(params).then(function(warnStr){
         process.stderr.write("Done"+(""===warnStr ? " without warnings!":"!"));
     }
 }).catch(function(err){
-    process.stderr.write("ERROR: "+err.message);
+    process.stderr.write("\nERROR: "+err.message);
+    process.stderr.write("\nSTACK: "+err.stack);
 });

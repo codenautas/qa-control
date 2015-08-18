@@ -1,10 +1,10 @@
 "use strict";
 /* eqnull:true */
 
-var StableProject = {};
+var stableProject = {};
 
-StableProject.fun = function(){
+stableProject.fun = function(){
     return "fun";
 }
 
-module.exports = StableProject;
+module.exports = stableProject;

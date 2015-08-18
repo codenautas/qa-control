@@ -172,12 +172,12 @@ var fixtures=[{
     ]
 },{
     base:'stable-project',
-    title:'first line does not match in file (#14)',
-    test:'first_line_does_not_match_in_file_1',
+    title:'first lines does not match in file (#14)',
+    test:'first_lines_does_not_match_in_file_1',
     change:function(info){
         info.files['stable-project.js'].content='// a comment in the first line\n'+info.files['stable-project.js'].content;
     },
-    expected:[{ warning:'first_line_does_not_match_in_file_1',params:['stable-project.js']}]
+    expected:[{ warning:'first_lines_does_not_match_in_file_1',params:['stable-project.js']}]
 },{
     base:'stable-project',
     title:'lack of mandatory lines in .gitignore (#10)',
@@ -313,7 +313,7 @@ describe('qa-control', function(){
                 expect(en['wrong_format_in_cucarda_1']).to.be('wrong format in cucarda $1');
                 expect(en['lack_of_mandatory_line_1_in_file_2']).to.be('lack of mandatory line $1 in file $2');
                 expect(en['file_1_does_not_match_custom_2']).to.be('file $1 does not match custom $2');
-                expect(en['first_line_does_not_match_in_file_1']).to.be('first line does not match in file $1');
+                expect(en['first_lines_does_not_match_in_file_1']).to.be('first lines does not match in file $1');
                 expect(en['repository_name_not_found']).to.be('pacakgeJson.repository must be in format /{[-a-zA-Z0-9_.]+}\/[-a-zA-Z0-9_.]+/');
                 expect(en['using_normal_promise_in_file_1']).to.be('using normal promise in file $1');
                 expect(en['packagejson_main_file_1_does_not_exists']).to.be('packagejson main file $1 does not exists');
@@ -387,7 +387,7 @@ describe('qa-control', function(){
         it('packageJson.main must be loaded from subdirectory', function(done){
             qaControl.loadProject('./test/fixtures/stable-project-main-in-subdir').then(function(info){
                 expect(info['files']).to.have.key('bin/main.js');
-                expect(info['files']['bin/main.js'].content).to.contain('StableProject');
+                expect(info['files']['bin/main.js'].content).to.contain('stableProject');
                 return qaControl.controlInfo(info);
             }).then(function(warns){
                 expect(warns).to.eql([]);
@@ -536,7 +536,7 @@ describe('qa-control main', function(){
                                        +'wrong format in cucarda param1\n'
                                        +'lack of mandatory line param1 in file param2\n'
                                        +'file param1 does not match custom param2\n'
-                                       +'first line does not match in file param1\n'
+                                       +'first lines does not match in file param1\n'
                                        +'using normal promise in file param1\n'
                                        +'packagejson main file param1 does not exists\n');
 
