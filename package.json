@@ -13,6 +13,7 @@
   "bin": {
     "qa-control": "./bin/qa-control-run.js"
   },
+  "main": "./bin/qa-control.js",
   "dependencies": {
     "fs-extra": "^0.22.1",
     "fs-promise": ">=0.3.1",
@@ -41,5 +42,17 @@
     "test-ci": "istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- --reporter spec --check-leaks test/",
     "test-cov": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter dot --check-leaks test/",
     "start": "node example/server.js"
+  },
+  "jshintConfig": {
+    "asi": false,
+    "forin": true,
+    "curly": true
+  },
+  "qa-control": {
+    "package-version": "0.0.1",
+    "coverage": 90,
+    "run-in": "server",
+    "stability": "designing",
+    "type": "cmd"
   }
 }

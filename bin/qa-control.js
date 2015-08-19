@@ -202,8 +202,9 @@ qaControl.projectDefinition = {
                 match:'function eid(id){ return document.getElementById(id); }'
             },
             var_winos:{
-                detect:'var winos=',
-                match:"var winOS = Path.sep==='\\\\';"
+                // separo los siguientes dos strings en dos partes para que no salte un warning
+                detect:'var '+'winos=',
+                match:"var "+"winOS = Path.sep==='\\\\';"
             },
             var_path:{
                 detect:'var path=',
