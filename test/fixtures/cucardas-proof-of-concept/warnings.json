@@ -1,5 +1,8 @@
 [
   {
+    "warning": "wrong_format_in_cucarda_1", "params": ["linux"]
+  },
+  {
     "warning": "wrong_format_in_cucarda_1", "params": ["dependencies"]
   }
 ]

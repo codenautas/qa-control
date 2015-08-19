@@ -141,17 +141,19 @@ qaControl.projectDefinition = {
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/downloads.png',
                 docDescription: ''
             },
-            // Emilio: esto parece un error de refactoring, confirmalo y borralo!!!!!
-            // build:{
-                // check: function(packageJson){ 
-                    // return !packageJson['qa-control']['test-appveyor'];
-                // },
-                // md:'[![build](https://img.shields.io/travis/xxx/yyy/master.svg)](https://travis-ci.org/xxx/yyy)',
-                // imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/medalla-ejemplo-linux.png',
-                // docDescription: 'linux/build'
-            // },
-            linux:{
+            build:{
+                check: function(packageJson){ 
+                    return !packageJson['qa-control']['test-appveyor'];
+                },
                 md:'[![build](https://img.shields.io/travis/xxx/yyy/master.svg)](https://travis-ci.org/xxx/yyy)',
+                imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/medalla-ejemplo-linux.png',
+                docDescription: 'linux/build'
+            },
+            linux:{
+                check: function(packageJson){ 
+                    return !!packageJson['qa-control']['test-appveyor'];
+                },
+                md:'[![linux](https://img.shields.io/travis/xxx/yyy/master.svg)](https://travis-ci.org/xxx/yyy)',
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/medalla-ejemplo-linux.png',
                 hideInManual: true,
             },
