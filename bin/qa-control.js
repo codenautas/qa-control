@@ -376,7 +376,7 @@ qaControl.projectDefinition = {
                             }
                         }
                         if(warns.length) {
-                            fs.writeFileSync("cucardas.log", qaControl.generateCucardas(cucardas, info.packageJson));
+                            fs.writeFile("cucardas.log", qaControl.generateCucardas(cucardas, info.packageJson));
                         }
                         return warns;
                     }
