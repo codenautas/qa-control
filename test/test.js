@@ -343,6 +343,16 @@ var fixtures=[{
         { warning:'lack_of_mandatory_line_1_in_file_2',params:['*-local.*', '.gitignore']},
         { warning: 'lack_of_jshintconfig_section_in_package_json'}
     ]
+},{
+    base:'stable-project',
+    title:'lack of optionally mandatory files',
+    test:'lack_of_mandatory_file_1',
+    change:function(info){
+        delete info.files['appveyor.yml'];
+    },
+    expected:[
+        { warning:'lack_of_mandatory_file_1',params:['appveyor.yml']}
+    ]
 }];
 
 function cloneProject(info){
