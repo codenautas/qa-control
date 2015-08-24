@@ -85,7 +85,12 @@ qaControl.projectDefinition = {
                 }
             },
             type: {
-                mandatory:true
+                mandatory:true,
+                values: {
+                    app: {},
+                    lib: {},
+                    "cmd-tool": {}
+                }
             }
         },
         files:{
@@ -312,7 +317,7 @@ qaControl.projectDefinition = {
                         return warns;
                     }
                 }],
-              shouldAbort:true
+                shouldAbort:true
             },
             valid_values_for_qa_control_keys:{
                 checks:[{
@@ -333,7 +338,8 @@ qaControl.projectDefinition = {
                         };
                         return warns;
                     }
-                }]
+                }],
+                shouldAbort:true
             },
             no_multilang_section_in_readme:{
                 checks:[{
@@ -432,8 +438,9 @@ qaControl.projectDefinition = {
                         var warns=[];
                         var qaControlSection=info.packageJson['qa-control'];
                         var whichRunIn=qaControlSection['run-in'];
-                        var codeCheck=qaControl.projectDefinition[info.packageVersion].sections['run-in']['values'][whichRunIn];
-                        if(codeCheck) {
+                        var whichType=qaControlSection['type'];
+                        var firstLines=qaControl.projectDefinition[info.packageVersion].firstLines[whichRunIn][whichType];
+                        if(firstLines) {
                         // transformar el nombre de proyecto
                             var parts = info.packageJson.name.split('-');
                             var first=function(toWhat){
@@ -446,13 +453,13 @@ qaControl.projectDefinition = {
                             var mainName = ('main' in info.packageJson) ? info.packageJson.main : 'index.js';
                             if(false == mainName in info.files) {
                                 warns.push({warning:'packagejson_main_file_1_does_not_exists', params:[mainName]})
-                            } else if(!qaControl.startsWith(info.files[mainName].content, codeCheck.firstLines.replace(/nombreDelModulo/g, ProjectName)) && 
-                                      !qaControl.startsWith(info.files[mainName].content, codeCheck.firstLines.replace(/nombreDelModulo/g, projectName))
+                            } else if(!qaControl.startsWith(info.files[mainName].content, firstLines.replace(/nombreDelModulo/g, ProjectName)) && 
+                                      !qaControl.startsWith(info.files[mainName].content, firstLines.replace(/nombreDelModulo/g, projectName))
                             ) {
                                 if(qaControl.verbose){
                                     var code=qaControl.fixEOL(info.files[mainName].content);
-                                    var model1=qaControl.fixEOL(codeCheck.firstLines.replace(/nombreDelModulo/g, projectName));
-                                    var model2=qaControl.fixEOL(codeCheck.firstLines.replace(/nombreDelModulo/g, ProjectName));
+                                    var model1=qaControl.fixEOL(firstLines.replace(/nombreDelModulo/g, projectName));
+                                    var model2=qaControl.fixEOL(firstLines.replace(/nombreDelModulo/g, ProjectName));
                                     for(var i=0; i<model1.length; i++){
                                         if(code[i]!=model1[i] && code[i]!=model2[i]){
                                             console.log('DIF STARTS IN:',JSON.stringify(code.substring(i, Math.min(model1.length, i+20))));
@@ -566,10 +573,19 @@ qaControl.fixMessages = function fixMessages(messagesToFix) {
 
 qaControl.configReady=false;
 var configReading=Promises.all(_.map(qaControl.projectDefinition,function(definition, version){
-    return Promises.all(_.map(definition.sections['run-in'].values,function(properties, value){
-        return fs.readFile(__dirname+'/'+version+'/first-lines-'+value+'.txt',{encoding: 'utf8'}).then(function(content){
-            properties.firstLines=content;
-        });
+    definition.firstLines=definition.firstLines||{};
+    return Promises.all(_.map(definition.sections['run-in'].values,function(runInProperties, runInValue){
+        return Promises.all(_.map(definition.sections['type'].values,function(typeProperties, typeValue){
+            return fs.readFile(__dirname+'/'+version+'/first-lines-'+runInValue+'-'+typeValue+'.txt',{encoding: 'utf8'}).catch(function(err){
+                if(err.code!=='ENOENT'){
+                    throw err;
+                }
+                return fs.readFile(__dirname+'/'+version+'/first-lines-'+runInValue+'.txt',{encoding: 'utf8'});
+            }).then(function(content){
+                definition.firstLines[runInValue]=definition.firstLines[runInValue]||{};
+                definition.firstLines[runInValue][typeValue]=content;
+            });
+        }));
     }));
 })).then(function(){
     return qaControl.fixMessages(qaControl.msgs.en);

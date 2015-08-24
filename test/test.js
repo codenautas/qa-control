@@ -326,7 +326,7 @@ describe('qa-control', function(){
             qaControl.loadProject('./test/fixtures/stable-project').then(function(info){
                 expect(qaControl.configReady).to.ok();
                 expect(
-                    qaControl.projectDefinition['0.0.1'].sections['run-in'].values.server.firstLines
+                    qaControl.projectDefinition['0.0.1'].firstLines['server']['lib']
                 ).to.match(/^"use strict";/);
                 done();
             }).catch(done);

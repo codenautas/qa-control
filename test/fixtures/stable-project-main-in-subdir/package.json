@@ -47,7 +47,7 @@
   "qa-control": {
     "package-version": "0.0.1",
     "run-in": "server",
-    "type": "lib",
+    "type": "app",
     "coverage": 100
   }
 }
