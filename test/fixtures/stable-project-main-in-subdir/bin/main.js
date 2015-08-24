@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 /*jshint eqnull:true */
 /*jshint globalstrict:true */
 /*jshint node:true */
@@ -7,4 +7,4 @@
 
 // provisorio
 
-console.log('esto es una APP de stableProject');
+console.log('¡esto es una APP de stableProject!');
