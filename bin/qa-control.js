@@ -633,9 +633,6 @@ qaControl.loadProject = function loadProject(projectDir) {
                     if(qaControl.verbose) { process.stdout.write("Reading '"+iFile+"'...\n"); }
                     return fs.readFile(iFile, 'utf8').then(function(content){
                         info['files'][file].content = content;
-                        if(file==='package.json') {
-                            info['packageJson'] = JSON.parse(content);
-                        }
                     });
                 } else {
                     if(qaControl.verbose) { process.stdout.write("Skipping directory '"+iFile+"'.\n"); }
@@ -643,19 +640,22 @@ qaControl.loadProject = function loadProject(projectDir) {
                 }
             });
         })).then(function() {
-            var mainName = info['packageJson'].main;
-            if(info['packageJson'].main && false === mainName in info['files']) {
-                info['files'][mainName] = {};
-                var mainFile = Path.normalize(projectDir+'/'+mainName);
-                if(qaControl.verbose) { process.stdout.write("Reading 'main' from '"+mainFile+"'...\n"); }
-                return fs.stat(mainFile).then(function(stat) {
-                    if(stat.isFile()) {
-                        return fs.readFile(mainFile, 'utf8').then(function(content) {
-                            info['files'][mainName].content = content;
-                        });
-                    }
-                });
-            }            
+            if(info.files['package.json']){
+                info['packageJson'] = JSON.parse(info.files['package.json'].content);
+                var mainName = info['packageJson'].main;
+                if(info['packageJson'].main && false === mainName in info['files']) {
+                    info['files'][mainName] = {};
+                    var mainFile = Path.normalize(projectDir+'/'+mainName);
+                    if(qaControl.verbose) { process.stdout.write("Reading 'main' from '"+mainFile+"'...\n"); }
+                    return fs.stat(mainFile).then(function(stat) {
+                        if(stat.isFile()) {
+                            return fs.readFile(mainFile, 'utf8').then(function(content) {
+                                info['files'][mainName].content = content;
+                            });
+                        }
+                    });
+                }            
+            }
         });
     }).then(function() {
         return info;

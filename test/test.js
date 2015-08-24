@@ -461,6 +461,12 @@ describe('qa-control', function(){
                 done(err);
             });
         });
+        it('generate warnings but not exception when no exists package.json', function(done){
+            qaControl.controlProject('./test/fixtures/without-package-json').then(function(warnings){
+                expect(warnings).to.eql([{warning:'no_package_json'}]);
+                done();
+            }).catch(done);
+        });
     });
     describe('integrity tests', function(){
         it('verify that qa-control.js only uses existent warning IDs (#24)', function(done){
