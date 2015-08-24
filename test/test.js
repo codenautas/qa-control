@@ -329,6 +329,20 @@ var fixtures=[{
     change:function(info){
         info['packageJson']['repository'] = info['packageJson']['repository'].replace('stable-project', 'another-proyect');
     }
+},{
+    skipped: true,
+    base:'stable-project',
+    title:'lack of mandatory lines in .gitignore should not abort (#30)',
+    test:'lack_of_mandatory_line_1_in_file_2',
+    change:function(info){
+        info.files['.gitignore'].content = info.files['.gitignore'].content.replace('local-*','').replace('*-local.*','');
+        delete info['packageJson']['jshintConfig'];
+    },
+    expected:[
+        { warning:'lack_of_mandatory_line_1_in_file_2',params:['local-*', '.gitignore']},
+        { warning:'lack_of_mandatory_line_1_in_file_2',params:['*-local.*', '.gitignore']},
+        { warning: 'lack_of_jshintconfig_section_in_package_json'}
+    ]
 }];
 
 function cloneProject(info){
