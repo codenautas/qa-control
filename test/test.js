@@ -321,6 +321,14 @@ var fixtures=[{
     change:function(info){
         delete info['packageJson']['repository'];
     }
+},{
+    skipped: true,
+    base:'stable-project',
+    title:'invalid repository section in package json (#28)',
+    test:'invalid_repository_section_in_package_json',
+    change:function(info){
+        info['packageJson']['repository'] = info['packageJson']['repository'].replace('stable-project', 'another-proyect');
+    }
 }];
 
 function cloneProject(info){

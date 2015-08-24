@@ -557,6 +557,19 @@ qaControl.projectDefinition = {
                         return warns;
                     }
                 }]
+            },
+            invalid_repository_in_package_json:{
+                checks:[{
+                    warnings:function(info) {
+                        var warns = [];
+                        var repoParts = info.packageJson.repository.split('/');
+                        var projName = repoParts[repoParts.length-1];
+                        if(projName !== info.packageJson.name) {
+                            return [{warning:'invalid_repository_section_in_package_json'}];
+                        }
+                        return warns;
+                    }
+                }]
             }
         }
     }
