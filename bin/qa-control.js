@@ -7,6 +7,7 @@ var _ = require('lodash');
 var semver = require('semver');
 var jsh = require('jshint');
 var multilang = require('multilang');
+var stripBom = require('strip-bom');
 
 var qaControl={};
 
@@ -441,7 +442,7 @@ qaControl.projectDefinition = {
                         var whichType=qaControlSection['type'];
                         var firstLines=qaControl.projectDefinition[info.packageVersion].firstLines[whichRunIn][whichType];
                         if(firstLines) {
-                        // transformar el nombre de proyecto
+                            // transformar el nombre de proyecto
                             var parts = info.packageJson.name.split('-');
                             var first=function(toWhat){
                                 return function(part){
@@ -583,7 +584,7 @@ var configReading=Promises.all(_.map(qaControl.projectDefinition,function(defini
                 return fs.readFile(__dirname+'/'+version+'/first-lines-'+runInValue+'.txt',{encoding: 'utf8'});
             }).then(function(content){
                 definition.firstLines[runInValue]=definition.firstLines[runInValue]||{};
-                definition.firstLines[runInValue][typeValue]=content;
+                definition.firstLines[runInValue][typeValue]=stripBom(content);
             });
         }));
     }));
@@ -632,7 +633,7 @@ qaControl.loadProject = function loadProject(projectDir) {
                 if(stat.isFile()) {
                     if(qaControl.verbose) { process.stdout.write("Reading '"+iFile+"'...\n"); }
                     return fs.readFile(iFile, 'utf8').then(function(content){
-                        info['files'][file].content = content;
+                        info['files'][file].content = stripBom(content);
                     });
                 } else {
                     if(qaControl.verbose) { process.stdout.write("Skipping directory '"+iFile+"'.\n"); }
@@ -650,7 +651,7 @@ qaControl.loadProject = function loadProject(projectDir) {
                     return fs.stat(mainFile).then(function(stat) {
                         if(stat.isFile()) {
                             return fs.readFile(mainFile, 'utf8').then(function(content) {
-                                info['files'][mainName].content = content;
+                                info['files'][mainName].content = stripBom(content);
                             });
                         }
                     });

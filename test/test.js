@@ -448,7 +448,7 @@ describe('qa-control', function(){
         });
     });
     describe('packageJson tests', function(){
-        it.skip/*#31*/('packageJson.main must be loaded from subdirectory', function(done){
+        it('packageJson.main must be loaded from subdirectory', function(done){
             qaControl.loadProject('./test/fixtures/stable-project-main-in-subdir').then(function(info){
                 expect(info['files']).to.have.key('bin/main.js');
                 expect(info['files']['bin/main.js'].content).to.contain('stableProject');
