@@ -314,6 +314,13 @@ var fixtures=[{
         { warning:'incorrect_jshintconfig_option_1_in_package_json',params:['curly']},
         { warning:'incorrect_jshintconfig_option_1_in_package_json',params:['forin']}
     ]
+},{
+    base:'stable-project',
+    title:'lack of repository section in package json (#28)',
+    test:'lack_of_repository_section_in_package_json',
+    change:function(info){
+        delete info['packageJson']['repository'];
+    }
 }];
 
 function cloneProject(info){

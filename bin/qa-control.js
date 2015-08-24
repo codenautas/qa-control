@@ -283,17 +283,6 @@ qaControl.projectDefinition = {
                 }],
                 shouldAbort:true
             },
-            repository_name_format: {
-                checks:[{
-                    warnings:function(info) {
-                        if(! info.packageJson.repository.match(/^([-a-zA-Z0-9_.]+\/[-a-zA-Z0-9_.]+)$/)){
-                            return [{warning:'repository_name_not_found'}];
-                        }
-                        return [];
-                    }
-                }],
-                shouldAbort:true
-            },
             mandatory_files:{
                 checks:[{
                     warnings:function(info) {
@@ -316,6 +305,20 @@ qaControl.projectDefinition = {
                                     });
                                 }
                             }
+                        }
+                        return warns;
+                    }
+                }],
+                shouldAbort:true
+            },
+            repository_in_package_json:{
+                checks:[{
+                    warnings:function(info) {
+                        var warns = [];
+                        if(false ==  'repository' in info['packageJson']) {
+                            warns.push({warning:'lack_of_repository_section_in_package_json'});
+                        } else if(! info.packageJson.repository.match(/^([-a-zA-Z0-9_.]+\/[-a-zA-Z0-9_.]+)$/)){
+                            return [{warning:'repository_name_not_found'}];
                         }
                         return warns;
                     }
