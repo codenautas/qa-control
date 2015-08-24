@@ -381,6 +381,8 @@ describe('qa-control', function(){
                 expect(en['lack_of_jshintconfig_section_in_package_json']).to.be('lack of jshintconfig section in package json');
                 expect(en['incorrect_jshintconfig_option_1_in_package_json']).to.be('incorrect jshintconfig option $1 in package json');
                 expect(en['readme_multilang_not_sincronized_with_file_1']).to.be('readme multilang not sincronized with file $1');
+                expect(en['lack_of_repository_section_in_package_json']).to.be('lack of repository section in package json');
+                expect(en['invalid_repository_section_in_package_json']).to.be('invalid repository section in package json');
                 done();
             }).catch(done);
         });
@@ -622,7 +624,9 @@ describe('qa-control main', function(){
                                       +'el archivo "param1" tiene warnings de JSHint\n'
                                       +'falta la sección "jshintConfig" en package.json\n'
                                       +'la opcion "param1" en "jshintConfig" es incorrecta en package.json\n'
-                                      +'README.md no esta sincronizado con "param1" para multilang\n');
+                                      +'README.md no esta sincronizado con "param1" para multilang\n'
+                                      +'Falta la sección "repository" en package.json\n'
+                                      +'La sección "repository" en package.json es inválida\n');
                 done();
             }).catch(done);
         });
@@ -656,7 +660,9 @@ describe('qa-control main', function(){
                                        +'jshint warnings in file param1\n'
                                        +'lack of jshintconfig section in package json\n'
                                        +'incorrect jshintconfig option param1 in package json\n'
-                                       +'readme multilang not sincronized with file param1\n');
+                                       +'readme multilang not sincronized with file param1\n'
+                                       +'lack of repository section in package json\n'
+                                       +'invalid repository section in package json\n');
                 done();
             }).catch(done);
         });

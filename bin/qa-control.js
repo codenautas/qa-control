@@ -43,7 +43,9 @@ qaControl.msgs={
         jshint_warnings_in_file_1: 'el archivo "$1" tiene warnings de JSHint',
         lack_of_jshintconfig_section_in_package_json: 'falta la sección "jshintConfig" en package.json',
         incorrect_jshintconfig_option_1_in_package_json: 'la opcion "$1" en "jshintConfig" es incorrecta en package.json',
-        readme_multilang_not_sincronized_with_file_1: 'README.md no esta sincronizado con "$1" para multilang'
+        readme_multilang_not_sincronized_with_file_1: 'README.md no esta sincronizado con "$1" para multilang',
+        lack_of_repository_section_in_package_json: 'Falta la sección "repository" en package.json',
+        invalid_repository_section_in_package_json: 'La sección "repository" en package.json es inválida'
     }
 };
 
