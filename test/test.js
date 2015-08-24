@@ -388,7 +388,7 @@ describe('qa-control', function(){
                 done();
             }).catch(done);
         });
-       it('generates english messages from spanish warnings', function(done){
+        it('generates english messages from spanish warnings', function(done){
             qaControl.loadProject('./test/fixtures/stable-project').then(function(info){
                 var en=qaControl.msgs.en;
                 var es=qaControl.msgs.es;
@@ -527,12 +527,12 @@ describe('qa-control', function(){
                                 var warn = matches[1];
                                 //console.log(ln+1, ":", warn);
                                 if(false === warn in qaControl.msgs[msg]) {
-                                    console.log("Inexistent warning '"+warn+"' on line #"+parseInt(ln+1));
+                                    console.log("Inexistent warning '"+warn+"' on line "+parseInt(ln+1));
                                     ++numWarns;
                                 }
                             }
                             if(reIncompleteWarn.test(line)) {
-                                console.log("Incomplete warning on line #"+parseInt(ln+1));
+                                console.log("Incomplete warning on line "+parseInt(ln+1));
                                 ++numWarns;
                             }
                         }

@@ -459,23 +459,27 @@ qaControl.projectDefinition = {
                             var mainName = ('main' in info.packageJson) ? info.packageJson.main : 'index.js';
                             if(false == mainName in info.files) {
                                 warns.push({warning:'packagejson_main_file_1_does_not_exists', params:[mainName]})
-                            } else if(!qaControl.startsWith(info.files[mainName].content, firstLines.replace(/nombreDelModulo/g, ProjectName)) && 
-                                      !qaControl.startsWith(info.files[mainName].content, firstLines.replace(/nombreDelModulo/g, projectName))
-                            ) {
-                                if(qaControl.verbose){
-                                    var code=qaControl.fixEOL(info.files[mainName].content);
-                                    var model1=qaControl.fixEOL(firstLines.replace(/nombreDelModulo/g, projectName));
-                                    var model2=qaControl.fixEOL(firstLines.replace(/nombreDelModulo/g, ProjectName));
-                                    for(var i=0; i<model1.length; i++){
-                                        if(code[i]!=model1[i] && code[i]!=model2[i]){
-                                            console.log('DIF STARTS IN:',JSON.stringify(code.substring(i, Math.min(model1.length, i+20))));
-                                            console.log('MODEL 1      :',JSON.stringify(model1.substring(i, Math.min(model1.length, i+20))));
-                                            console.log('MODEL 2      :',JSON.stringify(model2.substring(i, Math.min(model1.length, i+20))));
-                                            break;
+                            } else {
+                                var fileContent = stripBom(info.files[mainName].content);
+
+                                if(!qaControl.startsWith(fileContent, firstLines.replace(/nombreDelModulo/g, ProjectName)) && 
+                                      !qaControl.startsWith(fileContent, firstLines.replace(/nombreDelModulo/g, projectName))
+                                ) {
+                                    if(qaControl.verbose){
+                                        var code=qaControl.fixEOL(fileContent);
+                                        var model1=qaControl.fixEOL(firstLines.replace(/nombreDelModulo/g, projectName));
+                                        var model2=qaControl.fixEOL(firstLines.replace(/nombreDelModulo/g, ProjectName));
+                                        for(var i=0; i<model1.length; i++){
+                                            if(code[i]!=model1[i] && code[i]!=model2[i]){
+                                                console.log('DIF STARTS IN:',JSON.stringify(code.substring(i, Math.min(model1.length, i+20))));
+                                                console.log('MODEL 1      :',JSON.stringify(model1.substring(i, Math.min(model1.length, i+20))));
+                                                console.log('MODEL 2      :',JSON.stringify(model2.substring(i, Math.min(model1.length, i+20))));
+                                                break;
+                                            }
                                         }
                                     }
+                                    warns.push({warning:'first_lines_does_not_match_in_file_1', params:[mainName]});
                                 }
-                                warns.push({warning:'first_lines_does_not_match_in_file_1', params:[mainName]});
                             }
                         }
                         return warns;
@@ -502,14 +506,20 @@ qaControl.projectDefinition = {
                 checks:[{
                     warnings:function(info){
                         var warns = [];
-                        var jshOptions = { "asi": false, "curly": true, "forin": true };
+                        var jshintOpts = 
+                            info.packageJson.jshintConfig || 
+                            qaControl.projectDefinition[info.packageVersion].jshint_options;
                         for(var file in info.files) {
                             if(file.match(/(.js)$/)) {
                                 var content = info.files[file].content;
-                                jsh.JSHINT(content, qaControl.projectDefinition[info.packageVersion].jshint_options, false);
-                                var errors = jsh.JSHINT.data().errors;
-                                if(errors) {
-                                    //console.log(errors);
+                                jsh.JSHINT(content, jshintOpts , false);
+                                var data = jsh.JSHINT.data();
+                                if(data.errors) {
+                                    if(qaControl.verbose){
+                                        console.log('JSHINT output:');
+                                        console.log('jshintOpts',jshintOpts);
+                                        console.log(data);
+                                    }
                                     warns.push({warning:'jshint_warnings_in_file_1', params:[file]});
                                 }
                             }
