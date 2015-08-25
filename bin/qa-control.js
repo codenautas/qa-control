@@ -20,7 +20,7 @@ qaControl.msgs={
         deprecated_qa_control_version: 'la versión de qa-control es vieja',
         deprecated_version: 'la version es demasiado vieja',
         invalid_qa_control_version: 'la sección "package-version" en qa-control contiene un valor incorrecto',
-        invalid_value_1_in_parameter_2: 'valor invalido "$2" para el parametro "$1" en la sección qa-control',
+        invalid_value_1_in_parameter_2: 'valor invalido "$1" para el parametro "$2" en la sección qa-control',
         lack_of_mandatory_file_1: 'falta el archivo obligatorio "$1"',
         //lack_of_mandatory_parameter_1: 'falta el parámetro obligatorio "$1"',
         lack_of_mandatory_section_1: 'falta la sección obligatoria "$1" en la sección qa-control',

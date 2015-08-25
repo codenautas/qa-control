@@ -714,7 +714,7 @@ describe('qa-control main', function(){
                 expect(warnStr).to.eql('la versión de qa-control es vieja\n'
                                       +'la version es demasiado vieja\n'
                                       +'la sección "package-version" en qa-control contiene un valor incorrecto\n'
-                                      +'valor invalido "param2" para el parametro "param1" en la sección qa-control\n'
+                                      +'valor invalido "param1" para el parametro "param2" en la sección qa-control\n'
                                       +'falta el archivo obligatorio "param1"\n'
                                       +'falta la sección obligatoria "param1" en la sección qa-control\n'
                                       +'falta la sección "qa-control" en package.json y aparenta ser un proyecto codenautas\n'
