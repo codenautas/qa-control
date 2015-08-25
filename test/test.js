@@ -5,6 +5,7 @@ var expect = require('expect.js');
 var qaControl = require('..');
 var Promises = require('best-promise');
 var fs = require('fs-promise');
+var Path = require('path');
 
 var fixtures=[{
     base:'stable-project',
@@ -541,6 +542,45 @@ describe('qa-control', function(){
                 } else {
                     done();
                 }
+            }).catch(function(err) {
+                console.log("mal", err);
+                done(err);
+            });
+        });
+        function hasBOM(content) { return content.charCodeAt(0) === 0xFEFF; }
+        it('verify that qa-control .js files don\'t have BOM (#33)', function(done){
+            var basePath='./bin';
+            var filesWithBom = [];
+            return fs.readdir(basePath).then(function(files) {
+                //console.log(files);
+                return Promises.all(files.map(function(file){
+                    var iFile = Path.normalize(basePath+'/'+file);
+                    return Promises.start(function() {
+                        return fs.stat(iFile);
+                    }).then(function(stat) {
+                        if(stat.isFile() && iFile.match(/(.js)$/)) {
+                            //console.log("Reading: ", iFile);
+                            return fs.readFile(iFile, 'utf8').then(function(content){
+                                if(hasBOM(content)) {
+                                    filesWithBom.push(iFile);
+                                }
+                            });
+                        } /*else if(stat.isDirectory()) {
+                            console.log("DIR", iFile);
+                            return fs.readdir(iFile).then(function(files2) {
+                                console.log("files2", files2);
+                            });
+                        }*/
+                    });                    
+                })).then(function() {
+                    if(filesWithBom.length) {
+                        console.log(filesWithBom);
+                        done("Have files with BOM!");
+                        
+                    } else {
+                        done();
+                    }
+                });
             }).catch(function(err) {
                 console.log("mal", err);
                 done(err);
