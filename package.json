@@ -54,6 +54,6 @@
     "coverage": 90,
     "run-in": "server",
     "stability": "designing",
-    "type": "cmd"
+    "type": "cmd-tool"
   }
 }

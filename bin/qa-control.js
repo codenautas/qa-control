@@ -56,7 +56,7 @@ qaControl.fixEOL = function fixEOL(buf) {
 
 // bufTest debe empezar con bufStart
 qaControl.startsWith = function startsWith(bufTest, bufStart) {
-    return qaControl.fixEOL(bufTest).indexOf(qaControl.fixEOL(bufStart))==0;
+    return qaControl.fixEOL(bufTest).indexOf(qaControl.fixEOL(bufStart))===0;
 };
 
 qaControl.getRepositoryUrl = function getRepositoryUrl(info) {
@@ -128,7 +128,7 @@ qaControl.projectDefinition = {
             },
             designing:{
                 check: function(packageJson){ 
-                    return semver.satisfies(packageJson.version,'0.0.x') && packageJson['qa-control'].purpose==null
+                    return semver.satisfies(packageJson.version,'0.0.x') && packageJson['qa-control'].purpose===null;
                 },
                 md:'![designing](https://img.shields.io/badge/stability-desgining-red.svg)',
                 imgExample:'https://img.shields.io/badge/stability-desgining-red.svg',
@@ -182,7 +182,7 @@ qaControl.projectDefinition = {
             },
             coverage:{
                 check: function(packageJson){ 
-                    return packageJson['qa-control']['coverage'];
+                    return packageJson['qa-control'].coverage;
                 },
                 md:'[![coverage](https://img.shields.io/coveralls/xxx/yyy/master.svg)](https://coveralls.io/r/xxx/yyy)',
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/coverage.png',
@@ -190,7 +190,7 @@ qaControl.projectDefinition = {
             },
             climate:{
                 check: function(packageJson){ 
-                    return packageJson['qa-control']['coverage'] || packageJson['qa-control'].purpose==null;
+                    return packageJson['qa-control'].coverage || packageJson['qa-control'].purpose==null;
                 },
                 md:'[![climate](https://img.shields.io/codeclimate/github/xxx/yyy.svg)](https://codeclimate.com/github/xxx/yyy)',
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/climate.png',
@@ -314,7 +314,7 @@ qaControl.projectDefinition = {
                 checks:[{
                     warnings:function(info) {
                         var warns = [];
-                        if(!('repository' in info['packageJson'])) {
+                        if(!('repository' in info.packageJson)) {
                             warns.push({warning:'lack_of_repository_section_in_package_json'});
                         } else {
                             if(! qaControl.getRepositoryUrl(info).match(/^([-a-zA-Z0-9_.]+\/[-a-zA-Z0-9_.]+)$/)){
@@ -342,7 +342,7 @@ qaControl.projectDefinition = {
                                     warns.push({warning:'invalid_value_1_in_parameter_2',params:[observedValue,sectionName]});
                                 }
                             }
-                        };
+                        }
                         return warns;
                     }
                 }],
@@ -480,7 +480,7 @@ qaControl.projectDefinition = {
                         var warns=[];
                         var qaControlSection=info.packageJson['qa-control'];
                         var whichRunIn=qaControlSection['run-in'];
-                        var whichType=qaControlSection['type'];
+                        var whichType=qaControlSection.type;
                         var firstLines=qaControl.projectDefinition[info.packageVersion].firstLines[whichRunIn][whichType];
                         if(firstLines) {
                             // transformar el nombre de proyecto
@@ -488,13 +488,13 @@ qaControl.projectDefinition = {
                             var first=function(toWhat){
                                 return function(part){
                                     return part.substring(0, 1)[toWhat]()+part.substring(1);
-                                }
-                            }
+                                };
+                            };
                             var ProjectName = parts.map(first("toUpperCase")).join('');
                             var projectName = first("toLowerCase")(ProjectName);
                             var mainName = ('main' in info.packageJson) ? info.packageJson.main : 'index.js';
-                            if(false == mainName in info.files) {
-                                warns.push({warning:'packagejson_main_file_1_does_not_exists', params:[mainName]})
+                            if(!(mainName in info.files)) {
+                                warns.push({warning:'packagejson_main_file_1_does_not_exists', params:[mainName]});
                             } else {
                                 var fileContent = stripBom(info.files[mainName].content);
 
@@ -554,7 +554,8 @@ qaControl.projectDefinition = {
                                     if(qaControl.verbose){
                                         console.log('JSHINT output:');
                                         console.log('jshintOpts',jshintOpts);
-                                        console.log(data);
+                                        console.log(data.errors);
+                                        //console.log(data);
                                     }
                                     warns.push({warning:'jshint_warnings_in_file_1', params:[file]});
                                 }
@@ -568,12 +569,12 @@ qaControl.projectDefinition = {
                 checks:[{
                     warnings:function(info){
                         var warns = [];
-                        if(false ==  'jshintConfig' in info['packageJson']) {
+                        if(!('jshintConfig' in info.packageJson)) {
                             warns.push({warning:'lack_of_jshintconfig_section_in_package_json'});
                         }
                         else {
                             var requiredOptions = qaControl.projectDefinition[info.packageVersion].jshint_options;
-                            var checkedOptions = info['packageJson']['jshintConfig'];
+                            var checkedOptions = info.packageJson.jshintConfig;
                             for(var op in requiredOptions) {
                                 if((false === op in checkedOptions) || checkedOptions[op] !== requiredOptions[op]) {
                                     warns.push({warning:'incorrect_jshintconfig_option_1_in_package_json', params:[op]});
@@ -621,13 +622,13 @@ qaControl.fixMessages = function fixMessages(messagesToFix) {
             }
         }
     });
-}
+};
 
 qaControl.configReady=false;
 var configReading=Promises.all(_.map(qaControl.projectDefinition,function(definition, version){
     definition.firstLines=definition.firstLines||{};
     return Promises.all(_.map(definition.sections['run-in'].values,function(runInProperties, runInValue){
-        return Promises.all(_.map(definition.sections['type'].values,function(typeProperties, typeValue){
+        return Promises.all(_.map(definition.sections.type.values,function(typeProperties, typeValue){
             return fs.readFile(__dirname+'/'+version+'/first-lines-'+runInValue+'-'+typeValue+'.txt',{encoding: 'utf8'}).catch(function(err){
                 if(err.code!=='ENOENT'){
                     throw err;
@@ -656,7 +657,7 @@ qaControl.loadProject = function loadProject(projectDir) {
     var info = {};
     if(qaControl.verbose) { process.stdout.write("Starting qa-control on '"+projectDir+"'...\n"); }
     return Promises.start(function(){
-        if(!qaControl.configReady) return configReading;
+        if(!qaControl.configReady) { return configReading; }
     }).then(function(){
         if(qaControl.verbose) { process.stdout.write("Loaded default configuration.\n"); }
         if(!projectDir) { throw new Error('null projectDir'); }
@@ -671,10 +672,10 @@ qaControl.loadProject = function loadProject(projectDir) {
         if(qaControl.verbose) { process.stdout.write("Reading project directory...\n"); }
         return fs.readdir(projectDir);
     }).then(function(files) {
-        info['files'] = {};
-        for(var f in files) { info['files'][files[f]] = {}; }
+        info.files = {};
+        for(var f in files) { info.files[files[f]] = {}; }
         if(files.indexOf('package.json') != -1) {
-            info['packageJson'] = {};
+            info.packageJson = {};
         }
         return Promises.all(files.map(function(file){
             var iFile = Path.normalize(projectDir+'/'+file);
@@ -684,25 +685,25 @@ qaControl.loadProject = function loadProject(projectDir) {
                 if(stat.isFile()) {
                     if(qaControl.verbose) { process.stdout.write("Reading '"+iFile+"'...\n"); }
                     return fs.readFile(iFile, 'utf8').then(function(content){
-                        info['files'][file].content = stripBom(content);
+                        info.files[file].content = stripBom(content);
                     });
                 } else {
                     if(qaControl.verbose) { process.stdout.write("Skipping directory '"+iFile+"'.\n"); }
-                    delete info['files'][file]; // not a file, we erase it
+                    delete info.files[file]; // not a file, we erase it
                 }
             });
         })).then(function() {
             if(info.files['package.json']){
-                info['packageJson'] = JSON.parse(info.files['package.json'].content);
-                var mainName = info['packageJson'].main;
-                if(info['packageJson'].main && false === mainName in info['files']) {
-                    info['files'][mainName] = {};
+                info.packageJson = JSON.parse(info.files['package.json'].content);
+                var mainName = info.packageJson.main;
+                if(info.packageJson.main && false === mainName in info.files) {
+                    info.files[mainName] = {};
                     var mainFile = Path.normalize(projectDir+'/'+mainName);
                     if(qaControl.verbose) { process.stdout.write("Reading 'main' from '"+mainFile+"'...\n"); }
                     return fs.stat(mainFile).then(function(stat) {
                         if(stat.isFile()) {
                             return fs.readFile(mainFile, 'utf8').then(function(content) {
-                                info['files'][mainName].content = stripBom(content);
+                                info.files[mainName].content = stripBom(content);
                             });
                         }
                     });
@@ -743,7 +744,7 @@ qaControl.controlInfo=function controlInfo(info){
     cadenaDePromesas=cadenaDePromesas.catch(function(err) {
         if(err.message !== 'ruleIsAborting') {
             throw err;
-        };
+        }
     }).then(function(){
         return resultWarnings;
     });
@@ -773,7 +774,7 @@ qaControl.stringizeWarnings = function stringizeWarnings(warns, lang) {
         });
         return warnStr;
     });
-}
+};
 
 qaControl.controlProject=function controlProject(projectDir){
     return Promises.start(function(){
@@ -781,7 +782,7 @@ qaControl.controlProject=function controlProject(projectDir){
     }).then(function(info){
         return qaControl.controlInfo(info);
     });
-}
+};
 
 qaControl.main=function main(parameters) {
     return Promises.start(function() {
