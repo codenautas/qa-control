@@ -360,6 +360,14 @@ var fixtures=[{
         info['packageJson']['repository'] = { "type": "git", "url": "codenautas/stable-project" };
     },
     expected:[]
+},{
+    base:'stable-project',
+    title:'must handle repository with github prefix (#34)',
+    test:'lack_of_mandatory_file_1',
+    change:function(info){
+        info['packageJson']['repository'] = { "type": "git", "url": "https://github.com/codenautas/stable-project" };
+    },
+    expected:[]
 }];
 
 

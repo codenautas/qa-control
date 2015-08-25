@@ -60,7 +60,10 @@ qaControl.startsWith = function startsWith(bufTest, bufStart) {
 };
 
 qaControl.getRepositoryUrl = function getRepositoryUrl(info) {
-    return info.packageJson.repository.url ? info.packageJson.repository.url : info.packageJson.repository;
+    var repo = info.packageJson.repository.url ? info.packageJson.repository.url : info.packageJson.repository;
+    var ghRepo = /(https:\/\/github\.com\/)/.exec(repo);
+    if(ghRepo) { repo = repo.replace(ghRepo[1], ''); }
+    return repo;
 };
 
 // devuelve el contenido para el archivo de salida (p.e. cucardas.log)
