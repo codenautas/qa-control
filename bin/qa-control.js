@@ -315,7 +315,7 @@ qaControl.projectDefinition = {
                 checks:[{
                     warnings:function(info) {
                         var warns = [];
-                        if(false ==  'repository' in info['packageJson']) {
+                        if(!('repository' in info['packageJson'])) {
                             warns.push({warning:'lack_of_repository_section_in_package_json'});
                         } else if(! info.packageJson.repository.match(/^([-a-zA-Z0-9_.]+\/[-a-zA-Z0-9_.]+)$/)){
                             return [{warning:'repository_name_not_found'}];
@@ -357,7 +357,21 @@ qaControl.projectDefinition = {
                     }
                 }]
             },
+            invalid_repository_in_package_json:{
+                checks:[{
+                    warnings:function(info) {
+                        var warns = [];
+                        var repoParts = info.packageJson.repository.split('/');
+                        var projName = repoParts[repoParts.length-1];
+                        if(projName !== info.packageJson.name) {
+                            return [{warning:'invalid_repository_section_in_package_json'}];
+                        }
+                        return warns;
+                    }
+                }]
+            },
             cucardas:{
+                eclipsers:['invalid_repository_section_in_package_json', 'lack_of_repository_section_in_package_json'],
                 checks:[{
                     warnings:function(info){
                         var warns=[];
@@ -567,19 +581,6 @@ qaControl.projectDefinition = {
                         return warns;
                     }
                 }]
-            },
-            invalid_repository_in_package_json:{
-                checks:[{
-                    warnings:function(info) {
-                        var warns = [];
-                        var repoParts = info.packageJson.repository.split('/');
-                        var projName = repoParts[repoParts.length-1];
-                        if(projName !== info.packageJson.name) {
-                            return [{warning:'invalid_repository_section_in_package_json'}];
-                        }
-                        return warns;
-                    }
-                }]
             }
         }
     }
@@ -693,17 +694,24 @@ qaControl.loadProject = function loadProject(projectDir) {
 
 qaControl.controlInfo=function controlInfo(info){
     var resultWarnings=[];
+    var existingWarnings={};
     var rules = qaControl.projectDefinition[qaControl.currentVersion].rules;
     if(qaControl.verbose) { process.stdout.write("Controlling project information...\n"); }
     var cadenaDePromesas = Promises.start();
     _.forEach(rules, function(rule, ruleName) {
         rule.checks.forEach(function(checkInfo){
             cadenaDePromesas = cadenaDePromesas.then(function() {
+                if(rule.eclipsers && rule.eclipsers.some(function(warning){ return existingWarnings[warning]; })){
+                    return [];
+                }
                 if(qaControl.verbose) { process.stdout.write("Checking rule '"+ruleName+"'...\n"); }
                 return checkInfo.warnings(info);
             }).then(function(warningsOfThisRule) {
                 if(warningsOfThisRule.length) {
                     resultWarnings=resultWarnings.concat(warningsOfThisRule);
+                    warningsOfThisRule.forEach(function(warning){
+                        existingWarnings[warning.warning]=true; 
+                    });
                     if(rule.shouldAbort) { throw new Error("ruleIsAborting"); }
                 }
                 return resultWarnings;
