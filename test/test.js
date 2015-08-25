@@ -524,6 +524,19 @@ describe('qa-control', function(){
                 done();
             }).catch(done);
         });
+       it('packageJson.main must default to index.js', function(done){
+            qaControl.loadProject('./test/fixtures/stable-project-with-default-main').then(function(info){
+                expect(info['files']).to.have.key('index.js');
+                expect(info['files']['index.js'].content).to.contain('StableProject');
+                return qaControl.controlInfo(info);
+            }).then(function(warns){
+                expect(warns).to.eql([]);
+                done();
+            }).catch(function(err) {
+                console.log("mal", err);
+                done(err);
+            });
+        });
     });
     describe('integrity tests', function(){
         it('verify that qa-control.js only uses existent warning IDs (#24)', function(done){
