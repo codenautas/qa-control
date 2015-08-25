@@ -329,7 +329,6 @@ var fixtures=[{
         info['packageJson']['repository'] = info['packageJson']['repository'].replace('stable-project', 'another-proyect');
     }
 },{
-    skipped: true,
     base:'stable-project',
     title:'lack of mandatory lines in .gitignore should not abort (#30)',
     test:'lack_of_mandatory_line_1_in_file_2',

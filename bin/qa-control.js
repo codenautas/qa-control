@@ -295,14 +295,6 @@ qaControl.projectDefinition = {
                             } else {
                                 if(file.presentIf && file.presentIf(info.packageJson) && !info.files[fileName]) {
                                     warns.push({warning:'lack_of_mandatory_file_1', params:[fileName]});
-                                } else if(file.mandatoryLines) {
-                                    var fileContent = info.files[fileName].content;
-                                    file.mandatoryLines.forEach(function(mandatoryLine) {
-                                       // agrego '\n' antes para no utilizar expresiones regulares
-                                       if(fileContent.indexOf('\n'+mandatoryLine)==-1) {
-                                           warns.push({warning:'lack_of_mandatory_line_1_in_file_2', params:[mandatoryLine, fileName]});
-                                       }
-                                    });
                                 }
                             }
                         }
@@ -346,6 +338,27 @@ qaControl.projectDefinition = {
                     }
                 }],
                 shouldAbort:true
+            },
+            mandatory_lines:{
+                checks:[{
+                    warnings:function(info) {
+                        var warns =[];
+                        var files=qaControl.projectDefinition[info.packageVersion].files;
+                        for(var fileName in files) {
+                            var file = files[fileName];
+                            if(file.mandatoryLines) {
+                                var fileContent = info.files[fileName].content;
+                                file.mandatoryLines.forEach(function(mandatoryLine) {
+                                   // agrego '\n' antes para no utilizar expresiones regulares
+                                   if(fileContent.indexOf('\n'+mandatoryLine)==-1) {
+                                       warns.push({warning:'lack_of_mandatory_line_1_in_file_2', params:[mandatoryLine, fileName]});
+                                   }
+                                });
+                            }
+                        }
+                        return warns;
+                    }
+                }]
             },
             no_multilang_section_in_readme:{
                 checks:[{
