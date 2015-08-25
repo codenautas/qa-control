@@ -309,8 +309,11 @@ qaControl.projectDefinition = {
                         var warns = [];
                         if(!('repository' in info['packageJson'])) {
                             warns.push({warning:'lack_of_repository_section_in_package_json'});
-                        } else if(! info.packageJson.repository.match(/^([-a-zA-Z0-9_.]+\/[-a-zA-Z0-9_.]+)$/)){
-                            return [{warning:'repository_name_not_found'}];
+                        } else {
+                            var repo = info.packageJson.repository.url ? info.packageJson.repository.url : info.packageJson.repository;
+                            if(! repo.match(/^([-a-zA-Z0-9_.]+\/[-a-zA-Z0-9_.]+)$/)){
+                                return [{warning:'repository_name_not_found'}];
+                            }
                         }
                         return warns;
                     }
@@ -374,7 +377,8 @@ qaControl.projectDefinition = {
                 checks:[{
                     warnings:function(info) {
                         var warns = [];
-                        var repoParts = info.packageJson.repository.split('/');
+                        var repo = info.packageJson.repository.url ? info.packageJson.repository.url : info.packageJson.repository;
+                        var repoParts = repo.split('/');
                         var projName = repoParts[repoParts.length-1];
                         if(projName !== info.packageJson.name) {
                             return [{warning:'invalid_repository_section_in_package_json'}];
@@ -394,7 +398,8 @@ qaControl.projectDefinition = {
                         }
                         var cucardas=qaControl.projectDefinition[info.packageVersion].cucardas;
                         var modulo=info.packageJson.name;
-                        var repo=info.packageJson.repository.replace('/'+modulo,'');
+                        var repoUrl = info.packageJson.repository.url ? info.packageJson.repository.url : info.packageJson.repository;
+                        var repo=repoUrl.replace('/'+modulo,'');
                         for(var nombreCucarda in cucardas) {
                             var cucarda = cucardas[nombreCucarda];
                             var cucaID = '!['+/!\[([-a-z]+)]/.exec(cucarda.md)[1]+']';

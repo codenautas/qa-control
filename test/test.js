@@ -352,7 +352,16 @@ var fixtures=[{
     expected:[
         { warning:'lack_of_mandatory_file_1',params:['appveyor.yml']}
     ]
+},{
+    base:'stable-project',
+    title:'must handle repository as an object (#34)',
+    test:'lack_of_mandatory_file_1',
+    change:function(info){
+        info['packageJson']['repository'] = { "type": "git", "url": "codenautas/stable-project" };
+    },
+    expected:[]
 }];
+
 
 function cloneProject(info){
     return _.cloneDeep(info);
