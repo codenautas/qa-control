@@ -635,7 +635,7 @@ var configReading=Promises.all(_.map(qaControl.projectDefinition,function(defini
                 return fs.readFile(__dirname+'/'+version+'/first-lines-'+runInValue+'.txt',{encoding: 'utf8'});
             }).then(function(content){
                 definition.firstLines[runInValue]=definition.firstLines[runInValue]||{};
-                definition.firstLines[runInValue][typeValue]=stripBom(content);
+                definition.firstLines[runInValue][typeValue]=content;
             });
         }));
     }));
