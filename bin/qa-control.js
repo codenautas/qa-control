@@ -1,4 +1,9 @@
 "use strict";
+/*jshint eqnull:true */
+/*jshint globalstrict:true */
+/*jshint node:true */
+
+var qaControl = {};
 
 var Promises = require('best-promise');
 var fs = require('fs-promise');
@@ -8,8 +13,6 @@ var semver = require('semver');
 var jsh = require('jshint');
 var multilang = require('multilang');
 var stripBom = require('strip-bom');
-
-var qaControl={};
 
 qaControl.msgs={
     en:{
@@ -72,6 +75,7 @@ qaControl.generateCucardas = function generateCucardas(cucardas, packageJson) {
     var cucaFileContent = qaControl.cucaMarker+'\n';
     var modulo=packageJson.name;
     var repo=qaControl.getRepositoryUrl(packageJson).replace('/'+modulo,'');
+     /*jshint forin: false */
     for(var nombreCucarda in cucardas) {
         var cucarda = cucardas[nombreCucarda];
         if(!cucarda.check || cucarda.check(packageJson)) {
@@ -79,6 +83,7 @@ qaControl.generateCucardas = function generateCucardas(cucardas, packageJson) {
             cucaFileContent += cucaStr +'\n';
         }
     }
+     /*jshint forin: true */
     return cucaFileContent;
 };
 qaControl.verbose = false;
@@ -296,12 +301,14 @@ qaControl.projectDefinition = {
                         var warns =[];
                         var files=qaControl.projectDefinition[info.packageVersion].files;
                         for(var fileName in files) {
-                            var file = files[fileName];
-                            if(file.mandatory && !info.files[fileName]) {
-                                warns.push({warning:'lack_of_mandatory_file_1', params:[fileName]});
-                            } else {
-                                if(file.presentIf && file.presentIf(info.packageJson) && !info.files[fileName]) {
+                            if(files.hasOwnProperty(fileName)) {
+                                var file = files[fileName];
+                                if(file.mandatory && !info.files[fileName]) {
                                     warns.push({warning:'lack_of_mandatory_file_1', params:[fileName]});
+                                } else {
+                                    if(file.presentIf && file.presentIf(info.packageJson) && !info.files[fileName]) {
+                                        warns.push({warning:'lack_of_mandatory_file_1', params:[fileName]});
+                                    }
                                 }
                             }
                         }
@@ -332,6 +339,7 @@ qaControl.projectDefinition = {
                         var warns=[];
                         var qaControlSection=info.packageJson['qa-control'];
                         var sections=qaControl.projectDefinition[info.packageVersion].sections;
+                         /*jshint forin: false */
                         for(var sectionName in sections){
                             var sectionDef=sections[sectionName];
                             if(sectionDef.mandatory && !(sectionName in qaControlSection)){
@@ -343,6 +351,7 @@ qaControl.projectDefinition = {
                                 }
                             }
                         }
+                         /*jshint forin: true */
                         return warns;
                     }
                 }],
@@ -403,6 +412,7 @@ qaControl.projectDefinition = {
                         var cucardas=qaControl.projectDefinition[info.packageVersion].cucardas;
                         var modulo=info.packageJson.name;
                         var repo=qaControl.getRepositoryUrl(info.packageJson).replace('/'+modulo,'');
+                         /*jshint forin: false */
                         for(var nombreCucarda in cucardas) {
                             var cucarda = cucardas[nombreCucarda];
                             var cucaID = '!['+/!\[([-a-z]+)]/.exec(cucarda.md)[1]+']';
@@ -422,6 +432,7 @@ qaControl.projectDefinition = {
                                 }
                             }
                         }
+                         /*jshint forin: true */
                         if(warns.length) {
                             fs.writeFile("cucardas.log", qaControl.generateCucardas(cucardas, info.packageJson));
                         }
@@ -458,13 +469,15 @@ qaControl.projectDefinition = {
                         for(var file in info.files) {
                             if(file.match(/(.js)$/)) {
                                 for(var customeName in customs) {
-                                    var content = info.files[file].content;
-                                    var custom = customs[customeName];
-                                    var detect = makeCheck(custom.detect);
-                                    var match = makeCheck(custom.match, true);
-                                    //console.log(file, " detect:", detect(content), " match: ", match(content))
-                                    if(detect(content) && ! match(content)) {
-                                        warns.push({warning:'file_1_does_not_match_custom_2', params:[file,customeName]});
+                                    if(customs.hasOwnProperty(customeName)) {
+                                        var content = info.files[file].content;
+                                        var custom = customs[customeName];
+                                        var detect = makeCheck(custom.detect);
+                                        var match = makeCheck(custom.match, true);
+                                        //console.log(file, " detect:", detect(content), " match: ", match(content))
+                                        if(detect(content) && ! match(content)) {
+                                            warns.push({warning:'file_1_does_not_match_custom_2', params:[file,customeName]});
+                                        }
                                     }
                                 }
                             }
@@ -482,6 +495,7 @@ qaControl.projectDefinition = {
                         var whichType=qaControlSection.type;
                         var firstLines=qaControl.projectDefinition[info.packageVersion].firstLines[whichRunIn][whichType];
                         if(firstLines) {
+                            //console.log("firstLines", firstLines);
                             // transformar el nombre de proyecto
                             var parts = info.packageJson.name.split('-');
                             var first=function(toWhat){
@@ -594,6 +608,7 @@ qaControl.projectDefinition = {
                         var content = info.files['README.md'].content;
                         var obtainedLangs = multilang.obtainLangs(content);
                         //console.log("OL", obtainedLangs.langs);
+                        /*jshint forin: false */
                         for(var lang in obtainedLangs.langs) {
                             var file=obtainedLangs.langs[lang].fileName;
                             if(file !== 'README.md') {
@@ -603,6 +618,7 @@ qaControl.projectDefinition = {
                                 }
                             }
                         }
+                        /*jshint forin: true */
                         return warns;
                     }
                 }]
@@ -617,12 +633,14 @@ qaControl.currentVersion = '0.0.1';
 
 qaControl.fixMessages = function fixMessages(messagesToFix) {
     return Promises.start(function() {
+        /*jshint forin: false */
         for(var warn in qaControl.msgs.es) {
             var msg = qaControl.msgs.es[warn];
             if(false === warn in messagesToFix) {
                 messagesToFix[warn] = warn.replace(/_(\d+)/g,' -$1').replace(/-/g, '$').replace(/_/g,' ');
             }
         }
+         /*jshint forin: true */
     });
 };
 
@@ -675,7 +693,9 @@ qaControl.loadProject = function loadProject(projectDir) {
         return fs.readdir(projectDir);
     }).then(function(files) {
         info.files = {};
+         /*jshint forin: false */
         for(var f in files) { info.files[files[f]] = {}; }
+         /*jshint forin: true */
         if(files.indexOf('package.json') != -1) {
             info.packageJson = {};
         }
@@ -791,7 +811,9 @@ qaControl.main=function main(parameters) {
         qaControl.verbose = parameters.verbose;
         if(parameters.listLangs) {
             process.stdout.write("Available languages:");
+             /*jshint forin: false */
             for(var lang in qaControl.msgs) { process.stdout.write(" "+lang); }
+             /*jshint forin: true */
             process.stdout.write("\n");
         } else {
             return qaControl.controlProject(parameters.projectDir).then(function(warns) {
