@@ -353,8 +353,7 @@ qaControl.projectDefinition = {
                     warnings:function(info) {
                         var warns =[];
                         var files=qaControl.projectDefinition[info.packageVersion].files;
-                        for(var fileName in files) {
-                            var file = files[fileName];
+                        _.forEach(files, function(file, fileName) {
                             if(file.mandatoryLines) {
                                 var fileContent = info.files[fileName].content;
                                 file.mandatoryLines.forEach(function(mandatoryLine) {
@@ -364,7 +363,7 @@ qaControl.projectDefinition = {
                                    }
                                 });
                             }
-                        }
+                        });
                         return warns;
                     }
                 }]
