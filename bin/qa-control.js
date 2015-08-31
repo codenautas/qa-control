@@ -538,7 +538,29 @@ qaControl.projectDefinition = {
                     }
                 }]
             },
+            jshint_config:{
+                checks:[{
+                    warnings:function(info){
+                        var warns = [];
+                        if(!('jshintConfig' in info.packageJson)) {
+                            warns.push({warning:'lack_of_jshintconfig_section_in_package_json'});
+                        }
+                        else {
+                            var requiredOptions = qaControl.projectDefinition[info.packageVersion].jshint_options;
+                            var checkedOptions = info.packageJson.jshintConfig;
+                            for(var op in requiredOptions) {
+                                if((false === op in checkedOptions) || checkedOptions[op] !== requiredOptions[op]) {
+                                    warns.push({warning:'incorrect_jshintconfig_option_1_in_package_json', params:[op]});
+                                }
+                            }
+                        }
+                        return warns;
+                    }
+                }]
+            },
             jshint:{
+                eclipsers:['packagejson_main_file_1_does_not_exists', 'first_lines_does_not_match_in_file_1',
+                           'lack_of_jshintconfig_section_in_package_json', 'incorrect_jshintconfig_option_1_in_package_json'],
                 checks:[{
                     warnings:function(info){
                         var warns = [];
@@ -559,26 +581,6 @@ qaControl.projectDefinition = {
                                         //console.log(data);
                                     }
                                     warns.push({warning:'jshint_warnings_in_file_1', params:[file]});
-                                }
-                            }
-                        }
-                        return warns;
-                    }
-                }]
-            },
-            jshint_config:{
-                checks:[{
-                    warnings:function(info){
-                        var warns = [];
-                        if(!('jshintConfig' in info.packageJson)) {
-                            warns.push({warning:'lack_of_jshintconfig_section_in_package_json'});
-                        }
-                        else {
-                            var requiredOptions = qaControl.projectDefinition[info.packageVersion].jshint_options;
-                            var checkedOptions = info.packageJson.jshintConfig;
-                            for(var op in requiredOptions) {
-                                if((false === op in checkedOptions) || checkedOptions[op] !== requiredOptions[op]) {
-                                    warns.push({warning:'incorrect_jshintconfig_option_1_in_package_json', params:[op]});
                                 }
                             }
                         }
