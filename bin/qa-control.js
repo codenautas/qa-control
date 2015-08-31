@@ -133,7 +133,7 @@ qaControl.projectDefinition = {
             },
             designing:{
                 check: function(packageJson){ 
-                    return semver.satisfies(packageJson.version,'0.0.x') && packageJson['qa-control'].purpose===null;
+                    return semver.satisfies(packageJson.version,'0.0.x') && !packageJson['qa-control'].purpose;
                 },
                 md:'![designing](https://img.shields.io/badge/stability-desgining-red.svg)',
                 imgExample:'https://img.shields.io/badge/stability-desgining-red.svg',

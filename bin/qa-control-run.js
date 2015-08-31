@@ -33,9 +33,9 @@ params.lang = program.lang;
 //console.log(params); process.exit(0);
 
 qaControl.main(params).then(function(warnStr){
-    if(params.verbose) {
+    //if(params.verbose) {
         process.stderr.write("Done"+(""===warnStr ? " without warnings!":"!"));
-    }
+    //}
 }).catch(function(err){
     process.stderr.write("\nERROR: "+err.message);
     process.stderr.write("\nSTACK: "+err.stack);
