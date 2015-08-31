@@ -59,8 +59,8 @@ qaControl.startsWith = function startsWith(bufTest, bufStart) {
     return qaControl.fixEOL(bufTest).indexOf(qaControl.fixEOL(bufStart))===0;
 };
 
-qaControl.getRepositoryUrl = function getRepositoryUrl(info) {
-    var repo = info.packageJson.repository.url ? info.packageJson.repository.url : info.packageJson.repository;
+qaControl.getRepositoryUrl = function getRepositoryUrl(packageJson) {
+    var repo = packageJson.repository.url ? packageJson.repository.url : packageJson.repository;
     var ghRepo = /(https:\/\/github\.com\/)/.exec(repo);
     if(ghRepo) { repo = repo.replace(ghRepo[1], ''); }
     return repo;
@@ -71,7 +71,7 @@ qaControl.cucaMarker = '<!-- cucardas -->';
 qaControl.generateCucardas = function generateCucardas(cucardas, packageJson) {
     var cucaFileContent = qaControl.cucaMarker+'\n';
     var modulo=packageJson.name;
-    var repo=packageJson.repository.replace('/'+modulo,'');
+    var repo=qaControl.getRepositoryUrl(packageJson).replace('/'+modulo,'');
     for(var nombreCucarda in cucardas) {
         var cucarda = cucardas[nombreCucarda];
         if(!cucarda.check || cucarda.check(packageJson)) {
@@ -317,7 +317,7 @@ qaControl.projectDefinition = {
                         if(!('repository' in info.packageJson)) {
                             warns.push({warning:'lack_of_repository_section_in_package_json'});
                         } else {
-                            if(! qaControl.getRepositoryUrl(info).match(/^([-a-zA-Z0-9_.]+\/[-a-zA-Z0-9_.]+)$/)){
+                            if(! qaControl.getRepositoryUrl(info.packageJson).match(/^([-a-zA-Z0-9_.]+\/[-a-zA-Z0-9_.]+)$/)){
                                 return [{warning:'repository_name_not_found'}];
                             }
                         }
@@ -383,7 +383,7 @@ qaControl.projectDefinition = {
                 checks:[{
                     warnings:function(info) {
                         var warns = [];
-                        var repoParts = qaControl.getRepositoryUrl(info).split('/');
+                        var repoParts = qaControl.getRepositoryUrl(info.packageJson).split('/');
                         var projName = repoParts[repoParts.length-1];
                         if(projName !== info.packageJson.name) {
                             return [{warning:'invalid_repository_section_in_package_json'}];
@@ -403,7 +403,7 @@ qaControl.projectDefinition = {
                         }
                         var cucardas=qaControl.projectDefinition[info.packageVersion].cucardas;
                         var modulo=info.packageJson.name;
-                        var repo=qaControl.getRepositoryUrl(info).replace('/'+modulo,'');
+                        var repo=qaControl.getRepositoryUrl(info.packageJson).replace('/'+modulo,'');
                         for(var nombreCucarda in cucardas) {
                             var cucarda = cucardas[nombreCucarda];
                             var cucaID = '!['+/!\[([-a-z]+)]/.exec(cucarda.md)[1]+']';
