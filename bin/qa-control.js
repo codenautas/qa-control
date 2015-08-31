@@ -554,6 +554,7 @@ qaControl.projectDefinition = {
                                     if(qaControl.verbose){
                                         console.log('JSHINT output:');
                                         console.log('jshintOpts',jshintOpts);
+                                        console.log(data.errors.length, " JSHINT errors");
                                         console.log(data.errors);
                                         //console.log(data);
                                     }
