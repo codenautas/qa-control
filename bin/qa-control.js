@@ -136,9 +136,9 @@ qaControl.projectDefinition = {
             },
             extending:{
                 check: function(packageJson){ 
-                    return semver.satisfies(packageJson.version,'0.x.x')
-                              && !semver.satisfies(packageJson.version,'0.0.x')
-                              && packageJson['qa-control'].purpose==null;
+                    return semver.satisfies(packageJson.version,'0.x.x') &&
+                            !semver.satisfies(packageJson.version,'0.0.x') &&
+                            !packageJson['qa-control'].purpose;
                 },
                 md:'![extending](https://img.shields.io/badge/stability-extending-orange.svg)',
                 imgExample:'https://img.shields.io/badge/stability-extending-orange.svg',
@@ -190,7 +190,7 @@ qaControl.projectDefinition = {
             },
             climate:{
                 check: function(packageJson){ 
-                    return packageJson['qa-control'].coverage || packageJson['qa-control'].purpose==null;
+                    return packageJson['qa-control'].coverage || ! packageJson['qa-control'].purpose;
                 },
                 md:'[![climate](https://img.shields.io/codeclimate/github/xxx/yyy.svg)](https://codeclimate.com/github/xxx/yyy)',
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/climate.png',
@@ -437,7 +437,7 @@ qaControl.projectDefinition = {
                         var customs = qaControl.projectDefinition[info.packageVersion].customs;
                         function makeCheck(strOrRegexp, isMatchFunc) {
                             var checker;
-                            if(strOrRegexp == null){
+                            if(!strOrRegexp){
                                 checker=function(str) { return false; };
                             }else if(strOrRegexp instanceof RegExp) {
                                 checker=function(str) {
