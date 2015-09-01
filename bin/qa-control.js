@@ -729,7 +729,9 @@ qaControl.loadProject = function loadProject(projectDir) {
                             });
                         }
                     }).catch(function(err) {
-                        if(err.code!=='ENOENT') {
+                        if(err.code === 'ENOENT') {
+                            delete info.files[mainName];
+                        } else {
                             throw err;                            
                         }
                     });

@@ -537,12 +537,12 @@ describe('qa-control', function(){
                 done(err);
             });
         });
-       it.skip('packageJson.main must gracefully fail if file does not exists', function(done){
+       it('packageJson.main must gracefully fail if file does not exists (#37)', function(done){
             qaControl.loadProject('./test/fixtures/stable-project-with-inexistent-main').then(function(info){
-                expect(info['files']).to.have.key('bin/nonexistent.js');
+                expect(info['files']).not.to.have.key('bin/nonexistent.js');
                 return qaControl.controlInfo(info);
             }).then(function(warns){
-                expect(warns).to.eql([]);
+                expect(warns).to.eql([{warning:'packagejson_main_file_1_does_not_exists', params:['bin/nonexistent.js']}]);
                 done();
             }).catch(function(err) {
                 console.log("err", err);
