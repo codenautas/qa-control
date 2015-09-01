@@ -537,6 +537,18 @@ describe('qa-control', function(){
                 done(err);
             });
         });
+       it.skip('packageJson.main must gracefully fail if file does not exists', function(done){
+            qaControl.loadProject('./test/fixtures/stable-project-with-inexistent-main').then(function(info){
+                expect(info['files']).to.have.key('bin/nonexistent.js');
+                return qaControl.controlInfo(info);
+            }).then(function(warns){
+                expect(warns).to.eql([]);
+                done();
+            }).catch(function(err) {
+                console.log("err", err);
+                done(err);
+            });
+        });
     });
     describe('integrity tests', function(){
         it('verify that qa-control.js only uses existent warning IDs (#24)', function(done){

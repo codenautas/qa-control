@@ -728,6 +728,10 @@ qaControl.loadProject = function loadProject(projectDir) {
                                 info.files[mainName].content = stripBom(content);
                             });
                         }
+                    }).catch(function(err) {
+                        if(err.code!=='ENOENT') {
+                            throw err;                            
+                        }
                     });
                 }            
             }
