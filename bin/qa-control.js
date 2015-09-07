@@ -53,6 +53,35 @@ qaControl.msgs={
     }
 };
 
+qaControl.cmdMsgs = {
+    en: {
+        msg_done:'Done',
+        msg_nowarns:'without warnings',
+        msg_langs:'Available languages',
+        msg_starting: 'Starting qa-control on',
+        msg_loaded: 'Loaded default configuration',
+        msg_proj: 'Reading project directory',
+        msg_reading: 'Reading',
+        msg_skipping: 'Skipping directory',
+        msg_reading_main: 'Reading "main" from',
+        msg_controlling: 'Controlling project information',
+        msg_checking: 'Checking rule'
+    },
+    es: {
+        msg_done:'Listo',
+        msg_nowarns:'sin advertencias',
+        msg_langs:'Idiomas disponibles',
+        msg_starting: 'Iniciando qa-control en',
+        msg_loaded: 'Confuración por defecto cargada',
+        msg_proj: 'Leyendo directorio del proyecto',
+        msg_reading: 'Leyendo',
+        msg_skipping: 'Salteando directorio',
+        msg_reading_main: 'Leyendo "main" de',
+        msg_controlling: 'Controlando la información del proyecto',
+        msg_checking: 'Verificando regla'
+    }
+};
+
 // devuelve un buffer con los \n, \r\n, \r como \n
 qaControl.fixEOL = function fixEOL(buf) {
     return buf.replace(/\s*\r?\n/g, '\n').replace(/\s*\r/g, '\n');
@@ -696,11 +725,12 @@ var configReading=Promises.all(_.map(qaControl.projectDefinition,function(defini
 
 qaControl.loadProject = function loadProject(projectDir) {
     var info = {};
-    if(qaControl.verbose) { process.stdout.write("Starting qa-control on '"+projectDir+"'...\n"); }
+    var cmsgs = qaControl.cmdMsgs[qaControl.lang];
+    if(qaControl.verbose) { process.stdout.write(cmsgs.msg_starting+projectDir+"'...\n"); }
     return Promises.start(function(){
         if(!qaControl.configReady) { return configReading; }
     }).then(function(){
-        if(qaControl.verbose) { process.stdout.write("Loaded default configuration.\n"); }
+        if(qaControl.verbose) { process.stdout.write(cmsgs.msg_loaded+"\n"); }
         if(!projectDir) { throw new Error('null projectDir'); }
         return fs.exists(projectDir);
     }).then(function(exists) {
@@ -710,7 +740,7 @@ qaControl.loadProject = function loadProject(projectDir) {
         if(! stat.isDirectory()) {
             throw new Error("'"+projectDir+"' is not a directory");
         }
-        if(qaControl.verbose) { process.stdout.write("Reading project directory...\n"); }
+        if(qaControl.verbose) { process.stdout.write(cmsgs.msg_proj+"...\n"); }
         return fs.readdir(projectDir);
     }).then(function(files) {
         info.files = {};
@@ -726,12 +756,12 @@ qaControl.loadProject = function loadProject(projectDir) {
                 return fs.stat(iFile);
             }).then(function(stat) {
                 if(stat.isFile()) {
-                    if(qaControl.verbose) { process.stdout.write("Reading '"+iFile+"'...\n"); }
+                    if(qaControl.verbose) { process.stdout.write(cmsgs.msg_reading+" '"+iFile+"'...\n"); }
                     return fs.readFile(iFile, 'utf8').then(function(content){
                         info.files[file].content = stripBom(content);
                     });
                 } else {
-                    if(qaControl.verbose) { process.stdout.write("Skipping directory '"+iFile+"'.\n"); }
+                    if(qaControl.verbose) { process.stdout.write(cmsgs.msg_skipping+" '"+iFile+"'.\n"); }
                     delete info.files[file]; // not a file, we erase it
                 }
             });
@@ -742,7 +772,7 @@ qaControl.loadProject = function loadProject(projectDir) {
                 if(info.packageJson.main && false === mainName in info.files) {
                     info.files[mainName] = {};
                     var mainFile = Path.normalize(projectDir+'/'+mainName);
-                    if(qaControl.verbose) { process.stdout.write("Reading 'main' from '"+mainFile+"'...\n"); }
+                    if(qaControl.verbose) { process.stdout.write(cmsgs.msg_reading_main+" '"+mainFile+"'...\n"); }
                     return fs.stat(mainFile).then(function(stat) {
                         if(stat.isFile()) {
                             return fs.readFile(mainFile, 'utf8').then(function(content) {
@@ -767,8 +797,9 @@ qaControl.loadProject = function loadProject(projectDir) {
 qaControl.controlInfo=function controlInfo(info){
     var resultWarnings=[];
     var existingWarnings={};
+    var cmsgs = qaControl.cmdMsgs[qaControl.lang];
     var rules = qaControl.projectDefinition[qaControl.currentVersion].rules;
-    if(qaControl.verbose) { process.stdout.write("Controlling project information...\n"); }
+    if(qaControl.verbose) { process.stdout.write(cmsgs.msg_controlling+"...\n"); }
     var cadenaDePromesas = Promises.start();
     _.forEach(rules, function(rule, ruleName) {
         rule.checks.forEach(function(checkInfo){
@@ -776,7 +807,7 @@ qaControl.controlInfo=function controlInfo(info){
                 if(rule.eclipsers && rule.eclipsers.some(function(warning){ return existingWarnings[warning]; })){
                     return [];
                 }
-                if(qaControl.verbose) { process.stdout.write("Checking rule '"+ruleName+"'...\n"); }
+                if(qaControl.verbose) { process.stdout.write(cmsgs.msg_checking+" '"+ruleName+"'...\n"); }
                 return checkInfo.warnings(info);
             }).then(function(warningsOfThisRule) {
                 if(warningsOfThisRule.length) {
@@ -833,11 +864,6 @@ qaControl.controlProject=function controlProject(projectDir){
     });
 };
 
-qaControl.cmdMsgs = {
-    en: {msg_done:'Done', msg_nowarns:'without warnings', msg_langs:'Available languages'},
-    es: {msg_done:'Listo', msg_nowarns:'sin advertencias', msg_langs:'Idiomas disponibles'}
-};
-
 qaControl.main=function main(parameters) {
     return Promises.start(function() {
         qaControl.verbose = parameters.verbose;
@@ -849,8 +875,9 @@ qaControl.main=function main(parameters) {
              /*jshint forin: true */
             process.stdout.write("\n");
         } else {
+            qaControl.lang = parameters.lang || "en";
             return qaControl.controlProject(parameters.projectDir).then(function(warns) {
-                return qaControl.stringizeWarnings(warns, parameters.lang || "en");
+                return qaControl.stringizeWarnings(warns, qaControl.lang);
             }).then(function(warnString) {
                 process.stdout.write(warnString);
                 return warnString;
