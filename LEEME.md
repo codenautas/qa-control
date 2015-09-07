@@ -10,10 +10,6 @@ NO MODIFIQUE ESTE ARCHIVO. FUE GENERADO AUTOMÁTICAMENTE POR multilang.js
 
 -->
 # qa-control
-QA control of things that nobody controls
-
-<!--lnag:en-->
-Quality assurance tool for Node projects
 
 
 Herramienta de control de calidad para proyectos Node
@@ -51,7 +47,7 @@ $ pwd
 
 ```sh
 $ qa-control --list-langs
-Available languages: en es
+Idiomas disponibles: en es
 
 $ qa-control . --lang=es
 Listo sin advertencias!

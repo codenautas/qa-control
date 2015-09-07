@@ -1,12 +1,11 @@
 # qa-control
-QA control of things that nobody controls
 
 <!--multilang v0 en:README.md es:LEEME.md -->
-<!--lnag:en-->
+
+<!--lang:en-->
 Quality assurance tool for Node projects
 
 <!--lang:es--]
-
 Herramienta de control de calidad para proyectos Node
 
 [!--lang:*-->
@@ -28,7 +27,7 @@ also available in:
 
 <!--lang:en-->
 
-## Instalation
+## Install
 
 <!--lang:es--]
 
@@ -56,6 +55,10 @@ $ pwd
 <!--lang:en-->
 
 ```sh
+
+$ qa-control --list-langs
+Available languages: en es
+
 $ qa-control . 
 Done without warnings!
 ```
@@ -63,7 +66,7 @@ Done without warnings!
 <!--lang:es--]
 ```sh
 $ qa-control --list-langs
-Available languages: en es
+Idiomas disponibles: en es
 
 $ qa-control . --lang=es
 Listo sin advertencias!
