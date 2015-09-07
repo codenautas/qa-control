@@ -51,7 +51,7 @@ $ pwd
 
 ```sh
 $ qa-control . --lang=es
-Done without warnings!
+Listo sin advertencias!
 ```
 
 

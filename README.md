@@ -63,7 +63,7 @@ Done without warnings!
 <!--lang:es--]
 ```sh
 $ qa-control . --lang=es
-Done without warnings!
+Listo sin advertencias!
 ```
 
 [!--lang:en-->

@@ -844,9 +844,6 @@ qaControl.main=function main(parameters) {
             process.stdout.write("\n");
         } else {
             return qaControl.controlProject(parameters.projectDir).then(function(warns) {
-                if(parameters.lang) {
-                    console.log("lang: ", parameters.lang);
-                }
                 return qaControl.stringizeWarnings(warns, parameters.lang || "en");
             }).then(function(warnString) {
                 process.stdout.write(warnString);
