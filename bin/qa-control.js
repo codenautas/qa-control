@@ -17,7 +17,7 @@ var stripBom = require('strip-bom');
 qaControl.msgs={
     en:{
         deprecated_qa_control_version: 'deprecated qa-control version',
-        repository_name_not_found: 'pacakgeJson.repository must be in format /{[-a-zA-Z0-9_.]+}\/[-a-zA-Z0-9_.]+/'
+        repository_name_not_found: 'packageJson.repository must be in format /{[-a-zA-Z0-9_.]+}\/[-a-zA-Z0-9_.]+/'
     },
     es:{
         deprecated_qa_control_version: 'la versión de qa-control es vieja',
@@ -40,7 +40,7 @@ qaControl.msgs={
         lack_of_mandatory_line_1_in_file_2: 'falta la linea obligatoria $1 en el archivo $2',
         file_1_does_not_match_custom_2: '$1 no respeta la custombre $2',
         first_lines_does_not_match_in_file_1: 'las primeras líneas no coinciden en $1',
-        repository_name_not_found: 'pacakgeJson.repository no tiene el formato /{[-a-zA-Z0-9_.]+}\/[-a-zA-Z0-9_.]+/',
+        repository_name_not_found: 'packageJson.repository no tiene el formato /{[-a-zA-Z0-9_.]+}\/[-a-zA-Z0-9_.]+/',
         using_normal_promise_in_file_1: 'se han usado Promise(s) normales en "$1"',
         packagejson_main_file_1_does_not_exists: 'no existe el archivo "main" ($1) declarado en package.json',
         jshint_warnings_in_file_1: 'el archivo "$1" tiene warnings de JSHint',
@@ -633,11 +633,10 @@ qaControl.projectDefinition = {
                             for(var depName in info.packageJson.dependencies) {
                                 var depVal = info.packageJson.dependencies[depName];
                                 if(! reDep.test(depVal)) {
-                                    console.log(depName, depVal);
+                                    // console.log(depName, depVal);
+                                    warns.push({warning:'invalid_dependency_version_number_format_in_dep_1', params:[depName]});
                                 }
                             }
-                            
-                            //invalid_dependency_version_number_format_in_dep_1
                         }
                         return warns;
                     }

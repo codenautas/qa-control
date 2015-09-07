@@ -368,7 +368,20 @@ var fixtures=[{
         info['packageJson']['repository'] = { "type": "git", "url": "https://github.com/codenautas/stable-project" };
     },
     expected:[]
+},{
+    base:'stable-project',
+    title:'must reject invalid version numbers in "dependencies" section (#38)',
+    test:'invalid_dependency_version_number_format_in_dep_1',
+    change:function(info){
+        info.packageJson.dependencies['lodash'] = "^3.3.1";
+        info.packageJson.dependencies['best-promise'] = ">=1.3.10";
+    },
+    expected:[
+        { warning:'invalid_dependency_version_number_format_in_dep_1',params:['lodash'] },
+        { warning:'invalid_dependency_version_number_format_in_dep_1',params:['best-promise'] }
+    ]
 }];
+
 
 
 function cloneProject(info){
@@ -429,7 +442,7 @@ describe('qa-control', function(){
                 expect(en['lack_of_mandatory_line_1_in_file_2']).to.be('lack of mandatory line $1 in file $2');
                 expect(en['file_1_does_not_match_custom_2']).to.be('file $1 does not match custom $2');
                 expect(en['first_lines_does_not_match_in_file_1']).to.be('first lines does not match in file $1');
-                expect(en['repository_name_not_found']).to.be('pacakgeJson.repository must be in format /{[-a-zA-Z0-9_.]+}\/[-a-zA-Z0-9_.]+/');
+                expect(en['repository_name_not_found']).to.be('packageJson.repository must be in format /{[-a-zA-Z0-9_.]+}\/[-a-zA-Z0-9_.]+/');
                 expect(en['using_normal_promise_in_file_1']).to.be('using normal promise in file $1');
                 expect(en['packagejson_main_file_1_does_not_exists']).to.be('packagejson main file $1 does not exists');
                 expect(en['jshint_warnings_in_file_1']).to.be('jshint warnings in file $1');
@@ -742,7 +755,7 @@ describe('qa-control main', function(){
                                       +'falta la linea obligatoria param1 en el archivo param2\n'
                                       +'param1 no respeta la custombre param2\n'
                                       +'las primeras líneas no coinciden en param1\n'
-                                      +'pacakgeJson.repository no tiene el formato /{[-a-zA-Z0-9_.]+}/[-a-zA-Z0-9_.]+/\n'
+                                      +'packageJson.repository no tiene el formato /{[-a-zA-Z0-9_.]+}/[-a-zA-Z0-9_.]+/\n'
                                       +'se han usado Promise(s) normales en "param1"\n'
                                       +'no existe el archivo "main" (param1) declarado en package.json\n'
                                       +'el archivo "param1" tiene warnings de JSHint\n'
@@ -762,7 +775,7 @@ describe('qa-control main', function(){
             }).then(function(warnStr){
                 //console.log(warnStr);
                 expect(warnStr).to.eql('deprecated qa-control version\n'
-                                       +'pacakgeJson.repository must be in format /{[-a-zA-Z0-9_.]+}/[-a-zA-Z0-9_.]+/\n'
+                                       +'packageJson.repository must be in format /{[-a-zA-Z0-9_.]+}/[-a-zA-Z0-9_.]+/\n'
                                        +'deprecated version\n'
                                        +'invalid qa control version\n'
                                        +'invalid value param1 in parameter param2\n'
