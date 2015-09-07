@@ -10,9 +10,7 @@ NO MODIFIQUE ESTE ARCHIVO. FUE GENERADO AUTOMÁTICAMENTE POR multilang.js
 
 -->
 # qa-control
-
-
-Herramienta de control de calidad para proyectos Node
+Quality assurance tool for Node projects
 
 
 <!-- cucardas -->
@@ -29,6 +27,8 @@ Herramienta de control de calidad para proyectos Node
 idioma: ![castellano](https://raw.githubusercontent.com/codenautas/multilang/master/img/lang-es.png)
 también disponible en:
 [![inglés](https://raw.githubusercontent.com/codenautas/multilang/master/img/lang-en.png)](README.md)
+
+Herramienta de control de calidad para proyectos Node
 
 
 ## Instalación

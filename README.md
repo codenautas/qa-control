@@ -1,14 +1,7 @@
 # qa-control
-
-<!--multilang v0 en:README.md es:LEEME.md -->
-
-<!--lang:en-->
 Quality assurance tool for Node projects
 
-<!--lang:es--]
-Herramienta de control de calidad para proyectos Node
-
-[!--lang:*-->
+<!--multilang v0 en:README.md es:LEEME.md -->
 
 <!-- cucardas -->
 ![designing](https://img.shields.io/badge/stability-desgining-red.svg)
@@ -26,6 +19,12 @@ also available in:
 [![Spanish](https://raw.githubusercontent.com/codenautas/multilang/master/img/lang-es.png)](LEEME.md) - 
 
 <!--lang:en-->
+Quality assurance tool for Node projects
+
+<!--lang:es--]
+Herramienta de control de calidad para proyectos Node
+
+[!--lang:en-->
 
 ## Install
 
