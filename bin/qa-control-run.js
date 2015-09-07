@@ -32,16 +32,11 @@ params.lang = program.lang;
 
 //console.log(params); process.exit(0);
 
-var cmdMsgs = {
-    en: {msg_done:'Done', msg_nowarns:'without warnings'},
-    es: {msg_done:'Listo', msg_nowarns:'sin advertencias'}
-};
-
 qaControl.main(params).then(function(warnStr){
-    var cmdLang = params.lang || 'en';
-    //if(params.verbose) {
-        process.stderr.write(cmdMsgs[cmdLang].msg_done+(""===warnStr ? ' '+cmdMsgs[cmdLang].msg_nowarns:'')+'!');
-    //}
+    if(! params.listLangs) {
+        var msgs = qaControl.cmdMsgs[params.lang || 'en'];
+        process.stderr.write(msgs.msg_done+(""===warnStr ? ' '+msgs.msg_nowarns:'')+'!');
+    }
 }).catch(function(err){
     process.stderr.write("\nERROR: "+err.message);
     process.stderr.write("\nSTACK: "+err.stack);

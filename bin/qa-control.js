@@ -833,11 +833,17 @@ qaControl.controlProject=function controlProject(projectDir){
     });
 };
 
+qaControl.cmdMsgs = {
+    en: {msg_done:'Done', msg_nowarns:'without warnings', msg_langs:'Available languages'},
+    es: {msg_done:'Listo', msg_nowarns:'sin advertencias', msg_langs:'Idiomas disponibles'}
+};
+
 qaControl.main=function main(parameters) {
     return Promises.start(function() {
         qaControl.verbose = parameters.verbose;
         if(parameters.listLangs) {
-            process.stdout.write("Available languages:");
+            var msgLang =qaControl.cmdMsgs[parameters.lang || 'en'].msg_langs;
+            process.stdout.write(msgLang+':');
              /*jshint forin: false */
             for(var lang in qaControl.msgs) { process.stdout.write(" "+lang); }
              /*jshint forin: true */

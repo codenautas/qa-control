@@ -41,7 +41,7 @@ también disponible en:
 > npm install -g qa-control
 
 
-## Uso
+## Uso (línea de comandos)
 
 
 ```sh
@@ -50,13 +50,30 @@ $ pwd
 ```
 
 ```sh
+$ qa-control --list-langs
+Available languages: en es
+
 $ qa-control . --lang=es
 Listo sin advertencias!
 ```
 
 
+## Uso (código)
+
+
+```js
+var qaControl = require('qa-control');
+
+qaControl.controlProject('./path/to/my/project').then(function(warnings){
+    console.log(warnings);
+});
+
+```
+
 ## License
 
 [MIT](LICENSE)
+
+----------------
 
 

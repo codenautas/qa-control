@@ -40,11 +40,11 @@ also available in:
 
 <!--lang:en-->
 
-## Usage
+## Usage (command-line)
 
 <!--lang:es--]
 
-## Uso
+## Uso (línea de comandos)
 
 [!--lang:*-->
 
@@ -62,14 +62,36 @@ Done without warnings!
 
 <!--lang:es--]
 ```sh
+$ qa-control --list-langs
+Available languages: en es
+
 $ qa-control . --lang=es
 Listo sin advertencias!
 ```
 
+[!--lang:en-->
+
+## Usage (code)
+
+<!--lang:es--]
+
+## Uso (código)
+
 [!--lang:*-->
+
+```js
+var qaControl = require('qa-control');
+
+qaControl.controlProject('./path/to/my/project').then(function(warnings){
+    console.log(warnings);
+});
+
+```
 
 ## License
 
 [MIT](LICENSE)
+
+----------------
 
 
