@@ -630,6 +630,7 @@ qaControl.projectDefinition = {
                         var warns = [];
                         if("dependencies" in info.packageJson) {
                             var reDep=/^\d+\.\d+\.\d+$/;
+                            /*jshint forin: false */
                             for(var depName in info.packageJson.dependencies) {
                                 var depVal = info.packageJson.dependencies[depName];
                                 if(! reDep.test(depVal)) {
@@ -637,6 +638,7 @@ qaControl.projectDefinition = {
                                     warns.push({warning:'invalid_dependency_version_number_format_in_dep_1', params:[depName]});
                                 }
                             }
+                            /*jshint forin: true */
                         }
                         return warns;
                     }
