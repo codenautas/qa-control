@@ -10,7 +10,8 @@ NO MODIFIQUE ESTE ARCHIVO. FUE GENERADO AUTOMÁTICAMENTE POR multilang.js
 
 -->
 # qa-control
-Quality assurance tool for Node projects
+
+Herramienta de control de calidad para proyectos Node
 
 
 <!-- cucardas -->
@@ -21,6 +22,7 @@ Quality assurance tool for Node projects
 [![coverage](https://img.shields.io/coveralls/codenautas/qa-control/master.svg)](https://coveralls.io/r/codenautas/qa-control)
 [![climate](https://img.shields.io/codeclimate/github/codenautas/qa-control.svg)](https://codeclimate.com/github/codenautas/qa-control)
 [![dependencies](https://img.shields.io/david/codenautas/qa-control.svg)](https://david-dm.org/codenautas/qa-control)
+
 
 <!--multilang buttons-->
 
