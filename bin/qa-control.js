@@ -629,7 +629,14 @@ qaControl.projectDefinition = {
                     warnings:function(info) {
                         var warns = [];
                         if("dependencies" in info.packageJson) {
-                            //console.log("deps", info.packageJson["dependencies"])
+                            var reDep=/^\d+\.\d+\.\d+$/;
+                            for(var depName in info.packageJson.dependencies) {
+                                var depVal = info.packageJson.dependencies[depName];
+                                if(! reDep.test(depVal)) {
+                                    console.log(depName, depVal);
+                                }
+                            }
+                            
                             //invalid_dependency_version_number_format_in_dep_1
                         }
                         return warns;
