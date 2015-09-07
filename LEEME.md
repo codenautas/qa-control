@@ -12,9 +12,11 @@ NO MODIFIQUE ESTE ARCHIVO. FUE GENERADO AUTOMÁTICAMENTE POR multilang.js
 # qa-control
 QA control of things that nobody controls
 
+<!--lnag:en-->
+Quality assurance tool for Node projects
 
 
-Ajax con promesas y soporte para lecturas parciales
+Herramienta de control de calidad para proyectos Node
 
 
 <!-- cucardas -->
@@ -36,20 +38,20 @@ también disponible en:
 ## Instalación
 
 
-```js
 > npm install -g qa-control
-```
 
 
 ## Uso
 
 
-```js
-> pwd
+```sh
+$ pwd
 /home/user/npm-packages/this-module
+```
 
-> qa-control . 
-this-modules has not warnings!
+```sh
+$ qa-control . --lang=es
+Done without warnings!
 ```
 
 

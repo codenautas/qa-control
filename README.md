@@ -2,10 +2,12 @@
 QA control of things that nobody controls
 
 <!--multilang v0 en:README.md es:LEEME.md -->
+<!--lnag:en-->
+Quality assurance tool for Node projects
 
 <!--lang:es--]
 
-Ajax con promesas y soporte para lecturas parciales
+Herramienta de control de calidad para proyectos Node
 
 [!--lang:*-->
 
@@ -34,13 +36,11 @@ also available in:
 
 [!--lang:*-->
 
-```js
 > npm install -g qa-control
-```
 
 <!--lang:en-->
 
-## Use
+## Usage
 
 <!--lang:es--]
 
@@ -48,16 +48,25 @@ also available in:
 
 [!--lang:*-->
 
-```js
-> pwd
+```sh
+$ pwd
 /home/user/npm-packages/this-module
-
-> qa-control . 
-this-modules has not warnings!
 ```
 
 <!--lang:en-->
 
+```sh
+$ qa-control . 
+Done without warnings!
+```
+
+<!--lang:es--]
+```sh
+$ qa-control . --lang=es
+Done without warnings!
+```
+
+[!--lang:en-->
 ## Licence
 
 <!--lang:es-->
