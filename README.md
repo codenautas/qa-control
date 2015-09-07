@@ -35,7 +35,9 @@ also available in:
 
 [!--lang:*-->
 
-> npm install -g qa-control
+```sh
+$ npm install -g qa-control
+```
 
 <!--lang:en-->
 
@@ -55,7 +57,6 @@ $ pwd
 <!--lang:en-->
 
 ```sh
-
 $ qa-control --list-langs
 Available languages: en es
 

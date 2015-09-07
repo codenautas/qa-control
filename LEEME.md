@@ -34,7 +34,9 @@ también disponible en:
 ## Instalación
 
 
-> npm install -g qa-control
+```sh
+$ npm install -g qa-control
+```
 
 
 ## Uso (línea de comandos)
