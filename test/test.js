@@ -438,6 +438,7 @@ describe('qa-control', function(){
                 expect(en['readme_multilang_not_sincronized_with_file_1']).to.be('readme multilang not sincronized with file $1');
                 expect(en['lack_of_repository_section_in_package_json']).to.be('lack of repository section in package json');
                 expect(en['invalid_repository_section_in_package_json']).to.be('invalid repository section in package json');
+                expect(en['invalid_dependency_version_number_format_in_dep_1']).to.be('invalid dependency version number format in dep $1');
                 done();
             }).catch(done);
         });
@@ -749,7 +750,8 @@ describe('qa-control main', function(){
                                       +'la opcion "param1" en "jshintConfig" es incorrecta en package.json\n'
                                       +'README.md no esta sincronizado con "param1" para multilang\n'
                                       +'Falta la sección "repository" en package.json\n'
-                                      +'La sección "repository" en package.json es inválida\n');
+                                      +'La sección "repository" en package.json es inválida\n'
+                                      +'El formato del numero de version es incorrecto en "param1"\n');
                 done();
             }).catch(done);
         });
@@ -785,7 +787,8 @@ describe('qa-control main', function(){
                                        +'incorrect jshintconfig option param1 in package json\n'
                                        +'readme multilang not sincronized with file param1\n'
                                        +'lack of repository section in package json\n'
-                                       +'invalid repository section in package json\n');
+                                       +'invalid repository section in package json\n'
+                                       +'invalid dependency version number format in dep param1\n');
                 done();
             }).catch(done);
         });

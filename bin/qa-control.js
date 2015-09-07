@@ -48,7 +48,8 @@ qaControl.msgs={
         incorrect_jshintconfig_option_1_in_package_json: 'la opcion "$1" en "jshintConfig" es incorrecta en package.json',
         readme_multilang_not_sincronized_with_file_1: 'README.md no esta sincronizado con "$1" para multilang',
         lack_of_repository_section_in_package_json: 'Falta la sección "repository" en package.json',
-        invalid_repository_section_in_package_json: 'La sección "repository" en package.json es inválida'
+        invalid_repository_section_in_package_json: 'La sección "repository" en package.json es inválida',
+        invalid_dependency_version_number_format_in_dep_1: 'El formato del numero de version es incorrecto en "$1"'
     }
 };
 
@@ -619,6 +620,18 @@ qaControl.projectDefinition = {
                             }
                         }
                         /*jshint forin: true */
+                        return warns;
+                    }
+                }]
+            },
+            dependencies:{
+                checks:[{
+                    warnings:function(info) {
+                        var warns = [];
+                        if("dependencies" in info.packageJson) {
+                            //console.log("deps", info.packageJson["dependencies"])
+                            //invalid_dependency_version_number_format_in_dep_1
+                        }
                         return warns;
                     }
                 }]
