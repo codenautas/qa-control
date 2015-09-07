@@ -66,16 +66,10 @@ $ qa-control . --lang=es
 Listo sin advertencias!
 ```
 
-[!--lang:en-->
-## Licence
+[!--lang:*-->
 
-<!--lang:es-->
+## License
 
-## Licencia
+[MIT](LICENSE)
 
-<!--lang:*-->
-
-MIT
-
-.............................
 

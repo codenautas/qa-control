@@ -55,10 +55,8 @@ Listo sin advertencias!
 ```
 
 
-## Licencia
+## License
 
+[MIT](LICENSE)
 
-MIT
-
-.............................
 
