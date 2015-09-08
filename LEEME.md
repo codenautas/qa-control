@@ -1,18 +1,12 @@
-<!-- multilang from README.md
-
-
-
-
-NO MODIFIQUE ESTE ARCHIVO. FUE GENERADO AUTOMÁTICAMENTE POR multilang.js
-
-
-
-
--->
 # qa-control
 
+<!--lang:es-->
 Herramienta de control de calidad para proyectos Node
 
+<!--lang:en--]
+Quality assurance tool for Node projects
+
+[!--lang:*-->
 
 <!-- cucardas -->
 ![designing](https://img.shields.io/badge/stability-desgining-red.svg)
@@ -23,6 +17,7 @@ Herramienta de control de calidad para proyectos Node
 [![climate](https://img.shields.io/codeclimate/github/codenautas/qa-control.svg)](https://codeclimate.com/github/codenautas/qa-control)
 [![dependencies](https://img.shields.io/david/codenautas/qa-control.svg)](https://david-dm.org/codenautas/qa-control)
 
+<!--multilang v0 es:LEEME.md en:README.md -->
 
 <!--multilang buttons-->
 
@@ -30,24 +25,36 @@ idioma: ![castellano](https://raw.githubusercontent.com/codenautas/multilang/mas
 también disponible en:
 [![inglés](https://raw.githubusercontent.com/codenautas/multilang/master/img/lang-en.png)](README.md)
 
-Herramienta de control de calidad para proyectos Node
-
+<!--lang:es-->
 
 ## Instalación
 
+<!--lang:en--]
+
+## Install
+
+[!--lang:*-->
 
 ```sh
 $ npm install -g qa-control
 ```
 
+<!--lang:es-->
 
 ## Uso (línea de comandos)
 
+<!--lang:en--]
+
+## Usage (command-line)
+
+[!--lang:*-->
 
 ```sh
 $ pwd
 /home/user/npm-packages/this-module
 ```
+
+<!--lang:es-->
 
 ```sh
 $ qa-control --list-langs
@@ -57,9 +64,25 @@ $ qa-control . --lang=es
 Listo sin advertencias!
 ```
 
+<!--lang:en--]
+
+```sh
+$ qa-control --list-langs
+Available languages: en es
+
+$ qa-control . 
+Done without warnings!
+```
+
+[!--lang:es-->
 
 ## Uso (código)
 
+<!--lang:en--]
+
+## Usage (code)
+
+[!--lang:*-->
 
 ```js
 var qaControl = require('qa-control');
