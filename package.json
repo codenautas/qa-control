@@ -1,7 +1,7 @@
 {
   "name": "qa-control",
   "description": "QA control of things that nobody controls",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "author": "Codenautas <codenautas@googlegroups.com>",
   "license": "MIT",
   "repository": "codenautas/qa-control",
@@ -15,22 +15,22 @@
   },
   "main": "./bin/qa-control.js",
   "dependencies": {
-    "fs-extra": "0.23.1",
+    "fs-extra": "0.24.0",
     "fs-promise": "0.3.1",
-    "js-yaml": "3.4.0",
+    "js-yaml": "3.4.2",
     "lodash": "3.10.1",
     "parameters": "0.1.5",
     "commander": "2.8.1",
-    "semver": "5.0.1",
+    "semver": "5.0.3",
     "jshint": "2.8.0",
     "strip-bom": "2.0.0",
     
-    "best-promise": "0.2.3",
-    "multilang": "1.0.4"
+    "best-promise": "0.2.4",
+    "multilang": "1.0.5"
   },
   "devDependencies": {
-    "istanbul": "~0.3.18",
-    "mocha": "~2.2.5",
+    "istanbul": "~0.3.20",
+    "mocha": "~2.3.2",
     "expect.js": ">=0.3.1",
 
     "expect-called": ">=0.4.0"
