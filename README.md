@@ -1,5 +1,7 @@
 # qa-control
-QA control of things that nobody controls
+
+Quality assurance tool for Node projects
+
 
 ![designing](https://img.shields.io/badge/stability-desgining-red.svg)
 [![npm-version](https://img.shields.io/npm/v/qa-control.svg)](https://npmjs.org/package/qa-control)
@@ -37,7 +39,7 @@ $ pwd
 $ qa-control --list-langs
 Available languages: en es
 
-$ qa-control . 
+$ qa-control .
 Done without warnings!
 ```
 
@@ -59,5 +61,6 @@ qaControl.controlProject('./path/to/my/project').then(function(warnings){
 [MIT](LICENSE)
 
 ----------------
+
 
 
