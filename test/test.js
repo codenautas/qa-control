@@ -109,17 +109,17 @@ var fixtures=[{
     title:'no "multilang" section in README.md (#7)',
     test:'no_multilang_section_in_readme',
     change:function(info){
-        info.files['README.md'].content = info.files['README.md'].content.replace('multilang v0','');
+        info.files['LEEME.md'].content = info.files['LEEME.md'].content.replace('multilang v0','');
     }
 },{
     base:'stable-project',
     title:'README.md (multilang) not sinchronized (#7)',
     test:'readme_multilang_not_sincronized_with_file_1',
     change:function(info){
-        info.files['LEEME.md'].content = info.files['LEEME.md'].content.replace('NO MODIFIQUE ESTE ARCHIVO','');
+        info.files['README.md'].content = info.files['README.md'].content.replace('DO NOT MODIFY DIRECTLY THIS FILE','');
     },
     expected:[{
-        warning:'readme_multilang_not_sincronized_with_file_1', params:['LEEME.md']
+        warning:'readme_multilang_not_sincronized_with_file_1', params:['README.md']
     }]
 },{
     base:'stable-project',
@@ -137,7 +137,7 @@ var fixtures=[{
     },
     expected:[
         { warning:'lack_of_cucarda_marker_in_readme' },
-        { warning:'readme_multilang_not_sincronized_with_file_1', params:['LEEME.md']}
+        { warning:'readme_multilang_not_sincronized_with_file_1', params:['README.md']}
     ]
 },{
     base:'stable-project',
@@ -153,7 +153,7 @@ var fixtures=[{
         { warning:'lack_of_mandatory_cucarda_1',params:['npm-version']},
         { warning:'lack_of_mandatory_cucarda_1',params:['downloads']},
         { warning:'lack_of_mandatory_cucarda_1',params:['dependencies']},
-        { warning:'readme_multilang_not_sincronized_with_file_1', params:['LEEME.md']}
+        { warning:'readme_multilang_not_sincronized_with_file_1', params:['README.md']}
     ]
 },{
     base:'stable-project',
@@ -167,7 +167,7 @@ var fixtures=[{
                                                 .replace('![coverage]','')
                                                 .replace('![climate]','');
     },
-    expected:[ { warning:'readme_multilang_not_sincronized_with_file_1', params:['LEEME.md'] } ]
+    expected:[ { warning:'readme_multilang_not_sincronized_with_file_1', params:['README.md'] } ]
 },{
     base:'stable-project',
     title:'wrong format in mandatory cucardas in README.md (#8)',
@@ -184,7 +184,7 @@ var fixtures=[{
         { warning:'wrong_format_in_cucarda_1',params:['downloads']},
         { warning:'wrong_format_in_cucarda_1',params:['coverage']},
         { warning:'wrong_format_in_cucarda_1',params:['dependencies']},
-        { warning:'readme_multilang_not_sincronized_with_file_1', params:['LEEME.md']}
+        { warning:'readme_multilang_not_sincronized_with_file_1', params:['README.md']}
     ]
 },{
     base:'stable-project',
@@ -413,7 +413,7 @@ describe('qa-control', function(){
                 expect(info.packageJson["qa-control"]["test-appveyor"]).to.eql(true);
                 expect(info.packageJson["qa-control"]["type"]).to.eql("lib");
                 expect(info.packageJson["qa-control"]["coverage"]).to.eql(100);
-                expect(info.files['README.md'].content).to.match(/^<!--multilang v0 en:README.md es:LEEME.md -->/);
+                expect(info.files['LEEME.md'].content).to.match(/^<!--multilang v0 es:LEEME.md en:README.md -->/);
                 done();
             }).catch(done);
         });

@@ -118,8 +118,13 @@ qaControl.generateCucardas = function generateCucardas(cucardas, packageJson) {
 };
 qaControl.verbose = false;
 
+qaControl.mainDoc = function mainDoc() {
+    return qaControl.projectDefinition[qaControl.currentVersion].fileNameMainDoc;
+};
+
 qaControl.projectDefinition = {
     '0.0.1': {
+        fileNameMainDoc: 'LEEME.md',
         sections: { // podria llamarse 'json-sections'...
             'run-in': {
                 mandatory: true,
@@ -410,7 +415,7 @@ qaControl.projectDefinition = {
             no_multilang_section_in_readme:{
                 checks:[{
                     warnings:function(info){
-                        if(! info.files['README.md'].content.match(/<!--multilang v[0-9]+\s+(.+)(-->)/)) {
+                        if(! info.files[qaControl.mainDoc()].content.match(/<!--multilang v[0-9]+\s+(.+)(-->)/)) {
                             return [{warning:'no_multilang_section_in_readme'}];
                         }
                         return [];
@@ -635,13 +640,14 @@ qaControl.projectDefinition = {
                 checks:[{
                     warnings:function(info) {
                         var warns = [];
-                        var content = info.files['README.md'].content;
+                        var defReadme = qaControl.mainDoc();
+                        var content = info.files[defReadme].content;
                         var obtainedLangs = multilang.obtainLangs(content);
                         //console.log("OL", obtainedLangs.langs);
                         /*jshint forin: false */
                         for(var lang in obtainedLangs.langs) {
                             var file=obtainedLangs.langs[lang].fileName;
-                            if(file !== 'README.md') {
+                            if(file !== defReadme) {
                                 var mlContent = multilang.changeDoc(content, lang);
                                 if(mlContent != info.files[file].content) {
                                     warns.push({warning:'readme_multilang_not_sincronized_with_file_1', params:[file]});

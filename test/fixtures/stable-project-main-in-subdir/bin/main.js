@@ -3,8 +3,10 @@
 /*jshint globalstrict:true */
 /*jshint node:true */
 
-// APP
+var stableProject = {};
 
-// provisorio
+stableProject.fun = function(){
+    return "fun";
+};//; don't remove this comment. It is for test issue #26
 
-console.log('¡esto es una APP de stableProject!');
+module.exports = stableProject;
