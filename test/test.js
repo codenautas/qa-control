@@ -116,7 +116,7 @@ var fixtures=[{
     title:'README.md (multilang) not sinchronized (#7)',
     test:'readme_multilang_not_sincronized_with_file_1',
     change:function(info){
-        info.files['README.md'].content = info.files['README.md'].content.replace('DO NOT MODIFY DIRECTLY THIS FILE','');
+        info.files['README.md'].content = info.files['README.md'].content.replace('the description','');
     },
     expected:[{
         warning:'readme_multilang_not_sincronized_with_file_1', params:['README.md']
@@ -133,19 +133,18 @@ var fixtures=[{
     title:'cucardas marker must exist in README.md (#8)',
     test:'lack_of_cucarda_marker_in_readme',
     change:function(info){
-        info.files['README.md'].content = info.files['README.md'].content.replace('<!-- cucardas -->','');
+        info.files['LEEME.md'].content = info.files['LEEME.md'].content.replace('<!-- cucardas -->','');
     },
     expected:[
-        { warning:'lack_of_cucarda_marker_in_readme' },
-        { warning:'readme_multilang_not_sincronized_with_file_1', params:['README.md']}
+        { warning:'lack_of_cucarda_marker_in_readme' }
     ]
 },{
     base:'stable-project',
     title:'missing mandatory cucardas in README.md (#8)',
     test:'lack_of_mandatory_cucarda_1',
     change:function(info){
-        var readme=info.files['README.md'].content;
-        info.files['README.md'].content = readme.replace('![npm-version]','')
+        var readme=info.files['LEEME.md'].content;
+        info.files['LEEME.md'].content = readme.replace('![npm-version]','')
                                                 .replace('![downloads]','')
                                                 .replace('![dependencies]','');
     },
@@ -160,8 +159,8 @@ var fixtures=[{
     title:'missing optional cucardas in README.md must not create warnings (#8)',
     test:'lack_of_mandatory_cucarda_1',
     change:function(info){
-        var readme=info.files['README.md'].content;
-        info.files['README.md'].content = readme.replace('![designing]','')
+        var readme=info.files['LEEME.md'].content;
+        info.files['LEEME.md'].content = readme.replace('![designing]','')
                                                 .replace('![extending]','')
                                                 .replace('![windows]','')
                                                 .replace('![coverage]','')
@@ -173,8 +172,8 @@ var fixtures=[{
     title:'wrong format in mandatory cucardas in README.md (#8)',
     test:'wrong_format_in_cucarda_1',
     change:function(info){
-        var readme=info.files['README.md'].content;
-        info.files['README.md'].content = readme.replace('![npm-version](https://img.shields.io/npm','![npm-version](https://HHHimg.shields.io/npm')
+        var readme=info.files['LEEME.md'].content;
+        info.files['LEEME.md'].content = readme.replace('![npm-version](https://img.shields.io/npm','![npm-version](https://HHHimg.shields.io/npm')
                                                 .replace('[![downloads](https://img.shields.io/npm/','[![downloads](https://im__shields.io/npm/')
                                                 .replace('[![dependencies](https://img.shields.io','[![dependencies](https://EEimg.shields.io');
         delete info.packageJson['qa-control']["coverage"];
@@ -675,7 +674,7 @@ describe('qa-control', function(){
                             return o;
                         }).then(function(o) {
                             cucardasOut = o;
-                            return fs.exists(base+'/README.md');
+                            return fs.exists(base+'/LEEME.md');
                         }).then(function(readme) {
                             var packVer = packageJson['qa-control']['package-version'];
                             var project = qaControl.projectDefinition[packVer];
@@ -689,6 +688,7 @@ describe('qa-control', function(){
                             }
                             if(warnings) {
                                 return qaControl.loadProject(base).then(function(info) {
+                                    //console.log("info", info);
                                     info.packageVersion = info.packageJson['qa-control']['package-version'];
                                     return check(info);
                                 }).then(function(warns) {

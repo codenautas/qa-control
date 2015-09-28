@@ -440,7 +440,7 @@ qaControl.projectDefinition = {
                 checks:[{
                     warnings:function(info){
                         var warns=[];
-                        var readme=info.files['README.md'].content;
+                        var readme=info.files[qaControl.mainDoc()].content;
                         if(readme.indexOf(qaControl.cucaMarker) == -1) {
                             warns.push({warning:'lack_of_cucarda_marker_in_readme'});
                         }
@@ -486,8 +486,6 @@ qaControl.projectDefinition = {
                                 checker=function(str) { return false; };
                             }else if(strOrRegexp instanceof RegExp) {
                                 checker=function(str) {
-                                    //console.log("va RE", strOrRegexp.source);
-                                    //console.log(" y ", strOrRegexp.test(str) ? "matchea" : "NO matchea");
                                     return strOrRegexp.test(str);
                                 };
                             } else {
@@ -530,8 +528,6 @@ qaControl.projectDefinition = {
                         var whichType=qaControlSection.type;
                         var firstLines=qaControl.projectDefinition[info.packageVersion].firstLines[whichRunIn][whichType];
                         if(firstLines) {
-                            //console.log("firstLines", firstLines);
-                            // transformar el nombre de proyecto
                             var parts = info.packageJson.name.split('-');
                             var first=function(toWhat){
                                 return function(part){
@@ -643,12 +639,14 @@ qaControl.projectDefinition = {
                         var defReadme = qaControl.mainDoc();
                         var content = info.files[defReadme].content;
                         var obtainedLangs = multilang.obtainLangs(content);
-                        //console.log("OL", obtainedLangs.langs);
                         /*jshint forin: false */
                         for(var lang in obtainedLangs.langs) {
                             var file=obtainedLangs.langs[lang].fileName;
                             if(file !== defReadme) {
-                                var mlContent = multilang.changeDoc(content, lang);
+                                var mlContent = multilang.changeNamedDoc(file, content, lang);
+                                //console.log("mlContent", mlContent);
+                                //fs.writeFileSync("_gen_"+file, mlContent, 'utf8');
+                                //fs.writeFileSinc("_check_"+file, info.files[file].content, 'utf8');
                                 if(mlContent != info.files[file].content) {
                                     warns.push({warning:'readme_multilang_not_sincronized_with_file_1', params:[file]});
                                 }
