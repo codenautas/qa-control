@@ -644,10 +644,10 @@ qaControl.projectDefinition = {
                             var file=obtainedLangs.langs[lang].fileName;
                             if(file !== defReadme) {
                                 var mlContent = multilang.changeNamedDoc(file, content, lang);
-                                //console.log("mlContent", mlContent);
-                                //fs.writeFileSync("_gen_"+file, mlContent, 'utf8');
-                                //fs.writeFileSinc("_check_"+file, info.files[file].content, 'utf8');
                                 if(mlContent != info.files[file].content) {
+                                    var now=Date.now();
+                                    // fs.writeFileSync("_"+now+"_gen_"+file, mlContent, 'utf8');
+                                    // fs.writeFileSync("_"+now+"_ori_"+file, info.files[file].content, 'utf8');
                                     warns.push({warning:'readme_multilang_not_sincronized_with_file_1', params:[file]});
                                 }
                             }

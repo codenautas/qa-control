@@ -26,7 +26,7 @@
     "strip-bom": "2.0.0",
     
     "best-promise": "0.2.4",
-    "multilang": "1.0.7"
+    "multilang": "1.0.9"
   },
   "devDependencies": {
     "istanbul": "~0.3.20",

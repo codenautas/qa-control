@@ -136,7 +136,9 @@ var fixtures=[{
         info.files['LEEME.md'].content = info.files['LEEME.md'].content.replace('<!-- cucardas -->','');
     },
     expected:[
-        { warning:'lack_of_cucarda_marker_in_readme' }
+        { warning:'lack_of_cucarda_marker_in_readme' },
+        // Modificar LEEME.md hace que multilang genere distinto README.md
+        { warning:'readme_multilang_not_sincronized_with_file_1', params:['README.md']}
     ]
 },{
     base:'stable-project',

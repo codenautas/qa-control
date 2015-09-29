@@ -63,4 +63,3 @@ qaControl.controlProject('./path/to/my/project').then(function(warnings){
 ----------------
 
 
-

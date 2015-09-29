@@ -1,7 +1,5 @@
-
 # stable-project
 the description
-
 
 [![npm-version](https://img.shields.io/npm/v/stable-project.svg)](https://npmjs.org/package/stable-project)
 [![downloads](https://img.shields.io/npm/dm/stable-project.svg)](https://npmjs.org/package/stable-project)
@@ -10,7 +8,6 @@ the description
 [![coverage](https://img.shields.io/coveralls/codenautas/stable-project/master.svg)](https://coveralls.io/r/codenautas/stable-project)
 [![climate](https://img.shields.io/codeclimate/github/codenautas/stable-project.svg)](https://codeclimate.com/github/codenautas/stable-project)
 [![dependencies](https://img.shields.io/david/codenautas/stable-project.svg)](https://david-dm.org/codenautas/stable-project)
-
 
 
 language: ![English](https://raw.githubusercontent.com/codenautas/multilang/master/img/lang-en.png)
