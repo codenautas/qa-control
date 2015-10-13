@@ -267,12 +267,22 @@ qaControl.projectDefinition = {
             }
         },
         jshint_options: { "asi": false, "curly": true, "forin": true },
+        // Si info.scoring == true, cada regla debe agregar junto al warning, un objeto 'scoring'
+        // con na o más de las siguientes propiedades:
+        //   packaje_json:1
+        //   mandatories: 1
+        //   cucardas:1
+        //   multilang:1
+        //   versions:1
+        // Emilio redefinirá valores de cada score
         rules:{
             exist_package_json:{
                 checks:[{
                     warnings:function(info){
                         if(!info.files['package.json']){
-                            return [{warning:'no_package_json'}];
+                            var w={warning:'no_package_json'};
+                            if(info.scoring) { w['scoring'] = {package_json:1}}
+                            return [w];
                         }
                         return [];
                     }
@@ -798,13 +808,14 @@ qaControl.loadProject = function loadProject(projectDir) {
     });
 };
 
-qaControl.controlInfo=function controlInfo(info){
+qaControl.controlInfo=function controlInfo(info, opts){
     var resultWarnings=[];
     var existingWarnings={};
     var cmsgs = qaControl.cmdMsgs[qaControl.lang];
     var rules = qaControl.projectDefinition[qaControl.currentVersion].rules;
     if(qaControl.verbose) { process.stdout.write(cmsgs.msg_controlling+"...\n"); }
     var cadenaDePromesas = Promises.start();
+    info.scoring = opts && opts.scoring;
     _.forEach(rules, function(rule, ruleName) {
         rule.checks.forEach(function(checkInfo){
             cadenaDePromesas = cadenaDePromesas.then(function() {
@@ -860,11 +871,11 @@ qaControl.stringizeWarnings = function stringizeWarnings(warns, lang) {
     });
 };
 
-qaControl.controlProject=function controlProject(projectDir){
+qaControl.controlProject=function controlProject(projectDir, opts){
     return Promises.start(function(){
         return qaControl.loadProject(projectDir);
     }).then(function(info){
-        return qaControl.controlInfo(info);
+        return qaControl.controlInfo(info, opts);
     });
 };
 

@@ -10,9 +10,13 @@ var Path = require('path');
 var fixtures=[{
     base:'stable-project',
     test:'no_package_json',
+    scoring: true,
     change:function(info){
         delete info.files['package.json'];
-    }
+    },
+    expected:[
+        { warning:'no_package_json',scoring:{'package_json':1}},
+    ]
 },{
     base:'stable-project',
     title:'no qa-control section in package.json (#2)',
@@ -460,7 +464,7 @@ describe('qa-control', function(){
     describe('test qa-control by fixtures', function(){
         var perfectProjects={};
         fixtures.forEach(function(fixture){
-            var fixtureName='fixture '+(fixture.title ? fixture.title :fixture.test);
+            var fixtureName='fixture '+(fixture.title ? fixture.title :fixture.test)+(fixture.scoring ?' (S)':'');
             if(fixture.skipped){
                 it.skip(fixtureName, function(){});
                 return;
@@ -479,7 +483,7 @@ describe('qa-control', function(){
                     return cloneProject(info);
                 }).then(function(clonedInfo){
                     fixture.change(clonedInfo);
-                    return qaControl.controlInfo(clonedInfo);
+                    return qaControl.controlInfo(clonedInfo, {scoring:fixture.scoring});
                 }).then(function(warnings){
                     if(!fixture.expected){
                         fixture.expected=[{warning:fixture.test}];
