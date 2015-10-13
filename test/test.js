@@ -23,7 +23,7 @@ var fixtures=[{
         delete info.files['package.json'];
     },
     expected:[
-        { warning:'no_package_json',scoring:{'mandatories':1}},
+        { warning:'no_package_json',scoring:{mandatories:1}},
     ]
 },{
     base:'stable-project',
@@ -34,7 +34,7 @@ var fixtures=[{
         delete info.packageJson['qa-control'];
         info.files['package.json'].content = "otro contenido";        
     },
-    expected: [{ warning: 'no_qa_control_section_in_package_json', scoring:{'qac':1} } ]
+    expected: [{ warning: 'no_qa_control_section_in_package_json', scoring:{qac:1} } ]
 },{
     base:'stable-project',
     title:'no package-version in qa-control section (#3)',
@@ -43,7 +43,7 @@ var fixtures=[{
     change:function(info){
         delete info.packageJson['qa-control']['package-version'];
     },
-    expected: [{ warning: 'no_package_version_in_qa_control_section', scoring:{'qac':1} } ]
+    expected: [{ warning: 'no_package_version_in_qa_control_section', scoring:{qac:1} } ]
 },{
     base:'stable-project',
     test:'invalid_qa_control_version',
@@ -145,7 +145,7 @@ var fixtures=[{
     change:function(info){
         delete info.packageJson['qa-control'];
     },
-    expected:[{warning:'no_qa_control_section_in_codenautas_project', scoring:{'qac':1}}]
+    expected:[{warning:'no_qa_control_section_in_codenautas_project', scoring:{qac:1}}]
 },{
     base:'stable-project',
     title:'cucardas marker must exist in README.md (#8)',
