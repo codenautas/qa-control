@@ -7,6 +7,15 @@ var Promises = require('best-promise');
 var fs = require('fs-promise');
 var Path = require('path');
 
+function stripScoring(warnArray) {
+    for(var w=0; w<warnArray.length; ++w) {
+        //console.log(warnArray[w])
+        if('scoring' in warnArray[w]) {
+            delete warnArray[w]['scoring'];
+        }
+    }
+    return warnArray;
+}
 var fixtures=[{
     base:'stable-project',
     test:'no_package_json',
@@ -491,6 +500,7 @@ describe('qa-control', function(){
                             fixture.expected.params=fixture.expectedParams;
                         }
                     }
+                    if(! fixture.scoring) { stripScoring(warnings); }
                     expect(warnings).to.eql(fixture.expected);
                     done();
                 }).catch(done);
@@ -539,7 +549,7 @@ describe('qa-control', function(){
         });
         it('generate warnings but not exception when no exists package.json', function(done){
             qaControl.controlProject('./test/fixtures/without-package-json').then(function(warnings){
-                expect(warnings).to.eql([{warning:'no_package_json'}]);
+                expect(stripScoring(warnings)).to.eql([{warning:'no_package_json'}]);
                 done();
             }).catch(done);
         });

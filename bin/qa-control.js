@@ -280,9 +280,7 @@ qaControl.projectDefinition = {
                 checks:[{
                     warnings:function(info){
                         if(!info.files['package.json']){
-                            var w={warning:'no_package_json'};
-                            if(info.scoring) { w['scoring'] = {package_json:1}}
-                            return [w];
+                            return [{warning:'no_package_json', scoring:{package_json:1}}];
                         }
                         return [];
                     }
