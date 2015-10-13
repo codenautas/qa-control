@@ -269,18 +269,19 @@ qaControl.projectDefinition = {
         jshint_options: { "asi": false, "curly": true, "forin": true },
         // Si info.scoring == true, cada regla debe agregar junto al warning, un objeto 'scoring'
         // con na o más de las siguientes propiedades:
-        //   packaje_json:1
+        //   qac: 1
         //   mandatories: 1
         //   cucardas:1
         //   multilang:1
         //   versions:1
+        //   parameters:1
         // Emilio redefinirá valores de cada score
         rules:{
             exist_package_json:{
                 checks:[{
                     warnings:function(info){
                         if(!info.files['package.json']){
-                            return [{warning:'no_package_json', scoring:{package_json:1}}];
+                            return [{warning:'no_package_json', scoring:{mandatories:1}}];
                         }
                         return [];
                     }
@@ -293,7 +294,7 @@ qaControl.projectDefinition = {
                         if(!info.packageJson['qa-control']){
                             return [{warning:info.files['package.json'].content.match(/codenautas/)?
                                         'no_qa_control_section_in_codenautas_project':
-                                        'no_qa_control_section_in_package_json'}];
+                                        'no_qa_control_section_in_package_json', scoring:{qac:1}}];
                         }
                         return [];
                     }
@@ -304,7 +305,7 @@ qaControl.projectDefinition = {
                 checks:[{
                     warnings:function(info){
                         if(!info.packageJson['qa-control']['package-version']){
-                            return [{warning:'no_package_version_in_qa_control_section'}];
+                            return [{warning:'no_package_version_in_qa_control_section', scoring:{qac:1}}];
                         } else {
                             // defino la version para para siguientes checks
                             info.packageVersion = info.packageJson['qa-control']['package-version'];
@@ -319,7 +320,7 @@ qaControl.projectDefinition = {
                     warnings:function(info){
                         var ver=info.packageVersion;
                         if(! semver.valid(ver)){
-                            return [{warning:'invalid_qa_control_version',params:[ver]}];
+                            return [{warning:'invalid_qa_control_version',params:[ver], scoring:{versions:1}}];
                         }
                         return [];
                     }
@@ -331,7 +332,7 @@ qaControl.projectDefinition = {
                     warnings:function(info) {
                         var ver=info.packageVersion;
                         if(semver.satisfies(ver, qaControl.deprecatedVersions)){
-                            return [{warning:'deprecated_qa_control_version',params:[ver]}];
+                            return [{warning:'deprecated_qa_control_version',params:[ver], scoring:{versions:1}}];
                         }
                         return [];
                     }
@@ -347,10 +348,10 @@ qaControl.projectDefinition = {
                             if(files.hasOwnProperty(fileName)) {
                                 var file = files[fileName];
                                 if(file.mandatory && !info.files[fileName]) {
-                                    warns.push({warning:'lack_of_mandatory_file_1', params:[fileName]});
+                                    warns.push({warning:'lack_of_mandatory_file_1', params:[fileName], scoring:{mandatories:1}});
                                 } else {
                                     if(file.presentIf && file.presentIf(info.packageJson) && !info.files[fileName]) {
-                                        warns.push({warning:'lack_of_mandatory_file_1', params:[fileName]});
+                                        warns.push({warning:'lack_of_mandatory_file_1', params:[fileName], scoring:{mandatories:1}});
                                     }
                                 }
                             }
@@ -365,10 +366,10 @@ qaControl.projectDefinition = {
                     warnings:function(info) {
                         var warns = [];
                         if(!('repository' in info.packageJson)) {
-                            warns.push({warning:'lack_of_repository_section_in_package_json'});
+                            warns.push({warning:'lack_of_repository_section_in_package_json', scoring:{mandatories:1}});
                         } else {
                             if(! qaControl.getRepositoryUrl(info.packageJson).match(/^([-a-zA-Z0-9_.]+\/[-a-zA-Z0-9_.]+)$/)){
-                                return [{warning:'repository_name_not_found'}];
+                                return [{warning:'repository_name_not_found', scoring:{versions:1}}];
                             }
                         }
                         return warns;
@@ -386,11 +387,11 @@ qaControl.projectDefinition = {
                         for(var sectionName in sections){
                             var sectionDef=sections[sectionName];
                             if(sectionDef.mandatory && !(sectionName in qaControlSection)){
-                                warns.push({warning:'lack_of_mandatory_section_1',params:[sectionName]});
+                                warns.push({warning:'lack_of_mandatory_section_1',params:[sectionName], scoring:{mandatories:1}});
                             }else{
                                 var observedValue=qaControlSection[sectionName];
                                 if(sectionDef.values && !(observedValue in sectionDef.values)){
-                                    warns.push({warning:'invalid_value_1_in_parameter_2',params:[observedValue,sectionName]});
+                                    warns.push({warning:'invalid_value_1_in_parameter_2',params:[observedValue,sectionName], scoring:{parameters:1}});
                                 }
                             }
                         }

@@ -24,7 +24,7 @@ var fixtures=[{
         delete info.files['package.json'];
     },
     expected:[
-        { warning:'no_package_json',scoring:{'package_json':1}},
+        { warning:'no_package_json',scoring:{'mandatories':1}},
     ]
 },{
     base:'stable-project',
