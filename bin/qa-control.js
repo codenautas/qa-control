@@ -275,6 +275,10 @@ qaControl.projectDefinition = {
         //   multilang:1
         //   versions:1
         //   parameters:1
+        //   format:1
+        //   customs:1
+        //   jshint:1
+        //   dependencies:1
         // Emilio redefinirá valores de cada score
         rules:{
             exist_package_json:{
@@ -369,7 +373,7 @@ qaControl.projectDefinition = {
                             warns.push({warning:'lack_of_repository_section_in_package_json', scoring:{mandatories:1}});
                         } else {
                             if(! qaControl.getRepositoryUrl(info.packageJson).match(/^([-a-zA-Z0-9_.]+\/[-a-zA-Z0-9_.]+)$/)){
-                                return [{warning:'repository_name_not_found', scoring:{versions:1}}];
+                                return [{warning:'repository_name_not_found', scoring:{mandatories:1}}];
                             }
                         }
                         return warns;
@@ -412,7 +416,9 @@ qaControl.projectDefinition = {
                                 file.mandatoryLines.forEach(function(mandatoryLine) {
                                    // agrego '\n' antes para no utilizar expresiones regulares
                                    if(fileContent.indexOf('\n'+mandatoryLine)==-1) {
-                                       warns.push({warning:'lack_of_mandatory_line_1_in_file_2', params:[mandatoryLine, fileName]});
+                                       warns.push({warning:'lack_of_mandatory_line_1_in_file_2',
+                                                   params:[mandatoryLine, fileName],
+                                                   scoring:{mandatories:1}});
                                    }
                                 });
                             }
@@ -425,7 +431,7 @@ qaControl.projectDefinition = {
                 checks:[{
                     warnings:function(info){
                         if(! info.files[qaControl.mainDoc()].content.match(/<!--multilang v[0-9]+\s+(.+)(-->)/)) {
-                            return [{warning:'no_multilang_section_in_readme'}];
+                            return [{warning:'no_multilang_section_in_readme', scoring:{multilang:1}}];
                         }
                         return [];
                     }
@@ -438,7 +444,7 @@ qaControl.projectDefinition = {
                         var repoParts = qaControl.getRepositoryUrl(info.packageJson).split('/');
                         var projName = repoParts[repoParts.length-1];
                         if(projName !== info.packageJson.name) {
-                            return [{warning:'invalid_repository_section_in_package_json'}];
+                            return [{warning:'invalid_repository_section_in_package_json', scoring:{format:1}}];
                         }
                         return warns;
                     }
@@ -463,16 +469,16 @@ qaControl.projectDefinition = {
                             var cucaStr = cucarda.md.replace(/\bxxx\b/g,repo).replace(/\byyy\b/g,modulo);
                             if(readme.indexOf(cucaID) == -1) {
                                 if(cucarda.mandatory) {
-                                    warns.push({warning:'lack_of_mandatory_cucarda_1', params:[nombreCucarda]});
+                                    warns.push({warning:'lack_of_mandatory_cucarda_1', params:[nombreCucarda], scoring:{cucardas:1}});
                                 }
                             } else {
                                 if('check' in cucarda && ! cucarda.check(info.packageJson)) {
-                                    warns.push({warning:'wrong_format_in_cucarda_1', params:[nombreCucarda]});
+                                    warns.push({warning:'wrong_format_in_cucarda_1', params:[nombreCucarda], scoring:{cucardas:1}});
                                 }
                                 if(readme.indexOf(cucaStr) == -1) {
                                     // si tengo cucarda mal formada, devuelvo warning aunque no sea obligatoria
                                     // porque existió la intención de definirla
-                                    warns.push({warning:'wrong_format_in_cucarda_1', params:[nombreCucarda]});
+                                    warns.push({warning:'wrong_format_in_cucarda_1', params:[nombreCucarda], scoring:{cucardas:1}});
                                 }
                             }
                         }
@@ -518,7 +524,7 @@ qaControl.projectDefinition = {
                                         var match = makeCheck(custom.match, true);
                                         //console.log(file, " detect:", detect(content), " match: ", match(content))
                                         if(detect(content) && ! match(content)) {
-                                            warns.push({warning:'file_1_does_not_match_custom_2', params:[file,customeName]});
+                                            warns.push({warning:'file_1_does_not_match_custom_2', params:[file,customeName], scoring:{customs:1}});
                                         }
                                     }
                                 }
@@ -547,7 +553,7 @@ qaControl.projectDefinition = {
                             var projectName = first("toLowerCase")(ProjectName);
                             var mainName = ('main' in info.packageJson) ? info.packageJson.main : 'index.js';
                             if(!(mainName in info.files)) {
-                                warns.push({warning:'packagejson_main_file_1_does_not_exists', params:[mainName]});
+                                warns.push({warning:'packagejson_main_file_1_does_not_exists', params:[mainName], scoring:{customs:1}});
                             } else {
                                 var fileContent = stripBom(info.files[mainName].content);
 
@@ -567,7 +573,7 @@ qaControl.projectDefinition = {
                                             }
                                         }
                                     }
-                                    warns.push({warning:'first_lines_does_not_match_in_file_1', params:[mainName]});
+                                    warns.push({warning:'first_lines_does_not_match_in_file_1', params:[mainName], scoring:{customs:1}});
                                 }
                             }
                         }
@@ -583,7 +589,7 @@ qaControl.projectDefinition = {
                             if(file.match(/(.js)$/)) {
                                 var content = info.files[file].content;
                                 if(content.match(/require\(["'](promise|q|rsvp|es6promise)['"]\)/m)) {
-                                    warns.push({warning:'using_normal_promise_in_file_1', params:[file]});
+                                    warns.push({warning:'using_normal_promise_in_file_1', params:[file], scoring:{customs:1}});
                                 }
                             }
                         }
@@ -603,7 +609,7 @@ qaControl.projectDefinition = {
                             var checkedOptions = info.packageJson.jshintConfig;
                             for(var op in requiredOptions) {
                                 if((false === op in checkedOptions) || checkedOptions[op] !== requiredOptions[op]) {
-                                    warns.push({warning:'incorrect_jshintconfig_option_1_in_package_json', params:[op]});
+                                    warns.push({warning:'incorrect_jshintconfig_option_1_in_package_json', params:[op], scoring:{jshint:1}});
                                 }
                             }
                         }
@@ -633,7 +639,7 @@ qaControl.projectDefinition = {
                                         console.log(data.errors);
                                         //console.log(data);
                                     }
-                                    warns.push({warning:'jshint_warnings_in_file_1', params:[file]});
+                                    warns.push({warning:'jshint_warnings_in_file_1', params:[file], scoring:{jshint:1}});
                                 }
                             }
                         }
@@ -657,7 +663,7 @@ qaControl.projectDefinition = {
                                     var now=Date.now();
                                     // fs.writeFileSync("_"+now+"_gen_"+file, mlContent, 'utf8');
                                     // fs.writeFileSync("_"+now+"_ori_"+file, info.files[file].content, 'utf8');
-                                    warns.push({warning:'readme_multilang_not_sincronized_with_file_1', params:[file]});
+                                    warns.push({warning:'readme_multilang_not_sincronized_with_file_1', params:[file], scoring:{multilang:1}});
                                 }
                             }
                         }
@@ -677,7 +683,7 @@ qaControl.projectDefinition = {
                                 var depVal = info.packageJson.dependencies[depName];
                                 if(! reDep.test(depVal)) {
                                     // console.log(depName, depVal);
-                                    warns.push({warning:'invalid_dependency_version_number_format_in_dep_1', params:[depName]});
+                                    warns.push({warning:'invalid_dependency_version_number_format_in_dep_1', params:[depName], scoring:{dependencies:1}});
                                 }
                             }
                             /*jshint forin: true */

@@ -571,7 +571,7 @@ describe('qa-control', function(){
                 expect(info['files']).not.to.have.key('bin/nonexistent.js');
                 return qaControl.controlInfo(info);
             }).then(function(warns){
-                expect(warns).to.eql([{warning:'packagejson_main_file_1_does_not_exists', params:['bin/nonexistent.js']}]);
+                expect(stripScoring(warns)).to.eql([{warning:'packagejson_main_file_1_does_not_exists', params:['bin/nonexistent.js']}]);
                 done();
             }).catch(function(err) {
                 console.log("err", err);
@@ -708,7 +708,7 @@ describe('qa-control', function(){
                                     info.packageVersion = info.packageJson['qa-control']['package-version'];
                                     return check(info);
                                 }).then(function(warns) {
-                                    expect(warns).to.eql(warnings);
+                                    expect(stripScoring(warns)).to.eql(warnings);
                                     done();
                                 });
                             }
