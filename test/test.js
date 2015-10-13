@@ -9,7 +9,6 @@ var Path = require('path');
 
 function stripScoring(warnArray) {
     for(var w=0; w<warnArray.length; ++w) {
-        //console.log(warnArray[w])
         if('scoring' in warnArray[w]) {
             delete warnArray[w]['scoring'];
         }
@@ -30,17 +29,21 @@ var fixtures=[{
     base:'stable-project',
     title:'no qa-control section in package.json (#2)',
     test:'no_qa_control_section_in_package_json',
+    scoring: true,
     change:function(info){
         delete info.packageJson['qa-control'];
         info.files['package.json'].content = "otro contenido";        
-    }
+    },
+    expected: [{ warning: 'no_qa_control_section_in_package_json', scoring:{'qac':1} } ]
 },{
     base:'stable-project',
     title:'no package-version in qa-control section (#3)',
     test:'no_package_version_in_qa_control_section',
+    scoring:true,
     change:function(info){
         delete info.packageJson['qa-control']['package-version'];
-    }
+    },
+    expected: [{ warning: 'no_package_version_in_qa_control_section', scoring:{'qac':1} } ]
 },{
     base:'stable-project',
     test:'invalid_qa_control_version',
@@ -138,9 +141,11 @@ var fixtures=[{
     base:'stable-project',
     title:'no "qa-control" section in "codenautas" project (#21)',
     test:'no_qa_control_section_in_codenautas_project',
+    scoring: true,
     change:function(info){
         delete info.packageJson['qa-control'];
-    }
+    },
+    expected:[{warning:'no_qa_control_section_in_codenautas_project', scoring:{'qac':1}}]
 },{
     base:'stable-project',
     title:'cucardas marker must exist in README.md (#8)',
