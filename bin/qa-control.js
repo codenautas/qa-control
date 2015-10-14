@@ -161,7 +161,7 @@ qaControl.projectDefinition = {
         cucardas:{
             'proof-of-concept':{
                 check: function(packageJson){ 
-                    return packageJson['qa-control'].purpose=='proof-of-concept';
+                    return packageJson['qa-control'].purpose==='proof-of-concept';
                 },
                 md:'![proof-of-concept](https://img.shields.io/badge/stability-proof_of_concept-ff70c0.svg)',
                 imgExample:'https://img.shields.io/badge/stability-desgining-red.svg'
@@ -415,7 +415,7 @@ qaControl.projectDefinition = {
                                 var fileContent = info.files[fileName].content;
                                 file.mandatoryLines.forEach(function(mandatoryLine) {
                                    // agrego '\n' antes para no utilizar expresiones regulares
-                                   if(fileContent.indexOf('\n'+mandatoryLine)==-1) {
+                                   if(fileContent.indexOf('\n'+mandatoryLine)===-1) {
                                        warns.push({warning:'lack_of_mandatory_line_1_in_file_2',
                                                    params:[mandatoryLine, fileName],
                                                    scoring:{mandatories:1}});
@@ -456,7 +456,7 @@ qaControl.projectDefinition = {
                     warnings:function(info){
                         var warns=[];
                         var readme=info.files[qaControl.mainDoc()].content;
-                        if(readme.indexOf(qaControl.cucaMarker) == -1) {
+                        if(readme.indexOf(qaControl.cucaMarker) === -1) {
                             warns.push({warning:'lack_of_cucarda_marker_in_readme'});
                         }
                         var cucardas=qaControl.projectDefinition[info.packageVersion].cucardas;
@@ -467,7 +467,7 @@ qaControl.projectDefinition = {
                             var cucarda = cucardas[nombreCucarda];
                             var cucaID = '!['+/!\[([-a-z]+)]/.exec(cucarda.md)[1]+']';
                             var cucaStr = cucarda.md.replace(/\bxxx\b/g,repo).replace(/\byyy\b/g,modulo);
-                            if(readme.indexOf(cucaID) == -1) {
+                            if(readme.indexOf(cucaID) === -1) {
                                 if(cucarda.mandatory) {
                                     warns.push({warning:'lack_of_mandatory_cucarda_1', params:[nombreCucarda], scoring:{cucardas:1}});
                                 }
@@ -475,7 +475,7 @@ qaControl.projectDefinition = {
                                 if('check' in cucarda && ! cucarda.check(info.packageJson)) {
                                     warns.push({warning:'wrong_format_in_cucarda_1', params:[nombreCucarda], scoring:{cucardas:1}});
                                 }
-                                if(readme.indexOf(cucaStr) == -1) {
+                                if(readme.indexOf(cucaStr) === -1) {
                                     // si tengo cucarda mal formada, devuelvo warning aunque no sea obligatoria
                                     // porque existió la intención de definirla
                                     warns.push({warning:'wrong_format_in_cucarda_1', params:[nombreCucarda], scoring:{cucardas:1}});
@@ -498,7 +498,7 @@ qaControl.projectDefinition = {
                         function makeCheck(strOrRegexp, isMatchFunc) {
                             var checker;
                             if(!strOrRegexp){
-                                checker=function(str) { return false; };
+                                checker=function() { return false; };
                             }else if(strOrRegexp instanceof RegExp) {
                                 checker=function(str) {
                                     return strOrRegexp.test(str);
@@ -565,7 +565,7 @@ qaControl.projectDefinition = {
                                         var model1=qaControl.fixEOL(firstLines.replace(/nombreDelModulo/g, projectName));
                                         var model2=qaControl.fixEOL(firstLines.replace(/nombreDelModulo/g, ProjectName));
                                         for(var i=0; i<model1.length; i++){
-                                            if(code[i]!=model1[i] && code[i]!=model2[i]){
+                                            if(code[i]!== model1[i] && code[i] !== model2[i]){
                                                 console.log('DIF STARTS IN:',JSON.stringify(code.substring(i, Math.min(model1.length, i+20))));
                                                 console.log('MODEL 1      :',JSON.stringify(model1.substring(i, Math.min(model1.length, i+20))));
                                                 console.log('MODEL 2      :',JSON.stringify(model2.substring(i, Math.min(model1.length, i+20))));
@@ -659,8 +659,8 @@ qaControl.projectDefinition = {
                             var file=obtainedLangs.langs[lang].fileName;
                             if(file !== defReadme) {
                                 var mlContent = multilang.changeNamedDoc(file, content, lang);
-                                if(mlContent != info.files[file].content) {
-                                    var now=Date.now();
+                                if(mlContent !== info.files[file].content) {
+                                    //var now=Date.now();
                                     // fs.writeFileSync("_"+now+"_gen_"+file, mlContent, 'utf8');
                                     // fs.writeFileSync("_"+now+"_ori_"+file, info.files[file].content, 'utf8');
                                     warns.push({warning:'readme_multilang_not_sincronized_with_file_1', params:[file], scoring:{multilang:1}});
@@ -704,7 +704,6 @@ qaControl.fixMessages = function fixMessages(messagesToFix) {
     return Promises.start(function() {
         /*jshint forin: false */
         for(var warn in qaControl.msgs.es) {
-            var msg = qaControl.msgs.es[warn];
             if(false === warn in messagesToFix) {
                 messagesToFix[warn] = warn.replace(/_(\d+)/g,' -$1').replace(/-/g, '$').replace(/_/g,' ');
             }
@@ -766,7 +765,7 @@ qaControl.loadProject = function loadProject(projectDir) {
          /*jshint forin: false */
         for(var f in files) { info.files[files[f]] = {}; }
          /*jshint forin: true */
-        if(files.indexOf('package.json') != -1) {
+        if(files.indexOf('package.json') !== -1) {
             info.packageJson = {};
         }
         return Promises.all(files.map(function(file){
