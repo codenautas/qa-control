@@ -25,6 +25,13 @@ Entrando a una url similar a `https://codenautas.com/qa-control/organizacion`
 se ven la lista de todos los proyectos de la organización, 
 al lado de cada nombre de proyecto se ven todas las cucardas que tiene su archivo LEEME.md o README.md
 
+## Funcionamiento
 
+ * cuando **github.com** recibe un push avisa de algún modo al servidor qa-control.
+ * el servidor de qa-control hace:
+   * git clone
+   * npm install
+   * qa-control . (con la opción que necesitemos) y registra los resultados en algún lugar
+ * cuando recibe una petición (de cucarda, de detalles de un proyecto o de resumen de varios) utiliza la información guardada (no vuelve a ejecutar qa-control)
 
 
