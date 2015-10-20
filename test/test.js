@@ -79,7 +79,7 @@ var fixtures=[{
     title:'lack of mandatory files (#6)',
     test:'lack_of_mandatory_file_1',
     change:function(info){
-        //delete info.files['README.md']; // si saco este salta no_multilang_section_in_readme
+        //delete info.files['README.md']; // si saco este salta no_multilang_section_in_1
         delete info.files['LEEME.md'];
         delete info.files['.travis.yml'];
         delete info.files['.gitignore'];
@@ -98,7 +98,7 @@ var fixtures=[{
     title:'lack of mandatory files (#6)',
     test:'lack_of_mandatory_file_1',
     change:function(info){
-        //delete info.files['README.md']; // si saco este salta no_multilang_section_in_readme
+        //delete info.files['README.md']; // si saco este salta no_multilang_section_in_1
         delete info.files['LEEME.md'];
         delete info.files['.travis.yml'];
         delete info.files['.gitignore'];
@@ -123,10 +123,14 @@ var fixtures=[{
 },{
     base:'stable-project',
     title:'no "multilang" section in README.md (#7)',
-    test:'no_multilang_section_in_readme',
+    test:'no_multilang_section_in_1',
     change:function(info){
         info.files['LEEME.md'].content = info.files['LEEME.md'].content.replace('multilang v0','');
-    }
+    },
+    expected:[{
+        warning:'no_multilang_section_in_1',
+        params:['LEEME.md']
+    }]
 },{
     base:'stable-project',
     title:'README.md (multilang) not sinchronized (#7)',
@@ -450,7 +454,7 @@ describe('qa-control', function(){
                 //expect(en['lack_of_mandatory_parameter']).to.be('lack of mandatory parameter');
                 expect(en['lack_of_mandatory_section_1']).to.be('lack of mandatory section $1');
                 expect(en['no_qa_control_section_in_codenautas_project']).to.be('no qa control section in codenautas project');
-                expect(en['no_multilang_section_in_readme']).to.be('no multilang section in readme');
+                expect(en['no_multilang_section_in_1']).to.be('no multilang section in $1');
                 expect(en['no_package_json']).to.be('no package json');
                 expect(en['no_package_version_in_qa_control_section']).to.be('no package version in qa control section');
                 expect(en['no_qa_control_section_in_package_json']).to.be('no qa control section in package json');
@@ -765,7 +769,7 @@ describe('qa-control main', function(){
                                       +'falta el archivo obligatorio "param1"\n'
                                       +'falta la sección obligatoria "param1" en la sección qa-control\n'
                                       +'falta la sección "qa-control" en package.json y aparenta ser un proyecto codenautas\n'
-                                      +'falta la sección multilang en el archivo README.md\n'
+                                      +'falta la sección multilang en el archivo param1\n'
                                       +'falta el archivo package.json\n'
                                       +'falta la sección "package-version" en la sección qa-control\n'
                                       +'falta la sección qa-control en package.json\n'
@@ -803,7 +807,7 @@ describe('qa-control main', function(){
                                        +'lack of mandatory file param1\n'
                                        +'lack of mandatory section param1\n'
                                        +'no qa control section in codenautas project\n'
-                                       +'no multilang section in readme\n'
+                                       +'no multilang section in param1\n'
                                        +'no package json\n'
                                        +'no package version in qa control section\n'
                                        +'no qa control section in package json\n'

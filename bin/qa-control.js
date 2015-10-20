@@ -28,7 +28,7 @@ qaControl.msgs={
         //lack_of_mandatory_parameter_1: 'falta el parámetro obligatorio "$1"',
         lack_of_mandatory_section_1: 'falta la sección obligatoria "$1" en la sección qa-control',
         no_qa_control_section_in_codenautas_project: 'falta la sección "qa-control" en package.json y aparenta ser un proyecto codenautas',
-        no_multilang_section_in_readme: 'falta la sección multilang en el archivo README.md',
+        no_multilang_section_in_1: 'falta la sección multilang en el archivo $1',
         no_package_json: 'falta el archivo package.json',
         no_package_version_in_qa_control_section: 'falta la sección "package-version" en la sección qa-control',
         no_qa_control_section_in_package_json: 'falta la sección qa-control en package.json',
@@ -427,11 +427,15 @@ qaControl.projectDefinition = {
                     }
                 }]
             },
-            no_multilang_section_in_readme:{
+            no_multilang_section_in_1:{
                 checks:[{
                     warnings:function(info){
-                        if(! info.files[qaControl.mainDoc()].content.match(/<!--multilang v[0-9]+\s+(.+)(-->)/)) {
-                            return [{warning:'no_multilang_section_in_readme', scoring:{multilang:1}}];
+                        if(!info.files[qaControl.mainDoc()].content.match(/<!--multilang v[0-9]+\s+(.+)(-->)/)) {
+                            return [{
+                                warning:'no_multilang_section_in_1', 
+                                params:[qaControl.mainDoc()], 
+                                scoring:{multilang:1}
+                            }];
                         }
                         return [];
                     }
