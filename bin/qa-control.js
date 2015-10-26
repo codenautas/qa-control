@@ -13,6 +13,7 @@ var semver = require('semver');
 var jsh = require('jshint');
 var multilang = require('multilang');
 var stripBom = require('strip-bom');
+var yaml = require('js-yaml');
 
 qaControl.msgs={
     en:{
@@ -20,6 +21,7 @@ qaControl.msgs={
         repository_name_not_found: 'packageJson.repository must be in format /{[-a-zA-Z0-9_.]+}\/[-a-zA-Z0-9_.]+/'
     },
     es:{
+        no_test_in_node_four: 'falta probar para node 4 en .travis.yaml',
         deprecated_qa_control_version: 'la versión de qa-control es vieja',
         deprecated_version: 'la version es demasiado vieja',
         invalid_qa_control_version: 'la sección "package-version" en qa-control contiene un valor incorrecto',
@@ -700,6 +702,22 @@ qaControl.projectDefinition = {
     }
 };
 
+qaControl.projectDefinition['0.0.2'] = _.defaults({}, qaControl.projectDefinition['0.0.1']);
+
+// rules that must be evaluated first
+qaControl.projectDefinition['0.0.2'].rules = _.defaults({
+    no_test_in_node_four:{
+        checks:[{
+            warnings:function(info){
+                if(info.dotTravis && !(info.dotTravis.node_js.filter(function(x){ return x[0]=="4";}).length)){
+                    return [{warning:'no_test_in_node_four', scoring:{versions:1}}];
+                }
+                return [];
+            }
+        }],
+    },
+}, qaControl.projectDefinition['0.0.1'].rules);
+
 qaControl.lang = process.env.qa_control_lang || 'en';
 qaControl.deprecatedVersions = '< 0.0.1';
 qaControl.currentVersion = '0.0.1';
@@ -810,6 +828,10 @@ qaControl.loadProject = function loadProject(projectDir) {
                     });
                 }            
             }
+        }).then(function() {
+            if(info.files['.travis.yml']){
+                info.dotTravis = yaml.safeLoad(info.files['.travis.yml'].content);
+            }
         });
     }).then(function() {
         return info;
@@ -820,7 +842,7 @@ qaControl.controlInfo=function controlInfo(info, opts){
     var resultWarnings=[];
     var existingWarnings={};
     var cmsgs = qaControl.cmdMsgs[qaControl.lang];
-    var rules = qaControl.projectDefinition[qaControl.currentVersion].rules;
+    var rules = (qaControl.projectDefinition[((info.packageJson||{})['qa-control']||{})['package-version']||qaControl.currentVersion]||qaControl.projectDefinition[qaControl.currentVersion]).rules;
     if(qaControl.verbose) { process.stdout.write(cmsgs.msg_controlling+"...\n"); }
     var cadenaDePromesas = Promises.start();
     info.scoring = opts && opts.scoring;

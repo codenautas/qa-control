@@ -55,6 +55,13 @@ var fixtures=[{
     ]
 },{
     base:'stable-project',
+    test:'no_test_in_node_four',
+    change:function(info){
+        info.dotTravis.node_js = ['0.10', '0.12'];
+        info.packageJson["qa-control"]["package-version"] = '0.0.2';
+    }
+},{
+    base:'stable-project',
     title:'abort on deprecated qa-control section version (#4)',
     test:'deprecated_qa_control_version',
     change:function(info){
@@ -426,7 +433,8 @@ describe('qa-control', function(){
             qaControl.loadProject('./test/fixtures/stable-project').then(function(info){
                 expect(Object.keys(info)).to.eql([
                     'files',
-                    'packageJson'
+                    'packageJson',
+                    'dotTravis'
                 ]);
                 expect(Object.keys(info.files)).to.eql(['.gitignore','.travis.yml','LEEME.md','LICENSE','README.md','appveyor.yml','package.json','simple.js','stable-project.js']);
                 expect(info.files['package.json'].content).to.match(/^{\n  "name": "stable-project"/);
@@ -437,6 +445,7 @@ describe('qa-control', function(){
                 expect(info.packageJson["qa-control"]["type"]).to.eql("lib");
                 expect(info.packageJson["qa-control"]["coverage"]).to.eql(100);
                 expect(info.files['LEEME.md'].content).to.match(/^<!--multilang v0 es:LEEME.md en:README.md -->/);
+                expect(info.dotTravis.node_js).to.eql(['0.10','0.11','0.12','4.1']);
                 done();
             }).catch(done);
         });
@@ -762,7 +771,8 @@ describe('qa-control main', function(){
                 return qaControl.stringizeWarnings(generateWarningsArray('es'), 'es');
             }).then(function(warnStr){
                 //console.log(warnStr);
-                expect(warnStr).to.eql('la versión de qa-control es vieja\n'
+                expect(warnStr).to.eql('falta probar para node 4 en .travis.yaml\n'
+                                      +'la versión de qa-control es vieja\n'
                                       +'la version es demasiado vieja\n'
                                       +'la sección "package-version" en qa-control contiene un valor incorrecto\n'
                                       +'valor invalido "param1" para el parametro "param2" en la sección qa-control\n'
@@ -801,6 +811,7 @@ describe('qa-control main', function(){
                 //console.log(warnStr);
                 expect(warnStr).to.eql('deprecated qa-control version\n'
                                        +'packageJson.repository must be in format /{[-a-zA-Z0-9_.]+}/[-a-zA-Z0-9_.]+/\n'
+                                       +'no test in node four\n'
                                        +'deprecated version\n'
                                        +'invalid qa control version\n'
                                        +'invalid value param1 in parameter param2\n'

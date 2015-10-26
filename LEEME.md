@@ -9,7 +9,7 @@ Quality assurance tool for Node projects
 [!--lang:*-->
 
 <!-- cucardas -->
-![designing](https://img.shields.io/badge/stability-designing-red.svg)
+![extending](https://img.shields.io/badge/stability-extending-orange.svg)
 [![npm-version](https://img.shields.io/npm/v/qa-control.svg)](https://npmjs.org/package/qa-control)
 [![downloads](https://img.shields.io/npm/dm/qa-control.svg)](https://npmjs.org/package/qa-control)
 [![build](https://img.shields.io/travis/codenautas/qa-control/master.svg)](https://travis-ci.org/codenautas/qa-control)

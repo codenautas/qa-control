@@ -1,7 +1,7 @@
 {
   "name": "qa-control",
   "description": "QA control of things that nobody controls",
-  "version": "0.0.23",
+  "version": "0.1.0",
   "author": "Codenautas <codenautas@googlegroups.com>",
   "license": "MIT",
   "repository": "codenautas/qa-control",
@@ -50,10 +50,10 @@
     "curly": true
   },
   "qa-control": {
-    "package-version": "0.0.1",
+    "package-version": "0.0.2",
     "coverage": 90,
     "run-in": "server",
-    "stability": "designing",
+    "stability": "extending",
     "type": "cmd-tool"
   }
 }
