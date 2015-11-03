@@ -15,6 +15,7 @@ program
     .option('-v, --verbose', 'Show progress information')
     //.option('-s, --silent', 'Don\'t output anything')
     .option('-L, --list-langs', 'List available languages')
+    .option('-c, --cucardas', 'Always generate cucardas.log')
     .parse(process.argv);
     
 if( ( !program.listLangs && (""==program.args && !program.projectDir))
@@ -29,6 +30,7 @@ params.verbose = program.verbose;
 //params.silent = program.silent;
 params.listLangs = program.listLangs;
 params.lang = program.lang;
+params.cucardas = program.cucardas;
 
 //console.log(params); process.exit(0);
 

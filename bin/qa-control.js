@@ -119,7 +119,7 @@ qaControl.generateCucardas = function generateCucardas(cucardas, packageJson) {
     return cucaFileContent;
 };
 qaControl.verbose = false;
-
+qaControl.cucardas_always = false;
 qaControl.mainDoc = function mainDoc() {
     return qaControl.projectDefinition[qaControl.currentVersion].fileNameMainDoc;
 };
@@ -489,7 +489,7 @@ qaControl.projectDefinition = {
                             }
                         }
                          /*jshint forin: true */
-                        if(warns.length) {
+                        if(warns.length || qaControl.cucardas_always) {
                             fs.writeFile("cucardas.log", qaControl.generateCucardas(cucardas, info.packageJson));
                         }
                         return warns;
@@ -912,6 +912,7 @@ qaControl.controlProject=function controlProject(projectDir, opts){
 qaControl.main=function main(parameters) {
     return Promises.start(function() {
         qaControl.verbose = parameters.verbose;
+        qaControl.cucardas_always = parameters.cucardas;
         if(parameters.listLangs) {
             var msgLang =qaControl.cmdMsgs[parameters.lang || 'en'].msg_langs;
             process.stdout.write(msgLang+':');
