@@ -902,6 +902,8 @@ qaControl.stringizeWarnings = function stringizeWarnings(warns, lang) {
 };
 
 qaControl.controlProject=function controlProject(projectDir, opts){
+    qaControl.verbose = opts && opts.verbose;
+    qaControl.cucardas_always = opts && opts.cucardas;
     return Promises.start(function(){
         return qaControl.loadProject(projectDir);
     }).then(function(info){
@@ -911,8 +913,6 @@ qaControl.controlProject=function controlProject(projectDir, opts){
 
 qaControl.main=function main(parameters) {
     return Promises.start(function() {
-        qaControl.verbose = parameters.verbose;
-        qaControl.cucardas_always = parameters.cucardas;
         if(parameters.listLangs) {
             var msgLang =qaControl.cmdMsgs[parameters.lang || 'en'].msg_langs;
             process.stdout.write(msgLang+':');
@@ -922,7 +922,7 @@ qaControl.main=function main(parameters) {
             process.stdout.write("\n");
         } else {
             qaControl.lang = parameters.lang || "en";
-            return qaControl.controlProject(parameters.projectDir).then(function(warns) {
+            return qaControl.controlProject(parameters.projectDir, parameters).then(function(warns) {
                 return qaControl.stringizeWarnings(warns, qaControl.lang);
             }).then(function(warnString) {
                 process.stdout.write(warnString);
