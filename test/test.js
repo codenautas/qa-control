@@ -430,12 +430,15 @@ describe('qa-control', function(){
             }).catch(done);
         });
         it('loads ok', function(done){
-            qaControl.loadProject('./test/fixtures/stable-project').then(function(info){
+            var projDir = './test/fixtures/stable-project';
+            qaControl.loadProject(projDir).then(function(info){
                 expect(Object.keys(info)).to.eql([
+                    'projectDir',
                     'files',
                     'packageJson',
                     'dotTravis'
                 ]);
+                expect(info.projectDir).to.eql(projDir);
                 expect(Object.keys(info.files)).to.eql(['.gitignore','.travis.yml','LEEME.md','LICENSE','README.md','appveyor.yml','package.json','simple.js','stable-project.js']);
                 expect(info.files['package.json'].content).to.match(/^{\n  "name": "stable-project"/);
                 expect(info.packageJson.name).to.be('stable-project');
@@ -520,6 +523,11 @@ describe('qa-control', function(){
                     }
                     if(! fixture.scoring) { stripScoring(warnings); }
                     expect(warnings).to.eql(fixture.expected);
+                }).then(function() {
+                    return fs.unlink(Path.normalize(perfectProjects[fixture.base].projectDir+'/cucardas.log'));
+                }).catch(function(err) {
+                    if(err.code !== 'ENOENT') { done(err); }
+                }).then(function(){
                     done();
                 }).catch(done);
             });

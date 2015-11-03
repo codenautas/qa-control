@@ -490,7 +490,7 @@ qaControl.projectDefinition = {
                         }
                          /*jshint forin: true */
                         if(warns.length || qaControl.cucardas_always) {
-                            fs.writeFile("cucardas.log", qaControl.generateCucardas(cucardas, info.packageJson));
+                            fs.writeFile(Path.normalize(info.projectDir+'/cucardas.log'), qaControl.generateCucardas(cucardas, info.packageJson));
                         }
                         return warns;
                     }
@@ -764,7 +764,7 @@ var configReading=Promises.all(_.map(qaControl.projectDefinition,function(defini
 });
 
 qaControl.loadProject = function loadProject(projectDir) {
-    var info = {};
+    var info = {projectDir:projectDir};
     var cmsgs = qaControl.cmdMsgs[qaControl.lang];
     if(qaControl.verbose) { process.stdout.write(cmsgs.msg_starting+projectDir+"'...\n"); }
     return Promises.start(function(){
