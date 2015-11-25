@@ -1,4 +1,5 @@
 <!-- cucardas -->
+![stable](https://img.shields.io/badge/stability-stable-brightgreen.svg)
 [![npm-version](https://img.shields.io/npm/v/the-project.svg)](https://npmjs.org/package/the-project)
 [![downloads](https://img.shields.io/npm/dm/the-project.svg)](https://npmjs.org/package/the-project)
 [![build](https://img.shields.io/travis/codetrip/the-project/master.svg)](https://travis-ci.org/codetrip/the-project)

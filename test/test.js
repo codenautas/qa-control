@@ -442,13 +442,13 @@ describe('qa-control', function(){
                 expect(Object.keys(info.files)).to.eql(['.gitignore','.travis.yml','LEEME.md','LICENSE','README.md','appveyor.yml','package.json','simple.js','stable-project.js']);
                 expect(info.files['package.json'].content).to.match(/^{\n  "name": "stable-project"/);
                 expect(info.packageJson.name).to.be('stable-project');
-                expect(info.packageJson["qa-control"]["package-version"]).to.eql("0.0.1");
+                expect(info.packageJson["qa-control"]["package-version"]).to.eql("0.1.3");
                 expect(info.packageJson["qa-control"]["run-in"]).to.eql("server");
                 expect(info.packageJson["qa-control"]["test-appveyor"]).to.eql(true);
                 expect(info.packageJson["qa-control"]["type"]).to.eql("lib");
                 expect(info.packageJson["qa-control"]["coverage"]).to.eql(100);
                 expect(info.files['LEEME.md'].content).to.match(/^<!--multilang v0 es:LEEME.md en:README.md -->/);
-                expect(info.dotTravis.node_js).to.eql(['0.10','0.11','0.12','4.1']);
+                expect(info.dotTravis.node_js).to.eql(['0.10','0.11','0.12','4.2','5.1']);
                 done();
             }).catch(done);
         });
@@ -526,7 +526,7 @@ describe('qa-control', function(){
                 }).then(function() {
                     return fs.unlink(Path.normalize(perfectProjects[fixture.base].projectDir+'/cucardas.log'));
                 }).catch(function(err) {
-                    if(err.code !== 'ENOENT') { done(err); }
+                    if(err.code !== 'ENOENT') { throw err; }
                 }).then(function(){
                     done();
                 }).catch(done);

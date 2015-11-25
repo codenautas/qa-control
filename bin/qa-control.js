@@ -706,6 +706,14 @@ qaControl.projectDefinition['0.0.2'] = _.defaults({}, qaControl.projectDefinitio
 
 // rules that must be evaluated first
 qaControl.projectDefinition['0.0.2'].rules = _.defaults({
+    exist_package_json                     :qaControl.projectDefinition['0.0.1'].rules.exist_package_json                    ,
+    qa_control_section_in_package_json     :qaControl.projectDefinition['0.0.1'].rules.qa_control_section_in_package_json    ,
+    package_version_in_qa_control_section  :qaControl.projectDefinition['0.0.1'].rules.package_version_in_qa_control_section ,
+    invalid_qa_control_version             :qaControl.projectDefinition['0.0.1'].rules.invalid_qa_control_version            ,
+    deprecated_control_version             :qaControl.projectDefinition['0.0.1'].rules.deprecated_control_version            ,
+    mandatory_files                        :qaControl.projectDefinition['0.0.1'].rules.mandatory_files                       ,
+    repository_in_package_json             :qaControl.projectDefinition['0.0.1'].rules.repository_in_package_json            ,
+    valid_values_for_qa_control_keys       :qaControl.projectDefinition['0.0.1'].rules.valid_values_for_qa_control_keys      ,
     no_test_in_node_four:{
         checks:[{
             warnings:function(info){
@@ -717,6 +725,53 @@ qaControl.projectDefinition['0.0.2'].rules = _.defaults({
         }],
     },
 }, qaControl.projectDefinition['0.0.1'].rules);
+
+qaControl.projectDefinition['0.1.3'] = _.defaults({}, qaControl.projectDefinition['0.0.2']);
+qaControl.projectDefinition['0.1.3'].cucardas = _.defaults({
+    'training':{
+        check: function(packageJson){ 
+            return packageJson['qa-control'].purpose==='training';
+        },
+        md:'![training](https://img.shields.io/badge/stability-training-ffa0c0.svg)',
+        imgExample:'https://img.shields.io/badge/stability-training-ffa0c0.svg'
+    },
+    'example':{
+        check: function(packageJson){ 
+            return packageJson['qa-control'].purpose==='example';
+        },
+        md:'![example](https://img.shields.io/badge/stability-example-a0a0f0.svg)',
+        imgExample:'https://img.shields.io/badge/stability-example-a0a0f0.svg'
+    },
+    'stable':{
+        check: function(packageJson){ 
+            return semver.satisfies(packageJson.version,'>=1.0.0') && !packageJson['qa-control'].purpose;
+        },
+        md:'![stable](https://img.shields.io/badge/stability-stable-brightgreen.svg)',
+        imgExample:'https://img.shields.io/badge/stability-stable-brightgreen.svg'
+    },
+}, qaControl.projectDefinition['0.0.2'].cucardas);
+
+// rules that must be evaluated first
+qaControl.projectDefinition['0.1.3'].rules = _.defaults({
+    exist_package_json                     :qaControl.projectDefinition['0.0.2'].rules.exist_package_json                    ,
+    qa_control_section_in_package_json     :qaControl.projectDefinition['0.0.2'].rules.qa_control_section_in_package_json    ,
+    package_version_in_qa_control_section  :qaControl.projectDefinition['0.0.2'].rules.package_version_in_qa_control_section ,
+    invalid_qa_control_version             :qaControl.projectDefinition['0.0.2'].rules.invalid_qa_control_version            ,
+    deprecated_control_version             :qaControl.projectDefinition['0.0.2'].rules.deprecated_control_version            ,
+    mandatory_files                        :qaControl.projectDefinition['0.0.2'].rules.mandatory_files                       ,
+    repository_in_package_json             :qaControl.projectDefinition['0.0.2'].rules.repository_in_package_json            ,
+    valid_values_for_qa_control_keys       :qaControl.projectDefinition['0.0.2'].rules.valid_values_for_qa_control_keys      ,
+    no_test_in_node_four:{
+        checks:[{
+            warnings:function(info){
+                if(info.dotTravis && info.dotTravis.node_js.filter(function(x){ return x[0]=="4" || x[0]=="5";}).length<2){
+                    return [{warning:'no_test_in_node_four', scoring:{versions:1}}];
+                }
+                return [];
+            }
+        }],
+    },
+}, qaControl.projectDefinition['0.0.2'].rules);
 
 qaControl.lang = process.env.qa_control_lang || 'en';
 qaControl.deprecatedVersions = '< 0.0.1';

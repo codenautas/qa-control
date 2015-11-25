@@ -45,7 +45,7 @@
     "forin": true
   },
   "qa-control": {
-    "package-version": "0.0.1",
+    "package-version": "0.1.3",
     "run-in": "server",
     "test-appveyor": true,
     "type": "lib",
