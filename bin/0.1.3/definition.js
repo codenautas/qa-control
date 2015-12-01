@@ -4,6 +4,7 @@ var _ = require("lodash");
 var stripBom = require("strip-bom");
 var semver = require("semver");
 var jsh = require('jshint');
+var esl = require('eslint');
 var multilang = require('multilang');
 var fs = require('fs-promise');
 var Path = require('path');
@@ -174,6 +175,16 @@ module.exports = function(qaControl){
             }
         },
         jshint_options: { "asi": false, "curly": true, "forin": true },
+        elsint_options: {
+            "env": {
+              "node": false
+            },
+            "rules": {
+              "strict": 0,
+              "no-console": 1,
+              "no-unused-vars": 1
+            }
+        },
         // Si info.scoring == true, cada regla debe agregar junto al warning, un objeto 'scoring'
         // con na o más de las siguientes propiedades:
         //   qac: 1
@@ -538,6 +549,26 @@ module.exports = function(qaControl){
                     }
                 }]
             },
+            eslint_config:{
+                checks:[{
+                    warnings:function(info){
+                        var warns = [];
+                        if(!('eslintConfig' in info.packageJson)) {
+                            warns.push({warning:'lack_of_eslintconfig_section_in_package_json'});
+                        }
+                        else {
+                            var requiredOptions = qaControl.projectDefinition[info.packageVersion].eslint_options;
+                            var checkedOptions = info.packageJson.eslintConfig;
+                            for(var op in requiredOptions) {
+                                if((false === op in checkedOptions) || checkedOptions[op] !== requiredOptions[op]) {
+                                    warns.push({warning:'incorrect_eslintconfig_option_1_in_package_json', params:[op], scoring:{eslint:1}});
+                                }
+                            }
+                        }
+                        return warns;
+                    }
+                }]
+            },
             jshint:{
                 eclipsers:['packagejson_main_file_1_does_not_exists', 'first_lines_does_not_match_in_file_1',
                            'lack_of_jshintconfig_section_in_package_json', 'incorrect_jshintconfig_option_1_in_package_json'],
@@ -561,6 +592,35 @@ module.exports = function(qaControl){
                                         //console.log(data);
                                     }
                                     warns.push({warning:'jshint_warnings_in_file_1', params:[file], scoring:{jshint:1}});
+                                }
+                            }
+                        }
+                        return warns;
+                    }
+                }]
+            },
+            eslint:{
+                eclipsers:['packagejson_main_file_1_does_not_exists', 'first_lines_does_not_match_in_file_1',
+                           'lack_of_eslintconfig_section_in_package_json', 'incorrect_eslintconfig_option_1_in_package_json'],
+                checks:[{
+                    warnings:function(info){
+                        var warns = [];
+                        var eslintOpts = 
+                            info.packageJson.eslintConfig || 
+                            qaControl.projectDefinition[info.packageVersion].eslint_options;
+                        for(var file in info.files) {
+                            if(file.match(/(.js)$/)) {
+                                var content = info.files[file].content;
+                                var data = esl.linter.verify(content, eslintOpts);
+                                if(data.length) {
+                                    if(qaControl.verbose){
+                                        console.log('JSHINT output:');
+                                        console.log('eslintOpts',eslintOpts);
+                                        console.log(data.length, " JSHINT errors");
+                                        console.log(data);
+                                        //console.log(data);
+                                    }
+                                    warns.push({warning:'eslint_warnings_in_file_1', params:[file], scoring:{eslint:1}});
                                 }
                             }
                         }

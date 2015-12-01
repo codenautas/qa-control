@@ -2,6 +2,7 @@
 /*jshint eqnull:true */
 /*jshint globalstrict:true */
 /*jshint node:true */
+
 (function webpackUniversalModuleDefinition(root, factory) {
     /* global define */
     /* global globalModuleName */

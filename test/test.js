@@ -58,7 +58,6 @@ var fixtures=[{
     test:'no_test_in_node_four',
     change:function(info){
         info.dotTravis.node_js = ['0.10', '0.12'];
-        info.packageJson["qa-control"]["package-version"] = '0.0.2';
     }
 },{
     base:'stable-project',
@@ -246,7 +245,7 @@ var fixtures=[{
     },
     expected:[
         { warning:'file_1_does_not_match_custom_2',params:['simple.js', 'funtion_eid']},
-        { warning:'file_1_does_not_match_custom_2',params:['simple.js', 'var_winos']}
+        { warning:'file_1_does_not_match_custom_2',params:['simple.js', 'var_winos']},
     ]
 },{
     base:'stable-project',
@@ -258,6 +257,7 @@ var fixtures=[{
     },
     expected:[
         { warning:'file_1_does_not_match_custom_2',params:['simple.js', 'var_path']},
+        { warning:'eslint_warnings_in_file_1',params:['simple.js']},
     ]
 },{
     base:'stable-project',
@@ -275,7 +275,8 @@ var fixtures=[{
                 "var Promise = require('promise');\n\n" + info.files['simple.js'].content;
     },
     expected:[
-        { warning:'using_normal_promise_in_file_1',params:['simple.js']}
+        { warning:'using_normal_promise_in_file_1',params:['simple.js']},
+        { warning:'eslint_warnings_in_file_1',params:['simple.js']}, 
     ]
 },{
     base:'stable-project',
@@ -288,7 +289,9 @@ var fixtures=[{
     },
     expected:[
         { warning:'using_normal_promise_in_file_1',params:['simple.js']},
-        { warning:'using_normal_promise_in_file_1',params:['stable-project.js']}
+        { warning:'using_normal_promise_in_file_1',params:['stable-project.js']},
+        { warning:'eslint_warnings_in_file_1',params:['simple.js']}, 
+        { warning:'eslint_warnings_in_file_1',params:['stable-project.js']}, 
     ]
 },{
     base:'stable-project-main-in-subdir',
@@ -481,6 +484,7 @@ describe('qa-control', function(){
                 expect(en['using_normal_promise_in_file_1']).to.be('using normal promise in file $1');
                 expect(en['packagejson_main_file_1_does_not_exists']).to.be('packagejson main file $1 does not exists');
                 expect(en['jshint_warnings_in_file_1']).to.be('jshint warnings in file $1');
+                expect(en['eslint_warnings_in_file_1']).to.be('eslint warnings in file $1');
                 expect(en['lack_of_jshintconfig_section_in_package_json']).to.be('lack of jshintconfig section in package json');
                 expect(en['incorrect_jshintconfig_option_1_in_package_json']).to.be('incorrect jshintconfig option $1 in package json');
                 expect(en['readme_multilang_not_sincronized_with_file_1']).to.be('readme multilang not sincronized with file $1');
@@ -802,6 +806,7 @@ describe('qa-control main', function(){
                                       +'se han usado Promise(s) normales en "param1"\n'
                                       +'no existe el archivo "main" (param1) declarado en package.json\n'
                                       +'el archivo "param1" tiene warnings de JSHint\n'
+                                      +'el archivo "param1" tiene warnings de ESLint\n'
                                       +'falta la sección "jshintConfig" en package.json\n'
                                       +'la opcion "param1" en "jshintConfig" es incorrecta en package.json\n'
                                       +'README.md no esta sincronizado con "param1" para multilang\n'
@@ -840,6 +845,7 @@ describe('qa-control main', function(){
                                        +'using normal promise in file param1\n'
                                        +'packagejson main file param1 does not exists\n'
                                        +'jshint warnings in file param1\n'
+                                       +'eslint warnings in file param1\n'
                                        +'lack of jshintconfig section in package json\n'
                                        +'incorrect jshintconfig option param1 in package json\n'
                                        +'readme multilang not sincronized with file param1\n'

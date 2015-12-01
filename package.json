@@ -1,7 +1,7 @@
 {
   "name": "qa-control",
   "description": "QA control of things that nobody controls",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "author": "Codenautas <codenautas@googlegroups.com>",
   "license": "MIT",
   "repository": "codenautas/qa-control",
@@ -15,23 +15,24 @@
   },
   "main": "./bin/qa-control.js",
   "dependencies": {
-    "fs-extra": "0.24.0",
+    "commander": "2.9.0",
+    "eslint": "1.10.2",
+    "fs-extra": "0.26.2",
     "fs-promise": "0.3.1",
-    "js-yaml": "3.4.2",
+    "js-yaml": "3.4.6",
+    "jshint": "2.8.0",
     "lodash": "3.10.1",
     "parameters": "0.1.5",
-    "commander": "2.8.1",
-    "semver": "5.0.3",
-    "jshint": "2.8.0",
+    "semver": "5.1.0",
     "strip-bom": "2.0.0",
     
     "best-promise": "0.2.4",
-    "multilang": "1.0.9"
+    "multilang": "1.0.11"
   },
   "devDependencies": {
-    "istanbul": "~0.3.20",
-    "mocha": "~2.3.2",
     "expect.js": ">=0.3.1",
+    "istanbul": "0.4.1",
+    "mocha": "2.3.4",
 
     "expect-called": ">=0.4.0"
   },
@@ -48,6 +49,16 @@
     "asi": false,
     "forin": true,
     "curly": true
+  },
+  "eslintConfig":{
+    "env": {
+      "node": false
+    },
+    "rules": {
+      "strict": 0,
+      "no-console": 1,
+      "no-unused-vars": 1
+    }
   },
   "qa-control": {
     "package-version": "0.1.3",

@@ -46,6 +46,7 @@ qaControl.msgs={
         using_normal_promise_in_file_1: 'se han usado Promise(s) normales en "$1"',
         packagejson_main_file_1_does_not_exists: 'no existe el archivo "main" ($1) declarado en package.json',
         jshint_warnings_in_file_1: 'el archivo "$1" tiene warnings de JSHint',
+        eslint_warnings_in_file_1: 'el archivo "$1" tiene warnings de ESLint',
         lack_of_jshintconfig_section_in_package_json: 'falta la sección "jshintConfig" en package.json',
         incorrect_jshintconfig_option_1_in_package_json: 'la opcion "$1" en "jshintConfig" es incorrecta en package.json',
         readme_multilang_not_sincronized_with_file_1: 'README.md no esta sincronizado con "$1" para multilang',
