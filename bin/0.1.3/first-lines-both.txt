@@ -5,7 +5,6 @@
 
 (function webpackUniversalModuleDefinition(root, factory) {
     /* global define */
-    /* global globalModuleName */
     /* istanbul ignore next */
     if(typeof root.globalModuleName !== 'string'){
         root.globalModuleName = factory.name;
