@@ -16,6 +16,7 @@ Quality assurance tool for Node projects
 [![coverage](https://img.shields.io/coveralls/codenautas/qa-control/master.svg)](https://coveralls.io/r/codenautas/qa-control)
 [![climate](https://img.shields.io/codeclimate/github/codenautas/qa-control.svg)](https://codeclimate.com/github/codenautas/qa-control)
 [![dependencies](https://img.shields.io/david/codenautas/qa-control.svg)](https://david-dm.org/codenautas/qa-control)
+[![qa-control](http://codenautas.com/github/codenautas/qa-control.svg)](http://codenautas.com/github/codenautas/qa-control)
 
 <!--multilang v0 es:LEEME.md en:README.md -->
 
