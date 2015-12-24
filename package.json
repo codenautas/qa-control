@@ -1,7 +1,7 @@
 {
   "name": "qa-control",
   "description": "QA control of things that nobody controls",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "author": "Codenautas <codenautas@googlegroups.com>",
   "license": "MIT",
   "repository": "codenautas/qa-control",
@@ -16,8 +16,8 @@
   "main": "./bin/qa-control.js",
   "dependencies": {
     "commander": "2.9.0",
-    "eslint": "1.10.2",
-    "fs-extra": "0.26.2",
+    "eslint": "1.10.3",
+    "fs-extra": "0.26.3",
     "fs-promise": "0.3.1",
     "js-yaml": "3.4.6",
     "jshint": "2.8.0",
