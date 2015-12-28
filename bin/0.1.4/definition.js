@@ -677,6 +677,22 @@ module.exports = function(qaControl){
                         return warns;
                     }
                 }]
+            },
+            use_strict:{
+                checks:[{
+                    warnings:function(info){
+                        var warns = [];
+                        for(var file in info.files) {
+                            if(file.match(/(.js)$/)) {
+                                var content = info.files[file].content;
+                                if(content.match(/require\(["'](promise|q|rsvp|es6promise)['"]\)/m)) {
+                                    warns.push({warning:'use_strict_declaration_required_in_file_1', params:[file], scoring:{customs:1}});
+                                }
+                            }
+                        }
+                        return warns;
+                    }
+                }]
             }
         }
     };

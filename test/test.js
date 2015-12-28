@@ -413,9 +413,22 @@ var fixtures=[{
         { warning:'invalid_dependency_version_number_format_in_dep_1',params:['lodash'] },
         { warning:'invalid_dependency_version_number_format_in_dep_1',params:['best-promise'] }
     ]
+},{
+    // skipped: true,
+    base:'stable-project-qac-last-version',
+    title:'must reject files without "use strict" declaration (#43)',
+    test:'use_strict_declaration_required_in_file_1',
+    change:function(info){
+        info.files['simple.js'].content =
+            info.files['simple.js'].content = 
+                "/* comentario*/ " + info.files['simple.js'].content;
+    },
+    expected:[
+        { warning:'use_strict_declaration_required_in_file_1',params:['simple.js'] }
+    ]
 }];
 
-
+//
 
 function cloneProject(info){
     return _.cloneDeep(info);
@@ -491,6 +504,7 @@ describe('qa-control', function(){
                 expect(en['lack_of_repository_section_in_package_json']).to.be('lack of repository section in package json');
                 expect(en['invalid_repository_section_in_package_json']).to.be('invalid repository section in package json');
                 expect(en['invalid_dependency_version_number_format_in_dep_1']).to.be('invalid dependency version number format in dep $1');
+                expect(en['use_strict_declaration_required_in_file_1']).to.be('use strict declaration required in file $1');
                 done();
             }).catch(done);
         });
@@ -812,7 +826,8 @@ describe('qa-control main', function(){
                                       +'README.md no esta sincronizado con "param1" para multilang\n'
                                       +'Falta la sección "repository" en package.json\n'
                                       +'La sección "repository" en package.json es inválida\n'
-                                      +'El formato del numero de version es incorrecto en "param1"\n');
+                                      +'El formato del numero de version es incorrecto en "param1"\n'
+                                      +'La declaración "use strict"; es requerida en "param1"\n');
                 done();
             }).catch(done);
         });
@@ -851,7 +866,8 @@ describe('qa-control main', function(){
                                        +'readme multilang not sincronized with file param1\n'
                                        +'lack of repository section in package json\n'
                                        +'invalid repository section in package json\n'
-                                       +'invalid dependency version number format in dep param1\n');
+                                       +'invalid dependency version number format in dep param1\n'
+                                       +'use strict declaration required in file param1\n');
                 done();
             }).catch(done);
         });
