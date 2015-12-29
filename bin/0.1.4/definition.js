@@ -685,8 +685,20 @@ module.exports = function(qaControl){
                         for(var file in info.files) {
                             if(file.match(/(.js)$/)) {
                                 var content = info.files[file].content;
-                                if(content.match(/require\(["'](promise|q|rsvp|es6promise)['"]\)/m)) {
-                                    warns.push({warning:'use_strict_declaration_required_in_file_1', params:[file], scoring:{customs:1}});
+                                var lines = info.files[file].content.split(/\r?\n/);
+                                var prevLine = null;
+                                for(var l=0; l<lines.length; ++l) {
+                                    var line = lines[l];
+                                    var trimLine = line.replace(/^(\s+)/,'');
+                                    //console.log("line:"+l, '['+line+']', "trimmed", '['+trimLine+']', "prev", '['+prevLine+']');
+                                    if(trimLine.length>0 && trimLine[0].match(/['"']/)
+                                        && prevLine && prevLine.match(/{$/))
+                                    {
+                                        if(! trimLine.match(/"use strict";/)) {
+                                            warns.push({warning:'wrong_use_strict_spelling_in_file_1', params:[file], scoring:{customs:1}});
+                                        }
+                                    }
+                                    prevLine = line;
                                 }
                             }
                         }

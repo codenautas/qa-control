@@ -1,9 +1,14 @@
-var Path = require('path');
+"use strict";
+/*jshint eqnull:true */
+/*jshint globalstrict:true */
+/*jshint node:true */
+/*eslint-disable no-console */
 
-var winOS = Path.sep==='\\';
-
-function eid(id){ return document.getElementById(id); }
-
-if(eid == winOS){
-    eid(winOS);
+function fn() {
+    "use strict;";
+    return 3;
 }
+
+var f = fn();
+
+f += 2;
