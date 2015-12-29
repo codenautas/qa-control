@@ -10,9 +10,6 @@ var Promises = require('best-promise');
 var fs = require('fs-promise');
 var Path = require('path');
 var _ = require('lodash');
-//var semver = require('semver');
-//var jsh = require('jshint');
-//var multilang = require('multilang');
 var stripBom = require('strip-bom');
 var yaml = require('js-yaml');
 
