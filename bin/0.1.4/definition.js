@@ -503,6 +503,7 @@ module.exports = function(qaControl){
                                         var model2=qaControl.fixEOL(firstLines.replace(/nombreDelModulo/g, ProjectName));
                                         for(var i=0; i<model1.length; i++){
                                             if(code[i]!== model1[i] && code[i] !== model2[i]){
+                                                console.log('RUN-IN', whichRunIn);
                                                 console.log('DIF STARTS IN:',JSON.stringify(code.substring(i, Math.min(model1.length, i+20))));
                                                 console.log('MODEL 1      :',JSON.stringify(model1.substring(i, Math.min(model1.length, i+20))));
                                                 console.log('MODEL 2      :',JSON.stringify(model2.substring(i, Math.min(model1.length, i+20))));

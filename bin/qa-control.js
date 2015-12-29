@@ -66,7 +66,7 @@ qaControl.cmdMsgs = {
         msg_reading: 'Reading',
         msg_skipping: 'Skipping directory',
         msg_reading_main: 'Reading "main" from',
-        msg_controlling: 'Controlling project information',
+        msg_controlling: 'Controlling project information with definitions rules version ',
         msg_checking: 'Checking rule'
     },
     es: {
@@ -79,7 +79,7 @@ qaControl.cmdMsgs = {
         msg_reading: 'Leyendo',
         msg_skipping: 'Salteando directorio',
         msg_reading_main: 'Leyendo "main" de',
-        msg_controlling: 'Controlando la información del proyecto',
+        msg_controlling: 'Controlando la información del proyecto con definiciones de reglas versión ',
         msg_checking: 'Verificando regla'
     }
 };
@@ -254,8 +254,11 @@ qaControl.controlInfo=function controlInfo(info, opts){
     var resultWarnings=[];
     var existingWarnings={};
     var cmsgs = qaControl.cmdMsgs[qaControl.lang];
-    var rules = (qaControl.projectDefinition[((info.packageJson||{})['qa-control']||{})['package-version']||qaControl.currentVersion]||qaControl.projectDefinition[qaControl.currentVersion]).rules;
-    if(qaControl.verbose) { process.stdout.write(cmsgs.msg_controlling+"...\n"); }
+    //var rules = (qaControl.projectDefinition[((info.packageJson||{})['qa-control']||{})['package-version']||qaControl.currentVersion]||qaControl.projectDefinition[qaControl.currentVersion]).rules;
+    var verCheck = ((info.packageJson || {})['qa-control'] || {})['package-version'];
+    var usedDefinition = (verCheck in qaControl.projectDefinition) ? verCheck : qaControl.currentVersion;
+    var rules = qaControl.projectDefinition[usedDefinition].rules;
+    if(qaControl.verbose) { process.stdout.write(cmsgs.msg_controlling+usedDefinition+"...\n"); }
     var cadenaDePromesas = Promises.start();
     info.scoring = opts && opts.scoring;
     _.forEach(rules, function(rule, ruleName) {
