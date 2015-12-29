@@ -123,10 +123,6 @@ qaControl.generateCucardas = function generateCucardas(cucardas, packageJson) {
 };
 qaControl.verbose = false;
 qaControl.cucardas_always = false;
-qaControl.mainDoc = function mainDoc() {
-    return qaControl.projectDefinition[qaControl.currentVersion].fileNameMainDoc;
-};
-
 qaControl.projectDefinition = {};
 qaControl.projectDefinition['0.0.1'] = require("./0.0.1/definition.js")(qaControl);
 qaControl.projectDefinition['0.0.2'] = require("./0.0.2/definition.js")(qaControl);
@@ -136,6 +132,10 @@ qaControl.projectDefinition['0.1.4'] = require("./0.1.4/definition.js")(qaContro
 qaControl.lang = process.env.qa_control_lang || 'en';
 qaControl.deprecatedVersions = '< 0.0.1';
 qaControl.currentVersion = '0.1.4';
+
+qaControl.mainDoc = function mainDoc() {
+    return qaControl.projectDefinition[qaControl.currentVersion].fileNameMainDoc;
+};
 
 qaControl.fixMessages = function fixMessages(messagesToFix) {
     return Promises.start(function() {
