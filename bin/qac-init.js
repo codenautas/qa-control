@@ -4,7 +4,7 @@
 /*jshint node:true */
 /*eslint-disable no-console */
 
-var qaControlInit = {};
+var qacInit = {};
 
 var Promises = require('best-promise');
 var fs = require('fs-promise');
@@ -20,7 +20,7 @@ function initPackageJson(dir, initFile, configData) {
     });
 };
 
-qaControlInit.cmdMsgs = {
+qacInit.cmdMsgs = {
     en: {
         msg_initializing: 'Initializing project',
         msg_finished: 'Project initialized',
@@ -33,18 +33,12 @@ qaControlInit.cmdMsgs = {
     }
 };
 
-qaControlInit.init = function init(params) {
+qacInit.init = function init() {
     var dir = process.cwd();
-    var initFile = './input.js';
-    var msgs = qaControlInit.cmdMsgs[params.lang || 'en'];
+    var initFile = './qac-input.js';
     return Promises.start(function() {
         return initPackageJson(dir, initFile, {});
-    }).catch(function(err) {
-        if(err.message === 'canceled') {
-            throw new Error(msgs.msg_canceled);
-        }
-        process.stderr.write("STACK: "+err.stack);
     });
 };
 
-module.exports = qaControlInit;
+module.exports = qacInit;

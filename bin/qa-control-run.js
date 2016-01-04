@@ -4,7 +4,7 @@
 
 var program = require('commander');
 var qaControl = require('./qa-control');
-var qacInit = require('./qa-control-init');
+var qacInit = require('./qac-init');
 var Promises = require('best-promise');
 var fs = require('fs-promise');
 var path = require('path');
@@ -35,25 +35,26 @@ params.cucardas = program.cucardas;
 
 //console.log(params); process.exit(0);
 
-
 var msgs = (program.init ? qacInit.cmdMsgs : qaControl.cmdMsgs)[params.lang || 'en'];
 
+function printErr(err) {
+    process.stderr.write("\nERROR: "+err.message);
+    process.stderr.write("\nSTACK: "+err.stack);
+}
+
 if(program.init) {
-    //var msgs = qacInit.cmdMsgs[params.lang || 'en'];
     process.stdout.write(msgs.msg_initializing);
-    qacInit.init(params).then(function() {
+    qacInit.init().then(function() {
         process.stdout.write(msgs.msg_finished);
     }).catch(function(err){
-        process.stderr.write("\nERROR: "+err.message);
+        if(err.message === 'canceled') {
+            process.stderr.write("\n"+msgs.msg_canceled+"\n");
+        } else { printErr(err); }
     });
 } else {
     qaControl.main(params).then(function(warnStr){
         if(! params.listLangs) {
-            //var msgs = qaControl.cmdMsgs[params.lang || 'en'];
             process.stderr.write(msgs.msg_done+(""===warnStr ? ' '+msgs.msg_nowarns:'')+'!');
         }
-    }).catch(function(err){
-        process.stderr.write("\nERROR: "+err.message);
-        process.stderr.write("\nSTACK: "+err.stack);
-    });    
+    }).catch(function(err){ printErr(err); });    
 }
