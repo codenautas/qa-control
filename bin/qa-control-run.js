@@ -4,6 +4,7 @@
 
 var program = require('commander');
 var qaControl = require('./qa-control');
+var qacInit = require('./qa-control-init');
 var Promises = require('best-promise');
 var fs = require('fs-promise');
 var path = require('path');
@@ -13,12 +14,12 @@ program
     .usage('[[options] projectDirectory|--list-langs]')
     .option('-l, --lang [lang]', 'Language to generate')
     .option('-v, --verbose', 'Show progress information')
-    //.option('-s, --silent', 'Don\'t output anything')
     .option('-L, --list-langs', 'List available languages')
     .option('-c, --cucardas', 'Always generate cucardas.log')
+    .option('-i, --init', 'Initialize project with qa-control specs')
     .parse(process.argv);
     
-if( ( !program.listLangs && (""==program.args && !program.projectDir))
+if( ( !program.init && !program.listLangs && (""==program.args && !program.projectDir))
     || (program.lang && false === program.lang in qaControl.msgs) )
 {
     program.help();
@@ -34,12 +35,17 @@ params.cucardas = program.cucardas;
 
 //console.log(params); process.exit(0);
 
-qaControl.main(params).then(function(warnStr){
-    if(! params.listLangs) {
-        var msgs = qaControl.cmdMsgs[params.lang || 'en'];
-        process.stderr.write(msgs.msg_done+(""===warnStr ? ' '+msgs.msg_nowarns:'')+'!');
-    }
-}).catch(function(err){
-    process.stderr.write("\nERROR: "+err.message);
-    process.stderr.write("\nSTACK: "+err.stack);
-});
+if(program.init) {
+    var msgs = qacInit.cmdMsgs[params.lang || 'en'];
+    process.stdout.write(msgs.msg_initializing);
+} else {
+    qaControl.main(params).then(function(warnStr){
+        if(! params.listLangs) {
+            var msgs = qaControl.cmdMsgs[params.lang || 'en'];
+            process.stderr.write(msgs.msg_done+(""===warnStr ? ' '+msgs.msg_nowarns:'')+'!');
+        }
+    }).catch(function(err){
+        process.stderr.write("\nERROR: "+err.message);
+        process.stderr.write("\nSTACK: "+err.stack);
+    });    
+}
