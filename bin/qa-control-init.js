@@ -23,16 +23,28 @@ function initPackageJson(dir, initFile, configData) {
 qaControlInit.cmdMsgs = {
     en: {
         msg_initializing: 'Initializing project',
-        msg_finish: 'Project initialized'
+        msg_finished: 'Project initialized',
+        msg_canceled: 'Initialization canceled'
     },
     es: {
         msg_initializing: 'Inicializando proyecto',
-        msg_finish: 'Proyecto inicializado'
+        msg_finished: 'Proyecto inicializado',
+        msg_canceled: 'Initialización cancelada'
     }
 };
 
-qaControlInit.init = function init() {
-    
+qaControlInit.init = function init(params) {
+    var dir = process.cwd();
+    var initFile = './input.js';
+    var msgs = qaControlInit.cmdMsgs[params.lang || 'en'];
+    return Promises.start(function() {
+        return initPackageJson(dir, initFile, {});
+    }).catch(function(err) {
+        if(err.message === 'canceled') {
+            throw new Error(msgs.msg_canceled);
+        }
+        process.stderr.write("STACK: "+err.stack);
+    });
 };
 
 module.exports = qaControlInit;
