@@ -20,43 +20,59 @@ function throwErr(description) {
 }
 
 var mod = {
-    "name": prompt('Project name', defaultProjectName(), function(n) {
+    'name': prompt('Project name', defaultProjectName(), function(n) {
         return n;
     }),
-    "description": prompt('Project description', defs('description'), function(desc) {
+    'description': prompt('Project description', defs('description'), function(desc) {
         if(!desc) { throwErr(msgs().msg_error_desc); }
         return desc;
     }),
-    "version": prompt('Project version', defs('version') || "0.0.1", function(appver) {
+    'version': prompt('Project version', defs('version') || "0.0.1", function(appver) {
         return appver;
     }),
-    "author": prompt('Author', defs('author') || "Codenautas <codenautas@googlegroups.com>", function(author) {
+    'author': prompt('Author', defs('author') || "Codenautas <codenautas@googlegroups.com>", function(author) {
         return author;
     }),
-    "license": "MIT",
-    "respository": prompt('Repositorio', defs('repository') || 'codenautas/'+defaultProjectName(), function(repo) {
+    'license': "MIT",
+    "respository": prompt('Repository', defs('repository') || 'codenautas/'+defaultProjectName(), function(repo) {
         return repo; 
     }),
-    'jshint-section': {
-        "jshintConfig": {
+    'contributors': prompt('Add contributor (name: email)', function(nameAndEmail) {
+        var contributors = defs('contributors') || [];
+        var nae = nameAndEmail.split(':');
+        if(nae.length===2) {
+            var name = nae[0].trim();
+            var email = nae[1].trim();
+            if(name === '' || email === '') {
+                process.stderr.write('Invalid contributor data\n');
+            } else {
+                contributors.push({'name':name, 'email':email});
+            }
+        }
+        return contributors.length ? contributors : null;
+    }),
+    'scripts': {
+        "test": "mocha --reporter spec --bail --check-leaks test/",
+        "test-ci": "istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- --reporter spec --check-leaks test/",
+        "test-cov": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter dot --check-leaks test/",
+        "start": "node example/server.js"
+    },
+    'jshintConfig': {
             "asi": false,
             "forin": true,
             "curly": true
+    },
+    'eslintConfig':{
+        "env": {
+          "node": false
+        },
+        "rules": {
+          "strict": 0,
+          "no-console": 1,
+          "no-unused-vars": 1
         }
     },
-    'eslint-section': {
-        "eslintConfig":{
-            "env": {
-              "node": false
-            },
-            "rules": {
-              "strict": 0,
-              "no-console": 1,
-              "no-unused-vars": 1
-            }
-        }
-    },
-    "qa-control": prompt("qa-control package-version?", defs('qa-control-version') || "0.1.4", function (ver) {
+    'qa-control': prompt("qa-control package-version?", defs('qa-control-version') || "0.1.4", function (ver) {
         return { "package-version": ver,
             "run-in": "server",
             "test-appveyor": true,
