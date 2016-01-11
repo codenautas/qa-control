@@ -51,6 +51,22 @@ var mod = {
         }
         return contributors.length ? contributors : null;
     }),
+    'dependencies': {
+        "fs-extra": "0.26.3",
+        "fs-promise": "0.3.1",
+        
+        "best-promise": "0.2.4",
+    },
+    'devDependencies': {
+        "expect.js": ">=0.3.1",
+        "istanbul": "0.4.1",
+        "mocha": "2.3.4",
+
+        "expect-called": ">=0.4.0"
+    },
+    'engines': {
+        "node": ">= 0.10.0"
+    },
     'scripts': {
         "test": "mocha --reporter spec --bail --check-leaks test/",
         "test-ci": "istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- --reporter spec --check-leaks test/",
