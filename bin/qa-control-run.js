@@ -45,12 +45,19 @@ function printErr(err) {
 
 if(program.init) {
     process.stdout.write(msgs.msg_initializing);
-    qacInit.init(params.projectDir).then(function() {
+    qacInit.init(params).then(function() {
         process.stdout.write(msgs.msg_finished);
     }).catch(function(err){
-        if(err.message === 'canceled') {
-            process.stderr.write("\n"+msgs.msg_canceled+"\n");
-        } else { printErr(err); }
+        switch(err.message) {
+            case 'canceled':
+                process.stderr.write("\n"+msgs.msg_canceled+"\n");
+                break;
+            case 'input_error':
+                process.stderr.write("\n"+msgs.msg_error+": "+err.desc+"\n");
+                break;
+            default:
+                printErr(err);
+        }
     });
 } else {
     qaControl.main(params).then(function(warnStr){

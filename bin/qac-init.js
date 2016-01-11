@@ -24,27 +24,38 @@ qacInit.cmdMsgs = {
     en: {
         msg_initializing: 'Initializing project',
         msg_finished: 'Project initialized',
+        msg_error: 'Input error',
+        msg_error_desc: '"description" field is mandatory',
         msg_canceled: 'Initialization canceled'
     },
     es: {
         msg_initializing: 'Inicializando proyecto',
         msg_finished: 'Proyecto inicializado',
+        msg_error: 'Error en los argumentos',
+        msg_error_desc: 'El campo "description" es obligatorio',
         msg_canceled: 'Initialización cancelada'
     }
 };
 
-qacInit.init = function init(topDirectory) {
+qacInit.init = function init(params) {
     
-    var dir = topDirectory || process.cwd();
-    console.log("dir", dir)
-    var customData = { 'directorio':dir } ;
+    var dir = params.projectDir || process.cwd();
+    //console.log("dir", dir)
+    var customData = {
+        'directorio':dir,
+        'msgs':qacInit.cmdMsgs[params.lang || 'en']
+    };
     var customFile = Path.normalize(__dirname+'/qac-input.js');
-    var initFile = Path.resolve(process.env.HOME || process.env.HOMEPATH, '.npm-init');
-    var defInitFile = Path.resolve(Path.dirname(__dirname)+'/node-modules/init-package-json/default-input.js');
     
-    return Promises.start(function() {
-        //console.log("infile", initFile); return;
+    //return Promises.start(function() {
         return initPackageJson(dir, customFile, customData);
+    //});
+    return initPackageJson(dir, customFile, customData).catch(function(err) {
+        console.log("Error", err.message);
+    }).then(function(err, data) {
+       if(err) {
+           console.log("Error", err);
+       } 
     });
 };
 
