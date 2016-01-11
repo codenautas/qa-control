@@ -1,7 +1,13 @@
 var Path = require('path');
 
+function defs(entry) {
+    var defs = config.get('defs');
+    if(defs) { return defs[entry]; }
+    return defs;
+}
+
 function defaultProjectName() {
-    return Path.basename(config.get('directorio'));
+    return defs('name') || Path.basename(config.get('directorio'));
 }
 
 function msgs() { return config.get('msgs'); }
@@ -14,18 +20,21 @@ function throwErr(description) {
 }
 
 var mod = {
-    "name": prompt('Nombre del proyecto', defaultProjectName(), function(n) {
+    "name": prompt('Project name', defaultProjectName(), function(n) {
         return n;
     }),
-    "description": prompt('Descripción del proyecto', null, function(desc) {
+    "description": prompt('Project description', defs('description'), function(desc) {
         if(!desc) { throwErr(msgs().msg_error_desc); }
         return desc;
     }),
-    "version": prompt('Versión del proyecto', "0.0.1", function(appver) {
+    "version": prompt('Project version', "0.0.1", function(appver) {
         return appver;
     }),
+    "author": prompt('Author', "Codenautas <codenautas@googlegroups.com>", function(author) {
+        return author;
+    }),
     "license": "MIT",
-    "respository": prompt('Repositorio:', 'codenautas/'+defaultProjectName(), function(repo) {
+    "respository": prompt('Repositorio', 'codenautas/'+defaultProjectName(), function(repo) {
         return repo; 
     }),
     'jshint-section': {

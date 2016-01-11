@@ -38,7 +38,6 @@ qacInit.cmdMsgs = {
 };
 
 qacInit.init = function init(params) {
-    
     var dir = params.projectDir || process.cwd();
     //console.log("dir", dir)
     var customData = {
@@ -46,16 +45,15 @@ qacInit.init = function init(params) {
         'msgs':qacInit.cmdMsgs[params.lang || 'en']
     };
     var customFile = Path.normalize(__dirname+'/qac-input.js');
-    
-    //return Promises.start(function() {
+    var oriJson = Path.normalize(dir+'/package.json');
+    return fs.exists(oriJson).then(function(exists) {
+        if(exists) { return fs.readJson(oriJson); }
+        return { 'no_defaults': true };
+    }).then(function(json) {
+        if(! json.no_defaults) {
+            customData['defs'] = json;
+        }
         return initPackageJson(dir, customFile, customData);
-    //});
-    return initPackageJson(dir, customFile, customData).catch(function(err) {
-        console.log("Error", err.message);
-    }).then(function(err, data) {
-       if(err) {
-           console.log("Error", err);
-       } 
     });
 };
 
