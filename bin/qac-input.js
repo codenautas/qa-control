@@ -27,14 +27,14 @@ var mod = {
         if(!desc) { throwErr(msgs().msg_error_desc); }
         return desc;
     }),
-    "version": prompt('Project version', "0.0.1", function(appver) {
+    "version": prompt('Project version', defs('version') || "0.0.1", function(appver) {
         return appver;
     }),
-    "author": prompt('Author', "Codenautas <codenautas@googlegroups.com>", function(author) {
+    "author": prompt('Author', defs('author') || "Codenautas <codenautas@googlegroups.com>", function(author) {
         return author;
     }),
     "license": "MIT",
-    "respository": prompt('Repositorio', 'codenautas/'+defaultProjectName(), function(repo) {
+    "respository": prompt('Repositorio', defs('repository') || 'codenautas/'+defaultProjectName(), function(repo) {
         return repo; 
     }),
     'jshint-section': {
@@ -56,7 +56,7 @@ var mod = {
             }
         }
     },
-    "qa-control": prompt("Versión de qa-control a utilizar?", "0.1.4", function (ver) {
+    "qa-control": prompt("qa-control package-version?", defs('qa-control-version') || "0.1.4", function (ver) {
         return { "package-version": ver,
             "run-in": "server",
             "test-appveyor": true,

@@ -52,7 +52,12 @@ qacInit.init = function init(params) {
     }).then(function(json) {
         if(! json.no_defaults) {
             customData['defs'] = json;
+            // console.log("json", json);
+            if('qa-control' in json) {
+                customData['defs']['qa-control-version'] = json['qa-control']['package-version'];
+            }
         }
+        // console.log("customData", customData);
         return initPackageJson(dir, customFile, customData);
     });
 };
