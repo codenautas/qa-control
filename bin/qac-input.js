@@ -1,21 +1,18 @@
 var Path = require('path');
 
-var mod = {};
+function defaultProjectName() {
+    return Path.basename(config.get('directorio'));
+}
 
-var defName = Path.basename(process.cwd())
-
-mod.input = {
-  "state": {data: []},
-  "name": prompt('Nombre del proyecto', defName, function(n) {
-      mod.input.state.data.name = n;
-      console.log("this", mod.input["state"]);
+var mod = {
+  "name": prompt('Nombre del proyecto', defaultProjectName(), function(n) {
         return n;
   }),
   "version": prompt('Versión del proyecto', "0.0.1", function(appver) {
         return appver;
   }),
   "license": "MIT",
-  "respository": prompt('codenautas/'+defName, function(repo) {
+  "respository": prompt('Repositorio:', 'codenautas/'+defaultProjectName(), function(repo) {
      return repo; 
   }),
   "qa-control": prompt("Versión de qa-control a utilizar?", "0.1.4", function (ver) {
@@ -29,4 +26,4 @@ mod.input = {
   })
 };
 
-module.exports = mod.input;
+module.exports = mod;

@@ -33,7 +33,8 @@ params.listLangs = program.listLangs;
 params.lang = program.lang;
 params.cucardas = program.cucardas;
 
-//console.log(params); process.exit(0);
+// console.log(program); process.exit(0);
+// console.log(params); process.exit(0);
 
 var msgs = (program.init ? qacInit.cmdMsgs : qaControl.cmdMsgs)[params.lang || 'en'];
 
@@ -44,7 +45,7 @@ function printErr(err) {
 
 if(program.init) {
     process.stdout.write(msgs.msg_initializing);
-    qacInit.init().then(function() {
+    qacInit.init(params.projectDir).then(function() {
         process.stdout.write(msgs.msg_finished);
     }).catch(function(err){
         if(err.message === 'canceled') {

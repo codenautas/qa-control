@@ -33,15 +33,18 @@ qacInit.cmdMsgs = {
     }
 };
 
-qacInit.init = function init() {
-    var dir = process.cwd();
+qacInit.init = function init(topDirectory) {
+    
+    var dir = topDirectory || process.cwd();
+    console.log("dir", dir)
+    var customData = { 'directorio':dir } ;
     var customFile = Path.normalize(__dirname+'/qac-input.js');
     var initFile = Path.resolve(process.env.HOME || process.env.HOMEPATH, '.npm-init');
     var defInitFile = Path.resolve(Path.dirname(__dirname)+'/node-modules/init-package-json/default-input.js');
     
     return Promises.start(function() {
         //console.log("infile", initFile); return;
-        return initPackageJson(dir, customFile, {});
+        return initPackageJson(dir, customFile, customData);
     });
 };
 
