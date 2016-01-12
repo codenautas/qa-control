@@ -12,7 +12,7 @@ function defs(entry) {
 }
 
 function defaultProjectName() {
-    return defs('name') || Path.basename(config.get('directorio'));
+    return defs('name') || Path.basename(config.get('inputDir'));
 }
 
 function msgs() { return config.get('msgs'); }
@@ -93,7 +93,7 @@ var mod = {
           "no-unused-vars": 1
         }
     },
-    'qa-control': prompt("qa-control package-version?", defs('qa-control-version') || "0.1.4", function (ver) {
+    'qa-control': prompt("qa-control package-version?", config.get('qa-control-version'), function (ver) {
         return { "package-version": ver,
             "run-in": "server",
             "test-appveyor": true,

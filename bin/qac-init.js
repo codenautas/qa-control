@@ -46,21 +46,29 @@ qacInit.init = function init(params) {
     var outDir = params.projectDir || process.cwd();
     var msgs = qacInit.cmdMsgs[params.lang || 'en'];
     var customData = {
-        'directorio':outDir,
+        'inputDir':outDir,
         'msgs':msgs
     };
     var templateDir = Path.normalize(__dirname+'/init-template');
     var customFile = Path.normalize(__dirname+'/qac-input.js');
-    var oriJson = Path.normalize(outDir+'/package.json');
-    return fs.exists(oriJson).then(function(exists) {
-        if(exists) { return fs.readJson(oriJson); }
-        return { 'no_defaults': true };
-    }).then(function(json) {
-        if(! json.no_defaults) {
-            customData['defs'] = json;
-            if('qa-control' in json) {
-                customData['defs']['qa-control-version'] = json['qa-control']['package-version'];
-            }
+    var oriPackageJson = Path.normalize(outDir+'/package.json');
+    var qacPackageJson = Path.normalize(Path.dirname(__dirname)+'/package.json');
+    var qacJson;
+    return fs.readJson(qacPackageJson).then(function(json) {
+        qacJson = json;
+        return fs.exists(oriPackageJson);
+    }).then(function(exists) {
+        if(exists) { return fs.readJson(oriPackageJson); }
+        return { 'first_init': true };
+    }).then(function(oriJson) {
+        if(! oriJson.first_init) {
+            customData['defs'] = oriJson;
+            customData['qa-control-version'] = (('qa-control' in oriJson) ? oriJson : qacJson)['qa-control']['package-version'];
+            // if('qa-control' in oriJson) {
+                // customData['defs']['qa-control-version'] = oriJson['qa-control']['package-version'];
+            // }
+        } else {
+            customData['qa-control-version'] = qacJson['qa-control']['package-version'];
         }
         return initPackageJson(outDir, customFile, customData);
     }).then(function() {

@@ -28,11 +28,9 @@ if( ( !program.init && !program.listLangs && (""==program.args && !program.proje
 var params = {};
 params.projectDir = program.args[0];
 params.verbose = program.verbose;
-//params.silent = program.silent;
 params.listLangs = program.listLangs;
 params.lang = program.lang;
 params.cucardas = program.cucardas;
-
 // console.log(program); process.exit(0);
 // console.log(params); process.exit(0);
 
