@@ -24,6 +24,18 @@ function defaultProjectName() {
 
 function msgs() { return config.get('msgs'); }
 
+function selectDeps(depGroup, packages) {
+    var selectedDeps = {};
+    var group = qacs(depGroup);
+    for(var p=0; p<packages.length; ++p) {
+        var pac = packages[p];
+        if(pac in group) {
+            selectedDeps[pac] = group[pac];
+        }
+    }
+    return selectedDeps;
+}
+
 function throwErr(description) {
     throw {
         message:'input_error',
@@ -45,7 +57,7 @@ var mod = {
     'author': prompt('Author', defs('author') || "Codenautas <codenautas@googlegroups.com>", function(author) {
         return author;
     }),
-    'license': qacs('licence'),
+    'license': qacs('license'),
     "respository": prompt('Repository', defs('repository') || 'codenautas/'+defaultProjectName(), function(repo) {
         return repo; 
     }),
@@ -63,31 +75,16 @@ var mod = {
         }
         return contributors.length ? contributors : null;
     }),
-    'dependencies': {
-        "fs-extra": "0.26.3",
-        "fs-promise": "0.3.1",
-        
-        "best-promise": "0.2.4",
-    },
-    'devDependencies': {
-        "expect.js": ">=0.3.1",
-        "istanbul": "0.4.1",
-        "mocha": "2.3.4",
-
-        "expect-called": ">=0.4.0"
-    },
+    'dependencies': selectDeps('dependencies', ['fs-extra', 'fs-promise', 'best-promise']),
+    'devDependencies': selectDeps('devDependencies', ['expect.js', 'istanbul', 'mocha', 'expect-called']),
     'engines': qacs('engines'),
     'scripts': qacs('scripts'),
     'jshintConfig': qacs('jshintConfig'),
     'eslintConfig': qacs('eslintConfig'),
     'qa-control': prompt("qa-control package-version?", config.get('qa-control-version'), function (ver) {
-        return { "package-version": ver,
-            "run-in": "server",
-            "test-appveyor": true,
-            "type": "app",
-            "stage": "designing",
-            "coverage": 70
-        }; 
+        var qData = qacs('qa-control');
+        qData['package-version'] = ver;
+        return qData; 
   })
 };
 
