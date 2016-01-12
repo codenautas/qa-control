@@ -102,8 +102,12 @@ qacInit.init = function init(params) {
     }).then(function(files) {
         return Promises.all(files.map(function(file){
             if(! file.match(/(.tpl)$/)) {
-                out.write('  '+msgs.msg_copying+' '+file+'...\n');
-                return fs.copy(Path.resolve(templateDir+'/'+file), Path.resolve(outDir+'/'+file));                
+                var oFile = file;
+                if(file.match(/^(dot-)/)) {
+                    oFile = '.'+file.substring(4);
+                }
+                out.write('  '+msgs.msg_copying+' '+oFile+'...\n');
+                return fs.copy(Path.resolve(templateDir+'/'+file), Path.resolve(outDir+'/'+oFile));                
             }
         }));
     });
