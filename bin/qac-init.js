@@ -10,6 +10,7 @@ var Promises = require('best-promise');
 var fs = require('fs-promise');
 var Path = require('path');
 var init = require('init-package-json');
+var qaControl = require('./qa-control.js');
 
 function initPackageJson(outDir, initFile, configData) {
     return Promises.make(function(resolve, reject) {
@@ -65,20 +66,24 @@ qacInit.init = function init(params) {
         if(! oriJson.first_init) {
             customData['defs'] = oriJson;
             customData['qa-control-version'] = (('qa-control' in oriJson) ? oriJson : qacJson)['qa-control']['package-version'];
-            // if('qa-control' in oriJson) {
-                // customData['defs']['qa-control-version'] = oriJson['qa-control']['package-version'];
-            // }
         } else {
             customData['qa-control-version'] = qacJson['qa-control']['package-version'];
         }
         return initPackageJson(outDir, customFile, customData);
+    }).then(function(data) {
+        //console.log('data', data);
+        var cucardas=qaControl.projectDefinition[data['qa-control']['package-version']].cucardas;
+        var cucaContent = qaControl.generateCucardas(cucardas, data);
+        //console.log(cucaContent);
     }).then(function() {
         out.write(msgs.msg_creating+'...\n');
         return fs.readdir(templateDir);
     }).then(function(files) {
         return Promises.all(files.map(function(file){
-            out.write('  '+msgs.msg_copying+' '+file+'...\n');
-            return fs.copy(Path.resolve(templateDir+'/'+file), Path.resolve(outDir+'/'+file));
+            if(! file.match(/(.tpl)$/)) {
+                out.write('  '+msgs.msg_copying+' '+file+'...\n');
+                return fs.copy(Path.resolve(templateDir+'/'+file), Path.resolve(outDir+'/'+file));                
+            }
         }));
     });
 };

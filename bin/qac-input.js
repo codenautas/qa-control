@@ -58,7 +58,7 @@ var mod = {
         return author;
     }),
     'license': qacs('license'),
-    "respository": prompt('Repository', defs('repository') || 'codenautas/'+defaultProjectName(), function(repo) {
+    "repository": prompt('Repository', defs('repository') || 'https://github.com/codenautas/'+defaultProjectName(), function(repo) {
         return repo; 
     }),
     'contributors': prompt('Add contributor (name: email)', function(nameAndEmail) {
