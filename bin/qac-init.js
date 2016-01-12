@@ -26,6 +26,7 @@ qacInit.cmdMsgs = {
         msg_initializing: 'Initializing project',
         msg_creating: 'Creating files',
         msg_copying: 'Copying file',
+        msg_generating: 'Generationg',
         msg_finished: 'Project initialized',
         msg_error: 'Input error',
         msg_error_desc: '"description" field is mandatory',
@@ -35,6 +36,7 @@ qacInit.cmdMsgs = {
         msg_initializing: 'Inicializando proyecto',
         msg_creating: 'Creando archivos',
         msg_copying: 'Creando archivo',
+        msg_generating: 'Generando',
         msg_finished: 'Proyecto inicializado',
         msg_error: 'Error en los argumentos',
         msg_error_desc: 'El campo "description" es obligatorio',
@@ -55,6 +57,8 @@ qacInit.init = function init(params) {
     var oriPackageJson = Path.normalize(outDir+'/package.json');
     var qacPackageJson = Path.normalize(Path.dirname(__dirname)+'/package.json');
     var qacJson;
+    var cucaContent='';
+    var finalJson;
     return fs.readJson(qacPackageJson).then(function(json) {
         qacJson = json;
         customData['qac'] = qacJson;
@@ -71,10 +75,19 @@ qacInit.init = function init(params) {
         }
         return initPackageJson(outDir, customFile, customData);
     }).then(function(data) {
-        //console.log('data', data);
+        finalJson = data;
         var cucardas=qaControl.projectDefinition[data['qa-control']['package-version']].cucardas;
-        var cucaContent = qaControl.generateCucardas(cucardas, data);
+        cucaContent = qaControl.generateCucardas(cucardas, data);
         //console.log(cucaContent);
+        return fs.readFile(Path.normalize(templateDir+'/LEEME.tpl'), {encoding: 'utf8'});
+    }).then(function(readme) {
+        readme = readme.replace(new RegExp('{{name}}', 'g'), finalJson.name);
+        readme = readme.replace(new RegExp('{{desc}}', 'g'), finalJson.description);
+        readme = readme.replace(new RegExp('{{cucardas}}', 'g'), cucaContent);
+        //console.log(readme);
+        var leemeMD = Path.resolve(outDir+'/LEEME.md');
+        out.write(msgs.msg_generating+' '+leemeMD+'...\n');
+        return fs.writeFile(leemeMD, readme);
     }).then(function() {
         out.write(msgs.msg_creating+'...\n');
         return fs.readdir(templateDir);

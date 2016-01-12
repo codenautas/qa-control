@@ -22,6 +22,15 @@ function defaultProjectName() {
     return defs('name') || Path.basename(config.get('inputDir'));
 }
 
+function defaultRepository() {
+    var repo = defs('repository');
+    if(repo) {
+        var url = repo.url;
+        return url.substring(4, url.length-4);
+    }
+    return 'https://github.com/codenautas/'+defaultProjectName();
+}
+
 function msgs() { return config.get('msgs'); }
 
 function selectDeps(depGroup, packages) {
@@ -58,8 +67,8 @@ var mod = {
         return author;
     }),
     'license': qacs('license'),
-    "repository": prompt('Repository', defs('repository') || 'https://github.com/codenautas/'+defaultProjectName(), function(repo) {
-        return repo; 
+    "repository": prompt('Repository', defaultRepository(), function(repo) {
+        return repo;
     }),
     'contributors': prompt('Add contributor (name: email)', function(nameAndEmail) {
         var contributors = defs('contributors') || [];

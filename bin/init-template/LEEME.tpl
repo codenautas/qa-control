@@ -1,14 +1,17 @@
 # {{name}}
 {{desc}}
 
+<!--lang:es-->
+# Uso
+<!--lang:en--]
+# Usage
 [!--lang:*-->
-
 ```sh
 $ npm install {{name}}
 ```
+
 <!--multilang v0 es:LEEME.md en:README.md -->
 
-<!-- cucardas -->
 {{cucardas}}
 
 <!--multilang buttons-->
