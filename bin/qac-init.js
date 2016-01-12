@@ -11,6 +11,7 @@ var fs = require('fs-promise');
 var Path = require('path');
 var init = require('init-package-json');
 var qaControl = require('./qa-control.js');
+var multilang = require('multilang');
 
 function initPackageJson(outDir, initFile, configData) {
     return Promises.make(function(resolve, reject) {
@@ -59,6 +60,7 @@ qacInit.init = function init(params) {
     var qacJson;
     var cucaContent='';
     var finalJson;
+    var leemeContent='';
     return fs.readJson(qacPackageJson).then(function(json) {
         qacJson = json;
         customData['qac'] = qacJson;
@@ -80,14 +82,20 @@ qacInit.init = function init(params) {
         cucaContent = qaControl.generateCucardas(cucardas, data);
         //console.log(cucaContent);
         return fs.readFile(Path.normalize(templateDir+'/LEEME.tpl'), {encoding: 'utf8'});
-    }).then(function(readme) {
-        readme = readme.replace(new RegExp('{{name}}', 'g'), finalJson.name);
-        readme = readme.replace(new RegExp('{{desc}}', 'g'), finalJson.description);
-        readme = readme.replace(new RegExp('{{cucardas}}', 'g'), cucaContent);
+    }).then(function(leeme) {
+        leeme = leeme.replace(new RegExp('{{name}}', 'g'), finalJson.name);
+        leeme = leeme.replace(new RegExp('{{desc}}', 'g'), finalJson.description);
+        leeme = leeme.replace(new RegExp('{{cucardas}}', 'g'), cucaContent);
         //console.log(readme);
+        leemeContent = leeme;
         var leemeMD = Path.resolve(outDir+'/LEEME.md');
         out.write(msgs.msg_generating+' '+leemeMD+'...\n');
-        return fs.writeFile(leemeMD, readme);
+        return fs.writeFile(leemeMD, leeme);
+    }).then(function() {    
+        var readmeMD = Path.resolve(outDir+'/README.md');
+        out.write(msgs.msg_generating+' '+readmeMD+'...\n');
+        var readme = multilang.changeNamedDoc(readmeMD, leemeContent, 'en');
+        return fs.writeFile(readmeMD, multilang.stripComments(readme));
     }).then(function() {
         out.write(msgs.msg_creating+'...\n');
         return fs.readdir(templateDir);
