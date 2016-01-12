@@ -6,10 +6,17 @@
 var Path = require('path');
 
 function defs(entry) {
-    var defs = config.get('defs');
-    if(defs) { return defs[entry]; }
-    return defs;
+    var dfs = config.get('defs');
+    if(dfs) { return dfs[entry]; }
+    return dfs;
 }
+
+function qacs(entry) {
+    var qac = config.get('qac');
+    if(qac) { return qac[entry]; }
+    return qac;
+}
+
 
 function defaultProjectName() {
     return defs('name') || Path.basename(config.get('inputDir'));
@@ -38,7 +45,7 @@ var mod = {
     'author': prompt('Author', defs('author') || "Codenautas <codenautas@googlegroups.com>", function(author) {
         return author;
     }),
-    'license': "MIT",
+    'license': qacs('licence'),
     "respository": prompt('Repository', defs('repository') || 'codenautas/'+defaultProjectName(), function(repo) {
         return repo; 
     }),
@@ -69,30 +76,10 @@ var mod = {
 
         "expect-called": ">=0.4.0"
     },
-    'engines': {
-        "node": ">= 0.10.0"
-    },
-    'scripts': {
-        "test": "mocha --reporter spec --bail --check-leaks test/",
-        "test-ci": "istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- --reporter spec --check-leaks test/",
-        "test-cov": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter dot --check-leaks test/",
-        "start": "node example/server.js"
-    },
-    'jshintConfig': {
-            "asi": false,
-            "forin": true,
-            "curly": true
-    },
-    'eslintConfig':{
-        "env": {
-          "node": false
-        },
-        "rules": {
-          "strict": 0,
-          "no-console": 1,
-          "no-unused-vars": 1
-        }
-    },
+    'engines': qacs('engines'),
+    'scripts': qacs('scripts'),
+    'jshintConfig': qacs('jshintConfig'),
+    'eslintConfig': qacs('eslintConfig'),
     'qa-control': prompt("qa-control package-version?", config.get('qa-control-version'), function (ver) {
         return { "package-version": ver,
             "run-in": "server",

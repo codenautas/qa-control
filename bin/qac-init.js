@@ -56,6 +56,7 @@ qacInit.init = function init(params) {
     var qacJson;
     return fs.readJson(qacPackageJson).then(function(json) {
         qacJson = json;
+        customData['qac'] = qacJson;
         return fs.exists(oriPackageJson);
     }).then(function(exists) {
         if(exists) { return fs.readJson(oriPackageJson); }
