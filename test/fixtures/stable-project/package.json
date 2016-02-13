@@ -10,7 +10,7 @@
   }],
   "dependencies": {
     "lodash": "3.10.0",
-    "pg": "4.4.0",
+    "pg": "~4.4.0",
     "promise": "7.0.3",
     "best-promise": "0.2.2"
   },

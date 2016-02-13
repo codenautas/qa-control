@@ -659,7 +659,7 @@ module.exports = function(qaControl){
                     warnings:function(info) {
                         var warns = [];
                         if("dependencies" in info.packageJson) {
-                            var reDep=/^\d+\.\d+\.\d+$/;
+                            var reDep=/^~?\d+\.\d+\.\d+$/;
                             /*jshint forin: false */
                             for(var depName in info.packageJson.dependencies) {
                                 var depVal = info.packageJson.dependencies[depName];
