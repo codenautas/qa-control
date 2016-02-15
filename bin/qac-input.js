@@ -21,13 +21,13 @@ function defaultProjectName() {
     return defs('name') || Path.basename(config.get('inputDir'));
 }
 
-function defaultRepository() {
+function defaultRepository(selectedName) {
     var repo = defs('repository');
     if(repo) {
         var url = repo.url;
         return url.substring(4, url.length-4);
     }
-    return 'https://github.com/codenautas/'+defaultProjectName();
+    return 'https://github.com/codenautas/'+(selectedName || defaultProjectName());
 }
 
 function msgs() { return config.get('msgs'); }
@@ -51,8 +51,11 @@ function throwErr(description) {
     }    
 }
 
+var selectedName = null;
+
 var mod = {
     'name': prompt('Project name', defaultProjectName(), function(n) {
+        selectedName = n;
         return n;
     }),
     'description': prompt('Project description', defs('description'), function(desc) {
@@ -66,9 +69,9 @@ var mod = {
         return author;
     }),
     'license': qacs('license'),
-    "repository": prompt('Repository', defaultRepository(), function(repo) {
-        return repo;
-    }),
+    'repository': function (cb) {
+        return cb(null, prompt('Repository', defaultRepository(selectedName), function(repo) { return repo; }))
+    },
     'contributors': prompt('Add contributor (name: email)', function(nameAndEmail) {
         var contributors = defs('contributors') || [];
         var nae = nameAndEmail.split(':');
