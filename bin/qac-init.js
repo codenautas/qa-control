@@ -76,6 +76,27 @@ qacInit.init = function init(params) {
         } else {
             customData['qa-control-version'] = qacJson['qa-control']['package-version'];
         }
+        return fs.exists(oriREADME);
+    }).then(function(exists) {
+        if(exists) {
+            return fs.readFile(oriREADME, {encoding: 'utf8'});
+        }
+        return {'not_exists':true};
+    }).then(function(existingReadme) {
+        if(! existingReadme.not_exists) {
+            //console.log(existingReadme);
+            var lines = existingReadme.split(/\r?\n/);
+            if(lines.length===3 && lines[2]=='') {
+                lines.splice(2, 1);
+            }
+            if(lines.length!==2) {
+                throw new Error('Existing README.md is not empty')
+            }
+            if(! ('defs' in customData)) { customData['defs'] = {}; }
+            var defs = customData['defs'];
+            defs['name'] = lines[0].substr(2);
+            defs['description'] = lines[1];
+        }
         return initPackageJson(outDir, customFile, customData);
     }).then(function(data) {
         finalJson = data;

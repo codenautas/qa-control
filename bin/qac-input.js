@@ -17,7 +17,6 @@ function qacs(entry) {
     return qac;
 }
 
-
 function defaultProjectName() {
     return defs('name') || Path.basename(config.get('inputDir'));
 }
