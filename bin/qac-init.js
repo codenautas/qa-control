@@ -81,6 +81,16 @@ qacInit.init = function init(params) {
         var cucardas=qaControl.projectDefinition[data['qa-control']['package-version']].cucardas;
         cucaContent = qaControl.generateCucardas(cucardas, data);
         //console.log(cucaContent);
+        return fs.readFile(Path.normalize(templateDir+'/LICENSE.tpl'), {encoding: 'utf8'});
+    }).then(function(licenseTPL) {
+        licenseTPL = licenseTPL.replace(new RegExp('{{author}}', 'g'), finalJson.author);
+        var now = new Date();
+        licenseTPL = licenseTPL.replace(new RegExp('{{year}}', 'g'), now.getFullYear());
+        //console.log(licencse);
+        var license = Path.resolve(outDir+'/LICENSE');
+        out.write(msgs.msg_generating+' '+license+'...\n');
+        return fs.writeFile(license, licenseTPL);
+    }).then(function() {
         return fs.readFile(Path.normalize(templateDir+'/LEEME.tpl'), {encoding: 'utf8'});
     }).then(function(leeme) {
         leeme = leeme.replace(new RegExp('{{name}}', 'g'), finalJson.name);
@@ -91,7 +101,7 @@ qacInit.init = function init(params) {
         var leemeMD = Path.resolve(outDir+'/LEEME.md');
         out.write(msgs.msg_generating+' '+leemeMD+'...\n');
         return fs.writeFile(leemeMD, leeme);
-    }).then(function() {    
+    }).then(function() {
         var readmeMD = Path.resolve(outDir+'/README.md');
         out.write(msgs.msg_generating+' '+readmeMD+'...\n');
         var readme = multilang.changeNamedDoc(readmeMD, leemeContent, 'en');
