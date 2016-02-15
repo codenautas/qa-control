@@ -55,6 +55,7 @@ qacInit.init = function init(params) {
     };
     var templateDir = Path.normalize(__dirname+'/init-template');
     var customFile = Path.normalize(__dirname+'/qac-input.js');
+    var oriREADME = Path.normalize(outDir+'/README.md');
     var oriPackageJson = Path.normalize(outDir+'/package.json');
     var qacPackageJson = Path.normalize(Path.dirname(__dirname)+'/package.json');
     var qacJson;
