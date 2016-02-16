@@ -27,7 +27,7 @@ function defaultRepository(selectedName) {
         var url = repo.url;
         return url.substring(4, url.length-4);
     }
-    return 'https://github.com/codenautas/'+(selectedName || defaultProjectName());
+    return 'codenautas/'+(selectedName || defaultProjectName());
 }
 
 function msgs() { return config.get('msgs'); }

@@ -97,6 +97,8 @@ qacInit.init = function init(params) {
             defs['name'] = lines[0].substr(2);
             defs['description'] = lines[1];
         }
+        //customData['yes']=true;
+        //customData['silent']=true;
         return initPackageJson(outDir, customFile, customData);
     }).then(function(data) {
         finalJson = data;
