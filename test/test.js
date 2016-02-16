@@ -582,6 +582,14 @@ describe('qa-control', function(){
                 done();
             });
         });
+        it.skip('must fail if qa-control version does not exists', function(done){
+            qaControl.loadProject('./test/fixtures/with-wrong-qa-control-version').then(function(info){
+                done(info);
+            }).catch(function(err) {
+                expect(err).to.match(/inexistent qa-control version/);
+                done();
+            });
+        });
     });
     describe('packageJson tests', function(){
         it('packageJson.main must be loaded from subdirectory', function(done){
