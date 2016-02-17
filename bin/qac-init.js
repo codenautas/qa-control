@@ -18,7 +18,7 @@ qacInit.promptForVar = function promptForVar(name, defaultValue) {
     var def = defaultValue ? ' ('+defaultValue+')' : '';
     process.stdout.write(name+def+':');
     return Promises.make(function(resolve, reject) {
-        process.stdin.on('readable', () => {
+        process.stdin.on('readable', function() {
             var chunk = process.stdin.read();
             if(chunk !== null) {
                 //process.stdout.write(`data: "${chunk}"`);
@@ -28,10 +28,10 @@ qacInit.promptForVar = function promptForVar(name, defaultValue) {
                 }
             }
         });
-        process.stdin.on('end', () => {
+        process.stdin.on('end', function(){
             reject("unexpected end");
         });
-        process.stdin.on('error', (err) => {
+        process.stdin.on('error', function(err) {
             reject("error:"+err);
         });
     }); 
