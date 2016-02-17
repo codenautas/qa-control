@@ -9,7 +9,7 @@ var qacInit = {};
 var Promises = require('best-promise');
 var fs = require('fs-promise');
 var Path = require('path');
-// var init = require('init-package-json');
+var init = require('init-package-json');
 var qaControl = require('./qa-control.js');
 var multilang = require('multilang');
 
@@ -43,6 +43,7 @@ qacInit.Param = function Param(name, defVal, initCB) {
     this.def  = defVal;
     this.init = initCB;
 }
+
 // params es un array de Param
 qacInit.readParameters = function readParameters(params) {
     var currentResult = {};
@@ -52,6 +53,7 @@ qacInit.readParameters = function readParameters(params) {
            currentResult[param.name] = value;
         });
     })).then(function() {
+        //console.log(currentResult)
         return currentResult;
     });
 };
@@ -79,101 +81,6 @@ qacInit.cmdMsgs = {
     }
 };
 
-qacInit.init = function init(params) {
-    var out = process.stdout;
-    var outDir = params.projectDir || process.cwd();
-    var msgs = qacInit.cmdMsgs[params.lang || 'en'];
-    var templateDir = Path.normalize(__dirname+'/init-template');
-    var customFile = Path.normalize(__dirname+'/qac-input.js');
-    var oriREADME = Path.normalize(outDir+'/README.md');
-    var oriPackageJson = Path.normalize(outDir+'/package.json');
-    var qacPackageJson = Path.normalize(Path.dirname(__dirname)+'/package.json');
-    var qacJson;
-    var oriJson;
-    var cucaContent='';
-    var finalJson;
-    var leemeContent='';
-    var exitingReadme = {};
-    return fs.readJson(qacPackageJson).then(function(json) {
-        qacJson = json;
-        return fs.exists(oriPackageJson);
-    }).then(function(exists) {
-        if(exists) { return fs.readJson(oriPackageJson); }
-        return { 'first_init': true };
-    }).then(function(oriJsonData) {
-        if(! oriJsonData.first_init) {
-            oriJson = oriJsonData;
-        }
-        return fs.exists(oriREADME);
-    }).then(function(exists) {
-        if(exists) {
-            return fs.readFile(oriREADME, {encoding: 'utf8'});
-        }
-        return {'not_exists':true};
-    }).then(function(existingReadme) {
-        if(! existingReadme.not_exists) {
-            //console.log(existingReadme);
-            var lines = existingReadme.split(/\r?\n/);
-            if(lines.length===3 && lines[2]=='') {
-                lines.splice(2, 1);
-            }
-            if(lines.length!==2) {
-                throw new Error('Existing README.md is not empty')
-            }
-            existingReadme.name = lines[0].substr(2);
-            existingReadme.description = lines[1];
-        }
-        //customData['yes']=true;
-        //customData['silent']=true;
-        return initPackageJson(outDir, customFile, customData);
-    }).then(function(data) {
-        finalJson = data;
-        var cucardas=qaControl.projectDefinition[data['qa-control']['package-version']].cucardas;
-        cucaContent = qaControl.generateCucardas(cucardas, data);
-        //console.log(cucaContent);
-        return fs.readFile(Path.normalize(templateDir+'/LICENSE.tpl'), {encoding: 'utf8'});
-    }).then(function(licenseTPL) {
-        licenseTPL = licenseTPL.replace(new RegExp('{{author}}', 'g'), finalJson.author);
-        var now = new Date();
-        licenseTPL = licenseTPL.replace(new RegExp('{{year}}', 'g'), now.getFullYear());
-        //console.log(licencse);
-        var license = Path.resolve(outDir+'/LICENSE');
-        out.write(msgs.msg_generating+' '+license+'...\n');
-        return fs.writeFile(license, licenseTPL);
-    }).then(function() {
-        return fs.readFile(Path.normalize(templateDir+'/LEEME.tpl'), {encoding: 'utf8'});
-    }).then(function(leeme) {
-        leeme = leeme.replace(new RegExp('{{name}}', 'g'), finalJson.name);
-        leeme = leeme.replace(new RegExp('{{desc}}', 'g'), finalJson.description);
-        leeme = leeme.replace(new RegExp('{{cucardas}}', 'g'), cucaContent);
-        //console.log(readme);
-        leemeContent = leeme;
-        var leemeMD = Path.resolve(outDir+'/LEEME.md');
-        out.write(msgs.msg_generating+' '+leemeMD+'...\n');
-        return fs.writeFile(leemeMD, leeme);
-    }).then(function() {
-        var readmeMD = Path.resolve(outDir+'/README.md');
-        out.write(msgs.msg_generating+' '+readmeMD+'...\n');
-        var readme = multilang.changeNamedDoc(readmeMD, leemeContent, 'en');
-        return fs.writeFile(readmeMD, multilang.stripComments(readme));
-    }).then(function() {
-        out.write(msgs.msg_creating+'...\n');
-        return fs.readdir(templateDir);
-    }).then(function(files) {
-        return Promises.all(files.map(function(file){
-            if(! file.match(/(.tpl)$/)) {
-                var oFile = file;
-                if(file.match(/^(dot-)/)) {
-                    oFile = '.'+file.substring(4);
-                }
-                out.write('  '+msgs.msg_copying+' '+oFile+'...\n');
-                return fs.copy(Path.resolve(templateDir+'/'+file), Path.resolve(outDir+'/'+oFile));                
-            }
-        }));
-    });
-};
-
-/*
 
 function initPackageJson(outDir, initFile, configData) {
     return Promises.make(function(resolve, reject) {
@@ -285,6 +192,5 @@ qacInit.init = function init(params) {
         }));
     });
 };
-*/
 
 module.exports = qacInit;
