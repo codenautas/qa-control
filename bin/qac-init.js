@@ -13,6 +13,30 @@ var init = require('init-package-json');
 var qaControl = require('./qa-control.js');
 var multilang = require('multilang');
 
+qacInit.promptForVar = function promptForVar(name, defaultValue) {
+    process.stdin.setEncoding('utf8');
+    var def = defaultValue ? ' ('+defaultValue+')' : '';
+    process.stdout.write(name+def+':');
+    return Promises.make(function(resolve, reject) {
+        process.stdin.on('readable', () => {
+            var chunk = process.stdin.read();
+            if(chunk !== null) {
+                //process.stdout.write(`data: "${chunk}"`);
+                if(chunk.match(/\r?\n/)) {
+                    process.stdin.end();
+                    resolve(chunk.replace(/\s+$/,''));
+                }
+            }
+        });
+        process.stdin.on('end', () => {
+            reject("unexpected end");
+        });
+        process.stdin.on('error', (err) => {
+            reject("error:"+err);
+        });
+    }); 
+};
+
 function initPackageJson(outDir, initFile, configData) {
     return Promises.make(function(resolve, reject) {
         init(outDir, initFile, configData, function (er, data) {
