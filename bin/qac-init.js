@@ -48,11 +48,10 @@ qacInit.readParameters = function readParameters(params) {
     var currentResult = {};
     return Promises.all(params.map(function(param) {
         param.init(currentResult);
-        qacInit.promptForVar(param.name, param.defVal).then(function(value) {
-           currentResult[param.name] = value; 
+        return qacInit.promptForVar(param.name, param.def).then(function(value) {
+           currentResult[param.name] = value;
         });
     })).then(function() {
-        console.log(currentResult);
         return currentResult;
     });
 };
