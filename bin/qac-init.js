@@ -37,21 +37,14 @@ qacInit.promptForVar = function promptForVar(name, defaultValue) {
     }); 
 };
 
-// initCB debe ser function(currentResult) { }
-qacInit.Param = function Param(name, defVal, initCB) {
-    this.name = name;
-    this.def  = defVal;
-    this.init = initCB;
-}
-
 function getParam(param, curRes) {
     return Promises.start(function() {
-        param.init(curRes);
+        if(param.init) { param.init(curRes); }
         return qacInit.promptForVar(param.name, param.def).then(function(value) {
            curRes[param.name] = value;
         });
     });
-}
+};
 
 // params es un array de Param
 qacInit.readParameters = function readParameters(params) {

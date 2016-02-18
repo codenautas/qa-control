@@ -12,12 +12,12 @@ var qci = require('../bin/qac-init.js')
 
 describe('qa-control --init', function(){
     it('Params may use current result', function(done){
-        var p1 = new qci.Param('v1', 'def1', function(curResult) {});
-        var p2 = new qci.Param('v2', 'def2', function(curResult) {
+        var p1 = {name:'v1', def:'def1'};
+        var p2 = {name:'v2', def:'def2', init: function(curResult) {
             if(curResult.v1) {
                 this.def = 'using '+curResult.v1;
             }
-        });
+        }};
         expect(p1.name).to.eql('v1');
         expect(p1.def).to.eql('def1');
         expect(p2.name).to.eql('v2');
@@ -34,9 +34,9 @@ describe('qa-control --init', function(){
             return Promises.resolve('value'+name.substr(name.length-1, 1));
         });
         var params = [
-            new qci.Param('v1', 'def1', function(curResult) {}),
-            new qci.Param('v2', 'def2', function(curResult) {}),
-            new qci.Param('v3', 'def3', function(curResult) {})
+            {name:'v1', def:'def1'},
+            {name:'v2', def:'def2'},
+            {name:'v3', def:'def3'}
         ];
         return qci.readParameters(params).then(function(result) {
             qci.promptForVar.restore();
@@ -55,9 +55,9 @@ describe('qa-control --init', function(){
             return Promises.resolve(def);
         });
         var params = [
-            new qci.Param('v1', 'def1', function(curResult) {}),
-            new qci.Param('v2', 'def2', function(curResult) { if(curResult.v1) { this.def = 'have v1'; } }),
-            new qci.Param('v3', 'def3', function(curResult) { if(curResult.v2) { this.def = 'have v2'; } })
+            {name:'v1', def:'def1'},
+            {name:'v2', def:'def2', init: function(curResult) { if(curResult.v1) { this.def = 'have v1'; } } },
+            {name:'v3', def:'def3', init: function(curResult) { if(curResult.v2) { this.def = 'have v2'; } } }
         ];
         return qci.readParameters(params).then(function(result) {
             qci.promptForVar.restore();
