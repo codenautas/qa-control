@@ -50,21 +50,21 @@ describe('qa-control --init', function(){
             done(err);
         });
     });
-    it.skip("Reading of array of Param's using current values", function(done){
+    it("Reading of array of Param's using current values", function(done){
         sinon.stub(qci, 'promptForVar', function(name, def) {
             return Promises.resolve(def);
         });
         var params = [
             new qci.Param('v1', 'def1', function(curResult) {}),
-            new qci.Param('v2', 'def2', function(curResult) { console.log("CR", curResult); if(curResult.v1) { this.def = 'have v1'; } }),
-            new qci.Param('v3', 'def3', function(curResult) { console.log("CR", curResult); if(curResult.v2) { this.def = 'have v2'; } })
+            new qci.Param('v2', 'def2', function(curResult) { if(curResult.v1) { this.def = 'have v1'; } }),
+            new qci.Param('v3', 'def3', function(curResult) { if(curResult.v2) { this.def = 'have v2'; } })
         ];
         return qci.readParameters(params).then(function(result) {
             qci.promptForVar.restore();
             expect(result).to.eql({
                    v1: 'def1',
                    v2: 'have v1',
-                   v3: 'have v3'
+                   v3: 'have v2'
             });
             done();
         }).catch(function(err) {

@@ -44,17 +44,26 @@ qacInit.Param = function Param(name, defVal, initCB) {
     this.init = initCB;
 }
 
+function getParam(param, curRes) {
+    return Promises.start(function() {
+        param.init(curRes);
+        return qacInit.promptForVar(param.name, param.def).then(function(value) {
+           curRes[param.name] = value;
+        });
+    });
+}
+
 // params es un array de Param
 qacInit.readParameters = function readParameters(params) {
     var currentResult = {};
-    return Promises.all(params.map(function(param) {
-        param.init(currentResult);
-        return qacInit.promptForVar(param.name, param.def).then(function(value) {
-           currentResult[param.name] = value;
-        });
-    })).then(function() {
-        //console.log(currentResult)
-        return currentResult;
+    var cadenaDePromesas = Promises.start();
+    params.forEach(function(param) {
+       cadenaDePromesas = cadenaDePromesas.then(function() {
+            return getParam(param, currentResult);
+       });
+    });
+    return cadenaDePromesas.then(function() {
+       return currentResult; 
     });
 };
 
