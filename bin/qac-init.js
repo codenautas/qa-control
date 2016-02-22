@@ -13,6 +13,79 @@ var init = require('init-package-json');
 var qaControl = require('./qa-control.js');
 var multilang = require('multilang');
 
+qacInit.cmdMsgs = {
+    en: {
+        lang:'en',
+        msg_initializing: 'Initializing project',
+        msg_creating: 'Creating files',
+        msg_copying: 'Copying file',
+        msg_generating: 'Generationg',
+        msg_finished: 'Project initialized',
+        msg_error: 'Input error',
+        msg_error_desc: '"description" field is mandatory',
+        msg_canceled: 'Initialization canceled'
+    },
+    es: {
+        lang:'es',
+        msg_initializing: 'Inicializando proyecto',
+        msg_creating: 'Creando archivos',
+        msg_copying: 'Creando archivo',
+        msg_generating: 'Generando',
+        msg_finished: 'Proyecto inicializado',
+        msg_error: 'Error en los argumentos',
+        msg_error_desc: 'El campo "description" es obligatorio',
+        msg_canceled: 'Initialización cancelada'
+    }
+};
+
+qacInit.initDefaults = function initDefaults(initParams) {
+    var rv = {
+        outDir: initParams.projectDir || process.cwd(),
+        msgs: qacInit.cmdMsgs[initParams.lang || 'en'],
+        tplDir: Path.normalize(__dirname+'/init-template'),
+        existingJson:{},
+        qacJson:{}
+    };
+    var oriREADME = Path.normalize(rv.outDir+'/README.md');
+    var oriPackageJson = Path.normalize(rv.outDir+'/package.json');
+    var qacPackageJson = Path.normalize(Path.dirname(__dirname)+'/package.json');
+    var qacJson;
+    return fs.readJson(qacPackageJson).then(function(json) {
+        rv.qacJson = json;
+        return fs.exists(oriPackageJson);
+    }).then(function(exists) {
+        if(exists) { return fs.readJson(oriPackageJson); }
+        return { 'first_init': true };
+    }).then(function(oriJson) {
+        if(! oriJson.first_init) {
+            rv.existingJson = oriJson;
+            rv.existingJson['qa-control-version'] = (('qa-control' in oriJson) ? oriJson : rv.qacJson)['qa-control']['package-version'];
+        } else {
+            rv.existingJson['qa-control-version'] = rv.qacJson['qa-control']['package-version'];
+        }
+        return fs.exists(oriREADME);
+    }).then(function(exists) {
+        if(exists) {
+            return fs.readFile(oriREADME, {encoding: 'utf8'});
+        }
+        return {'not_exists':true};
+    }).then(function(existingReadme) {
+        if(! existingReadme.not_exists) {
+            //console.log(existingReadme);
+            var lines = existingReadme.split(/\r?\n/);
+            if(lines.length===3 && lines[2]=='') {
+                lines.splice(2, 1);
+            }
+            if(lines.length!==2) {
+                throw new Error('Existing README.md is not empty')
+            }
+            rv.existingJson['name'] = lines[0].substr(2);
+            rv.existingJson['description'] = lines[1];
+        }
+        return rv;
+    });
+};
+
 qacInit.promptForVar = function promptForVar(name, defaultValue) {
     process.stdin.setEncoding('utf8');
     var def = defaultValue ? ' ('+defaultValue+')' : '';
@@ -36,8 +109,6 @@ qacInit.promptForVar = function promptForVar(name, defaultValue) {
         });
     }); 
 };
-
-//
     
 function getParam(param, ctx) {
     return Promises.start(function() {
@@ -48,7 +119,6 @@ function getParam(param, ctx) {
     });
 };
 
-// params es un array de Param
 qacInit.readParameters = function readParameters(params, existingJson, qacJson) {
     var ctx = {
         result:{},
@@ -78,29 +148,6 @@ qacInit.generateJSon = function generateJSon(readedParameters, templateJson) {
         }
         return outJson;
     });
-};
-
-qacInit.cmdMsgs = {
-    en: {
-        msg_initializing: 'Initializing project',
-        msg_creating: 'Creating files',
-        msg_copying: 'Copying file',
-        msg_generating: 'Generationg',
-        msg_finished: 'Project initialized',
-        msg_error: 'Input error',
-        msg_error_desc: '"description" field is mandatory',
-        msg_canceled: 'Initialization canceled'
-    },
-    es: {
-        msg_initializing: 'Inicializando proyecto',
-        msg_creating: 'Creando archivos',
-        msg_copying: 'Creando archivo',
-        msg_generating: 'Generando',
-        msg_finished: 'Proyecto inicializado',
-        msg_error: 'Error en los argumentos',
-        msg_error_desc: 'El campo "description" es obligatorio',
-        msg_canceled: 'Initialización cancelada'
-    }
 };
 
 

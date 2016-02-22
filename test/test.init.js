@@ -12,6 +12,17 @@ function clonar(obj) { return JSON.parse(JSON.stringify(obj)); }
 
 var qci = require('../bin/qac-init.js')
 describe/*.only*/("qa-control --init", function(){
+    describe('initialization', function(){
+        it('should load defaults', function(done){
+            return qci.initDefaults({projectDir:'./test/fixtures-init/empty'}).then(function(res) {
+                //console.log("res",res);
+                done();
+            });
+            
+        }, function(err) {
+            done(err);
+        });
+    });
     describe("parameters", function(){
         it('may use current result', function(done){
             var p1 = {name:'v1', def:'def1'};
