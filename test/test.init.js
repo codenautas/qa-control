@@ -9,7 +9,7 @@ var Path = require('path');
 var sinon = require('sinon');
 
 var qci = require('../bin/qac-init.js')
-describe.only("qa-control --init", function(){
+describe("qa-control --init", function(){
     describe("Param's", function(){
         it('may use current result', function(done){
             var p1 = {name:'v1', def:'def1'};
