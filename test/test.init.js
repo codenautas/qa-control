@@ -33,8 +33,7 @@ describe/*.only*/("qa-control --init", function(){
         });
     });
     describe('test initialization by fixtures', function(){
-        var fixtures=[
-        {
+        var fixtures=[{
             title:'should load from empty directory',
             base:'empty',
             expected: function(ctx) {
@@ -75,6 +74,19 @@ describe/*.only*/("qa-control --init", function(){
                     qacJson:ctx.qapj
                 }
             }
+        },{
+            title:'should select the right language',
+            base:'empty',
+            lang:'es',
+            expected: function(ctx) {
+                return {
+                    outDir:'./test/fixtures-init/empty',
+                    msgs:qci.cmdMsgs.es,
+                    tplDir:templateDir,
+                    existingJson:{'qac-version':ctx.qapj['qa-control']['package-version']},
+                    qacJson:ctx.qapj
+                }
+            }
         }];
         fixtures.forEach(function(fixture){
             //console.log("fi", fixture);
@@ -92,7 +104,9 @@ describe/*.only*/("qa-control --init", function(){
                     return loadIfExists(oriReadme, false);
                 }).then(function(ordm) {
                     expParam.oriReadme = ordm;
-                    return qci.initDefaults({projectDir:'./test/fixtures-init/'+fixture.base});
+                    var params = { projectDir:'./test/fixtures-init/'+fixture.base };
+                    if(fixture.lang) { params['lang'] = fixture.lang; }
+                    return qci.initDefaults(params);
                 }).then(function(res) {
                     expect(res).to.eql(fixture.expected(expParam));  
                 }).then(function(){
