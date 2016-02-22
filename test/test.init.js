@@ -17,21 +17,19 @@ describe("qa-control --init", function(){
         return fs.readJson('./package.json').then(function(json) { /*console.log(qacPackageJson);*/ qacPackageJson = json; })
     });
     describe('initialization', function(){
+        var templateDir = Path.resolve('./bin/init-template');
         it('should load from empty directory', function(done){
             return qci.initDefaults({projectDir:'./test/fixtures-init/empty'}).then(function(res) {
                 //console.log("res",res);
                 expect(res).to.eql({
                     outDir:'./test/fixtures-init/empty',
                     msgs:qci.cmdMsgs.en,
-                    tplDir:Path.resolve('./bin/init-template'),
+                    tplDir:templateDir,
                     existingJson:{'qac-version':qacPackageJson['qa-control']['package-version']},
                     qacJson:qacPackageJson
                 });
                 done();  
-            });
-            
-        }, function(err) {
-            done(err);
+            }).catch(function(err) { done(err); });
         });
         it('should load from directory with existing package.json', function(done){
             var pruDir = './test/fixtures-init/existing-with-package-json';
@@ -46,15 +44,12 @@ describe("qa-control --init", function(){
                 expect(res).to.eql({
                     outDir:pruDir,
                     msgs:qci.cmdMsgs.en,
-                    tplDir:Path.resolve('./bin/init-template'),
+                    tplDir:templateDir,
                     existingJson:oriJson,
                     qacJson:qacPackageJson
                 });
                 done();  
-            });
-            
-        }, function(err) {
-            done(err);
+            }).catch(function(err) { done(err); });
         });
     });
     describe("parameters", function(){
