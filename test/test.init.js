@@ -24,7 +24,7 @@ function loadIfExists(fileName, isJson) {
     });
 };
 
-describe.only("qa-control --init", function(){
+describe/*.only*/("qa-control --init", function(){
     var templateDir = Path.resolve('./bin/init-template');
     var qacPackageJson;
     before(function() {
@@ -47,7 +47,6 @@ describe.only("qa-control --init", function(){
                 }
             }
         },{
-            //skipped:true,
             title:'should load from directory with existing package.json',
             base:'existing-with-package-json',
             expected: function(ctx) {
@@ -60,10 +59,26 @@ describe.only("qa-control --init", function(){
                     qacJson:ctx.qapj
                 }
             }
+        },{
+            title:'should load from directory with existing README',
+            base:'existing-with-readme',
+            expected: function(ctx) {
+                return {
+                    outDir:'./test/fixtures-init/existing-with-readme',
+                    msgs:qci.cmdMsgs.en,
+                    tplDir:templateDir,
+                    existingJson:{
+                        'name': 'existing-with-readme',
+                        'description': 'Existing with readme with description',
+                        'qac-version': ctx.qapj['qa-control']['package-version']
+                    },
+                    qacJson:ctx.qapj
+                }
+            }
         }];
         fixtures.forEach(function(fixture){
             //console.log("fi", fixture);
-            var fixtureName='fixture '+fixture.title;
+            var fixtureName='fixture: '+fixture.title;
             if(fixture.skipped){
                 it.skip(fixtureName, function(){});
                 return;
