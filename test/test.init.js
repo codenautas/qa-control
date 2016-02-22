@@ -11,12 +11,48 @@ var sinon = require('sinon');
 function clonar(obj) { return JSON.parse(JSON.stringify(obj)); }
 
 var qci = require('../bin/qac-init.js')
+
+var helper=require('../test/test.init.helper.js');
+
+console.log("helper", helper);
+/*
+var fixtures = [{
+    title:'should load from empty directory',
+    base:'empty',
+    expected:{
+        outDir:'./test/fixtures-init/empty',
+        msgs:qci.cmdMsgs.en,
+        tplDir:helper.templateDir,
+        existingJson:{'qac-version':helper.qacPackageJson['qa-control']['package-version']},
+        qacJson:helper.qacPackageJson
+    }
+}];
+*/
 describe("qa-control --init", function(){
-    var qacPackageJson;
-    before(function(){
-        return fs.readJson('./package.json').then(function(json) { /*console.log(qacPackageJson);*/ qacPackageJson = json; })
+    /*
+    describe('test initialization by fixtures', function(){
+        fixtures.forEach(function(fixture){
+            console.log("fi", fixture);
+            var fixtureName='fixture '+fixture.title;
+            if(fixture.skipped){
+                it.skip(fixtureName, function(){});
+                return;
+            }
+            it(fixtureName, function(done) {
+                console.log("va", fixtureName)
+                return qci.initDefaults({projectDir:'./test/fixtures-init/'+fixture.base}).then(function(res) {
+                    //console.log("res",res);
+                    expect(res).to.eql(fixture.expected);       
+                }).then(function(){
+                    done();
+                }).catch(done);
+            }).then(function(listo) {
+                console.log("do", listo);
+            });
+        });
     });
-    describe('initialization', function(){
+    */
+    describe('by fixtures', function(){
         var templateDir = Path.resolve('./bin/init-template');
         it('should load from empty directory', function(done){
             return qci.initDefaults({projectDir:'./test/fixtures-init/empty'}).then(function(res) {
@@ -25,8 +61,8 @@ describe("qa-control --init", function(){
                     outDir:'./test/fixtures-init/empty',
                     msgs:qci.cmdMsgs.en,
                     tplDir:templateDir,
-                    existingJson:{'qac-version':qacPackageJson['qa-control']['package-version']},
-                    qacJson:qacPackageJson
+                    existingJson:{'qac-version':helper.qacPackageJson['qa-control']['package-version']},
+                    qacJson:helper.qacPackageJson
                 });
                 done();  
             }).catch(function(err) { done(err); });
@@ -46,7 +82,7 @@ describe("qa-control --init", function(){
                     msgs:qci.cmdMsgs.en,
                     tplDir:templateDir,
                     existingJson:oriJson,
-                    qacJson:qacPackageJson
+                    qacJson:helper.qacPackageJson
                 });
                 done();  
             }).catch(function(err) { done(err); });
@@ -160,9 +196,9 @@ describe("qa-control --init", function(){
     });
     describe("J-Son output", function(){
         it('should clone provided template .json', function(done){
-            qci.generateJSon({}, qacPackageJson).then(function(json) {
-               expect(json).to.eql(qacPackageJson);
-               expect(json).not.to.be(qacPackageJson);
+            qci.generateJSon({}, helper.qacPackageJson).then(function(json) {
+               expect(json).to.eql(helper.qacPackageJson);
+               expect(json).not.to.be(helper.qacPackageJson);
                done(); 
             });
         }, function(err) {
@@ -174,11 +210,11 @@ describe("qa-control --init", function(){
                 'description': 'fixed description',
                 'engines': {node: ">= 4.0.0"}
             }
-            var resJson = clonar(qacPackageJson);
+            var resJson = clonar(helper.qacPackageJson);
             resJson['name'] = readedParams.name;
             resJson['description'] = readedParams.description;
             resJson['engines']= readedParams.engines;
-            qci.generateJSon(readedParams, qacPackageJson).then(function(json) {
+            qci.generateJSon(readedParams, helper.qacPackageJson).then(function(json) {
                //console.log(json);
                expect(json).to.eql(resJson);
                done(); 
