@@ -9,21 +9,21 @@ var Path = require('path');
 var sinon = require('sinon');
 
 var qci = require('../bin/qac-init.js')
-describe("qa-control --init", function(){
-    describe("Param's", function(){
+describe/*.only*/("qa-control --init", function(){
+    describe("parameters", function(){
         it('may use current result', function(done){
             var p1 = {name:'v1', def:'def1'};
-            var p2 = {name:'v2', def:'def2', init: function(curResult) {
-                if(curResult.v1) {
-                    this.def = 'using '+curResult.v1;
+            var p2 = {name:'v2', def:'def2', init: function(ctx) {
+                if(ctx.result.v1) {
+                    this.def = 'using '+ctx.result.v1;
                 }
             }};
             expect(p1.name).to.eql('v1');
             expect(p1.def).to.eql('def1');
             expect(p2.name).to.eql('v2');
             expect(p2.def).to.eql('def2');
-            var curResult = { v1: 'val1' };
-            p2.init(curResult);
+            var ctx = { result: { v1: 'val1' } };
+            p2.init(ctx);
             expect(p1.def).to.eql('def1');
             expect(p2.def).to.eql('using val1');
             done();
@@ -41,7 +41,7 @@ describe("qa-control --init", function(){
                 {name:'v2', def:'def2'},
                 {name:'v3', def:'def3'}
             ];
-            return qci.readParameters(params).then(function(result) {
+            return qci.readParameters(params, {}, {}).then(function(result) {
                 qci.promptForVar.restore();
                 expect(result).to.eql({
                        v1: 'value1',
@@ -59,10 +59,10 @@ describe("qa-control --init", function(){
             });
             var params = [
                 {name:'v1', def:'def1'},
-                {name:'v2', def:'def2', init: function(curResult) { if(curResult.v1) { this.def = 'have v1'; } } },
-                {name:'v3', def:'def3', init: function(curResult) { if(curResult.v2) { this.def = 'have v2'; } } }
+                {name:'v2', def:'def2', init: function(ctx) { if(ctx.result.v1) { this.def = 'have v1'; } } },
+                {name:'v3', def:'def3', init: function(ctx) { if(ctx.result.v2) { this.def = 'have v2'; } } }
             ];
-            return qci.readParameters(params).then(function(result) {
+            return qci.readParameters(params, {}, {}).then(function(result) {
                 qci.promptForVar.restore();
                 expect(result).to.eql({
                        v1: 'def1',
@@ -80,7 +80,7 @@ describe("qa-control --init", function(){
                 return Promises.resolve(def);
             });
             var params = [ {name:'v1', def:'def1'}, {name:'v2', def:'def2'}];
-            qci.readParameters(params).then(function(result) {
+            qci.readParameters(params, {}, {}).then(function(result) {
                 done(result);
             }).catch(function(err) {
                 qci.promptForVar.restore();

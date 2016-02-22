@@ -39,26 +39,30 @@ qacInit.promptForVar = function promptForVar(name, defaultValue) {
 
 //
     
-function getParam(param, curRes) {
+function getParam(param, ctx) {
     return Promises.start(function() {
-        if(param.init) { param.init(curRes); }
+        if(param.init) { param.init(ctx); }
         return qacInit.promptForVar(param.name, param.def).then(function(value) {
-           curRes[param.name] = value;
+           ctx.result[param.name] = value;
         });
     });
 };
 
 // params es un array de Param
-qacInit.readParameters = function readParameters(params) {
-    var currentResult = {};
+qacInit.readParameters = function readParameters(params, existingJson, qacJson) {
+    var ctx = {
+        result:{},
+        defs:existingJson,
+        qac:qacJson
+    };
     var cadenaDePromesas = Promises.start();
     params.forEach(function(param) {
        cadenaDePromesas = cadenaDePromesas.then(function() {
-            return getParam(param, currentResult);
+            return getParam(param, ctx);
        });
     });
     return cadenaDePromesas.then(function() {
-       return currentResult; 
+       return ctx.result; 
     }).catch(function(err) {
         throw { message:'input_error', desc:err };
     });
