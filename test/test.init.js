@@ -252,7 +252,25 @@ describe/*.only*/("qa-control --init", function(){
     });
     describe("templates", function(){
         it.skip('should substitute values', function(done){
-            done();
+            var testTplDir = './test/fixtures-init/templates';
+            var tests = {};
+            return fs.readdir(testTplDir).then(function(files) {
+                return Promises.all(files.map(function(file){
+                    return fs.readFile(Path.normalize(testTplDir+'/'+file), {encoding:'utf8'}).then(function(content) {
+                        var name = file.substr(0, file.length-4);
+                        if(! (name in tests)) { tests[name] = {}; }
+                        var f = tests[name];
+                        if(file.match(/(.tpl)$/)) {
+                           f.input = { file: file, data: content };
+                        } else {
+                            f.output = { file: file, data: content };
+                        }
+                    })
+                }));
+            }).then(function() {
+                console.log(tests);
+                done();
+            });
         }, function(err) {
             done(err);
         });
