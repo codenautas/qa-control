@@ -57,9 +57,9 @@ qacInit.initDefaults = function initDefaults(initParams) {
     }).then(function(oriJson) {
         if(! oriJson.first_init) {
             rv.existingJson = oriJson;
-            rv.existingJson['qa-control-version'] = (('qa-control' in oriJson) ? oriJson : rv.qacJson)['qa-control']['package-version'];
+            rv.existingJson['qac-version'] = (('qa-control' in oriJson) ? oriJson : rv.qacJson)['qa-control']['package-version'];
         } else {
-            rv.existingJson['qa-control-version'] = rv.qacJson['qa-control']['package-version'];
+            rv.existingJson['qac-version'] = rv.qacJson['qa-control']['package-version'];
         }
         return fs.exists(oriREADME);
     }).then(function(exists) {

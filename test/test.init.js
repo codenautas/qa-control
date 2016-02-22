@@ -11,24 +11,45 @@ var sinon = require('sinon');
 function clonar(obj) { return JSON.parse(JSON.stringify(obj)); }
 
 var qci = require('../bin/qac-init.js')
-describe/*.only*/("qa-control --init", function(){
+describe("qa-control --init", function(){
     var qacPackageJson;
     before(function(){
         return fs.readJson('./package.json').then(function(json) { /*console.log(qacPackageJson);*/ qacPackageJson = json; })
     });
     describe('initialization', function(){
-        it.only('should load defaults', function(done){
+        it('should load from empty directory', function(done){
             return qci.initDefaults({projectDir:'./test/fixtures-init/empty'}).then(function(res) {
                 //console.log("res",res);
-                var expectedRes = {
+                expect(res).to.eql({
                     outDir:'./test/fixtures-init/empty',
                     msgs:qci.cmdMsgs.en,
                     tplDir:Path.resolve('./bin/init-template'),
-                    existingJson:{'qa-control-version':qacPackageJson['qa-control']['package-version']},
+                    existingJson:{'qac-version':qacPackageJson['qa-control']['package-version']},
                     qacJson:qacPackageJson
-                };
-                //console.log("exp",expectedRes);
-                expect(res).to.eql(expectedRes);
+                });
+                done();  
+            });
+            
+        }, function(err) {
+            done(err);
+        });
+        it('should load from directory with existing package.json', function(done){
+            var pruDir = './test/fixtures-init/existing-with-package-json';
+            var oriJson;
+            return fs.readJson(pruDir+'/package.json').then(function(ojs) {
+                oriJson = ojs;
+                return qci.initDefaults({projectDir:pruDir});
+            }).then(function(res) {
+                oriJson['qac-version'] = oriJson['qa-control']['package-version'];
+                // console.log("res",res.existingJson);
+                // console.log("expe", oriJson)
+                expect(res).to.eql({
+                    outDir:pruDir,
+                    msgs:qci.cmdMsgs.en,
+                    tplDir:Path.resolve('./bin/init-template'),
+                    existingJson:oriJson,
+                    qacJson:qacPackageJson
+                });
                 done();  
             });
             
