@@ -8,6 +8,8 @@ var fs = require('fs-promise');
 var Path = require('path');
 var sinon = require('sinon');
 
+function clonar(obj) { return JSON.parse(JSON.stringify(obj)); }
+
 var qci = require('../bin/qac-init.js')
 describe/*.only*/("qa-control --init", function(){
     describe("parameters", function(){
@@ -119,13 +121,30 @@ describe/*.only*/("qa-control --init", function(){
     describe("J-Son output", function(){
         var template;
         before(function(){
-            return fs.readJson('./package.json').then(function(json) { template = json; })
+            return fs.readJson('./package.json').then(function(json) { /*console.log(template);*/ template = json; })
         });
         it('should clone provided template .json', function(done){
-            //console.log(template);
             qci.generateJSon({}, template).then(function(json) {
                expect(json).to.eql(template);
                expect(json).not.to.be(template);
+               done(); 
+            });
+        }, function(err) {
+            done(err);
+        });
+        it('should modify only provided properties in readed parameters', function(done){
+            var readedParams = {
+                'name': 'fixed name',
+                'description': 'fixed description',
+                'engines': {node: ">= 4.0.0"}
+            }
+            var resJson = clonar(template);
+            resJson['name'] = readedParams.name;
+            resJson['description'] = readedParams.description;
+            resJson['engines']= readedParams.engines;
+            qci.generateJSon(readedParams, template).then(function(json) {
+               //console.log(json);
+               expect(json).to.eql(resJson);
                done(); 
             });
         }, function(err) {

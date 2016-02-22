@@ -68,10 +68,10 @@ qacInit.readParameters = function readParameters(params, existingJson, qacJson) 
     });
 };
 
-// utiliza qacJson como plantilla
-qacInit.generateJSon = function generateJSon(readedParameters, qacJson) {
+// utiliza templateJson como plantilla
+qacInit.generateJSon = function generateJSon(readedParameters, templateJson) {
     return Promises.start(function() {
-        var outJson = JSON.parse(JSON.stringify(qacJson));
+        var outJson = JSON.parse(JSON.stringify(templateJson));
         for(var paramName in readedParameters) {
             var val = readedParameters[paramName];
             outJson[paramName] = val;
