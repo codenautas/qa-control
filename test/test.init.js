@@ -32,7 +32,7 @@ describe/*.only*/("qa-control --init", function(){
         });
     });
     describe('readParameters', function(){
-        it("should read an array of Param's", function(done){
+        it("should read an array of parameters", function(done){
             sinon.stub(qci, 'promptForVar', function(name, defaultvalue) {
                 return Promises.resolve('value'+name.substr(name.length-1, 1));
             });
@@ -53,7 +53,7 @@ describe/*.only*/("qa-control --init", function(){
                 done(err);
             });
         });
-        it("should read an array of Param's using current values", function(done){
+        it("should read an array of parameters using current values", function(done){
             sinon.stub(qci, 'promptForVar', function(name, def) {
                 return Promises.resolve(def);
             });
@@ -86,6 +86,31 @@ describe/*.only*/("qa-control --init", function(){
                 qci.promptForVar.restore();
                 expect(err).to.eql({message:'input_error', desc:'dummy error'});
                 done();                    
+            });
+        });
+        it("should forward the context to parameters", function(done) {
+            sinon.stub(qci, 'promptForVar', function(name, def) {
+                return Promises.resolve(def);
+            });
+            var params = [
+                {name:'v1', def:'def1', init:function(ctx) {
+                    this.def = ctx.defs;
+                }},
+                {name:'v2', def:'def2', init:function(ctx) {
+                    this.def = ctx.qac;
+                }}
+            ];
+            var existingJson = {e1:'e1', e2:'e2'};
+            var qacJson = {qa1:'qa1', qa2:'qa2'};
+            qci.readParameters(params, existingJson, qacJson).then(function(result) {
+                qci.promptForVar.restore();
+                expect(result).to.eql({
+                       v1: existingJson,
+                       v2: qacJson
+                });
+                done();
+            }).catch(function(err) {
+                done(err);                    
             });
         });
     });
