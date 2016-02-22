@@ -38,15 +38,15 @@ describe/*.only*/("qa-control --init", function(){
             });
             var params = [
                 {name:'v1', def:'def1'},
-                {name:'v2', def:'def2'},
-                {name:'v3', def:'def3'}
+                {name:'v3', def:'def3'},
+                {name:'v2', def:'def2'}
             ];
             return qci.readParameters(params, {}, {}).then(function(result) {
                 qci.promptForVar.restore();
                 expect(result).to.eql({
                        v1: 'value1',
-                       v2: 'value2',
-                       v3: 'value3'
+                       v3: 'value3',
+                       v2: 'value2'
                 });
                 done();
             }).catch(function(err) {
@@ -104,6 +104,8 @@ describe/*.only*/("qa-control --init", function(){
             var qacJson = {qa1:'qa1', qa2:'qa2'};
             qci.readParameters(params, existingJson, qacJson).then(function(result) {
                 qci.promptForVar.restore();
+                expect(result.v1).to.be(existingJson);
+                expect(result.v2).to.be(qacJson);
                 expect(result).to.eql({
                        v1: existingJson,
                        v2: qacJson
@@ -112,6 +114,22 @@ describe/*.only*/("qa-control --init", function(){
             }).catch(function(err) {
                 done(err);                    
             });
+        });
+    });
+    describe("J-Son output", function(){
+        var template;
+        before(function(){
+            return fs.readJson('./package.json').then(function(json) { template = json; })
+        });
+        it('should clone provided template .json', function(done){
+            //console.log(template);
+            qci.generateJSon({}, template).then(function(json) {
+               expect(json).to.eql(template);
+               expect(json).not.to.be(template);
+               done(); 
+            });
+        }, function(err) {
+            done(err);
         });
     });
 });

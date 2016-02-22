@@ -68,6 +68,18 @@ qacInit.readParameters = function readParameters(params, existingJson, qacJson) 
     });
 };
 
+// utiliza qacJson como plantilla
+qacInit.generateJSon = function generateJSon(readedParameters, qacJson) {
+    return Promises.start(function() {
+        var outJson = JSON.parse(JSON.stringify(qacJson));
+        for(var paramName in readedParameters) {
+            var val = readedParameters[paramName];
+            outJson[paramName] = val;
+        }
+        return outJson;
+    });
+};
+
 qacInit.cmdMsgs = {
     en: {
         msg_initializing: 'Initializing project',
