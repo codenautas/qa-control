@@ -9,7 +9,7 @@ var Path = require('path');
 var sinon = require('sinon');
 
 var qci = require('../bin/qac-init.js')
-describe("qa-control --init", function(){
+describe.only("qa-control --init", function(){
     describe("Param's", function(){
         it('may use current result', function(done){
             var p1 = {name:'v1', def:'def1'};
@@ -72,6 +72,20 @@ describe("qa-control --init", function(){
                 done();
             }).catch(function(err) {
                 done(err);
+            });
+        });
+        it("should handle errors in the prompt", function(done) {
+            sinon.stub(qci, 'promptForVar', function(name, def) {
+                if(name=='v2') { return Promises.reject('dummy error'); }
+                return Promises.resolve(def);
+            });
+            var params = [ {name:'v1', def:'def1'}, {name:'v2', def:'def2'}];
+            qci.readParameters(params).then(function(result) {
+                done(result);
+            }).catch(function(err) {
+                qci.promptForVar.restore();
+                expect(err).to.eql({message:'input_error', desc:'dummy error'});
+                done();                    
             });
         });
     });

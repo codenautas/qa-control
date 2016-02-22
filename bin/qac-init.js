@@ -37,6 +37,8 @@ qacInit.promptForVar = function promptForVar(name, defaultValue) {
     }); 
 };
 
+//
+    
 function getParam(param, curRes) {
     return Promises.start(function() {
         if(param.init) { param.init(curRes); }
@@ -57,6 +59,8 @@ qacInit.readParameters = function readParameters(params) {
     });
     return cadenaDePromesas.then(function() {
        return currentResult; 
+    }).catch(function(err) {
+        throw { message:'input_error', desc:err };
     });
 };
 
