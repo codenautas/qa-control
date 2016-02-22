@@ -15,7 +15,6 @@ var multilang = require('multilang');
 
 qacInit.cmdMsgs = {
     en: {
-        lang:'en',
         msg_initializing: 'Initializing project',
         msg_creating: 'Creating files',
         msg_copying: 'Copying file',
@@ -26,7 +25,6 @@ qacInit.cmdMsgs = {
         msg_canceled: 'Initialization canceled'
     },
     es: {
-        lang:'es',
         msg_initializing: 'Inicializando proyecto',
         msg_creating: 'Creando archivos',
         msg_copying: 'Creando archivo',

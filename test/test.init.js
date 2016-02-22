@@ -12,11 +12,24 @@ function clonar(obj) { return JSON.parse(JSON.stringify(obj)); }
 
 var qci = require('../bin/qac-init.js')
 describe/*.only*/("qa-control --init", function(){
+    var qacPackageJson;
+    before(function(){
+        return fs.readJson('./package.json').then(function(json) { /*console.log(qacPackageJson);*/ qacPackageJson = json; })
+    });
     describe('initialization', function(){
-        it('should load defaults', function(done){
+        it.only('should load defaults', function(done){
             return qci.initDefaults({projectDir:'./test/fixtures-init/empty'}).then(function(res) {
                 //console.log("res",res);
-                done();
+                var expectedRes = {
+                    outDir:'./test/fixtures-init/empty',
+                    msgs:qci.cmdMsgs.en,
+                    tplDir:Path.resolve('./bin/init-template'),
+                    existingJson:{'qa-control-version':qacPackageJson['qa-control']['package-version']},
+                    qacJson:qacPackageJson
+                };
+                //console.log("exp",expectedRes);
+                expect(res).to.eql(expectedRes);
+                done();  
             });
             
         }, function(err) {
@@ -130,14 +143,10 @@ describe/*.only*/("qa-control --init", function(){
         });
     });
     describe("J-Son output", function(){
-        var template;
-        before(function(){
-            return fs.readJson('./package.json').then(function(json) { /*console.log(template);*/ template = json; })
-        });
         it('should clone provided template .json', function(done){
-            qci.generateJSon({}, template).then(function(json) {
-               expect(json).to.eql(template);
-               expect(json).not.to.be(template);
+            qci.generateJSon({}, qacPackageJson).then(function(json) {
+               expect(json).to.eql(qacPackageJson);
+               expect(json).not.to.be(qacPackageJson);
                done(); 
             });
         }, function(err) {
@@ -149,11 +158,11 @@ describe/*.only*/("qa-control --init", function(){
                 'description': 'fixed description',
                 'engines': {node: ">= 4.0.0"}
             }
-            var resJson = clonar(template);
+            var resJson = clonar(qacPackageJson);
             resJson['name'] = readedParams.name;
             resJson['description'] = readedParams.description;
             resJson['engines']= readedParams.engines;
-            qci.generateJSon(readedParams, template).then(function(json) {
+            qci.generateJSon(readedParams, qacPackageJson).then(function(json) {
                //console.log(json);
                expect(json).to.eql(resJson);
                done(); 
