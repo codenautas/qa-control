@@ -250,4 +250,11 @@ describe/*.only*/("qa-control --init", function(){
             done(err);
         });
     });
+    describe("templates", function(){
+        it.skip('should substitute values', function(done){
+            done();
+        }, function(err) {
+            done(err);
+        });
+    });
 });
