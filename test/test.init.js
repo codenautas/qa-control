@@ -265,28 +265,52 @@ describe/*.only*/("qa-control --init", function(){
         });
     });
     describe("templates", function(){
+        try {
         it.skip('should substitute values', function(done){
             var testTplDir = './test/fixtures-init/templates';
             var tests = {};
+            sinon.stub(fs, 'writeFile', function(fileName, content) {
+                //console.log("stub writeFile", fileName, content)
+                return Promises.resolve(content);
+            });
             return fs.readdir(testTplDir).then(function(files) {
                 return Promises.all(files.map(function(file){
-                    return fs.readFile(Path.normalize(testTplDir+'/'+file), {encoding:'utf8'}).then(function(content) {
+                    var fPath = Path.normalize(testTplDir+'/'+file);
+                    return fs.readFile(fPath, {encoding:'utf8'}).then(function(content) {
                         var name = file.substr(0, file.length-4);
                         if(! (name in tests)) { tests[name] = {}; }
                         var f = tests[name];
                         if(file.match(/(.tpl)$/)) {
-                           f.input = { file: file, data: content };
+                           f.input = { file: fPath, data: content };
                         } else {
-                            f.output = { file: file, data: content };
+                            f.output = { file: fPath, data: content };
                         }
-                    })
+                    });
                 }));
             }).then(function() {
-                console.log(tests);
+                var keys = ['year', 'author', 'name', 'desc', 'cucardas'];
+                var kvPairs = {};
+                keys.forEach(function(key) {
+                   kvPairs[key] = 'valueOf'+ key.charAt(0).toUpperCase() + key.slice(1); 
+                });
+                var testsA = [];
+                for(var t in tests) { testsA.push(tests[t]); }
+                return Promises.all(testsA.map(function(test) {
+                    return qci.writeTemplate(test.input.file, test.output.file, kvPairs).then(function(out) {
+                        console.lg("out", out);
+                    });
+                }));
+            }).then(function() {
+                fs.writeFile.restore();
                 done();
             });
         }, function(err) {
+            console.log("err", err);
             done(err);
         });
+        }catch(e) {
+            console.log("e", e);
+            done(e);
+        }
     });
 });

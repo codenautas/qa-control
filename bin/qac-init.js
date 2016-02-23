@@ -156,12 +156,15 @@ qacInit.generateJSon = function generateJSon(readedParameters, templateJson) {
 };
 
 qacInit.writeTemplate = function writeTemplate(inputFile, outputFile, vars) {
+    console.log("WT", inputFile, outputFile, vars);
     return fs.readFile(inputFile, {encoding: 'utf8'}).then(function(content) {
         for(var name in vars) {
             var value = vars[name];
             content = content.replace(new RegExp('{{'+name+'}}', 'g'), value);
         }
-        return fs.writeFile(content, outputFile);
+        return fs.writeFile(outputFile, content);
+    }).then(function(o) {
+       console.log("WT end", o);
     });
 };
 
