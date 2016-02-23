@@ -265,8 +265,7 @@ describe/*.only*/("qa-control --init", function(){
         });
     });
     describe("templates", function(){
-        try {
-        it.skip('should substitute values', function(done){
+        it('should substitute values', function(done){
             var testTplDir = './test/fixtures-init/templates';
             var tests = {};
             sinon.stub(fs, 'writeFile', function(fileName, content) {
@@ -297,20 +296,14 @@ describe/*.only*/("qa-control --init", function(){
                 for(var t in tests) { testsA.push(tests[t]); }
                 return Promises.all(testsA.map(function(test) {
                     return qci.writeTemplate(test.input.file, test.output.file, kvPairs).then(function(out) {
-                        console.lg("out", out);
+                        expect(out).to.eql(test.output.data);
+						// console.log("out", out);
                     });
                 }));
             }).then(function() {
                 fs.writeFile.restore();
                 done();
-            });
-        }, function(err) {
-            console.log("err", err);
-            done(err);
+            }).catch(done);
         });
-        }catch(e) {
-            console.log("e", e);
-            done(e);
-        }
     });
 });
