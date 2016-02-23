@@ -36,6 +36,21 @@ qacInit.cmdMsgs = {
     }
 };
 
+qacInit.loadIfExists = function loadIfExists(fileName, isJson) {
+    return fs.exists(fileName).then(function(existe) {
+        if(existe) {
+            return isJson ? fs.readJson(fileName) : fs.readFile(fileName, {encoding:'utf8'});
+        }
+        return {noexiste:true};
+    }).then(function(content) {
+       return (! content.noexiste) ? content : null;
+    });
+};
+
+qacInit.loadJsonIfExists = function loadIfExists(fileName) {
+    return qacInit.loadIfExists(fileName, true);
+};
+
 qacInit.initDefaults = function initDefaults(initParams) {
     var rv = {
         outDir: initParams.projectDir || process.cwd(),
@@ -50,25 +65,17 @@ qacInit.initDefaults = function initDefaults(initParams) {
     var qacJson;
     return fs.readJson(qacPackageJson).then(function(json) {
         rv.qacJson = json;
-        return fs.exists(oriPackageJson);
-    }).then(function(exists) {
-        if(exists) { return fs.readJson(oriPackageJson); }
-        return { 'first_init': true };
+        return qacInit.loadJsonIfExists(oriPackageJson);
     }).then(function(oriJson) {
-        if(! oriJson.first_init) {
+        if(oriJson) {
             rv.existingJson = oriJson;
             rv.existingJson['qac-version'] = (('qa-control' in oriJson) ? oriJson : rv.qacJson)['qa-control']['package-version'];
         } else {
             rv.existingJson['qac-version'] = rv.qacJson['qa-control']['package-version'];
         }
-        return fs.exists(oriREADME);
-    }).then(function(exists) {
-        if(exists) {
-            return fs.readFile(oriREADME, {encoding: 'utf8'});
-        }
-        return {'not_exists':true};
+        return qacInit.loadIfExists(oriREADME);
     }).then(function(existingReadme) {
-        if(! existingReadme.not_exists) {
+        if(existingReadme) {
             //console.log(existingReadme);
             var lines = existingReadme.split(/\r?\n/);
             if(lines.length===3 && lines[2]=='') {

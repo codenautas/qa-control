@@ -13,17 +13,6 @@ function clonar(obj) { return JSON.parse(JSON.stringify(obj)); }
 
 var templateDir = Path.resolve('./bin/init-template');
 
-function loadIfExists(fileName, isJson) {
-    return fs.exists(fileName).then(function(existe) {
-        if(existe) {
-            return isJson ? fs.readJson(fileName) : fs.readFile(fileName, {encoding:'utf8'});
-        }
-        return {noexiste:true};
-    }).then(function(content) {
-       return (! content.noexiste) ? content : null;
-    });
-};
-
 describe/*.only*/("qa-control --init", function(){
     var templateDir = Path.resolve('./bin/init-template');
     var qacPackageJson;
@@ -99,9 +88,9 @@ describe/*.only*/("qa-control --init", function(){
                 var oriJson = Path.resolve('./test/fixtures-init/'+fixture.base+'/package.json');
                 var oriReadme = Path.resolve('./test/fixtures-init/'+fixture.base+'/README.md');
                 var expParam = { qapj:qacPackageJson };
-                return loadIfExists(oriJson, true).then(function(ojs) {
+                return qci.loadJsonIfExists(oriJson).then(function(ojs) {
                     expParam.oriJson = ojs;
-                    return loadIfExists(oriReadme, false);
+                    return qci.loadIfExists(oriReadme);
                 }).then(function(ordm) {
                     expParam.oriReadme = ordm;
                     var params = { projectDir:'./test/fixtures-init/'+fixture.base };
