@@ -21,6 +21,31 @@ describe/*.only*/("qa-control --init", function(){
             qacPackageJson = json;
         });
     });
+    describe("load*IfExists()", function(){
+        it('load simple file', function(done){
+            return qci.loadIfExists('./test/fixtures-init/templates/LEEME.tpl').then(function(content) {
+                expect(content.length).to.be.above(10);
+                return qci.loadIfExists('./my/inexistent/file');
+            }).then(function(content) {
+                expect(content).to.be(null);
+                done();
+            });
+        }, function(err) {
+            done(err);
+        });
+        it('load J-Son file', function(done){
+            return qci.loadJsonIfExists('./package.json').then(function(content) {
+                expect(content).to.be.eql(qacPackageJson);
+                return qci.loadJsonIfExists('./my/inexistent/file.json');
+            }).then(function(content) {
+                expect(content).to.be(null);
+                done();
+            });
+            
+        }, function(err) {
+            done(err);
+        });
+    });
     describe('test initialization by fixtures', function(){
         var fixtures=[{
             title:'should load from empty directory',
