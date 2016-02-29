@@ -152,8 +152,8 @@ describe/*.only*/("qa-control --init", function(){
     });
     describe('readParameters', function(){
         it("should read an array of parameters", function(done){
-            sinon.stub(qci, 'promptForVar', function(name, defaultvalue, msgs) {
-                return Promises.resolve('value'+name.substr(name.length-1, 1));
+            sinon.stub(qci, 'promptForVar', function(param, msgs) {
+                return Promises.resolve('value'+param.name.substr(param.name.length-1, 1));
             });
             var params = [
                 {name:'v1', def:'def1'},
@@ -173,8 +173,8 @@ describe/*.only*/("qa-control --init", function(){
             });
         });
         it("should read an array of parameters using current values", function(done){
-            sinon.stub(qci, 'promptForVar', function(name, def, msgs) {
-                return Promises.resolve(def);
+            sinon.stub(qci, 'promptForVar', function(param, msgs) {
+                return Promises.resolve(param.def);
             });
             var params = [
                 {name:'v1', def:'def1'},
@@ -194,9 +194,9 @@ describe/*.only*/("qa-control --init", function(){
             });
         });
         it("should handle errors in the prompt", function(done) {
-            sinon.stub(qci, 'promptForVar', function(name, def, msgs) {
-                if(name=='v2') { return Promises.reject('dummy error'); }
-                return Promises.resolve(def);
+            sinon.stub(qci, 'promptForVar', function(param, msgs) {
+                if(param.name=='v2') { return Promises.reject('dummy error'); }
+                return Promises.resolve(param.def);
             });
             var params = [ {name:'v1', def:'def1'}, {name:'v2', def:'def2'}];
             qci.readParameters({}, params, {}, {}).then(function(result) {
@@ -208,8 +208,8 @@ describe/*.only*/("qa-control --init", function(){
             });
         });
         it("should forward the context to parameters", function(done) {
-            sinon.stub(qci, 'promptForVar', function(name, def, msgs) {
-                return Promises.resolve(def);
+            sinon.stub(qci, 'promptForVar', function(param, msgs) {
+                return Promises.resolve(param.def);
             });
             var params = [
                 {name:'v1', def:'def1', init:function(ctx) {

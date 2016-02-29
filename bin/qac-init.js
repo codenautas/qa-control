@@ -112,22 +112,23 @@ function ask(name, defaultValue, format, msgs, callback) {
 };
 */
 
-function ask(name, defaultValue, msgs, callback) {
-    var def = defaultValue ? ' ('+defaultValue+')' : '';
+function ask(param, msgs, callback) {
+    var def = param.def ? ' ('+param.def+')' : '';
     var stdin = process.stdin;
     var stdout = process.stdout;
     stdin.resume();
-    stdout.write(name+def + ": ");
+    var prompt = param.prompt || param.name;
+    stdout.write(prompt+def+ ": ");
     stdin.once('data', function(data) {
         data = data.toString().trim();
         callback(data !== '' ? data : defaultValue);
     });
 };
 
-qacInit.promptForVar = function promptForVar(name, defaultValue, msgs) {
+qacInit.promptForVar = function promptForVar(param, msgs) {
     return Promises.make(function(resolve, reject) {
         //ask(name, defaultValue, /.*/, msgs, function (data) {
-        ask(name, defaultValue, msgs, function (data) {
+        ask(param, msgs, function (data) {
             resolve(data);
         });
     });
@@ -136,7 +137,7 @@ qacInit.promptForVar = function promptForVar(name, defaultValue, msgs) {
 function getParam(param, ctx, msgs) {
     return Promises.start(function() {
         if(param.init) { param.init(ctx); }
-        return qacInit.promptForVar(param.name, param.def, msgs).then(function(value) {
+        return qacInit.promptForVar(param, msgs).then(function(value) {
            ctx.result[param.name] = value;
         });
     });
@@ -192,8 +193,8 @@ qacInit.init = function init(inputParams) {
     return qacInit.initDefaults(inputParams).then(function(initResult) {
         input = initResult; //console.log("input", input);
         var configParams = [
-            {name:'v1', def:'def1'},
-            {name:'v2', def:'def2', init: function(ctx) { if(ctx.result.v1) { this.def = 'have v1'; } } },
+            {name:'name', prompt:'Project name', def:'def1'},
+            {name:'description', prompt:'Project description', def:'', init: function(ctx) { if(ctx.result.v1) { this.def = 'have v1'; } } },
             {name:'v3', def:'def3', init: function(ctx) { if(ctx.result.v2) { this.def = 'have v2'; } } }
         ];
         return qacInit.readParameters(input, configParams, input.existingJson, input.qacJson);
