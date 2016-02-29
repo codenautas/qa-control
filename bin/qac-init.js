@@ -123,7 +123,7 @@ function getParam(param, ctx) {
             if(value === '' || ! value) {
                 throw new Error(param.name+' '+ctx.input.msgs.msg_error_empty);
             }
-            ctx.result[param.name] = value;
+            ctx.result[param.name] = param.post ? param.post(value) : value;
         });
     });
 };
@@ -171,7 +171,6 @@ qacInit.writeTemplate = function writeTemplate(inputFile, outputFile, vars) {
         return fs.writeFile(outputFile, content);
     });
 };
-
 /*
 qacInit.init = function init(initParams) {
     var inputParams;
@@ -197,6 +196,9 @@ qacInit.init = function init(initParams) {
                                     repo.url.substring(4, repo.url.length-4)
                                     : repo
                                 : 'codenautas/'+ctx.result.name;
+            }},
+            {name:'contributors', prompt: 'Add contributor (name: email)', def:'', init: function(ctx) {
+                var contributors = ctx.input.existingJson.contributors || [];
             }}
         ];
         return qacInit.readParameters(inputParams, configParams);

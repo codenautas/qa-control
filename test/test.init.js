@@ -149,6 +149,18 @@ describe/*.only*/("qa-control --init", function(){
         }, function(err) {
             done(err);
         });
+        it('may do post-processing', function(done){
+            var p1 = {name:'v1', def:'def1', post: function(selectedValue) {
+                return '"'+selectedValue+'"';
+            }};
+            expect(p1.name).to.eql('v1');
+            expect(p1.def).to.eql('def1');
+            expect(p1.post(p1.def)).to.eql('"'+p1.def+'"');
+            expect(p1.post('a value')).to.eql('"a value"');
+            done();
+        }, function(err) {
+            done(err);
+        });
     });
     describe('readParameters', function(){
         var dummyInput = {
@@ -184,17 +196,20 @@ describe/*.only*/("qa-control --init", function(){
             var params = [
                 {name:'v1', def:'def1'},
                 {name:'v2', def:'def2', init: function(ctx) { if(ctx.result.v1) { this.def = 'have v1'; } } },
-                {name:'v3', def:'def3', init: function(ctx) { if(ctx.result.v2) { this.def = 'have v2'; } } }
+                {name:'v3', def:'def3', init: function(ctx) { if(ctx.result.v2) { this.def = 'have v2'; } } },
+                {name:'v4', def:'def4', post: function(selectedValue) { return '<'+selectedValue+'>'; }}
             ];
             return qci.readParameters({}, params).then(function(result) {
                 qci.promptForVar.restore();
                 expect(result).to.eql({
                        v1: 'def1',
                        v2: 'have v1',
-                       v3: 'have v2'
+                       v3: 'have v2',
+                       v4: '<def4>'
                 });
                 done();
             }).catch(function(err) {
+                console.log("err", err)
                 done(err);
             });
         });
