@@ -160,7 +160,7 @@ describe/*.only*/("qa-control --init", function(){
                 {name:'v3', def:'def3'},
                 {name:'v2', def:'def2'}
             ];
-            return qci.readParameters({}, params, {}, {}).then(function(result) {
+            return qci.readParameters({}, params).then(function(result) {
                 qci.promptForVar.restore();
                 expect(result).to.eql({
                        v1: 'value1',
@@ -181,7 +181,7 @@ describe/*.only*/("qa-control --init", function(){
                 {name:'v2', def:'def2', init: function(ctx) { if(ctx.result.v1) { this.def = 'have v1'; } } },
                 {name:'v3', def:'def3', init: function(ctx) { if(ctx.result.v2) { this.def = 'have v2'; } } }
             ];
-            return qci.readParameters({}, params, {}, {}).then(function(result) {
+            return qci.readParameters({}, params).then(function(result) {
                 qci.promptForVar.restore();
                 expect(result).to.eql({
                        v1: 'def1',
@@ -199,7 +199,7 @@ describe/*.only*/("qa-control --init", function(){
                 return Promises.resolve(param.def);
             });
             var params = [ {name:'v1', def:'def1'}, {name:'v2', def:'def2'}];
-            qci.readParameters({}, params, {}, {}).then(function(result) {
+            qci.readParameters({}, params).then(function(result) {
                 done(result);
             }).catch(function(err) {
                 qci.promptForVar.restore();
@@ -213,21 +213,29 @@ describe/*.only*/("qa-control --init", function(){
             });
             var params = [
                 {name:'v1', def:'def1', init:function(ctx) {
-                    this.def = ctx.defs;
+                    this.def = ctx.input.existingJson.e1;
                 }},
                 {name:'v2', def:'def2', init:function(ctx) {
-                    this.def = ctx.qac;
+                    this.def = ctx.input.qacJson['qa2'];
+                }},
+                {name:'v3', def:'def3', init:function(ctx) {
+                    this.def = ctx.input.dummy;
                 }}
             ];
-            var existingJson = {e1:'e1', e2:'e2'};
-            var qacJson = {qa1:'qa1', qa2:'qa2'};
-            qci.readParameters({}, params, existingJson, qacJson).then(function(result) {
+            var inputParams = {
+                dummy:'dummy',
+                existingJson : {e1:'e1', e2:'e2'},
+                qacJson: {qa1:'qa1', qa2:'qa2'}
+            };
+            qci.readParameters(inputParams, params).then(function(result) {
                 qci.promptForVar.restore();
-                expect(result.v1).to.be(existingJson);
-                expect(result.v2).to.be(qacJson);
+                expect(result.v1).to.be(inputParams.existingJson.e1);
+                expect(result.v2).to.be(inputParams.qacJson.qa2);
+                expect(result.v3).to.be(inputParams.dummy);
                 expect(result).to.eql({
-                       v1: existingJson,
-                       v2: qacJson
+                       v1: 'e1',
+                       v2: 'qa2',
+                       v3: 'dummy'
                 });
                 done();
             }).catch(function(err) {

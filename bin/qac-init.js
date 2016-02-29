@@ -121,7 +121,7 @@ function ask(param, msgs, callback) {
     stdout.write(prompt+def+ ": ");
     stdin.once('data', function(data) {
         data = data.toString().trim();
-        callback(data !== '' ? data : defaultValue);
+        callback(data !== '' ? data : param.def);
     });
 };
 
@@ -143,12 +143,10 @@ function getParam(param, ctx, msgs) {
     });
 };
 
-qacInit.readParameters = function readParameters(inputParams, params, existingJson, qacJson) {
-    //console.log("readParameters", inputParams.msgs)
+qacInit.readParameters = function readParameters(inputParams, params) {
     var ctx = {
         result:{},
-        defs:existingJson,
-        qac:qacJson
+        input: inputParams
     };
     var cadenaDePromesas = Promises.start();
     params.forEach(function(param) {
@@ -187,23 +185,23 @@ qacInit.writeTemplate = function writeTemplate(inputFile, outputFile, vars) {
     });
 };
 
-/*
-qacInit.init = function init(inputParams) {
-    var input;
-    return qacInit.initDefaults(inputParams).then(function(initResult) {
-        input = initResult; //console.log("input", input);
+
+qacInit.init = function init(initParams) {
+    var inputParams;
+    return qacInit.initDefaults(initParams).then(function(initResult) {
+        inputParams = initResult; //console.log("inputParams", inputParams);
         var configParams = [
             {name:'name', prompt:'Project name', def:'def1'},
             {name:'description', prompt:'Project description', def:'', init: function(ctx) { if(ctx.result.v1) { this.def = 'have v1'; } } },
             {name:'v3', def:'def3', init: function(ctx) { if(ctx.result.v2) { this.def = 'have v2'; } } }
         ];
-        return qacInit.readParameters(input, configParams, input.existingJson, input.qacJson);
+        return qacInit.readParameters(inputParams, configParams);
     }).then(function(result) {
         console.log("res",result);
     });
 };
-*/
 
+/*
 function initPackageJson(outDir, initFile, configData) {
     return Promises.make(function(resolve, reject) {
         init(outDir, initFile, configData, function (er, data) {
@@ -314,5 +312,5 @@ qacInit.init = function init(params) {
         }));
     });
 };
-
+*/
 module.exports = qacInit;
