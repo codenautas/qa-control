@@ -13,7 +13,7 @@ function clonar(obj) { return JSON.parse(JSON.stringify(obj)); }
 
 var templateDir = Path.resolve('./bin/init-template');
 
-describe/*.only*/("qa-control --init", function(){
+describe.only("qa-control --init", function(){
     var templateDir = Path.resolve('./bin/init-template');
     var qacPackageJson;
     before(function() {
@@ -150,13 +150,12 @@ describe/*.only*/("qa-control --init", function(){
             done(err);
         });
         it('may do post-processing', function(done){
-            var p1 = {name:'v1', def:'def1', post: function(selectedValue) {
-                return '"'+selectedValue+'"';
+            var p1 = {name:'v1', def:'def1', post: function(ctx) {
+                return '"'+ctx.result.v1+'"';
             }};
             expect(p1.name).to.eql('v1');
             expect(p1.def).to.eql('def1');
-            expect(p1.post(p1.def)).to.eql('"'+p1.def+'"');
-            expect(p1.post('a value')).to.eql('"a value"');
+            expect(p1.post({result:{'v1':p1.def}})).to.eql('"'+p1.def+'"');
             done();
         }, function(err) {
             done(err);
@@ -197,7 +196,7 @@ describe/*.only*/("qa-control --init", function(){
                 {name:'v1', def:'def1'},
                 {name:'v2', def:'def2', init: function(ctx) { if(ctx.result.v1) { this.def = 'have v1'; } } },
                 {name:'v3', def:'def3', init: function(ctx) { if(ctx.result.v2) { this.def = 'have v2'; } } },
-                {name:'v4', def:'def4', post: function(selectedValue) { return '<'+selectedValue+'>'; }}
+                {name:'v4', def:'def4', post: function(ctx) { return '<'+ctx.result.v4+'>'; }}
             ];
             return qci.readParameters({}, params).then(function(result) {
                 qci.promptForVar.restore();

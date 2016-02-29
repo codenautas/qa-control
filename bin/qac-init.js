@@ -123,7 +123,8 @@ function getParam(param, ctx) {
             if(value === '' || ! value) {
                 throw new Error(param.name+' '+ctx.input.msgs.msg_error_empty);
             }
-            ctx.result[param.name] = param.post ? param.post(value) : value;
+            ctx.result[param.name] = value;
+            if(param.post) { ctx.result[param.name] = param.post(ctx); }
         });
     });
 };
