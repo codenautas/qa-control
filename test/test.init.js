@@ -17,8 +17,8 @@ describe/*.only*/("qa-control --init", function(){
     var templateDir = Path.resolve('./bin/init-template');
     var qacPackageJson;
     before(function() {
-        return fs.readJson('./package.json').then(function(json) {
-            qacPackageJson = json;
+        return fs.readJson('./package.json').then(function(content) {
+            qacPackageJson = content;
         });
     });
     describe("load*IfExists()", function(){
@@ -55,8 +55,8 @@ describe/*.only*/("qa-control --init", function(){
                     outDir:'./test/fixtures-init/empty',
                     msgs:qci.cmdMsgs.en,
                     tplDir:templateDir,
-                    existingJson:{'qac-version':ctx.qapj['qa-control']['package-version']},
-                    qacJson:ctx.qapj
+                    existingJson:{'qac-version':ctx.qacPackageJson['qa-control']['package-version']},
+                    qacJson:ctx.qacPackageJson
                 }
             }
         },{
@@ -69,7 +69,7 @@ describe/*.only*/("qa-control --init", function(){
                     msgs:qci.cmdMsgs.en,
                     tplDir:templateDir,
                     existingJson:ctx.oriJson,
-                    qacJson:ctx.qapj
+                    qacJson:ctx.qacPackageJson
                 }
             }
         },{
@@ -83,9 +83,9 @@ describe/*.only*/("qa-control --init", function(){
                     existingJson:{
                         'name': 'existing-with-readme',
                         'description': 'Existing with readme with description',
-                        'qac-version': ctx.qapj['qa-control']['package-version']
+                        'qac-version': ctx.qacPackageJson['qa-control']['package-version']
                     },
-                    qacJson:ctx.qapj
+                    qacJson:ctx.qacPackageJson
                 }
             }
         },{
@@ -97,8 +97,8 @@ describe/*.only*/("qa-control --init", function(){
                     outDir:'./test/fixtures-init/empty',
                     msgs:qci.cmdMsgs.es,
                     tplDir:templateDir,
-                    existingJson:{'qac-version':ctx.qapj['qa-control']['package-version']},
-                    qacJson:ctx.qapj
+                    existingJson:{'qac-version':ctx.qacPackageJson['qa-control']['package-version']},
+                    qacJson:ctx.qacPackageJson
                 }
             }
         }];
@@ -112,17 +112,17 @@ describe/*.only*/("qa-control --init", function(){
             it(fixtureName, function(done) {
                 var oriJson = Path.resolve('./test/fixtures-init/'+fixture.base+'/package.json');
                 var oriReadme = Path.resolve('./test/fixtures-init/'+fixture.base+'/README.md');
-                var expParam = { qapj:qacPackageJson };
-                return qci.loadJsonIfExists(oriJson).then(function(ojs) {
-                    expParam.oriJson = ojs;
+                var expParam = { qacPackageJson:qacPackageJson };
+                return qci.loadJsonIfExists(oriJson).then(function(oriJsonContent) {
+                    expParam.oriJson = oriJsonContent;
                     return qci.loadIfExists(oriReadme);
-                }).then(function(ordm) {
-                    expParam.oriReadme = ordm;
+                }).then(function(oriReadmeContent) {
+                    expParam.oriReadme = oriReadmeContent;
                     var params = { projectDir:'./test/fixtures-init/'+fixture.base };
                     if(fixture.lang) { params['lang'] = fixture.lang; }
                     return qci.initDefaults(params);
-                }).then(function(res) {
-                    expect(res).to.eql(fixture.expected(expParam));  
+                }).then(function(result) {
+                    expect(result).to.eql(fixture.expected(expParam));  
                 }).then(function(){
                     done();
                 }).catch(done);
@@ -237,9 +237,9 @@ describe/*.only*/("qa-control --init", function(){
     });
     describe("J-Son output", function(){
         it('should clone provided template .json', function(done){
-            qci.generateJSon({}, qacPackageJson).then(function(json) {
-               expect(json).to.eql(qacPackageJson);
-               expect(json).not.to.be(qacPackageJson);
+            qci.generateJSon({}, qacPackageJson).then(function(generatedJson) {
+               expect(generatedJson).to.eql(qacPackageJson);
+               expect(generatedJson).not.to.be(qacPackageJson);
                done(); 
             });
         }, function(err) {
@@ -255,9 +255,9 @@ describe/*.only*/("qa-control --init", function(){
             resJson['name'] = readedParams.name;
             resJson['description'] = readedParams.description;
             resJson['engines']= readedParams.engines;
-            qci.generateJSon(readedParams, qacPackageJson).then(function(json) {
-               //console.log(json);
-               expect(json).to.eql(resJson);
+            qci.generateJSon(readedParams, qacPackageJson).then(function(generatedJson) {
+               //console.log(generatedJson);
+               expect(generatedJson).to.eql(resJson);
                done(); 
             });
         }, function(err) {
@@ -292,9 +292,9 @@ describe/*.only*/("qa-control --init", function(){
                 keys.forEach(function(key) {
                    kvPairs[key] = 'valueOf'+ key.charAt(0).toUpperCase() + key.slice(1); 
                 });
-                var testsA = [];
-                for(var t in tests) { testsA.push(tests[t]); }
-                return Promises.all(testsA.map(function(test) {
+                var testsArray = [];
+                for(var t in tests) { testsArray.push(tests[t]); }
+                return Promises.all(testsArray.map(function(test) {
                     return qci.writeTemplate(test.input.file, test.output.file, kvPairs).then(function(out) {
                         expect(out).to.eql(test.output.data);
 						// console.log("out", out);
