@@ -95,31 +95,12 @@ qacInit.initDefaults = function initDefaults(initParams) {
     });
 };
 
-/*
-function ask(name, defaultValue, format, msgs, callback) {
-    var def = defaultValue ? ' ('+defaultValue+')' : '';
-    var stdin = process.stdin;
-    var stdout = process.stdout;
-    stdin.resume();
-    stdout.write(name+def + ": ");
-    stdin.once('data', function(data) {
-        data = data.toString().trim();
-        if(format.test(data)) {
-            callback(data !== '' ? data : defaultValue);
-        } else {
-            stdout.write(msgs.msg_should_match+" '"+ format +"'\n");
-            ask(question, format, msgs, callback);
-        }
-    });
-};
-*/
-
 function ask(param, msgs, callback) {
     var def = param.def ? ' ('+param.def+')' : '';
     var stdin = process.stdin;
     var stdout = process.stdout;
     stdin.resume();
-    var prompt = param.prompt || param.name;
+    var prompt = param.prompt || param.name.substring(0,1).toUpperCase()+param.name.substring(1);
     stdout.write(prompt+def+ ": ");
     stdin.once('data', function(data) {
         data = data.toString().trim();
@@ -129,7 +110,6 @@ function ask(param, msgs, callback) {
 
 qacInit.promptForVar = function promptForVar(param, msgs) {
     return Promises.make(function(resolve, reject) {
-        //ask(name, defaultValue, /.*/, msgs, function (data) {
         ask(param, msgs, function (data) {
             resolve(data);
         });
@@ -140,7 +120,7 @@ function getParam(param, ctx) {
     return Promises.start(function() {
         if(param.init) { param.init(ctx); }
         return qacInit.promptForVar(param, ctx.input.msgs).then(function(value) {
-            if(value === '') {
+            if(value === '' || ! value) {
                 throw new Error(param.name+' '+ctx.input.msgs.msg_error_empty);
             }
             ctx.result[param.name] = value;
@@ -164,6 +144,7 @@ qacInit.readParameters = function readParameters(inputParams, params) {
        process.stdin.end();
        return ctx.result; 
     }).catch(function(err) {
+        process.stdin.end();
         //console.log("err.stack", err.stack)
         throw { message:'input_error', desc:err };
     });
@@ -197,9 +178,26 @@ qacInit.init = function init(initParams) {
     return qacInit.initDefaults(initParams).then(function(initResult) {
         inputParams = initResult; //console.log("inputParams", inputParams);
         var configParams = [
-            {name:'name', prompt:'Project name', def:'def1'},
-            {name:'description', prompt:'Project description', def:'', init: function(ctx) { if(ctx.result.v1) { this.def = 'have v1'; } } },
-            {name:'v3', def:'def3', init: function(ctx) { if(ctx.result.v2) { this.def = 'have v2'; } } }
+            {name:'name', prompt:'Project name', def:'def1', init:function(ctx) {
+                this.def = ctx.input.existingJson.name ? ctx.input.existingJson.name : Path.basename(ctx.input.outDir);
+            }},
+            {name:'description', prompt:'Project description', def:'', init: function(ctx) {
+                this.def = ctx.input.existingJson.description; 
+            }},
+            {name:'version', prompt:'Project version:', def:'', init: function(ctx) {
+                this.def = ctx.input.existingJson.version || '0.0.1';
+            }},
+            {name:'author', def:'', init: function(ctx) {
+                this.def = ctx.input.existingJson.author || 'Codenautas <codenautas@googlegroups.com>';
+            }},
+            {name:'license', def:'', init: function(ctx) { this.def = ctx.input.qacJson.license; }},
+            {name:'repository', def:'', init: function(ctx) {
+                var repo = ctx.input.existingJson.repository;
+                this.def = repo ? repo.url ?
+                                    repo.url.substring(4, repo.url.length-4)
+                                    : repo
+                                : 'codenautas/'+ctx.result.name;
+            }}
         ];
         return qacInit.readParameters(inputParams, configParams);
     }).then(function(result) {
