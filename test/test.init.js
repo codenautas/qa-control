@@ -152,7 +152,7 @@ describe/*.only*/("qa-control --init", function(){
     });
     describe('readParameters', function(){
         it("should read an array of parameters", function(done){
-            sinon.stub(qci, 'promptForVar', function(name, defaultvalue) {
+            sinon.stub(qci, 'promptForVar', function(name, defaultvalue, msgs) {
                 return Promises.resolve('value'+name.substr(name.length-1, 1));
             });
             var params = [
@@ -160,7 +160,7 @@ describe/*.only*/("qa-control --init", function(){
                 {name:'v3', def:'def3'},
                 {name:'v2', def:'def2'}
             ];
-            return qci.readParameters(params, {}, {}).then(function(result) {
+            return qci.readParameters({}, params, {}, {}).then(function(result) {
                 qci.promptForVar.restore();
                 expect(result).to.eql({
                        v1: 'value1',
@@ -173,7 +173,7 @@ describe/*.only*/("qa-control --init", function(){
             });
         });
         it("should read an array of parameters using current values", function(done){
-            sinon.stub(qci, 'promptForVar', function(name, def) {
+            sinon.stub(qci, 'promptForVar', function(name, def, msgs) {
                 return Promises.resolve(def);
             });
             var params = [
@@ -181,7 +181,7 @@ describe/*.only*/("qa-control --init", function(){
                 {name:'v2', def:'def2', init: function(ctx) { if(ctx.result.v1) { this.def = 'have v1'; } } },
                 {name:'v3', def:'def3', init: function(ctx) { if(ctx.result.v2) { this.def = 'have v2'; } } }
             ];
-            return qci.readParameters(params, {}, {}).then(function(result) {
+            return qci.readParameters({}, params, {}, {}).then(function(result) {
                 qci.promptForVar.restore();
                 expect(result).to.eql({
                        v1: 'def1',
@@ -194,12 +194,12 @@ describe/*.only*/("qa-control --init", function(){
             });
         });
         it("should handle errors in the prompt", function(done) {
-            sinon.stub(qci, 'promptForVar', function(name, def) {
+            sinon.stub(qci, 'promptForVar', function(name, def, msgs) {
                 if(name=='v2') { return Promises.reject('dummy error'); }
                 return Promises.resolve(def);
             });
             var params = [ {name:'v1', def:'def1'}, {name:'v2', def:'def2'}];
-            qci.readParameters(params, {}, {}).then(function(result) {
+            qci.readParameters({}, params, {}, {}).then(function(result) {
                 done(result);
             }).catch(function(err) {
                 qci.promptForVar.restore();
@@ -208,7 +208,7 @@ describe/*.only*/("qa-control --init", function(){
             });
         });
         it("should forward the context to parameters", function(done) {
-            sinon.stub(qci, 'promptForVar', function(name, def) {
+            sinon.stub(qci, 'promptForVar', function(name, def, msgs) {
                 return Promises.resolve(def);
             });
             var params = [
@@ -221,7 +221,7 @@ describe/*.only*/("qa-control --init", function(){
             ];
             var existingJson = {e1:'e1', e2:'e2'};
             var qacJson = {qa1:'qa1', qa2:'qa2'};
-            qci.readParameters(params, existingJson, qacJson).then(function(result) {
+            qci.readParameters({}, params, existingJson, qacJson).then(function(result) {
                 qci.promptForVar.restore();
                 expect(result.v1).to.be(existingJson);
                 expect(result.v2).to.be(qacJson);

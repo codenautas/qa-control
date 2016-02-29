@@ -22,7 +22,8 @@ qacInit.cmdMsgs = {
         msg_finished: 'Project initialized',
         msg_error: 'Input error',
         msg_error_desc: '"description" field is mandatory',
-        msg_canceled: 'Initialization canceled'
+        msg_canceled: 'Initialization canceled',
+        msg_should_match: 'Input should match'
     },
     es: {
         msg_initializing: 'Inicializando proyecto',
@@ -32,7 +33,8 @@ qacInit.cmdMsgs = {
         msg_finished: 'Proyecto inicializado',
         msg_error: 'Error en los argumentos',
         msg_error_desc: 'El campo "description" es obligatorio',
-        msg_canceled: 'Initialización cancelada'
+        msg_canceled: 'Initialización cancelada',
+        msg_should_match: 'La entrada debe estar en formato'
     }
 };
 
@@ -91,61 +93,57 @@ qacInit.initDefaults = function initDefaults(initParams) {
     });
 };
 
-function ask(question, format, callback) {
-    var stdin = process.stdin, stdout = process.stdout;
+/*
+function ask(name, defaultValue, format, msgs, callback) {
+    var def = defaultValue ? ' ('+defaultValue+')' : '';
+    var stdin = process.stdin;
+    var stdout = process.stdout;
     stdin.resume();
-    stdout.write(question + ": ");
- 
+    stdout.write(name+def + ": ");
     stdin.once('data', function(data) {
         data = data.toString().trim();
         if(format.test(data)) {
-            callback(data);
+            callback(data !== '' ? data : defaultValue);
         } else {
-            stdout.write("It should match: "+ format +"\n");
-            ask(question, format, callback);
+            stdout.write(msgs.msg_should_match+" '"+ format +"'\n");
+            ask(question, format, msgs, callback);
         }
     });
 };
+*/
 
-function doAsk(question, format) {
+function ask(name, defaultValue, msgs, callback) {
+    var def = defaultValue ? ' ('+defaultValue+')' : '';
+    var stdin = process.stdin;
+    var stdout = process.stdout;
+    stdin.resume();
+    stdout.write(name+def + ": ");
+    stdin.once('data', function(data) {
+        data = data.toString().trim();
+        callback(data !== '' ? data : defaultValue);
+    });
+};
+
+qacInit.promptForVar = function promptForVar(name, defaultValue, msgs) {
     return Promises.make(function(resolve, reject) {
-        ask(question, format, function (data) {
+        //ask(name, defaultValue, /.*/, msgs, function (data) {
+        ask(name, defaultValue, msgs, function (data) {
             resolve(data);
         });
     });
 };
 
-qacInit.promptForVarCB = function promptForVarCB(name, defaultValue) {
-    var def = defaultValue ? ' ('+defaultValue+')' : '';
-    return doAsk(name+def, /.*/).then(function(res) {
-       console.log("res", res);
-        return res;
-    }).catch(function(err) {
-        throw { message:'input_error', desc:err };
-    });
-};
-
-qacInit.promptForVar = function promptForVar(name, defaultValue) {
-    var def = defaultValue ? ' ('+defaultValue+')' : '';
-    return doAsk(name+def, /.*/).then(function(res) {
-       console.log("res", res);
-        return res;
-    }).catch(function(err) {
-        throw { message:'input_error', desc:err };
-    });
-};
-
-function getParam(param, ctx) {
+function getParam(param, ctx, msgs) {
     return Promises.start(function() {
         if(param.init) { param.init(ctx); }
-        return qacInit.promptForVar(param.name, param.def).then(function(value) {
-           // console.log("promptForVar ->", value)
+        return qacInit.promptForVar(param.name, param.def, msgs).then(function(value) {
            ctx.result[param.name] = value;
         });
     });
 };
 
-qacInit.readParameters = function readParameters(params, existingJson, qacJson) {
+qacInit.readParameters = function readParameters(inputParams, params, existingJson, qacJson) {
+    //console.log("readParameters", inputParams.msgs)
     var ctx = {
         result:{},
         defs:existingJson,
@@ -154,9 +152,10 @@ qacInit.readParameters = function readParameters(params, existingJson, qacJson) 
     var cadenaDePromesas = Promises.start();
     params.forEach(function(param) {
        cadenaDePromesas = cadenaDePromesas.then(function() {
-            return getParam(param, ctx);
+            return getParam(param, ctx, inputParams.msgs);
        });
     });
+    //process.stdout.write("\n");
     return cadenaDePromesas.then(function() {
        process.stdin.end();
        return ctx.result; 
@@ -197,7 +196,7 @@ qacInit.init = function init(inputParams) {
             {name:'v2', def:'def2', init: function(ctx) { if(ctx.result.v1) { this.def = 'have v1'; } } },
             {name:'v3', def:'def3', init: function(ctx) { if(ctx.result.v2) { this.def = 'have v2'; } } }
         ];
-        return qacInit.readParameters(configParams, input.existingJson, input.qacJson);
+        return qacInit.readParameters(input, configParams, input.existingJson, input.qacJson);
     }).then(function(result) {
         console.log("res",result);
     });

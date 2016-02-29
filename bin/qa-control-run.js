@@ -42,9 +42,9 @@ function printErr(err) {
 }
 
 if(program.init) {
-    process.stdout.write(msgs.msg_initializing);
+    process.stdout.write(msgs.msg_initializing+"\n");
     qacInit.init(params).then(function() {
-        process.stdout.write("\n"+msgs.msg_finished);
+        process.stdout.write(msgs.msg_finished);
     }).catch(function(err){
         switch(err.message) {
             case 'canceled':
