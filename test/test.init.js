@@ -237,7 +237,7 @@ describe/*.only*/("qa-control --init", function(){
             }).catch(function(err) {
                 qci.promptForVar.restore();
                 expect(err.message).to.eql('input_error');
-                expect(err.desc).to.match(new RegExp(qci.cmdMsgs.en['msg_error_empty']));
+                expect(err.desc).to.eql('v2 '+qci.cmdMsgs.en['msg_error_empty']);
                 done();                    
             }).catch(done);
         });

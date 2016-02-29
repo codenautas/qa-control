@@ -12,6 +12,7 @@ var Path = require('path');
 var init = require('init-package-json');
 var qaControl = require('./qa-control.js');
 var multilang = require('multilang');
+var semver = require("semver");
 
 qacInit.cmdMsgs = {
     en: {
@@ -213,7 +214,8 @@ qacInit.init = function init(initParams) {
                 name:'version', prompt:'Project version:', def:'',
                 init: function(ctx) {
                     this.def = ctx.input.existingJson.version || '0.0.1';
-                }
+                },
+                valid:function(ver) { return semver.valid(ver); }
             },{
                 name:'author', def:'',
                 init: function(ctx) {
@@ -277,6 +279,14 @@ qacInit.init = function init(initParams) {
                     var qacData = ctx.input.qacJson['qa-control'];
                     qacData['package-version'] = ver;
                     return ver;
+                },
+                valid: function(ver) {
+                    if(semver.valid(ver)) {
+                        for(var v in qaControl.projectDefinition) {
+                            if(semver.satisfies(ver, v)) { return true; }
+                        }
+                    }
+                    return false;
                 }
             },{
                 name:'qa-control', def:'', noPrompt:true, init: function(ctx) { this.def = ctx.input.qacJson['qa-control']; }
