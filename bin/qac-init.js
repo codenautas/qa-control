@@ -119,14 +119,18 @@ qacInit.promptForVar = function promptForVar(param, msgs) {
 function getParam(param, ctx) {
     return Promises.start(function() {
         if(param.init) { param.init(ctx); }
-        return qacInit.promptForVar(param, ctx.input.msgs).then(function(value) {
-            ctx.result[param.name] = value;
-            if(param.post) { ctx.result[param.name] = param.post(ctx); }
-            value = ctx.result[param.name];
-            if(value === '' || ! value) {
-                throw new Error(param.name+' '+ctx.input.msgs.msg_error_empty);
-            }
-        });
+        if(param.noPrompt) {
+            return param.def;
+        } else {
+            return qacInit.promptForVar(param, ctx.input.msgs);
+        }
+    }).then(function(value) {
+        ctx.result[param.name] = value;
+        if(param.post) { ctx.result[param.name] = param.post(ctx); }
+        value = ctx.result[param.name];
+        if(value === '' || ! value) {
+            throw new Error(param.name+' '+ctx.input.msgs.msg_error_empty);
+        }
     });
 };
 
@@ -172,47 +176,79 @@ qacInit.writeTemplate = function writeTemplate(inputFile, outputFile, vars) {
         return fs.writeFile(outputFile, content);
     });
 };
+
+function selectDeps(depGroup, packages) {
+    var selectedDeps = {};
+    for(var p=0; p<packages.length; ++p) {
+        var pac = packages[p];
+        if(pac in depGroup) {
+            selectedDeps[pac] = depGroup[pac];
+        }
+    }
+    return selectedDeps;
+}
+
 /*
 qacInit.init = function init(initParams) {
     var inputParams;
     return qacInit.initDefaults(initParams).then(function(initResult) {
         inputParams = initResult; //console.log("inputParams", inputParams);
         var configParams = [
-            {name:'name', prompt:'Project name', def:'def1', init:function(ctx) {
-                this.def = ctx.input.existingJson.name ? ctx.input.existingJson.name : Path.basename(ctx.input.outDir);
-            }},
-            {name:'description', prompt:'Project description', def:'', init: function(ctx) {
-                this.def = ctx.input.existingJson.description; 
-            }},
-            {name:'version', prompt:'Project version:', def:'', init: function(ctx) {
-                this.def = ctx.input.existingJson.version || '0.0.1';
-            }},
-            {name:'author', def:'', init: function(ctx) {
-                this.def = ctx.input.existingJson.author || 'Codenautas <codenautas@googlegroups.com>';
-            }},
-            {name:'license', def:'', init: function(ctx) { this.def = ctx.input.qacJson.license; }},
-            {name:'repository', def:'', init: function(ctx) {
-                var repo = ctx.input.existingJson.repository;
-                this.def = repo ? repo.url ?
-                                    repo.url.substring(4, repo.url.length-4)
-                                    : repo
-                                : 'codenautas/'+ctx.result.name;
-            }},
-            {name:'contributors', prompt: 'Add contributor (name: email)', def:'',
-             post: function(ctx) {
-                var contributors = ctx.input.existingJson.contributors || [];
-                var nae = ctx.result[this.name].split(':');
-                if(nae.length===2) {
-                    var name = nae[0].trim();
-                    var email = nae[1].trim();
-                    if(name === '' || ! email.match(/^(.+@.+)$/)) {
-                        process.stderr.write('Invalid contributor data\n');
-                    } else {
-                        contributors.push({'name':name, 'email':email});
-                    }
+            {
+                name:'name', prompt:'Project name', def:'def1',
+                init:function(ctx) {
+                    this.def = ctx.input.existingJson.name ? ctx.input.existingJson.name : Path.basename(ctx.input.outDir);
                 }
-                return contributors.length ? contributors : null;
-            }}
+            },{
+                name:'description', prompt:'Project description', def:'',
+                init: function(ctx) {
+                    this.def = ctx.input.existingJson.description; 
+                }
+            },{
+                name:'version', prompt:'Project version:', def:'',
+                init: function(ctx) {
+                    this.def = ctx.input.existingJson.version || '0.0.1';
+                }
+            },{
+                name:'author', def:'',
+                init: function(ctx) {
+                    this.def = ctx.input.existingJson.author || 'Codenautas <codenautas@googlegroups.com>';
+                }
+            },{
+                name:'license', def:'',
+                init: function(ctx) { this.def = ctx.input.qacJson.license; }
+            },{
+                name:'repository', def:'',
+                init: function(ctx) {
+                    var repo = ctx.input.existingJson.repository;
+                    this.def = repo ? repo.url ?
+                                        repo.url.substring(4, repo.url.length-4)
+                                        : repo
+                                    : 'codenautas/'+ctx.result.name;
+                }
+            },{
+                name:'contributors', prompt: 'Add contributor (name: email)', def:'',
+                post: function(ctx) {
+                    var contributors = ctx.input.existingJson.contributors || [];
+                    var nae = ctx.result[this.name].split(':');
+                    if(nae.length===2) {
+                        var name = nae[0].trim();
+                        var email = nae[1].trim();
+                        if(name === '' || ! email.match(/^(.+@.+)$/)) {
+                            process.stderr.write('Invalid contributor data\n');
+                        } else {
+                            contributors.push({'name':name, 'email':email});
+                        }
+                    }
+                    return contributors.length ? contributors : null;
+                }
+            },{
+                name:'dependencies', def:'',
+                noPrompt:true,
+                init: function(ctx) {
+                    this.def = selectDeps(ctx.input.qacJson['dependencies'], ['fs-extra', 'fs-promise', 'best-promise']);
+                }
+            }
         ];
         return qacInit.readParameters(inputParams, configParams);
     }).then(function(result) {

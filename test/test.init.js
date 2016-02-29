@@ -276,6 +276,29 @@ describe/*.only*/("qa-control --init", function(){
                 done(err);                    
             });
         });
+        it("should skip parameters where requeted", function(done) {
+            var promptedParameters=0;
+            sinon.stub(qci, 'promptForVar', function(param, msgs) {
+                ++promptedParameters;
+                return Promises.resolve(param.def);
+            });
+            var params = [
+                {name:'v1', def:'def1', noPrompt:true},
+                {name:'v2', def:'def2'},
+                {name:'v3', def:'def3', noPrompt:true, init:function(ctx) { this.def = 'init v3'}},
+                {name:'v4', def:'def4'},
+            ];
+            qci.readParameters(dummyInput, params).then(function(result) {
+                expect(promptedParameters).to.eql(2);
+                expect(result).to.eql({
+                    v1: 'def1',
+                    v2: 'def2',
+                    v3: 'init v3',
+                    v4: 'def4',
+                })
+                done();
+            }).catch(done);
+        });
     });
     describe("J-Son output", function(){
         it('should clone provided template .json', function(done){
