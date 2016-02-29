@@ -24,7 +24,8 @@ qacInit.cmdMsgs = {
         msg_error_desc: '"description" field is mandatory',
         msg_canceled: 'Initialization canceled',
         msg_should_match: 'Input should match',
-        msg_error_empty: 'cannot be empty'
+        msg_error_empty: 'cannot be empty',
+        msg_error_invalid: 'is invalid'
     },
     es: {
         msg_initializing: 'Inicializando proyecto',
@@ -36,7 +37,8 @@ qacInit.cmdMsgs = {
         msg_error_desc: 'El campo "description" es obligatorio',
         msg_canceled: 'Initialización cancelada',
         msg_should_match: 'La entrada debe estar en formato',
-        msg_error_empty: 'no puede estar vacío'
+        msg_error_empty: 'no puede estar vacío',
+        msg_error_invalid: 'es inválido'
     }
 };
 
@@ -129,7 +131,10 @@ function getParam(param, ctx) {
         if(param.post) { ctx.result[param.name] = param.post(ctx); }
         value = ctx.result[param.name];
         if(value === '' || ! value) {
-            throw new Error(param.name+' '+ctx.input.msgs.msg_error_empty);
+            throw param.name+' '+ctx.input.msgs.msg_error_empty;
+        }
+        if(param.valid && ! param.valid(value)) {
+            throw param.name+' '+ctx.input.msgs.msg_error_invalid;
         }
     });
 };
@@ -243,11 +248,38 @@ qacInit.init = function init(initParams) {
                     return contributors.length ? contributors : null;
                 }
             },{
-                name:'dependencies', def:'',
-                noPrompt:true,
+                name:'dependencies', def:'', noPrompt:true,
                 init: function(ctx) {
                     this.def = selectDeps(ctx.input.qacJson['dependencies'], ['fs-extra', 'fs-promise', 'best-promise']);
                 }
+            },{
+                name:'devDependencies', def:'', noPrompt:true,
+                init: function(ctx) {
+                    this.def = selectDeps(ctx.input.qacJson['devDependencies'], ['expect.js', 'istanbul', 'mocha', 'expect-called']);
+                }
+            },{
+                name:'engines', def:'', noPrompt:true, init: function(ctx) { this.def = ctx.input.qacJson['engines']; }
+            },{
+                name:'scripts', def:'', noPrompt:true, init: function(ctx) { this.def = ctx.input.qacJson['scripts']; }
+            },{
+                name:'jshintConfig', def:'', noPrompt:true, init: function(ctx) { this.def = ctx.input.qacJson['jshintConfig']; }
+            },{
+                name:'eslintConfig', def:'', noPrompt:true, init: function(ctx) { this.def = ctx.input.qacJson['eslintConfig']; }
+            },{
+                name:'qa-control-version', prompt: 'qa-control package-version', def:'',
+                init: function(ctx) {
+                    //console.log("QAC", ctx.input.qacJson['qa-control'])
+                    this.def = ctx.input.qacJson['qa-control']['package-version'];
+                },
+                post: function(ctx) {
+                    var contributors = ctx.input.existingJson.contributors || [];
+                    var ver = ctx.result[this.name];
+                    var qacData = ctx.input.qacJson['qa-control'];
+                    qacData['package-version'] = ver;
+                    return ver;
+                }
+            },{
+                name:'qa-control', def:'', noPrompt:true, init: function(ctx) { this.def = ctx.input.qacJson['qa-control']; }
             }
         ];
         return qacInit.readParameters(inputParams, configParams);
