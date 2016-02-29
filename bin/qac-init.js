@@ -23,7 +23,8 @@ qacInit.cmdMsgs = {
         msg_error: 'Input error',
         msg_error_desc: '"description" field is mandatory',
         msg_canceled: 'Initialization canceled',
-        msg_should_match: 'Input should match'
+        msg_should_match: 'Input should match',
+        msg_error_empty: 'cannot be empty'
     },
     es: {
         msg_initializing: 'Inicializando proyecto',
@@ -34,7 +35,8 @@ qacInit.cmdMsgs = {
         msg_error: 'Error en los argumentos',
         msg_error_desc: 'El campo "description" es obligatorio',
         msg_canceled: 'Initialización cancelada',
-        msg_should_match: 'La entrada debe estar en formato'
+        msg_should_match: 'La entrada debe estar en formato',
+        msg_error_empty: 'no puede estar vacío'
     }
 };
 
@@ -134,11 +136,14 @@ qacInit.promptForVar = function promptForVar(param, msgs) {
     });
 };
 
-function getParam(param, ctx, msgs) {
+function getParam(param, ctx) {
     return Promises.start(function() {
         if(param.init) { param.init(ctx); }
-        return qacInit.promptForVar(param, msgs).then(function(value) {
-           ctx.result[param.name] = value;
+        return qacInit.promptForVar(param, ctx.input.msgs).then(function(value) {
+            if(value === '') {
+                throw new Error(param.name+' '+ctx.input.msgs.msg_error_empty);
+            }
+            ctx.result[param.name] = value;
         });
     });
 };
@@ -151,7 +156,7 @@ qacInit.readParameters = function readParameters(inputParams, params) {
     var cadenaDePromesas = Promises.start();
     params.forEach(function(param) {
        cadenaDePromesas = cadenaDePromesas.then(function() {
-            return getParam(param, ctx, inputParams.msgs);
+            return getParam(param, ctx);
        });
     });
     //process.stdout.write("\n");
@@ -159,6 +164,7 @@ qacInit.readParameters = function readParameters(inputParams, params) {
        process.stdin.end();
        return ctx.result; 
     }).catch(function(err) {
+        //console.log("err.stack", err.stack)
         throw { message:'input_error', desc:err };
     });
 };
@@ -185,7 +191,7 @@ qacInit.writeTemplate = function writeTemplate(inputFile, outputFile, vars) {
     });
 };
 
-
+/*
 qacInit.init = function init(initParams) {
     var inputParams;
     return qacInit.initDefaults(initParams).then(function(initResult) {
@@ -200,8 +206,8 @@ qacInit.init = function init(initParams) {
         console.log("res",result);
     });
 };
+*/
 
-/*
 function initPackageJson(outDir, initFile, configData) {
     return Promises.make(function(resolve, reject) {
         init(outDir, initFile, configData, function (er, data) {
@@ -312,5 +318,5 @@ qacInit.init = function init(params) {
         }));
     });
 };
-*/
+
 module.exports = qacInit;

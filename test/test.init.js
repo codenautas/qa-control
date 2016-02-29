@@ -151,6 +151,9 @@ describe/*.only*/("qa-control --init", function(){
         });
     });
     describe('readParameters', function(){
+        var dummyInput = {
+           msgs: qci.cmdMsgs.en 
+        };
         it("should read an array of parameters", function(done){
             sinon.stub(qci, 'promptForVar', function(param, msgs) {
                 return Promises.resolve('value'+param.name.substr(param.name.length-1, 1));
@@ -160,7 +163,8 @@ describe/*.only*/("qa-control --init", function(){
                 {name:'v3', def:'def3'},
                 {name:'v2', def:'def2'}
             ];
-            return qci.readParameters({}, params).then(function(result) {
+            
+            return qci.readParameters(dummyInput, params).then(function(result) {
                 qci.promptForVar.restore();
                 expect(result).to.eql({
                        v1: 'value1',
@@ -169,6 +173,7 @@ describe/*.only*/("qa-control --init", function(){
                 });
                 done();
             }).catch(function(err) {
+                console.log("err", err)
                 done(err);
             });
         });
@@ -206,6 +211,21 @@ describe/*.only*/("qa-control --init", function(){
                 expect(err).to.eql({message:'input_error', desc:'dummy error'});
                 done();                    
             });
+        });
+        it("should handle errors produced by empty values", function(done) {
+            sinon.stub(qci, 'promptForVar', function(param, msgs) {
+                if(param.name=='v2') { return Promises.resolve(''); }
+                return Promises.resolve(param.def);
+            });
+            var params = [ {name:'v1', def:'def1'}, {name:'v2', def:'def2'}];
+            qci.readParameters(dummyInput, params).then(function(result) {
+                done(result);
+            }).catch(function(err) {
+                qci.promptForVar.restore();
+                expect(err.message).to.eql('input_error');
+                expect(err.desc).to.match(new RegExp(qci.cmdMsgs.en['msg_error_empty']));
+                done();                    
+            }).catch(done);
         });
         it("should forward the context to parameters", function(done) {
             sinon.stub(qci, 'promptForVar', function(param, msgs) {
