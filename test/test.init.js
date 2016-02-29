@@ -13,7 +13,7 @@ function clonar(obj) { return JSON.parse(JSON.stringify(obj)); }
 
 var templateDir = Path.resolve('./bin/init-template');
 
-describe.only("qa-control --init", function(){
+describe/*.only*/("qa-control --init", function(){
     var templateDir = Path.resolve('./bin/init-template');
     var qacPackageJson;
     before(function() {

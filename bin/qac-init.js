@@ -120,11 +120,12 @@ function getParam(param, ctx) {
     return Promises.start(function() {
         if(param.init) { param.init(ctx); }
         return qacInit.promptForVar(param, ctx.input.msgs).then(function(value) {
+            ctx.result[param.name] = value;
+            if(param.post) { ctx.result[param.name] = param.post(ctx); }
+            value = ctx.result[param.name];
             if(value === '' || ! value) {
                 throw new Error(param.name+' '+ctx.input.msgs.msg_error_empty);
             }
-            ctx.result[param.name] = value;
-            if(param.post) { ctx.result[param.name] = param.post(ctx); }
         });
     });
 };
@@ -140,7 +141,6 @@ qacInit.readParameters = function readParameters(inputParams, params) {
             return getParam(param, ctx);
        });
     });
-    //process.stdout.write("\n");
     return cadenaDePromesas.then(function() {
        process.stdin.end();
        return ctx.result; 
@@ -198,8 +198,20 @@ qacInit.init = function init(initParams) {
                                     : repo
                                 : 'codenautas/'+ctx.result.name;
             }},
-            {name:'contributors', prompt: 'Add contributor (name: email)', def:'', init: function(ctx) {
+            {name:'contributors', prompt: 'Add contributor (name: email)', def:'',
+             post: function(ctx) {
                 var contributors = ctx.input.existingJson.contributors || [];
+                var nae = ctx.result[this.name].split(':');
+                if(nae.length===2) {
+                    var name = nae[0].trim();
+                    var email = nae[1].trim();
+                    if(name === '' || ! email.match(/^(.+@.+)$/)) {
+                        process.stderr.write('Invalid contributor data\n');
+                    } else {
+                        contributors.push({'name':name, 'email':email});
+                    }
+                }
+                return contributors.length ? contributors : null;
             }}
         ];
         return qacInit.readParameters(inputParams, configParams);
