@@ -198,7 +198,8 @@ qacInit.selectDeps = function selectDeps(depGroup, packages) {
 }
 
 qacInit.init = function init(initParams) {
-    var out = process.stdout;
+    var echo = function(message) { process.stdout.write(message); }
+    if(! initParams.verbose) { echo = function() {} }
     var inputParams;
     var tplData = {
         vars: {},
@@ -308,7 +309,7 @@ qacInit.init = function init(initParams) {
         //console.log("res",data);
         packageJS = data;
         delete packageJS['qa-control-version'];
-        out.write(inputParams.msgs.msg_creating+' package.json...\n');
+        echo(inputParams.msgs.msg_creating+' package.json...\n');
         return fs.writeJson(Path.resolve(inputParams.outDir+'/package.json'), packageJS);
     }).then(function() {
         tplData.vars.name = packageJS.name;
@@ -320,7 +321,7 @@ qacInit.init = function init(initParams) {
         tplData.vars.cucardas = qaControl.generateCucardas(cucardas, packageJS);
         tplData.vars.author = packageJS.author;
         //console.log("tplData.vars", tplData.vars)
-        out.write(inputParams.msgs.msg_creating+'...\n');
+        echo(inputParams.msgs.msg_creating+'...\n');
         return fs.readdir(inputParams.tplDir);
     }).then(function(files) {
         tplData.tpls = files.filter(function(file) { return file.match(/(.tpl)$/); });
@@ -329,13 +330,13 @@ qacInit.init = function init(initParams) {
         return Promises.all(tplData.other.map(function(file){
             var oFile = file;
             if(file.match(/^(dot-)/)) { oFile = '.'+file.substring(4); }
-            out.write('  '+inputParams.msgs.msg_copying+' '+oFile+'...\n');
+            echo('  '+inputParams.msgs.msg_copying+' '+oFile+'...\n');
             return fs.copy(Path.resolve(inputParams.tplDir+'/'+file), Path.resolve(inputParams.outDir+'/'+oFile));                
         }));
     }).then(function() {
         return Promises.all(tplData.tpls.map(function(file) {
             var oFile = file.substr(0, file.length-4); // removemos '.tpl'
-            out.write('  '+inputParams.msgs.msg_generating+' '+oFile+'...\n');
+            echo('  '+inputParams.msgs.msg_generating+' '+oFile+'...\n');
             return qacInit.writeTemplate(Path.resolve(inputParams.tplDir+'/'+file),Path.resolve(inputParams.outDir+'/'+oFile), tplData.vars).then(function(out) {
                 //console.log("out", out);
             });
@@ -344,17 +345,17 @@ qacInit.init = function init(initParams) {
         return fs.readFile(Path.resolve(inputParams.outDir+'/LEEME.md'), {encoding: 'utf8'});
     }).then(function(leemeContent) {
         var readmeMD = Path.resolve(inputParams.outDir+'/README.md');
-        out.write(inputParams.msgs.msg_generating+' '+readmeMD+'...\n');
+        echo(inputParams.msgs.msg_generating+' '+readmeMD+'...\n');
         var readme = multilang.changeNamedDoc(readmeMD, leemeContent, 'en');
         return fs.writeFile(readmeMD, multilang.stripComments(readme));
     }).then(function() {
-        out.write(inputParams.msgs.msg_running+' QA-control... ');
-        return qaControl.controlProject(inputParams.outDir, initParams);
+        echo(inputParams.msgs.msg_running+' QA-control... ');
+        return qaControl.controlProject(inputParams.outDir/*, initParams*/);
     }).then(function(warns) {
         return qaControl.stringizeWarnings(warns, qaControl.lang);
     }).then(function(warnString) {
-        out.write((warnString !== '') ? '\n'+warnString : 'ok');
-        out.write('\n');
+        echo((warnString !== '') ? '\n'+warnString : 'ok');
+        echo('\n'+inputParams.msgs.msg_finished+'\n');
     });
 };
 

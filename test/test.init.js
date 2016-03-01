@@ -314,6 +314,7 @@ describe/*.only*/("qa-control --init", function(){
                     v3: 'init v3',
                     v4: 'def4',
                 })
+                qci.promptForVar.restore();
                 done();
             }).catch(done);
         });
@@ -400,21 +401,26 @@ describe/*.only*/("qa-control --init", function(){
             done(err);
         });
     });
-    describe.skip("generation", function(){
-        it('--init', function(done){
-            var readedParams = {
-                'name': 'fixed name',
-                'description': 'fixed description',
-                'engines': {node: ">= 4.0.0"}
-            }
-            var resJson = clonar(qacPackageJson);
-            resJson['name'] = readedParams.name;
-            resJson['description'] = readedParams.description;
-            resJson['engines']= readedParams.engines;
-            qci.generateJSon(readedParams, qacPackageJson).then(function(generatedJson) {
-               //console.log(generatedJson);
-               expect(generatedJson).to.eql(resJson);
+    describe("generation", function(){
+        it('init', function(done) {
+            var outDir = Path.resolve(helper.dirbase+'/gen-init');
+            sinon.stub(qci, 'promptForVar', function(param, msgs) {
+                //console.log("PFV", param)
+                var ret=param.def;
+                switch(param.name) {
+                    case 'description': ret='The description'; break;
+                    case 'contributors': ret='Diego:diegoefe@unemail.com'; break;
+                }
+                return Promises.resolve(ret);
+            });
+            fs.mkdir(outDir).then(function() {
+                return qci.init({projectDir:outDir});
+            }).then(function() {
+               qci.promptForVar.restore();
                done(); 
+            }).catch(function(err) {
+                console.log("err", err)
+                done(err);
             });
         }, function(err) {
             done(err);
