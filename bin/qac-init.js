@@ -184,7 +184,7 @@ qacInit.writeTemplate = function writeTemplate(inputFile, outputFile, vars) {
     });
 };
 
-function selectDeps(depGroup, packages) {
+qacInit.selectDeps = function selectDeps(depGroup, packages) {
     var selectedDeps = {};
     for(var p=0; p<packages.length; ++p) {
         var pac = packages[p];
@@ -261,12 +261,12 @@ qacInit.init = function init(initParams) {
             },{
                 name:'dependencies', def:'', noPrompt:true,
                 init: function(ctx) {
-                    this.def = selectDeps(ctx.input.qacJson['dependencies'], ['fs-extra', 'fs-promise', 'best-promise']);
+                    this.def = qacInit.selectDeps(ctx.input.qacJson['dependencies'], ['fs-extra', 'fs-promise', 'best-promise']);
                 }
             },{
                 name:'devDependencies', def:'', noPrompt:true,
                 init: function(ctx) {
-                    this.def = selectDeps(ctx.input.qacJson['devDependencies'], ['expect.js', 'istanbul', 'mocha', 'expect-called']);
+                    this.def = qacInit.selectDeps(ctx.input.qacJson['devDependencies'], ['expect.js', 'istanbul', 'mocha', 'expect-called']);
                 }
             },{
                 name:'engines', def:'', noPrompt:true, init: function(ctx) { this.def = ctx.input.qacJson['engines']; }
