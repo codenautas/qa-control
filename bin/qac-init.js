@@ -259,6 +259,8 @@ qacInit.init = function init(initParams) {
                     return contributors.length ? contributors : null;
                 }
             },{
+                name:'main', def:'index.js', noPrompt:true
+            },{
                 name:'dependencies', def:'', noPrompt:true,
                 init: function(ctx) {
                     this.def = selectDeps(ctx.input.qacJson['dependencies'], ['fs-extra', 'fs-promise', 'best-promise']);
