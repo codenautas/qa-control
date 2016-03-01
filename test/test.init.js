@@ -362,7 +362,7 @@ describe/*.only*/("qa-control --init", function(){
                         if(! (name in tests)) { tests[name] = {}; }
                         var f = tests[name];
                         if(file.match(/(.tpl)$/)) {
-                           f.input = { file: fPath, data: content };
+                            f.input = { file: fPath, data: content };
                         } else {
                             f.output = { file: fPath, data: content };
                         }
@@ -379,7 +379,7 @@ describe/*.only*/("qa-control --init", function(){
                 return Promises.all(testsArray.map(function(test) {
                     return qci.writeTemplate(test.input.file, test.output.file, kvPairs).then(function(out) {
                         expect(out).to.eql(test.output.data);
-						// console.log("out", out);
+						//console.log("out", out);
                     });
                 }));
             }).then(function() {

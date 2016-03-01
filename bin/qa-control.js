@@ -261,7 +261,7 @@ qaControl.controlInfo=function controlInfo(info, opts){
     var existingWarnings={};
     var cmsgs = qaControl.cmdMsgs[qaControl.lang];
     var rules = qaControl.projectDefinition[info.usedDefinition].rules;
-    if(qaControl.verbose) { process.stdout.write(cmsgs.msg_controlling+usedDefinition+"...\n"); }
+    if(qaControl.verbose) { process.stdout.write(cmsgs.msg_controlling+info.usedDefinition+"...\n"); }
     var cadenaDePromesas = Promises.start();
     info.scoring = opts && opts.scoring;
     _.forEach(rules, function(rule, ruleName) {

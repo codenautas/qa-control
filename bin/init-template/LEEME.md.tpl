@@ -1,5 +1,5 @@
 # {{name}}
-{{desc}}
+{{description}}
 
 <!--lang:es-->
 # Uso

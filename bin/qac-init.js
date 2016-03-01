@@ -174,12 +174,16 @@ qacInit.generateJSon = function generateJSon(readedParameters, templateJson) {
 };
 
 qacInit.writeTemplate = function writeTemplate(inputFile, outputFile, vars) {
+    var cont;
     return fs.readFile(inputFile, {encoding: 'utf8'}).then(function(content) {
         for(var name in vars) {
             var value = vars[name];
             content = content.replace(new RegExp('{{'+name+'}}', 'g'), value);
         }
-        return fs.writeFile(outputFile, content);
+        cont = content;
+        return fs.writeFile(outputFile, cont);
+    }).then(function() {
+       return cont; 
     });
 };
 
@@ -194,9 +198,15 @@ function selectDeps(depGroup, packages) {
     return selectedDeps;
 }
 
-/*
 qacInit.init = function init(initParams) {
+    var out = process.stdout;
     var inputParams;
+    var tplData = {
+        vars: {},
+        tpls: [],
+        other: []
+    };
+    var packageJS;
     return qacInit.initDefaults(initParams).then(function(initResult) {
         inputParams = initResult; //console.log("inputParams", inputParams);
         var configParams = [
@@ -293,12 +303,52 @@ qacInit.init = function init(initParams) {
             }
         ];
         return qacInit.readParameters(inputParams, configParams);
-    }).then(function(result) {
-        console.log("res",result);
+    }).then(function(data) {
+        //console.log("res",data);
+        packageJS = data;
+        delete packageJS['qa-control-version'];
+        out.write(inputParams.msgs.msg_creating+' package.json...\n');
+        return fs.writeJson(Path.resolve(inputParams.outDir+'/package.json'), packageJS);
+    }).then(function() {
+        tplData.vars.name = packageJS.name;
+        tplData.vars.description = packageJS.description;
+        var now = new Date();
+        tplData.vars.year = now.getFullYear();
+        var cucardas=qaControl.projectDefinition[packageJS['qa-control']['package-version']].cucardas;
+        tplData.vars.cucardas = qaControl.generateCucardas(cucardas, packageJS);
+        tplData.vars.author = packageJS.author;
+        //console.log("tplData.vars", tplData.vars)
+        out.write(inputParams.msgs.msg_creating+'...\n');
+        return fs.readdir(inputParams.tplDir);
+    }).then(function(files) {
+        tplData.tpls = files.filter(function(file) { return file.match(/(.tpl)$/); });
+        tplData.other = files.filter(function(file) { return tplData.tpls.indexOf(file) < 0 })
+        //console.log("tplData", tplData);
+        return Promises.all(tplData.other.map(function(file){
+            var oFile = file;
+            if(file.match(/^(dot-)/)) { oFile = '.'+file.substring(4); }
+            out.write('  '+inputParams.msgs.msg_copying+' '+oFile+'...\n');
+            return fs.copy(Path.resolve(inputParams.tplDir+'/'+file), Path.resolve(inputParams.outDir+'/'+oFile));                
+        }));
+    }).then(function() {
+        return Promises.all(tplData.tpls.map(function(file) {
+            var oFile = file.substr(0, file.length-4); // removemos '.tpl'
+            out.write('  '+inputParams.msgs.msg_generating+' '+oFile+'...\n');
+            return qacInit.writeTemplate(Path.resolve(inputParams.tplDir+'/'+file),Path.resolve(inputParams.outDir+'/'+oFile), tplData.vars).then(function(out) {
+                //console.log("out", out);
+            });
+        }));
+    }).then(function() {
+        return fs.readFile(Path.resolve(inputParams.outDir+'/LEEME.md'), {encoding: 'utf8'});
+    }).then(function(leemeContent) {
+        var readmeMD = Path.resolve(inputParams.outDir+'/README.md');
+        out.write(inputParams.msgs.msg_generating+' '+readmeMD+'...\n');
+        var readme = multilang.changeNamedDoc(readmeMD, leemeContent, 'en');
+        return fs.writeFile(readmeMD, multilang.stripComments(readme));
     });
 };
-*/
 
+/*
 function initPackageJson(outDir, initFile, configData) {
     return Promises.make(function(resolve, reject) {
         init(outDir, initFile, configData, function (er, data) {
@@ -409,5 +459,5 @@ qacInit.init = function init(params) {
         }));
     });
 };
-
+*/
 module.exports = qacInit;
