@@ -429,7 +429,8 @@ var fixtures=[{
     scoring:true,
     change:function(info){
         info.files['stable-project.js'].content = info.files['stable-project.js'].content.replace("/*eslint-disable no-console */\n", "");
-        info.packageJson['qa-control']['package-version']='0.0.2';
+        info.usedDefinition = '0.0.2';
+        info.packageJson['qa-control']['package-version']=info.usedDefinition;  
     },
     expected: []
 }];
