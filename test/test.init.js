@@ -402,8 +402,23 @@ describe/*.only*/("qa-control --init", function(){
         });
     });
     describe("generation", function(){
+        function loadDir(fullPath) {
+            var info = {};
+            return fs.readdir(fullPath).then(function(files) {
+                return Promises.all(files.map(function(file){
+                    var fPath = Path.normalize(fullPath+'/'+file);
+                    return fs.readFile(fPath, {encoding:'utf8'}).then(function(content) {
+                        info[file] = content;
+                    });
+                }));
+            }).then(function() {
+                return info;
+            });
+        }
         it('init', function(done) {
             var outDir = Path.resolve(helper.dirbase+'/gen-init');
+            var testDir = Path.resolve('./test/fixtures-init/initialized');
+            var infoGen, infoTest;
             sinon.stub(qci, 'promptForVar', function(param, msgs) {
                 //console.log("PFV", param)
                 var ret=param.def;
@@ -416,6 +431,18 @@ describe/*.only*/("qa-control --init", function(){
             fs.mkdir(outDir).then(function() {
                 return qci.init({projectDir:outDir});
             }).then(function() {
+                return loadDir(outDir);
+            }).then(function(info) {
+                infoGen = info;
+                return loadDir(testDir);                
+            }).then(function(info) {
+               infoTest = info;
+               //console.log("gen", infoGen); console.log("test", infoTest);
+               for(var file in infoTest) {
+                   expect(file in infoGen).to.be.ok();
+                   //console.log("file", file);
+                   expect(infoTest[file].content).to.eql(infoGen[file].content);
+               }
                qci.promptForVar.restore();
                done(); 
             }).catch(function(err) {
