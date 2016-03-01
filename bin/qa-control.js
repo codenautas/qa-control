@@ -246,6 +246,12 @@ qaControl.loadProject = function loadProject(projectDir) {
             }
         });
     }).then(function() {
+        var verCheck = ((info.packageJson || {})['qa-control'] || {})['package-version'];
+        //console.log("verCheck", verCheck)
+        if(verCheck && ! (verCheck in qaControl.projectDefinition)) {
+            throw new Error("inexistent qa-control version: "+verCheck);
+        }
+        info.usedDefinition = (verCheck in qaControl.projectDefinition) ? verCheck : qaControl.currentVersion;
         return info;
     });
 };
@@ -254,14 +260,7 @@ qaControl.controlInfo=function controlInfo(info, opts){
     var resultWarnings=[];
     var existingWarnings={};
     var cmsgs = qaControl.cmdMsgs[qaControl.lang];
-    //var rules = (qaControl.projectDefinition[((info.packageJson||{})['qa-control']||{})['package-version']||qaControl.currentVersion]||qaControl.projectDefinition[qaControl.currentVersion]).rules;
-    var verCheck = ((info.packageJson || {})['qa-control'] || {})['package-version'];
-    // console.log("verCheck", verCheck)
-    // if(verCheck && ! (verCheck in qaControl.projectDefinition)) {
-        // throw new Error("inexistent qa-control version: "+verCheck);
-    // }
-    var usedDefinition = (verCheck in qaControl.projectDefinition) ? verCheck : qaControl.currentVersion;
-    var rules = qaControl.projectDefinition[usedDefinition].rules;
+    var rules = qaControl.projectDefinition[info.usedDefinition].rules;
     if(qaControl.verbose) { process.stdout.write(cmsgs.msg_controlling+usedDefinition+"...\n"); }
     var cadenaDePromesas = Promises.start();
     info.scoring = opts && opts.scoring;

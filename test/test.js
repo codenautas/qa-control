@@ -458,7 +458,8 @@ describe('qa-control', function(){
                     'projectDir',
                     'files',
                     'packageJson',
-                    'dotTravis'
+                    'dotTravis',
+                    'usedDefinition'
                 ]);
                 expect(info.projectDir).to.eql(projDir);
                 expect(Object.keys(info.files)).to.eql(['.gitignore','.travis.yml','LEEME.md','LICENSE','README.md','appveyor.yml','package.json','simple.js','stable-project.js']);
@@ -582,8 +583,9 @@ describe('qa-control', function(){
                 done();
             });
         });
-        it.skip('must fail if qa-control version does not exists', function(done){
+        it('must fail if qa-control version does not exists', function(done){
             qaControl.loadProject('./test/fixtures/with-wrong-qa-control-version').then(function(info){
+                console.log(info)
                 done(info);
             }).catch(function(err) {
                 expect(err).to.match(/inexistent qa-control version/);
