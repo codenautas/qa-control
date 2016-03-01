@@ -227,38 +227,6 @@ describe/*.only*/("qa-control --init", function(){
                 done();                    
             });
         });
-        it("should handle errors produced by EMPTY values", function(done) {
-            sinon.stub(qci, 'promptForVar', function(param, msgs) {
-                if(param.name=='v2') { return Promises.resolve(''); }
-                return Promises.resolve(param.def);
-            });
-            var params = [ {name:'v1', def:'def1'}, {name:'v2', def:'def2'}];
-            qci.readParameters(dummyInput, params).then(function(result) {
-                done(result);
-            }).catch(function(err) {
-                qci.promptForVar.restore();
-                expect(err.message).to.eql('input_error');
-                expect(err.desc).to.eql('v2 '+qci.cmdMsgs.en['msg_error_empty']);
-                done();                    
-            }).catch(done);
-        });
-        it("should handle errors produced by WRONG values", function(done) {
-            sinon.stub(qci, 'promptForVar', function(param, msgs) {
-                return Promises.resolve(param.def);
-            });
-            var params = [
-                {name:'v1', def:'def1'},
-                {name:'v2', def:'def2', valid:function(value) { return value.match(/^([a-z])$/); }}
-            ];
-            qci.readParameters(dummyInput, params).then(function(result) {
-                done(result);
-            }).catch(function(err) {
-                qci.promptForVar.restore();
-                expect(err.message).to.eql('input_error');
-                expect(err.desc).to.eql('v2 '+qci.cmdMsgs.en['msg_error_invalid']);
-                done();                    
-            }).catch(done);
-        });
         it("should forward the context to parameters", function(done) {
             sinon.stub(qci, 'promptForVar', function(param, msgs) {
                 return Promises.resolve(param.def);

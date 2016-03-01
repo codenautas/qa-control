@@ -97,7 +97,7 @@ qacInit.initDefaults = function initDefaults(initParams) {
     });
 };
 
-function ask(param, msgs, callback) {
+qacInit.ask = function ask(param, msgs, callback) {
     var def = param.def ? ' ('+param.def+')' : '';
     var stdin = process.stdin;
     var stdout = process.stdout;
@@ -106,13 +106,18 @@ function ask(param, msgs, callback) {
     stdout.write(prompt+def+ ": ");
     stdin.once('data', function(data) {
         data = data.toString().trim();
-        callback(data !== '' ? data : param.def);
+        if(! param.valid || (data==='' || param.valid(data))) {
+            callback(data !== '' ? data : param.def);
+        } else {
+            stdout.write('"'+data+'" '+msgs.msg_error_invalid+'\n');
+            qacInit.ask(param, msgs, callback);
+        }
     });
 };
 
 qacInit.promptForVar = function promptForVar(param, msgs) {
     return Promises.make(function(resolve, reject) {
-        ask(param, msgs, function (data) {
+        qacInit.ask(param, msgs, function (data) {
             resolve(data);
         });
     });
@@ -127,14 +132,9 @@ function getParam(param, ctx) {
             return qacInit.promptForVar(param, ctx.input.msgs);
         }
     }).then(function(value) {
-        ctx.result[param.name] = value;
-        if(param.post) { ctx.result[param.name] = param.post(ctx); }
-        value = ctx.result[param.name];
-        if(value === '' || ! value) {
-            throw param.name+' '+ctx.input.msgs.msg_error_empty;
-        }
-        if(param.valid && ! param.valid(value)) {
-            throw param.name+' '+ctx.input.msgs.msg_error_invalid;
+        if(value!=='') {
+            ctx.result[param.name] = value;
+            if(param.post) { ctx.result[param.name] = param.post(ctx); }    
         }
     });
 };
@@ -218,7 +218,7 @@ qacInit.init = function init(initParams) {
             },{
                 name:'description', prompt:'Project description', def:'',
                 init: function(ctx) {
-                    this.def = ctx.input.existingJson.description; 
+                    this.def = ctx.input.existingJson.description || ctx.result['name']+' module'; 
                 }
             },{
                 name:'version', prompt:'Project version:', def:'',
