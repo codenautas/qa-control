@@ -4,7 +4,7 @@
 /*jshint node:true */
 /*eslint-disable no-console */
 
-var qaControl = {};
+var qaControl = {}; //eslint-disable-line no-unused-vars
 
 var Promises = require('best-promise');
 var fs = require('fs-promise');

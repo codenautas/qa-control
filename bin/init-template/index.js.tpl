@@ -4,6 +4,4 @@
 /*jshint node:true */
 /*eslint-disable no-console */
 
-var {{nameJS}} = {};
-
-module.exports = {{nameJS}};
+var {{nameJS}} = {}; //eslint-disable-line no-unused-vars

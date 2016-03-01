@@ -19,9 +19,8 @@ qacInit.cmdMsgs = {
         msg_creating: 'Creating files',
         msg_copying: 'Copying file',
         msg_generating: 'Generationg',
+        msg_running: 'Running',
         msg_finished: 'Project initialized',
-        msg_error: 'Input error',
-        msg_error_desc: '"description" field is mandatory',
         msg_canceled: 'Initialization canceled',
         msg_should_match: 'Input should match',
         msg_error_empty: 'cannot be empty',
@@ -32,9 +31,8 @@ qacInit.cmdMsgs = {
         msg_creating: 'Creando archivos',
         msg_copying: 'Creando archivo',
         msg_generating: 'Generando',
+        msg_running: 'Corriendo',
         msg_finished: 'Proyecto inicializado',
-        msg_error: 'Error en los argumentos',
-        msg_error_desc: 'El campo "description" es obligatorio',
         msg_canceled: 'Initialización cancelada',
         msg_should_match: 'La entrada debe estar en formato',
         msg_error_empty: 'no puede estar vacío',
@@ -347,6 +345,14 @@ qacInit.init = function init(initParams) {
         out.write(inputParams.msgs.msg_generating+' '+readmeMD+'...\n');
         var readme = multilang.changeNamedDoc(readmeMD, leemeContent, 'en');
         return fs.writeFile(readmeMD, multilang.stripComments(readme));
+    }).then(function() {
+        out.write(inputParams.msgs.msg_running+' QA-control... ');
+        return qaControl.controlProject(inputParams.outDir, initParams);
+    }).then(function(warns) {
+        return qaControl.stringizeWarnings(warns, qaControl.lang);
+    }).then(function(warnString) {
+        out.write((warnString !== '') ? '\n'+warnString : 'ok');
+        out.write('\n');
     });
 };
 
