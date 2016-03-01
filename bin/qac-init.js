@@ -134,7 +134,7 @@ function getParam(param, ctx) {
     }).then(function(value) {
         if(value!=='') {
             ctx.result[param.name] = value;
-            if(param.post) { ctx.result[param.name] = param.post(ctx); }    
+            if(param.post) { ctx.result[param.name] = param.post(ctx); }
         }
     });
 };
@@ -214,7 +214,8 @@ qacInit.init = function init(initParams) {
                 name:'name', prompt:'Project name', def:'def1',
                 init:function(ctx) {
                     this.def = ctx.input.existingJson.name ? ctx.input.existingJson.name : Path.basename(ctx.input.outDir);
-                }
+                },
+                valid:function(name) { return name.match(/^([a-z]+[a-z0-9.-]*[a-z0-9]+)$/); }
             },{
                 name:'description', prompt:'Project description', def:'',
                 init: function(ctx) {
@@ -230,10 +231,14 @@ qacInit.init = function init(initParams) {
                 name:'author', def:'',
                 init: function(ctx) {
                     this.def = ctx.input.existingJson.author || 'Codenautas <codenautas@googlegroups.com>';
-                }
+                },
+                valid:function(author) { return author.match(/^([a-zA-Z]+ <[a-z]+@[.a-z0-9]+>)$/); }
             },{
                 name:'license', def:'',
-                init: function(ctx) { this.def = ctx.input.qacJson.license; }
+                init: function(ctx) { this.def = ctx.input.qacJson.license; },
+                valid:function(lic) {
+                    return lic.match(/^([a-zA-Z]+[A-Za-z0-9.-]*[A-Za-z0-9]+)$/);
+                }
             },{
                 name:'repository', def:'',
                 init: function(ctx) {
@@ -245,19 +250,21 @@ qacInit.init = function init(initParams) {
                 }
             },{
                 name:'contributors', prompt: 'Add contributor (name: email)', def:'',
+                parseNE:function(nameAndEmail) {
+                    var nae = nameAndEmail.split(':');
+                    if(nae.length===2) { return {name: nae[0].trim(), email: nae[1].trim()}; }
+                    return null;
+                },
                 post: function(ctx) {
                     var contributors = ctx.input.existingJson.contributors || [];
-                    var nae = ctx.result[this.name].split(':');
-                    if(nae.length===2) {
-                        var name = nae[0].trim();
-                        var email = nae[1].trim();
-                        if(name === '' || ! email.match(/^(.+@.+)$/)) {
-                            process.stderr.write('Invalid contributor data\n');
-                        } else {
-                            contributors.push({'name':name, 'email':email});
-                        }
-                    }
+                    var nae = this.parseNE(ctx.result[this.name]);
+                    contributors.push({'name':nae.name, 'email':nae.email});
                     return contributors.length ? contributors : null;
+                },
+                valid:function(nameAndEmail) {
+                    var nae = this.parseNE(nameAndEmail);
+                    if(nae) { return nae.name.match(/^([A-Za-z]+[a-z0-9.-]*[a-z0-9]+)$/) && nae.email.match(/^(.+@.+)$/); }
+                    return false;
                 }
             },{
                 name:'main', def:'index.js', noPrompt:true
