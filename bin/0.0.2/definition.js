@@ -443,14 +443,8 @@ module.exports = function(qaControl){
                         var whichType=qaControlSection.type;
                         var firstLines=qaControl.projectDefinition[info.packageVersion].firstLines[whichRunIn][whichType];
                         if(firstLines) {
-                            var parts = info.packageJson.name.split('-');
-                            var first=function(toWhat){
-                                return function(part){
-                                    return part.substring(0, 1)[toWhat]()+part.substring(1);
-                                };
-                            };
-                            var ProjectName = parts.map(first("toUpperCase")).join('');
-                            var projectName = first("toLowerCase")(ProjectName);
+                            var ProjectName = qaControl.jsProjectName(info.packageJson.name);
+                            var projectName = qaControl.first("toLowerCase")(ProjectName);
                             var mainName = ('main' in info.packageJson) ? info.packageJson.main : 'index.js';
                             if(!(mainName in info.files)) {
                                 warns.push({warning:'packagejson_main_file_1_does_not_exists', params:[mainName], scoring:{customs:1}});

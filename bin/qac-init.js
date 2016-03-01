@@ -311,6 +311,7 @@ qacInit.init = function init(initParams) {
         return fs.writeJson(Path.resolve(inputParams.outDir+'/package.json'), packageJS);
     }).then(function() {
         tplData.vars.name = packageJS.name;
+        tplData.vars.nameJS = qaControl.jsProjectName(packageJS.name);
         tplData.vars.description = packageJS.description;
         var now = new Date();
         tplData.vars.year = now.getFullYear();

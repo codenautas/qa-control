@@ -4,6 +4,6 @@
 /*jshint node:true */
 /*eslint-disable no-console */
 
-var nombreDelModulo = {};
+var {{nameJS}} = {};
 
-module.exports = nombreDelModulo;
+module.exports = {{nameJS}};
