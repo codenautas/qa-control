@@ -4,5 +4,3 @@
 /*jshint node:true */
 
 var nombreDelModulo = {};
-
-module.exports = nombreDelModulo;

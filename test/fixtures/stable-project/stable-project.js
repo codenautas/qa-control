@@ -4,11 +4,10 @@
 /*jshint node:true */
 /*eslint-disable no-console */
 
-var StableProject = {};
+var stableProject = {};
 
-module.exports = StableProject;
-
-StableProject.fun = function(){
+stableProject.fun = function(){
     return "fun";
 };//; don't remove this comment. It is for test issue #26
 
+module.exports = stableProject;

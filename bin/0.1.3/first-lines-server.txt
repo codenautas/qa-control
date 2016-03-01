@@ -5,5 +5,3 @@
 /*eslint-disable no-console */
 
 var nombreDelModulo = {};
-
-module.exports = nombreDelModulo;
