@@ -4,7 +4,9 @@
 /*jshint node:true */
 /*eslint-disable no-console */
 
-var qaControl = {}; //eslint-disable-line no-unused-vars
+var qaControl = {};
+
+module.exports = qaControl;
 
 var Promises = require('best-promise');
 var fs = require('fs-promise');
@@ -361,4 +363,3 @@ qaControl.main=function main(parameters) {
     });
 };
 
-module.exports = qaControl;

@@ -4,4 +4,6 @@
 /*jshint node:true */
 /*eslint-disable no-console */
 
-var nombreDelModulo = {}; //eslint-disable-line no-unused-vars
+var nombreDelModulo = {};
+
+module.exports = nombreDelModulo;

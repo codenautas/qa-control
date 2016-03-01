@@ -4,4 +4,6 @@
 /*jshint node:true */
 /*eslint-disable no-console */
 
-var stableProject = {}; //eslint-disable-line no-unused-vars
+var stableProject = {};
+
+module.exports = stableProject;

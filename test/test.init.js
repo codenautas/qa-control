@@ -7,7 +7,8 @@ var Promises = require('best-promise');
 var fs = require('fs-promise');
 var Path = require('path');
 var sinon = require('sinon');
-var qci = require('../bin/qac-init.js')
+var qci = require('../bin/qac-init.js');
+var helper = require('./test.helper.js');
 
 function clonar(obj) { return JSON.parse(JSON.stringify(obj)); }
 
@@ -395,6 +396,26 @@ describe/*.only*/("qa-control --init", function(){
             var generatedGroup = qci.selectDeps(groupWithDeps, selected);
             expect(generatedGroup).to.eql({k2:'va2', k4:'va4', k5:'va5'});
             done(); 
+        }, function(err) {
+            done(err);
+        });
+    });
+    describe.skip("generation", function(){
+        it('--init', function(done){
+            var readedParams = {
+                'name': 'fixed name',
+                'description': 'fixed description',
+                'engines': {node: ">= 4.0.0"}
+            }
+            var resJson = clonar(qacPackageJson);
+            resJson['name'] = readedParams.name;
+            resJson['description'] = readedParams.description;
+            resJson['engines']= readedParams.engines;
+            qci.generateJSon(readedParams, qacPackageJson).then(function(generatedJson) {
+               //console.log(generatedJson);
+               expect(generatedJson).to.eql(resJson);
+               done(); 
+            });
         }, function(err) {
             done(err);
         });
