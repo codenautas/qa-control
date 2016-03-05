@@ -464,6 +464,7 @@ module.exports = function(qaControl){
                                                 console.log('DIF STARTS IN:',JSON.stringify(code.substring(i, Math.min(model1.length, i+20))));
                                                 console.log('MODEL 1      :',JSON.stringify(model1.substring(i, Math.min(model1.length, i+20))));
                                                 console.log('MODEL 2      :',JSON.stringify(model2.substring(i, Math.min(model1.length, i+20))));
+                                                console.log('FOR MODULE NAME:',projectName,'OR',ProjectName);
                                                 break;
                                             }
                                         }

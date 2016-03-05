@@ -6,8 +6,6 @@
 
 var qacInit = {};
 
-module.exports = qacInit;
-
 var Promises = require('best-promise');
 var fs = require('fs-promise');
 var Path = require('path');
@@ -365,4 +363,6 @@ qacInit.init = function init(initParams) {
         echo('\n'+inputParams.msgs.msg_finished+'\n');
     });
 };
+
+module.exports = qacInit;
 

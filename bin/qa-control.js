@@ -6,8 +6,6 @@
 
 var qaControl = {};
 
-module.exports = qaControl;
-
 var Promises = require('best-promise');
 var fs = require('fs-promise');
 var Path = require('path');
@@ -362,4 +360,6 @@ qaControl.main=function main(parameters) {
         }        
     });
 };
+
+module.exports = qaControl;
 
