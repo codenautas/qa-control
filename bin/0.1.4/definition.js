@@ -691,6 +691,11 @@ module.exports = function(qaControl){
                                         && prevLine && prevLine.match(/{$/))
                                     {
                                         if(! trimLine.match(/"use strict";/)) {
+                                            if(qaControl.verbose){
+                                                console.log('['+file+']');
+                                                console.log('  '+(l-1)+':"'+prevLine+'"');
+                                                console.log('  '+(l)+':"'+line+'"');
+                                            }
                                             warns.push({warning:'wrong_use_strict_spelling_in_file_1', params:[file], scoring:{customs:1}});
                                         }
                                     }

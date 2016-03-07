@@ -417,12 +417,20 @@ var fixtures=[{
     base:'stable-project-qac-last-version',
     title:'must reject files without correct "use strict" (#43)',
     test:'wrong_use_strict_spelling_in_file_1',
+    skipped: true,
     change:function(info){
-        info.files['simple.js'].content = info.files['simple.js'].content.replace("\tuse strict", "use spirit");
+        info.files['simple.js'].content = info.files['simple.js'].content.replace("use strict", "use spirit");
     },
     expected:[
         { warning:'wrong_use_strict_spelling_in_file_1',params:['simple.js'] }
     ]
+},{
+    base:'stable-project-qac-last-version',
+    title:'must accept strings in object definitions instead of generate "use strict" warning (#51)',
+    test:'wrong_use_strict_spelling_in_file_1',
+    skipped: true,
+    change:function(info) {},
+    expected:[]
 },{
     base:'stable-project',
     title:'coverage for version "0.0.2"',

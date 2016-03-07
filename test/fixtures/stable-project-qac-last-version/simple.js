@@ -4,11 +4,19 @@
 /*jshint node:true */
 /*eslint-disable no-console */
 
+var obj = {
+    prop: {
+        "subprop1":1,
+        'subprop2':2
+    }
+
+};
+
 function fn() {
-    "use strict;";
-    return 3;
+    return 3+obj.prop.subprop2;
 }
 
 var f = fn();
 
 f += 2;
+
