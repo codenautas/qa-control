@@ -6,13 +6,17 @@
 
 var obj = {
     prop: {
-        "subprop1":1,
-        'subprop2':2
+        'subprop1':1
+    },
+    prop2: {
+        "subprop2":2,
+        'subprop3':3
     }
 
 };
 
 function fn() {
+    //USE_STRICT_MARK
     return 3+obj.prop.subprop2;
 }
 

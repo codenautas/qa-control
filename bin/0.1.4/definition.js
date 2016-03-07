@@ -687,8 +687,12 @@ module.exports = function(qaControl){
                                     var line = lines[l];
                                     var trimLine = line.replace(/^(\s+)/,'');
                                     //console.log("line:"+l, '['+line+']', "trimmed", '['+trimLine+']', "prev", '['+prevLine+']');
-                                    if(trimLine.length>0 && trimLine[0].match(/['"']/)
-                                        && prevLine && prevLine.match(/{$/))
+                                    if(trimLine.length>0
+                                        && trimLine[0].match(/['"']/)
+                                        && prevLine
+                                        && prevLine.match(/{$/)
+                                        && ! prevLine.match(/[a-zA-Z0-9_]+\s?:/)
+                                        )
                                     {
                                         if(! trimLine.match(/"use strict";/)) {
                                             if(qaControl.verbose){
