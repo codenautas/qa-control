@@ -26,4 +26,3 @@ también disponible en:
 
 [MIT](LICENSE)
 
-----------------

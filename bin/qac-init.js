@@ -274,7 +274,7 @@ qacInit.init = function init(initParams) {
             },{
                 name:'devDependencies', def:'', noPrompt:true,
                 init: function(ctx) {
-                    this.def = qacInit.selectDeps(ctx.input.qacJson['devDependencies'], ['expect.js', 'istanbul', 'mocha', 'expect-called']);
+                    this.def = qacInit.selectDeps(ctx.input.qacJson['devDependencies'], ['expect.js', 'istanbul', 'mocha']);
                 }
             },{
                 name:'engines', def:'', noPrompt:true, init: function(ctx) { this.def = ctx.input.qacJson['engines']; }

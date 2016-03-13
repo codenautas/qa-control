@@ -16,12 +16,12 @@
   "main": "./bin/qa-control.js",
   "dependencies": {
     "commander": "2.9.0",
-    "eslint": "1.10.3",
-    "fs-extra": "0.26.3",
-    "fs-promise": "0.3.1",
-    "js-yaml": "3.4.6",
+    "eslint": "2.4.0",
+    "fs-extra": "0.26.5",
+    "fs-promise": "0.5.0",
+    "js-yaml": "3.5.4",
     "jshint": "2.8.0",
-    "lodash": "3.10.1",
+    "lodash": "4.6.1",
     "parameters": "0.1.5",
     "semver": "5.1.0",
     "strip-bom": "2.0.0",
@@ -30,10 +30,10 @@
     "multilang": "1.0.11"
   },
   "devDependencies": {
-    "expect.js": ">=0.3.1",
-    "istanbul": "0.4.1",
-    "mocha": "2.3.4",
-    "sinon": "^1.17.2",
+    "expect.js": "~0.3.1",
+    "istanbul": "~0.4.2",
+    "mocha": "~2.4.5",
+    "sinon": "~1.17.3",
 
     "expect-called": ">=0.4.0"
   },
