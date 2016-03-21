@@ -229,17 +229,15 @@ qacInit.init = function init(initParams) {
                 },
                 valid:function(ver) { return semver.valid(ver); }
             },{
+                name:'organization', def:'codenautas', temporary:true,
+                valid:function(org) { return org.match(/^([a-zA-Z][a-zA-Z]+)$/); }
+            },{
                 name:'author', prompt:'Author (FirstN[ LastL] <EMail>)', def:'',
                 init: function(ctx) {
-                    this.def = ctx.input.existingJson.author || 'Codenautas <codenautas@googlegroups.com>';
+                    this.def = ctx.input.existingJson.author
+                               || (ctx.result.organization == 'codenautas' ? 'Codenautas <codenautas@googlegroups.com>' : '');
                 },
                 valid:function(author) { return author.match(/^([a-zA-Z]+( [a-zA-Z]+)? <[a-z]+@[.a-z0-9]+>)$/); }
-            },{
-                name:'license', def:'',
-                init: function(ctx) { this.def = ctx.input.qacJson.license; },
-                valid:function(lic) {
-                    return lic.match(/^([a-zA-Z]+[A-Za-z0-9.-]*[A-Za-z0-9]+)$/);
-                }
             },{
                 name:'repository', def:'',
                 init: function(ctx) {
@@ -247,7 +245,13 @@ qacInit.init = function init(initParams) {
                     this.def = repo ? repo.url ?
                                         repo.url.substring(4, repo.url.length-4)
                                         : repo
-                                    : 'codenautas/'+ctx.result.name;
+                                    : ctx.result.organization+'/'+ctx.result.name;
+                }
+            },{
+                name:'license', def:'',
+                init: function(ctx) { this.def = ctx.input.qacJson.license; },
+                valid:function(lic) {
+                    return lic.match(/^([a-zA-Z]+[A-Za-z0-9.-]*[A-Za-z0-9]+)$/);
                 }
             },{
                 name:'contributors', prompt: 'Add contributor (name: email)', def:'',
