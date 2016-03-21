@@ -199,10 +199,11 @@ qacInit.selectDeps = function selectDeps(depGroup, packages) {
 }
 
 qacInit.re = {
-    alpha      : /^([a-zA-Z][a-zA-Z]+)$/,
-    alnumex    : /^([a-z]+[a-z0-9.-]*[a-z0-9]+)$/,
-    alnumexcml : /^([A-Z]+[A-Za-z0-9.-]*[A-Za-z0-9]+)$/, // Debe empezar con mayusculas
-    email      : /<?[a-z]+@[.a-z0-9]+>?/ // muy mejorable
+    name      : /^([a-zA-Z][a-zA-Z]+)$/,                            // alpha, minusculas
+    namex    : /^([a-z]+[a-z0-9-]*[a-z0-9]+)$/,                     // alnum+'-', minusculas
+    namexs    : /^([a-z]+[a-z0-9.-]*[a-z0-9]+)$/,                   // alnum+'-'+'.', minusculas 
+    namexcml : /^([A-Z]+[A-Za-z0-9.-]*[A-Za-z0-9]+)$/,              // alnum+'-'+'.', minusculas, primera en mayusculas
+    email      : /^(<?[A-Za-z]+[a-z0-9.]+@[a-z0-9]+\.[a-z0-9]+>?)$/ // muy mejorable
 };
 
 qacInit.init = function init(initParams) {
@@ -237,7 +238,7 @@ qacInit.init = function init(initParams) {
                 valid:function(ver) { return semver.valid(ver); }
             },{
                 name:'organization', def:'codenautas', temporary:true,
-                valid:function(org) { return org.match(qacInit.re.alpha); }
+                valid:function(org) { return org.match(qacInit.re.names); }
             },{
                 name:'author', prompt:'Author (FirstN[ LastL] <EMail>)', def:'',
                 init: function(ctx) {
@@ -250,7 +251,7 @@ qacInit.init = function init(initParams) {
                     if(np != 2 && np != 3) { return false; }
                     var p=0;
                     // first and optional last name
-                    for( ; p<np-1; ++p) { if(! pts[p].match(qacInit.re.alpha)) { return false; } }
+                    for( ; p<np-1; ++p) { if(! pts[p].match(qacInit.re.name)) { return false; } }
                     // last should be e-mail
                     return pts[p].match(qacInit.re.email);
                 }

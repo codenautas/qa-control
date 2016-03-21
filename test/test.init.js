@@ -388,6 +388,54 @@ describe/*.only*/("qa-control --init", function(){
             done(err);
         });
     });
+    describe("regular expressions", function(){
+        it('names', function(done){
+            expect('pepe').to.match(qci.re.name);
+            expect('Pepe').to.match(qci.re.name);
+            expect('P').not.to.match(qci.re.name);
+            expect('P3').not.to.match(qci.re.name);
+            expect('_pepe_').not.to.match(qci.re.name);
+            
+            expect('pepe').to.match(qci.re.namex);
+            expect('pepe-sanchez').to.match(qci.re.namex);
+            expect('pepewithwith-slash').to.match(qci.re.namex);
+            expect('p').not.to.match(qci.re.namex);
+            expect('P').not.to.match(qci.re.namex);
+            
+            expect('pepe').to.match(qci.re.namexs);
+            expect('pepe-sanchez').to.match(qci.re.namexs);
+            expect('pepewith-slashesand.dot').to.match(qci.re.namexs);
+            expect('P').not.to.match(qci.re.namexs);
+            expect('pa').to.match(qci.re.namexs);
+            expect('pepe1').to.match(qci.re.namexs);
+            expect('pepe2').to.match(qci.re.namexs);
+            
+            expect('pepe').not.to.match(qci.re.namexcml);
+            expect('pepe-sanchez').not.to.match(qci.re.namexcml);
+            expect('pepewith-slashesand.dot').not.to.match(qci.re.namexcml);
+            expect('P').not.to.match(qci.re.namexcml);
+            expect('Pa').to.match(qci.re.namexcml);
+            expect('Pepe1').to.match(qci.re.namexcml);
+            expect('pepe2').not.to.match(qci.re.namexcml);
+            
+            done(); 
+        }, function(err) {
+            done(err);
+        });
+       it('e-mail', function(done){
+            expect('pepe@server').not.to.match(qci.re.email);
+            expect('pepe@server.dom').to.match(qci.re.email);
+            expect('<pepe@server.dom>').to.match(qci.re.email);
+            expect('pepe.sanchez@server.dom').to.match(qci.re.email);
+            expect('Pepe.sanchez@server.dom').to.match(qci.re.email);
+            expect('<Pepe.sanchez@server.dom>').to.match(qci.re.email);
+            // hay que mejorarla para que falle con el siguiente
+            // expect('<Pepe.sanchez@server.dom').not.to.match(qci.re.email);
+            done(); 
+        }, function(err) {
+            done(err);
+        });
+    });
     describe("generation", function(){
         function loadDir(fullPath) {
             var info = {};
