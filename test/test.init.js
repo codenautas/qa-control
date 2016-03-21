@@ -227,6 +227,20 @@ describe/*.only*/("qa-control --init", function(){
                 done();                    
             });
         });
+        it("should default values for valid input", function(done) {
+            sinon.stub(qci, 'promptForVar', function(param, msgs) {
+                if(param.name=='v2') { return Promises.reject('dummy error'); }
+                return Promises.resolve(param.def);
+            });
+            var params = [ {name:'v1', def:'def1'}, {name:'v2', def:'def2'}];
+            qci.readParameters({}, params).then(function(result) {
+                done(result);
+            }).catch(function(err) {
+                qci.promptForVar.restore();
+                expect(err).to.eql({message:'input_error', desc:'dummy error'});
+                done();                    
+            });
+        });
         it("should forward the context to parameters", function(done) {
             sinon.stub(qci, 'promptForVar', function(param, msgs) {
                 return Promises.resolve(param.def);

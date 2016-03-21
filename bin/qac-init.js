@@ -96,7 +96,8 @@ qacInit.initDefaults = function initDefaults(initParams) {
 };
 
 qacInit.ask = function ask(param, msgs, callback) {
-    var def = param.def ? ' ('+param.def+')' : '';
+    //if(param.valid) { console.log("param", param, "valid:", param.valid(param.def) ? "true" : "false");  }
+    var def = param.def && (! param.valid || param.valid(param.def)) ? ' ('+param.def+')' : '';
     var stdin = process.stdin;
     var stdout = process.stdout;
     stdin.resume();
@@ -104,8 +105,9 @@ qacInit.ask = function ask(param, msgs, callback) {
     stdout.write(prompt+def+ ": ");
     stdin.once('data', function(data) {
         data = data.toString().trim();
-        if(! param.valid || (data==='' || param.valid(data))) {
-            callback(data !== '' ? data : param.def);
+        if(data === '') { data = param.def; }
+        if((param.valid && param.valid(data)) || (! param.valid  && data !== '')) {
+            callback(data);
         } else {
             stdout.write('"'+data+'" '+msgs.msg_error_invalid+'\n');
             qacInit.ask(param, msgs, callback);
@@ -215,6 +217,12 @@ qacInit.init = function init(initParams) {
         tpls: [],
         other: []
     };
+    function validName(nameparts) {
+        for(var n in nameparts) {
+            if(! nameparts[n].match(qacInit.re.name)) { return false; }
+        }
+        return true;
+    }
     var packageJS;
     return qacInit.initDefaults(initParams).then(function(initResult) {
         inputParams = initResult; //console.log("inputParams", inputParams);
@@ -224,7 +232,7 @@ qacInit.init = function init(initParams) {
                 init:function(ctx) {
                     this.def = ctx.input.existingJson.name ? ctx.input.existingJson.name : Path.basename(ctx.input.outDir);
                 },
-                valid:function(name) { return name.match(qacInit.re.alphaex); }
+                valid:function(name) { return name.match(qacInit.re.namex); }
             },{
                 name:'description', prompt:'Project description', def:'',
                 init: function(ctx) {
@@ -238,7 +246,7 @@ qacInit.init = function init(initParams) {
                 valid:function(ver) { return semver.valid(ver); }
             },{
                 name:'organization', def:'codenautas', temporary:true,
-                valid:function(org) { return org.match(qacInit.re.names); }
+                valid:function(org) { return org.match(qacInit.re.namex); }
             },{
                 name:'author', prompt:'Author (FirstN[ LastL] <EMail>)', def:'',
                 init: function(ctx) {
@@ -247,13 +255,7 @@ qacInit.init = function init(initParams) {
                 },
                 valid:function(author) {
                     var pts = author.split(' ');
-                    var np = pts.length;
-                    if(np != 2 && np != 3) { return false; }
-                    var p=0;
-                    // first and optional last name
-                    for( ; p<np-1; ++p) { if(! pts[p].match(qacInit.re.name)) { return false; } }
-                    // last should be e-mail
-                    return pts[p].match(qacInit.re.email);
+                    return validName(pts.slice(0, pts.length-1)) &&  pts[pts.length-1].match(qacInit.re.email);
                 }
             },{
                 name:'repository', def:'',
@@ -267,13 +269,13 @@ qacInit.init = function init(initParams) {
             },{
                 name:'license', def:'',
                 init: function(ctx) { this.def = ctx.input.qacJson.license; },
-                valid:function(lic) { return lic.match(qacInit.re.alphaexcml); }
+                valid:function(lic) { return lic.match(qacInit.re.namexcml); }
             },{
-                name:'contributors', prompt: 'Add contributor (name: email)', def:'',
+                name:'contributors', prompt: 'Add contributor (Name: email)', def:'',
                 parseNE:function(nameAndEmail) {
                     var nae = nameAndEmail.split(':');
                     if(nae.length===2) { return {name: nae[0].trim(), email: nae[1].trim()}; }
-                    return null;
+                    return false;
                 },
                 post: function(ctx) {
                     var contributors = ctx.input.existingJson.contributors || [];
@@ -282,8 +284,11 @@ qacInit.init = function init(initParams) {
                     return contributors.length ? contributors : null;
                 },
                 valid:function(nameAndEmail) {
+                    if(nameAndEmail==='') { return true; }
                     var nae = this.parseNE(nameAndEmail);
-                    if(nae) { return nae.name.match(qacInit.re.alphaexcml) && nae.email.match(qacInit.re.email); }
+                    if(nae) {
+                        return validName(nae.name.split(' ')) && nae.email.match(qacInit.re.email);
+                    }
                     return false;
                 }
             },{
@@ -309,7 +314,6 @@ qacInit.init = function init(initParams) {
             },{
                 name:'qa-control-version', prompt: 'qa-control package-version', def:'',
                 init: function(ctx) {
-                    //console.log("QAC", ctx.input.qacJson['qa-control'])
                     this.def = ctx.input.qacJson['qa-control']['package-version'];
                 },
                 post: function(ctx) {
