@@ -286,9 +286,7 @@ qacInit.init = function init(initParams) {
                 valid:function(nameAndEmail) {
                     if(nameAndEmail==='') { return true; }
                     var nae = this.parseNE(nameAndEmail);
-                    if(nae) {
-                        return validName(nae.name.split(' ')) && nae.email.match(qacInit.re.email);
-                    }
+                    if(nae) { return validName(nae.name.split(' ')) && nae.email.match(qacInit.re.email); }
                     return false;
                 }
             },{
@@ -391,4 +389,3 @@ qacInit.init = function init(initParams) {
 };
 
 module.exports = qacInit;
-
