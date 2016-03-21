@@ -220,17 +220,17 @@ qacInit.init = function init(initParams) {
                     this.def = ctx.input.existingJson.description || ctx.result['name']+' module'; 
                 }
             },{
-                name:'version', prompt:'Project version:', def:'',
+                name:'version', prompt:'Project version', def:'',
                 init: function(ctx) {
                     this.def = ctx.input.existingJson.version || '0.0.1';
                 },
                 valid:function(ver) { return semver.valid(ver); }
             },{
-                name:'author', def:'',
+                name:'author', prompt:'Author (FirstN[ LastL] <EMail>)', def:'',
                 init: function(ctx) {
                     this.def = ctx.input.existingJson.author || 'Codenautas <codenautas@googlegroups.com>';
                 },
-                valid:function(author) { return author.match(/^([a-zA-Z]+ <[a-z]+@[.a-z0-9]+>)$/); }
+                valid:function(author) { return author.match(/^([a-zA-Z]+( [a-zA-Z]+)? <[a-z]+@[.a-z0-9]+>)$/); }
             },{
                 name:'license', def:'',
                 init: function(ctx) { this.def = ctx.input.qacJson.license; },
