@@ -198,6 +198,13 @@ qacInit.selectDeps = function selectDeps(depGroup, packages) {
     return selectedDeps;
 }
 
+qacInit.re = {
+    alpha      : /^([a-zA-Z][a-zA-Z]+)$/,
+    alnumex    : /^([a-z]+[a-z0-9.-]*[a-z0-9]+)$/,
+    alnumexcml : /^([A-Z]+[A-Za-z0-9.-]*[A-Za-z0-9]+)$/, // Debe empezar con mayusculas
+    email      : /<?[a-z]+@[.a-z0-9]+>?/ // muy mejorable
+};
+
 qacInit.init = function init(initParams) {
     var echo = function(message) { process.stdout.write(message); }
     if(! initParams.verbose) { echo = function() {} }
@@ -216,7 +223,7 @@ qacInit.init = function init(initParams) {
                 init:function(ctx) {
                     this.def = ctx.input.existingJson.name ? ctx.input.existingJson.name : Path.basename(ctx.input.outDir);
                 },
-                valid:function(name) { return name.match(/^([a-z]+[a-z0-9.-]*[a-z0-9]+)$/); }
+                valid:function(name) { return name.match(qacInit.re.alphaex); }
             },{
                 name:'description', prompt:'Project description', def:'',
                 init: function(ctx) {
@@ -230,14 +237,23 @@ qacInit.init = function init(initParams) {
                 valid:function(ver) { return semver.valid(ver); }
             },{
                 name:'organization', def:'codenautas', temporary:true,
-                valid:function(org) { return org.match(/^([a-zA-Z][a-zA-Z]+)$/); }
+                valid:function(org) { return org.match(qacInit.re.alpha); }
             },{
                 name:'author', prompt:'Author (FirstN[ LastL] <EMail>)', def:'',
                 init: function(ctx) {
                     this.def = ctx.input.existingJson.author
                                || (ctx.result.organization == 'codenautas' ? 'Codenautas <codenautas@googlegroups.com>' : '');
                 },
-                valid:function(author) { return author.match(/^([a-zA-Z]+( [a-zA-Z]+)? <[a-z]+@[.a-z0-9]+>)$/); }
+                valid:function(author) {
+                    var pts = author.split(' ');
+                    var np = pts.length;
+                    if(np != 2 && np != 3) { return false; }
+                    var p=0;
+                    // first and optional last name
+                    for( ; p<np-1; ++p) { if(! pts[p].match(qacInit.re.alpha)) { return false; } }
+                    // last should be e-mail
+                    return pts[p].match(qacInit.re.email);
+                }
             },{
                 name:'repository', def:'',
                 init: function(ctx) {
@@ -250,9 +266,7 @@ qacInit.init = function init(initParams) {
             },{
                 name:'license', def:'',
                 init: function(ctx) { this.def = ctx.input.qacJson.license; },
-                valid:function(lic) {
-                    return lic.match(/^([a-zA-Z]+[A-Za-z0-9.-]*[A-Za-z0-9]+)$/);
-                }
+                valid:function(lic) { return lic.match(qacInit.re.alphaexcml); }
             },{
                 name:'contributors', prompt: 'Add contributor (name: email)', def:'',
                 parseNE:function(nameAndEmail) {
@@ -268,7 +282,7 @@ qacInit.init = function init(initParams) {
                 },
                 valid:function(nameAndEmail) {
                     var nae = this.parseNE(nameAndEmail);
-                    if(nae) { return nae.name.match(/^([A-Za-z]+[a-z0-9.-]*[a-z0-9]+)$/) && nae.email.match(/^(.+@.+)$/); }
+                    if(nae) { return nae.name.match(qacInit.re.alphaexcml) && nae.email.match(qacInit.re.email); }
                     return false;
                 }
             },{
