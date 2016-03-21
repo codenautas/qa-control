@@ -262,7 +262,7 @@ describe/*.only*/("qa-control --init", function(){
                 done(err);                    
             });
         });
-        it("should skip parameters where requeted", function(done) {
+        it("should skip parameters where requested", function(done) {
             var promptedParameters=0;
             sinon.stub(qci, 'promptForVar', function(param, msgs) {
                 ++promptedParameters;
@@ -282,6 +282,25 @@ describe/*.only*/("qa-control --init", function(){
                     v3: 'init v3',
                     v4: 'def4',
                 })
+                qci.promptForVar.restore();
+                done();
+            }).catch(done);
+        });
+        it("should exclude temporary parameters where requested", function(done) {
+            sinon.stub(qci, 'promptForVar', function(param, msgs) {
+                return Promises.resolve(param.name=='v2' ? 'promptedV2' : param.def);
+            });
+            var params = [
+                {name:'v1', def:'def1', noPrompt:true},
+                {name:'v2', def:'def2', temporary:true},
+                {name:'v3', def:'def3', post:function(ctx) { return 'v3 haves '+ctx.result.v2; } }
+            ];
+            qci.readParameters(dummyInput, params).then(function(result) {
+                //console.log("result", result);
+                expect(result).to.eql({
+                    v1: 'def1',
+                    v3: 'v3 haves promptedV2'
+                });
                 qci.promptForVar.restore();
                 done();
             }).catch(done);

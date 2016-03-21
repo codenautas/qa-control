@@ -144,13 +144,16 @@ qacInit.readParameters = function readParameters(inputParams, params) {
     };
     var cadenaDePromesas = Promises.start();
     params.forEach(function(param) {
-       cadenaDePromesas = cadenaDePromesas.then(function() {
+        cadenaDePromesas = cadenaDePromesas.then(function() {
             return getParam(param, ctx);
-       });
+        });
     });
     return cadenaDePromesas.then(function() {
-       process.stdin.end();
-       return ctx.result; 
+        process.stdin.end();
+        params.forEach(function(param) {
+            if(param.temporary) { delete ctx.result[param.name]; }
+        });
+        return ctx.result; 
     }).catch(function(err) {
         process.stdin.end();
         //console.log("err.stack", err.stack)
