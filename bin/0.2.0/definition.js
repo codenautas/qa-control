@@ -539,9 +539,13 @@ module.exports = function(qaControl){
             jshint_config:{
                 checks:[{
                     warnings:function(info){
+                        var projDef = qaControl.projectDefinition[info.packageVersion];
+                        var reqOptions = info.packageJson['qa-control']['run-in'] === 'server' ?
+                                         _.assignIn(projDef.jshint_options, projDef.jshint_options_server) :
+                                         projDef.jshint_options;
                         return qaControl.checkLintConfig(info,
                                                          'jshintConfig', 'lack_of_jshintconfig_section_in_package_json',
-                                                         qaControl.projectDefinition[info.packageVersion].jshint_options,
+                                                         reqOptions,
                                                          'incorrect_jshintconfig_option_1_in_package_json',
                                                          {jshint:1});
                     }
@@ -550,9 +554,13 @@ module.exports = function(qaControl){
             eslint_config:{
                 checks:[{
                     warnings:function(info){
+                        var projDef = qaControl.projectDefinition[info.packageVersion];
+                        var reqOptions = info.packageJson['qa-control']['run-in'] === 'server' ?
+                                         _.assignIn(projDef.eslint_options, projDef.eslint_options_server) :
+                                         projDef.eslint_options;
                         return qaControl.checkLintConfig(info,
                                                          'eslintConfig', 'lack_of_eslintconfig_section_in_package_json',
-                                                         qaControl.projectDefinition[info.packageVersion].eslint_options,
+                                                         reqOptions,
                                                          'incorrect_eslintconfig_option_1_in_package_json',
                                                          {eslint:1});
                     }
@@ -573,13 +581,13 @@ module.exports = function(qaControl){
                                 jsh.JSHINT(content, jshintOpts , false);
                                 var data = jsh.JSHINT.data();
                                 if(data.errors) {
-                                    if(qaControl.verbose){
+                                    //if(qaControl.verbose){
                                         console.log('JSHINT output:');
                                         console.log('jshintOpts',jshintOpts);
                                         console.log(data.errors.length, " JSHINT errors");
                                         console.log(data.errors);
                                         //console.log(data);
-                                    }
+                                    //}
                                     warns.push({warning:'jshint_warnings_in_file_1', params:[file], scoring:{jshint:1}});
                                 }
                             }

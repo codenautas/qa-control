@@ -450,8 +450,7 @@ var fixtures=[{
     expected:[
         { warning:'incorrect_eslintconfig_option_1_in_package_json', params:['rules'] }
     ]
-},
-,{
+},{
     base:'stable-project-v0.1.4',
     title:'must detect missing jshint options',
     test:'incorrect_jshintconfig_option_1_in_package_json',
@@ -462,6 +461,12 @@ var fixtures=[{
     expected:[
         { warning:'incorrect_jshintconfig_option_1_in_package_json', params:['forin'] }
     ]
+},{
+    skipped: true,
+    base:'stable-project-last-version',
+    title:'check for last version (0.0.2)',
+    change:function(info){},
+    expected:[]
 }];
 
 
