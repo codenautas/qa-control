@@ -562,6 +562,14 @@ module.exports = function(qaControl){
                             var checkedOptions = info.packageJson.eslintConfig;
                             for(var op in requiredOptions) {
                                 if((false === op in checkedOptions) || JSON.stringify(checkedOptions[op]) !== JSON.stringify(requiredOptions[op])) {
+                                    if(qaControl.verbose){
+                                        if(false === op in checkedOptions) {
+                                            console.log("  eslint: Missing property '"+op+"'");
+                                        } else {
+                                            console.log("  eslint: property '"+JSON.stringify(checkedOptions[op])
+                                                        +"'\n                != '"+JSON.stringify(requiredOptions[op])+"'");
+                                        }
+                                    }
                                     warns.push({warning:'incorrect_eslintconfig_option_1_in_package_json', params:[op], scoring:{eslint:1}});
                                 }
                             }
