@@ -180,7 +180,7 @@ module.exports = function(qaControl){
             }
         },
         jshint_options: { "asi": false, "curly": true, "forin": true },
-        elsint_options: {
+        eslint_options: {
             "env": {
               "node": false
             },
@@ -561,7 +561,7 @@ module.exports = function(qaControl){
                             var requiredOptions = qaControl.projectDefinition[info.packageVersion].eslint_options;
                             var checkedOptions = info.packageJson.eslintConfig;
                             for(var op in requiredOptions) {
-                                if((false === op in checkedOptions) || checkedOptions[op] !== requiredOptions[op]) {
+                                if((false === op in checkedOptions) || JSON.stringify(checkedOptions[op]) !== JSON.stringify(requiredOptions[op])) {
                                     warns.push({warning:'incorrect_eslintconfig_option_1_in_package_json', params:[op], scoring:{eslint:1}});
                                 }
                             }

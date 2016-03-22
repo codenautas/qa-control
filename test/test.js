@@ -439,9 +439,19 @@ var fixtures=[{
         info.packageJson['qa-control']['package-version']=info.usedDefinition;  
     },
     expected: []
+},{
+    base:'stable-project',
+    title:'must detect missing eslint options',
+    test:'incorrect_eslintconfig_option_1_in_package_json',
+    change:function(info){
+        info.files['package.json'].content = info.files['package.json'].content.replace('"no-console": 1', '"no-console": 0');
+        info.packageJson.eslintConfig.rules['no-console'] = 0;
+    },
+    expected:[
+        { warning:'incorrect_eslintconfig_option_1_in_package_json', params:['rules'] }
+    ]
 }];
 
-//
 
 function cloneProject(info){
     return _.cloneDeep(info);
