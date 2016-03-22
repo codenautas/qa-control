@@ -414,7 +414,7 @@ var fixtures=[{
         { warning:'invalid_dependency_version_number_format_in_dep_1',params:['best-promise'] }
     ]
 },{
-    base:'stable-project-qac-last-version',
+    base:'stable-project-v0.1.4',
     title:'must reject files without correct "use strict" (#43)',
     test:'wrong_use_strict_spelling_in_file_1',
     change:function(info){
@@ -424,7 +424,7 @@ var fixtures=[{
         { warning:'wrong_use_strict_spelling_in_file_1',params:['simple.js'] }
     ]
 },{
-    base:'stable-project-qac-last-version',
+    base:'stable-project-v0.1.4',
     title:'must accept strings in object definitions instead of generate "use strict" warning (#51)',
     test:'wrong_use_strict_spelling_in_file_1',
     change:function(info) {},
@@ -452,7 +452,7 @@ var fixtures=[{
     ]
 },
 ,{
-    base:'stable-project-qac-last-version',
+    base:'stable-project-v0.1.4',
     title:'must detect missing jshint options',
     test:'incorrect_jshintconfig_option_1_in_package_json',
     change:function(info){
