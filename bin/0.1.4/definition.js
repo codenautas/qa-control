@@ -533,48 +533,20 @@ module.exports = function(qaControl){
             jshint_config:{
                 checks:[{
                     warnings:function(info){
-                        var warns = [];
-                        if(!('jshintConfig' in info.packageJson)) {
-                            warns.push({warning:'lack_of_jshintconfig_section_in_package_json'});
-                        }
-                        else {
-                            var requiredOptions = qaControl.projectDefinition[info.packageVersion].jshint_options;
-                            var checkedOptions = info.packageJson.jshintConfig;
-                            for(var op in requiredOptions) {
-                                if((false === op in checkedOptions) || checkedOptions[op] !== requiredOptions[op]) {
-                                    warns.push({warning:'incorrect_jshintconfig_option_1_in_package_json', params:[op], scoring:{jshint:1}});
-                                }
-                            }
-                        }
-                        return warns;
+                        return qaControl.checkLintConfig(info,
+                                                         'jshintConfig', 'lack_of_jshintconfig_section_in_package_json',
+                                                         'jshint_options','incorrect_jshintconfig_option_1_in_package_json',
+                                                         {jshint:1});
                     }
                 }]
             },
             eslint_config:{
                 checks:[{
                     warnings:function(info){
-                        var warns = [];
-                        if(!('eslintConfig' in info.packageJson)) {
-                            warns.push({warning:'lack_of_eslintconfig_section_in_package_json'});
-                        }
-                        else {
-                            var requiredOptions = qaControl.projectDefinition[info.packageVersion].eslint_options;
-                            var checkedOptions = info.packageJson.eslintConfig;
-                            for(var op in requiredOptions) {
-                                if((false === op in checkedOptions) || JSON.stringify(checkedOptions[op]) !== JSON.stringify(requiredOptions[op])) {
-                                    if(qaControl.verbose){
-                                        if(false === op in checkedOptions) {
-                                            console.log("  eslint: Missing property '"+op+"'");
-                                        } else {
-                                            console.log("  eslint: property '"+JSON.stringify(checkedOptions[op])
-                                                        +"'\n                != '"+JSON.stringify(requiredOptions[op])+"'");
-                                        }
-                                    }
-                                    warns.push({warning:'incorrect_eslintconfig_option_1_in_package_json', params:[op], scoring:{eslint:1}});
-                                }
-                            }
-                        }
-                        return warns;
+                        return qaControl.checkLintConfig(info,
+                                                         'eslintConfig', 'lack_of_eslintconfig_section_in_package_json',
+                                                         'eslint_options','incorrect_eslintconfig_option_1_in_package_json',
+                                                         {eslint:1});
                     }
                 }]
             },

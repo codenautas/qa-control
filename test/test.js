@@ -450,6 +450,18 @@ var fixtures=[{
     expected:[
         { warning:'incorrect_eslintconfig_option_1_in_package_json', params:['rules'] }
     ]
+},
+,{
+    base:'stable-project-qac-last-version',
+    title:'must detect missing jshint options',
+    test:'incorrect_jshintconfig_option_1_in_package_json',
+    change:function(info){
+        info.files['package.json'].content = info.files['package.json'].content.replace('"forin": true', '"forin": false');
+        info.packageJson.jshintConfig["forin"] = false;
+    },
+    expected:[
+        { warning:'incorrect_jshintconfig_option_1_in_package_json', params:['forin'] }
+    ]
 }];
 
 

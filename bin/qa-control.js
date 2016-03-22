@@ -118,6 +118,36 @@ qaControl.generateCucardas = function generateCucardas(cucardas, packageJson) {
      /*jshint forin: true */
     return cucaFileContent;
 };
+
+qaControl.checkLintConfig = function checkLintConfig(info,
+                                                     lintConfigName, warnLackOf,
+                                                     lintOptionsName, warnIncorrect,
+                                                     scoring)
+{
+    var warns = [];
+    if(!(lintConfigName in info.packageJson)) {
+        warns.push({warning:warnLackOf});
+    }
+    else {
+        var requiredOptions = qaControl.projectDefinition[info.packageVersion][lintOptionsName];
+        var checkedOptions = info.packageJson[lintConfigName];
+        for(var op in requiredOptions) {
+            if((false === op in checkedOptions) || JSON.stringify(checkedOptions[op]) !== JSON.stringify(requiredOptions[op])) {
+                if(qaControl.verbose){
+                    if(false === op in checkedOptions) {
+                        console.log("  "+lintConfigName+": Missing property '"+op+"'");
+                    } else {
+                        console.log("  "+lintConfigName+": property '"+op+"' differs\n    '"+JSON.stringify(checkedOptions[op])
+                                    +"'\n    '"+JSON.stringify(requiredOptions[op])+"'");
+                    }
+                }
+                warns.push({warning:warnIncorrect, params:[op], scoring:scoring});
+            }
+        }
+    }
+    return warns;
+};
+
 qaControl.verbose = false;
 qaControl.cucardas_always = false;
 qaControl.projectDefinition = {};
