@@ -119,17 +119,12 @@ qaControl.generateCucardas = function generateCucardas(cucardas, packageJson) {
     return cucaFileContent;
 };
 
-qaControl.checkLintConfig = function checkLintConfig(info,
-                                                     lintConfigName, warnLackOf,
-                                                     lintOptionsName, warnIncorrect,
-                                                     scoring)
-{
+qaControl.checkLintConfig = function checkLintConfig(info, lintConfigName, warnLackOf, requiredOptions, warnIncorrect, scoring) {
     var warns = [];
     if(!(lintConfigName in info.packageJson)) {
         warns.push({warning:warnLackOf});
     }
     else {
-        var requiredOptions = qaControl.projectDefinition[info.packageVersion][lintOptionsName];
         var checkedOptions = info.packageJson[lintConfigName];
         for(var op in requiredOptions) {
             if((false === op in checkedOptions) || JSON.stringify(checkedOptions[op]) !== JSON.stringify(requiredOptions[op])) {
@@ -155,10 +150,11 @@ qaControl.projectDefinition['0.0.1'] = require("./0.0.1/definition.js")(qaContro
 qaControl.projectDefinition['0.0.2'] = require("./0.0.2/definition.js")(qaControl);
 qaControl.projectDefinition['0.1.3'] = require("./0.1.3/definition.js")(qaControl);
 qaControl.projectDefinition['0.1.4'] = require("./0.1.4/definition.js")(qaControl);
+qaControl.projectDefinition['0.2.0'] = require("./0.2.0/definition.js")(qaControl);
 
 qaControl.lang = process.env.qa_control_lang || 'en';
 qaControl.deprecatedVersions = '< 0.0.1';
-qaControl.currentVersion = '0.1.4';
+qaControl.currentVersion = '0.2.0';
 
 qaControl.mainDoc = function mainDoc() {
     return qaControl.projectDefinition[qaControl.currentVersion].fileNameMainDoc;

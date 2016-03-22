@@ -4,6 +4,7 @@ var _ = require("lodash");
 var stripBom = require("strip-bom");
 var semver = require("semver");
 var jsh = require('jshint');
+var esl = require('eslint');
 var multilang = require('multilang');
 var fs = require('fs-promise');
 var Path = require('path');
@@ -70,6 +71,27 @@ module.exports = function(qaControl){
                 imgExample:'https://img.shields.io/badge/stability-extending-orange.svg',
                 docDescription: 'opt. manual'
             },
+            training:{
+                check: function(packageJson){ 
+                    return packageJson['qa-control'].purpose==='training';
+                },
+                md:'![training](https://img.shields.io/badge/stability-training-ffa0c0.svg)',
+                imgExample:'https://img.shields.io/badge/stability-training-ffa0c0.svg'
+            },
+            example:{
+                check: function(packageJson){ 
+                    return packageJson['qa-control'].purpose==='example';
+                },
+                md:'![example](https://img.shields.io/badge/stability-example-a0a0f0.svg)',
+                imgExample:'https://img.shields.io/badge/stability-example-a0a0f0.svg'
+            },
+            stable:{
+                check: function(packageJson){ 
+                    return semver.satisfies(packageJson.version,'>=1.0.0') && !packageJson['qa-control'].purpose;
+                },
+                md:'![stable](https://img.shields.io/badge/stability-stable-brightgreen.svg)',
+                imgExample:'https://img.shields.io/badge/stability-stable-brightgreen.svg'
+            },
             'npm-version':{
                 mandatory:true,
                 md:'[![npm-version](https://img.shields.io/npm/v/yyy.svg)](https://npmjs.org/package/yyy)',
@@ -127,6 +149,11 @@ module.exports = function(qaControl){
                 md:'[![dependencies](https://img.shields.io/david/xxx/yyy.svg)](https://david-dm.org/xxx/yyy)',
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/medalla-ejemplo-dependencies.png',
                 docDescription: ''
+            },
+            'qa-control':{
+                mandatory:true,
+                md:'[![qa-control](http://codenautas.com/github/xxx/yyy.svg)](http://codenautas.com/github/xxx/yyy)',
+                docDescription: ''
             }
         },
         customs:{
@@ -153,6 +180,22 @@ module.exports = function(qaControl){
             }
         },
         jshint_options: { "asi": false, "curly": true, "forin": true },
+        jshint_options_server: { "esversion": 6 },
+        eslint_options: {
+            "env": {
+              "node": false
+            },
+            "rules": {
+              "strict": 0,
+              "no-console": 1,
+              "no-unused-vars": 1
+            }
+        },
+        eslint_options_server: {
+            "parserOptions": {
+                "ecmaVersion": 6
+            }
+        },
         // Si info.scoring == true, cada regla debe agregar junto al warning, un objeto 'scoring'
         // con na o más de las siguientes propiedades:
         //   qac: 1
@@ -316,7 +359,7 @@ module.exports = function(qaControl){
             no_test_in_node_four:{
                 checks:[{
                     warnings:function(info){
-                        if(info.dotTravis && !(info.dotTravis.node_js.filter(function(x){ return x[0]=="4";}).length)){
+                        if(info.dotTravis && info.dotTravis.node_js.filter(function(x){ return x[0]==="4" || x[0]==="5";}).length<2){
                             return [{warning:'no_test_in_node_four', scoring:{versions:1}}];
                         }
                         return [];
@@ -497,11 +540,21 @@ module.exports = function(qaControl){
                 checks:[{
                     warnings:function(info){
                         return qaControl.checkLintConfig(info,
-                                                         'jshintConfig',
-                                                         'lack_of_jshintconfig_section_in_package_json',
+                                                         'jshintConfig', 'lack_of_jshintconfig_section_in_package_json',
                                                          qaControl.projectDefinition[info.packageVersion].jshint_options,
                                                          'incorrect_jshintconfig_option_1_in_package_json',
                                                          {jshint:1});
+                    }
+                }]
+            },
+            eslint_config:{
+                checks:[{
+                    warnings:function(info){
+                        return qaControl.checkLintConfig(info,
+                                                         'eslintConfig', 'lack_of_eslintconfig_section_in_package_json',
+                                                         qaControl.projectDefinition[info.packageVersion].eslint_options,
+                                                         'incorrect_eslintconfig_option_1_in_package_json',
+                                                         {eslint:1});
                     }
                 }]
             },
@@ -528,6 +581,35 @@ module.exports = function(qaControl){
                                         //console.log(data);
                                     }
                                     warns.push({warning:'jshint_warnings_in_file_1', params:[file], scoring:{jshint:1}});
+                                }
+                            }
+                        }
+                        return warns;
+                    }
+                }]
+            },
+            eslint:{
+                eclipsers:['packagejson_main_file_1_does_not_exists', 'first_lines_does_not_match_in_file_1',
+                           'lack_of_eslintconfig_section_in_package_json', 'incorrect_eslintconfig_option_1_in_package_json'],
+                checks:[{
+                    warnings:function(info){
+                        var warns = [];
+                        var eslintOpts = 
+                            info.packageJson.eslintConfig || 
+                            qaControl.projectDefinition[info.packageVersion].eslint_options;
+                        for(var file in info.files) {
+                            if(file.match(/(.js)$/)) {
+                                var content = info.files[file].content;
+                                var data = esl.linter.verify(content, eslintOpts);
+                                if(data.length) {
+                                    if(qaControl.verbose){
+                                        console.log('JSHINT output:');
+                                        console.log('eslintOpts',eslintOpts);
+                                        console.log(data.length, " JSHINT errors");
+                                        console.log(data);
+                                        //console.log(data);
+                                    }
+                                    warns.push({warning:'eslint_warnings_in_file_1', params:[file], scoring:{eslint:1}});
                                 }
                             }
                         }
@@ -575,6 +657,43 @@ module.exports = function(qaControl){
                                 }
                             }
                             /*jshint forin: true */
+                        }
+                        return warns;
+                    }
+                }]
+            },
+            use_strict:{
+                checks:[{
+                    warnings:function(info){
+                        var warns = [];
+                        for(var file in info.files) {
+                            if(file.match(/(.js)$/)) {
+                                var content = info.files[file].content;
+                                var lines = info.files[file].content.split(/\r?\n/);
+                                var prevLine = null;
+                                for(var l=0; l<lines.length; ++l) {
+                                    var line = lines[l];
+                                    var trimLine = line.replace(/^(\s+)/,'');
+                                    //console.log("line:"+l, '['+line+']', "trimmed", '['+trimLine+']', "prev", '['+prevLine+']');
+                                    if(trimLine.length>0
+                                        && trimLine[0].match(/['"']/)
+                                        && prevLine
+                                        && prevLine.match(/{$/)
+                                        && ! prevLine.match(/[a-zA-Z0-9_]+\s?:/)
+                                        )
+                                    {
+                                        if(! trimLine.match(/"use strict";/)) {
+                                            if(qaControl.verbose){
+                                                console.log('['+file+']');
+                                                console.log('  '+(l-1)+':"'+prevLine+'"');
+                                                console.log('  '+(l)+':"'+line+'"');
+                                            }
+                                            warns.push({warning:'wrong_use_strict_spelling_in_file_1', params:[file], scoring:{customs:1}});
+                                        }
+                                    }
+                                    prevLine = line;
+                                }
+                            }
                         }
                         return warns;
                     }

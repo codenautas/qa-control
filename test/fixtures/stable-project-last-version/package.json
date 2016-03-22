@@ -42,7 +42,8 @@
   "jshintConfig": {
     "asi": false,
     "curly": true,
-    "forin": true
+    "forin": true,
+    "esversion": 6
   },
   "eslintConfig":{
     "env": {
@@ -52,10 +53,13 @@
       "strict": 0,
       "no-console": 1,
       "no-unused-vars": 1
+    },
+    "parserOptions": {
+      "ecmaVersion": 6
     }
   },
   "qa-control": {
-    "package-version": "0.1.4",
+    "package-version": "0.2.0",
     "run-in": "server",
     "test-appveyor": true,
     "type": "lib",

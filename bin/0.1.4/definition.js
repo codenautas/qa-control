@@ -534,8 +534,10 @@ module.exports = function(qaControl){
                 checks:[{
                     warnings:function(info){
                         return qaControl.checkLintConfig(info,
-                                                         'jshintConfig', 'lack_of_jshintconfig_section_in_package_json',
-                                                         'jshint_options','incorrect_jshintconfig_option_1_in_package_json',
+                                                         'jshintConfig',
+                                                         'lack_of_jshintconfig_section_in_package_json',
+                                                         qaControl.projectDefinition[info.packageVersion].jshint_options,
+                                                         'incorrect_jshintconfig_option_1_in_package_json',
                                                          {jshint:1});
                     }
                 }]
@@ -544,8 +546,10 @@ module.exports = function(qaControl){
                 checks:[{
                     warnings:function(info){
                         return qaControl.checkLintConfig(info,
-                                                         'eslintConfig', 'lack_of_eslintconfig_section_in_package_json',
-                                                         'eslint_options','incorrect_eslintconfig_option_1_in_package_json',
+                                                         'eslintConfig',
+                                                         'lack_of_eslintconfig_section_in_package_json',
+                                                         qaControl.projectDefinition[info.packageVersion].eslint_options,
+                                                         'incorrect_eslintconfig_option_1_in_package_json',
                                                          {eslint:1});
                     }
                 }]

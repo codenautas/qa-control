@@ -486,8 +486,10 @@ module.exports = function(qaControl){
                 checks:[{
                     warnings:function(info){
                         return qaControl.checkLintConfig(info,
-                                                         'jshintConfig', 'lack_of_jshintconfig_section_in_package_json',
-                                                         'jshint_options','incorrect_jshintconfig_option_1_in_package_json',
+                                                         'jshintConfig',
+                                                         'lack_of_jshintconfig_section_in_package_json',
+                                                         qaControl.projectDefinition[info.packageVersion].jshint_options,
+                                                         'incorrect_jshintconfig_option_1_in_package_json',
                                                          {jshint:1});
                     }
                 }]
