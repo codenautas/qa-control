@@ -132,8 +132,8 @@ qaControl.checkLintConfig = function checkLintConfig(info, lintConfigName, warnL
                     if(false === op in checkedOptions) {
                         console.log("  "+lintConfigName+": Missing property '"+op+"'");
                     } else {
-                        console.log("  "+lintConfigName+": property '"+op+"' differs\n    '"+JSON.stringify(checkedOptions[op])
-                                    +"'\n    '"+JSON.stringify(requiredOptions[op])+"'");
+                        console.log("  "+lintConfigName+": property '"+op+"' differs\n    '"+JSON.stringify(checkedOptions[op])+
+                                    "'\n    '"+JSON.stringify(requiredOptions[op])+"'");
                     }
                 }
                 warns.push({warning:warnIncorrect, params:[op], scoring:scoring});
