@@ -464,7 +464,7 @@ var fixtures=[{
 },{
     skipped: true,
     base:'stable-project-last-version',
-    title:'check for last version (0.0.2)',
+    title:'check for last version (0.2.0 para #52)',
     change:function(info){},
     expected:[]
 }];
