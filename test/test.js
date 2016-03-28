@@ -58,7 +58,11 @@ var fixtures=[{
     test:'no_test_in_node_four',
     change:function(info){
         info.dotTravis.node_js = ['0.10', '0.12'];
-    }
+    },
+    expected:[
+        { warning:'no_test_in_node_four'},
+        { warning:'jshint_warnings_in_file_1',params:['stable-project.js']}
+    ]
 },{
     base:'stable-project',
     title:'abort on deprecated qa-control section version (#4)',
@@ -133,10 +137,10 @@ var fixtures=[{
     change:function(info){
         info.files['LEEME.md'].content = info.files['LEEME.md'].content.replace('multilang v0','');
     },
-    expected:[{
-        warning:'no_multilang_section_in_1',
-        params:['LEEME.md']
-    }]
+    expected:[
+        { warning:'no_multilang_section_in_1', params:['LEEME.md'] },
+        { warning:'jshint_warnings_in_file_1', params:['stable-project.js'] }
+   ]
 },{
     base:'stable-project',
     title:'README.md (multilang) not sinchronized (#7)',
@@ -144,9 +148,10 @@ var fixtures=[{
     change:function(info){
         info.files['README.md'].content = info.files['README.md'].content.replace('the description','');
     },
-    expected:[{
-        warning:'readme_multilang_not_sincronized_with_file_1', params:['README.md']
-    }]
+    expected:[
+        { warning:'jshint_warnings_in_file_1', params:['stable-project.js'] },
+        {warning:'readme_multilang_not_sincronized_with_file_1', params:['README.md']}
+    ]
 },{
     base:'stable-project',
     title:'no "qa-control" section in "codenautas" project (#21)',
@@ -165,6 +170,7 @@ var fixtures=[{
     },
     expected:[
         { warning:'lack_of_cucarda_marker_in_readme' },
+        { warning:'jshint_warnings_in_file_1', params:['stable-project.js'] },
         // Modificar LEEME.md hace que multilang genere distinto README.md
         { warning:'readme_multilang_not_sincronized_with_file_1', params:['README.md']}
     ]
@@ -182,6 +188,7 @@ var fixtures=[{
         { warning:'lack_of_mandatory_cucarda_1',params:['npm-version']},
         { warning:'lack_of_mandatory_cucarda_1',params:['downloads']},
         { warning:'lack_of_mandatory_cucarda_1',params:['dependencies']},
+        { warning:'jshint_warnings_in_file_1', params:['stable-project.js'] },
         { warning:'readme_multilang_not_sincronized_with_file_1', params:['README.md']}
     ]
 },{
@@ -196,7 +203,10 @@ var fixtures=[{
                                                 .replace('![coverage]','')
                                                 .replace('![climate]','');
     },
-    expected:[ { warning:'readme_multilang_not_sincronized_with_file_1', params:['README.md'] } ]
+    expected:[
+        { warning:'jshint_warnings_in_file_1', params:['stable-project.js'] },
+        { warning:'readme_multilang_not_sincronized_with_file_1', params:['README.md'] }
+    ]
 },{
     base:'stable-project',
     title:'wrong format in mandatory cucardas in README.md (#8)',
@@ -213,6 +223,7 @@ var fixtures=[{
         { warning:'wrong_format_in_cucarda_1',params:['downloads']},
         { warning:'wrong_format_in_cucarda_1',params:['coverage']},
         { warning:'wrong_format_in_cucarda_1',params:['dependencies']},
+        { warning:'jshint_warnings_in_file_1', params:['stable-project.js'] },
         { warning:'readme_multilang_not_sincronized_with_file_1', params:['README.md']}
     ]
 },{
@@ -232,7 +243,8 @@ var fixtures=[{
     },
     expected:[
         { warning:'lack_of_mandatory_line_1_in_file_2',params:['local-*', '.gitignore']},
-        { warning:'lack_of_mandatory_line_1_in_file_2',params:['*-local.*', '.gitignore']}
+        { warning:'lack_of_mandatory_line_1_in_file_2',params:['*-local.*', '.gitignore']},
+        { warning:'jshint_warnings_in_file_1', params:['stable-project.js'] }
     ]
 },{
     base:'stable-project',
@@ -246,6 +258,7 @@ var fixtures=[{
     expected:[
         { warning:'file_1_does_not_match_custom_2',params:['simple.js', 'funtion_eid']},
         { warning:'file_1_does_not_match_custom_2',params:['simple.js', 'var_winos']},
+        { warning:'jshint_warnings_in_file_1', params:['stable-project.js'] }
     ]
 },{
     base:'stable-project',
@@ -257,6 +270,7 @@ var fixtures=[{
     },
     expected:[
         { warning:'file_1_does_not_match_custom_2',params:['simple.js', 'var_path']},
+        { warning:'jshint_warnings_in_file_1', params:['stable-project.js'] },
         { warning:'eslint_warnings_in_file_1',params:['simple.js']},
     ]
 },{
@@ -276,6 +290,7 @@ var fixtures=[{
     },
     expected:[
         { warning:'using_normal_promise_in_file_1',params:['simple.js']},
+        { warning:'jshint_warnings_in_file_1', params:['stable-project.js'] },
         { warning:'eslint_warnings_in_file_1',params:['simple.js']}, 
     ]
 },{
@@ -290,6 +305,7 @@ var fixtures=[{
     expected:[
         { warning:'using_normal_promise_in_file_1',params:['simple.js']},
         { warning:'using_normal_promise_in_file_1',params:['stable-project.js']},
+        { warning:'jshint_warnings_in_file_1', params:['stable-project.js'] },
         { warning:'eslint_warnings_in_file_1',params:['simple.js']}, 
         { warning:'eslint_warnings_in_file_1',params:['stable-project.js']}, 
     ]
@@ -361,7 +377,11 @@ var fixtures=[{
     test:'invalid_repository_section_in_package_json',
     change:function(info){
         info['packageJson']['repository'] = info['packageJson']['repository'].replace('stable-project', 'another-proyect');
-    }
+    },
+    expected:[
+        { warning:'invalid_repository_section_in_package_json' },
+        { warning:'jshint_warnings_in_file_1', params:['stable-project.js'] }
+    ]
 },{
     base:'stable-project',
     title:'lack of mandatory lines in .gitignore should not abort (#30)',
@@ -392,7 +412,7 @@ var fixtures=[{
     change:function(info){
         info['packageJson']['repository'] = { "type": "git", "url": "codenautas/stable-project" };
     },
-    expected:[]
+    expected:[{ warning:'jshint_warnings_in_file_1', params:['stable-project.js'] }]
 },{
     base:'stable-project',
     title:'must handle repository with github prefix (#34)',
@@ -400,7 +420,7 @@ var fixtures=[{
     change:function(info){
         info['packageJson']['repository'] = { "type": "git", "url": "https://github.com/codenautas/stable-project" };
     },
-    expected:[]
+    expected:[{ warning:'jshint_warnings_in_file_1', params:['stable-project.js'] }]
 },{
     base:'stable-project',
     title:'must reject invalid version numbers in "dependencies" section (#38)',
@@ -410,6 +430,7 @@ var fixtures=[{
         info.packageJson.dependencies['best-promise'] = ">=1.3.10";
     },
     expected:[
+        { warning:'jshint_warnings_in_file_1', params:['stable-project.js'] },
         { warning:'invalid_dependency_version_number_format_in_dep_1',params:['lodash'] },
         { warning:'invalid_dependency_version_number_format_in_dep_1',params:['best-promise'] }
     ]
@@ -421,6 +442,8 @@ var fixtures=[{
         info.files['simple.js'].content = info.files['simple.js'].content.replace('//USE_STRICT_MARK', '    "use spirit";');
     },
     expected:[
+        { warning:'jshint_warnings_in_file_1', params:['simple.js'] },
+        { warning:'jshint_warnings_in_file_1', params:['stable-project.js'] },
         { warning:'wrong_use_strict_spelling_in_file_1',params:['simple.js'] }
     ]
 },{
@@ -428,7 +451,10 @@ var fixtures=[{
     title:'must accept strings in object definitions instead of generate "use strict" warning (#51)',
     test:'wrong_use_strict_spelling_in_file_1',
     change:function(info) {},
-    expected:[]
+    expected:[
+        { warning:'jshint_warnings_in_file_1', params:['simple.js'] },
+        { warning:'jshint_warnings_in_file_1', params:['stable-project.js'] }
+    ]
 },{
     base:'stable-project',
     title:'coverage for version "0.0.2"',
@@ -438,7 +464,9 @@ var fixtures=[{
         info.usedDefinition = '0.0.2';
         info.packageJson['qa-control']['package-version']=info.usedDefinition;  
     },
-    expected: []
+    expected: [
+        { warning:'jshint_warnings_in_file_1', params:['stable-project.js'], scoring:{jshint:1} }
+    ]
 },{
     base:'stable-project',
     title:'must detect missing eslint options',
@@ -448,7 +476,8 @@ var fixtures=[{
         info.packageJson.eslintConfig.rules['no-console'] = 0;
     },
     expected:[
-        { warning:'incorrect_eslintconfig_option_1_in_package_json', params:['rules'] }
+        { warning:'incorrect_eslintconfig_option_1_in_package_json', params:['rules'] },
+        { warning:'jshint_warnings_in_file_1', params:['stable-project.js'] }
     ]
 },{
     base:'stable-project-v0.1.4',
@@ -462,7 +491,6 @@ var fixtures=[{
         { warning:'incorrect_jshintconfig_option_1_in_package_json', params:['forin'] }
     ]
 },{
-    skipped: true,
     base:'stable-project-last-version',
     title:'check for last version (0.2.0 para #52)',
     change:function(info){},
@@ -636,7 +664,7 @@ describe('qa-control', function(){
                 expect(info['files']['bin/main.js'].content).to.contain('stableProject');
                 return qaControl.controlInfo(info);
             }).then(function(warns){
-                expect(warns).to.eql([]);
+                expect(warns).to.eql([{ warning:'jshint_warnings_in_file_1', params:['bin/main.js'], scoring:{jshint:1} }]);
                 done();
             }).catch(function(err) {
                 console.log("mal", err);
@@ -655,7 +683,7 @@ describe('qa-control', function(){
                 expect(info['files']['index.js'].content).to.contain('StableProject');
                 return qaControl.controlInfo(info);
             }).then(function(warns){
-                expect(warns).to.eql([]);
+                expect(warns).to.eql([{ warning:'jshint_warnings_in_file_1', params:['index.js'], scoring:{jshint:1} }]);
                 done();
             }).catch(function(err) {
                 console.log("mal", err);
