@@ -1,7 +1,7 @@
 {
   "name": "qa-control",
   "description": "QA control of things that nobody controls",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "author": "Codenautas <codenautas@googlegroups.com>",
   "license": "MIT",
   "repository": "codenautas/qa-control",
@@ -20,7 +20,7 @@
     "fs-extra": "0.26.5",
     "fs-promise": "0.5.0",
     "js-yaml": "3.5.4",
-    "jshint280": "file:dist/jshint280.tgz",
+    "jshint280": "1.0.0",
     "jshint": "2.9.1",
     "lodash": "4.6.1",
     "parameters": "0.1.5",
