@@ -1,16 +1,15 @@
+<!--multilang v0 es:LEEME.md en:README.md -->
 # {{name}}
 {{description}}
 
 <!--lang:es-->
-# Uso
+# Instalación
 <!--lang:en--]
-# Usage
+# Install
 [!--lang:*-->
 ```sh
 $ npm install {{name}}
 ```
-
-<!--multilang v0 es:LEEME.md en:README.md -->
 
 {{cucardas}}
 
@@ -20,9 +19,11 @@ idioma: ![castellano](https://raw.githubusercontent.com/codenautas/multilang/mas
 también disponible en:
 [![inglés](https://raw.githubusercontent.com/codenautas/multilang/master/img/lang-en.png)](README.md)
 
-<!--lang:*-->
-
+<!--lang:es-->
+## Licencia
+<!--lang:en--]
 ## License
+[!--lang:*-->
 
 [MIT](LICENSE)
 
