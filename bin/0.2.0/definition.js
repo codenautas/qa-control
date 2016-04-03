@@ -686,7 +686,8 @@ module.exports = function(qaControl){
                                     if(trimLine.length>0
                                         && trimLine[0].match(/['"']/)
                                         && prevLine
-                                        && ! line.match(/["'].*["']\s?:/)
+                                        && prevLine.match(/{$/)
+                                        && ! line.match(/["'].*["']\s*:/)
                                         )
                                     {
                                         if(! trimLine.match(/"use strict";/)) {
