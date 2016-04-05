@@ -674,6 +674,9 @@ module.exports = function(qaControl){
                 checks:[{
                     warnings:function(info){
                         var warns = [];
+                        function hasColonOutsideQuotes(line) {
+                            return line.replace(/([\'"])(.*?)\1/g,'').match(/:/);
+                        }
                         for(var file in info.files) {
                             if(file.match(/(.js)$/)) {
                                 var content = info.files[file].content;
@@ -684,11 +687,12 @@ module.exports = function(qaControl){
                                     var trimLine = line.replace(/^(\s+)/,'');
                                     //console.log("line:"+l, '['+line+']', "trimmed", '['+trimLine+']', "prev", '['+prevLine+']');
                                     if(trimLine.length>0
-                                        && trimLine[0].match(/['"']/)
+                                        && trimLine[0].match(/['"]/)
                                         && prevLine
-                                        && prevLine.match(/{$/)
-                                        && ! line.match(/["'].*["']\s*:/)
-                                        )
+                                        && prevLine.match(/{\s?$/)
+                                        //&& ! line.match(/["'].*["']\s*:/)
+                                        && ! hasColonOutsideQuotes(trimLine)
+                                      )
                                     {
                                         if(! trimLine.match(/"use strict";/)) {
                                             if(qaControl.verbose){
