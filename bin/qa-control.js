@@ -3,6 +3,7 @@
 /*jshint node:true */
 /*eslint-disable no-console */
 
+// CMD-TOOL
 var qaControl = {};
 
 var Promises = require('best-promise');
