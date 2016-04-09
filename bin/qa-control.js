@@ -122,7 +122,7 @@ qaControl.generateCucardas = function generateCucardas(cucardas, packageJson) {
 qaControl.checkLintConfig = function checkLintConfig(info, lintConfigName, warnLackOf, requiredOptions, warnIncorrect, scoring) {
     var warns = [];
     if(!(lintConfigName in info.packageJson)) {
-        warns.push({warning:warnLackOf});
+        warns.push({warning:warnLackOf, scoring:{mandatory:1}});
     }
     else {
         var checkedOptions = info.packageJson[lintConfigName];

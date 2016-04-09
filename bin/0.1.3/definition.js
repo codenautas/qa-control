@@ -500,7 +500,7 @@ module.exports = function(qaControl){
                                             }
                                         }
                                     }
-                                    warns.push({warning:'first_lines_does_not_match_in_file_1', params:[mainName], scoring:{customs:1}});
+                                    warns.push({warning:'first_lines_does_not_match_in_file_1', params:[mainName], scoring:{warning:1}});
                                 }
                             }
                         }

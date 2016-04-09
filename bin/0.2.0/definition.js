@@ -214,7 +214,7 @@ module.exports = function(qaControl){
                 checks:[{
                     warnings:function(info){
                         if(!info.files['package.json']){
-                            return [{warning:'no_package_json', scoring:{mandatories:1}}];
+                            return [{warning:'no_package_json', scoring:{fatal:1}}];
                         }
                         return [];
                     }
@@ -227,7 +227,7 @@ module.exports = function(qaControl){
                         if(!info.packageJson['qa-control']){
                             return [{warning:info.files['package.json'].content.match(/codenautas/)?
                                         'no_qa_control_section_in_codenautas_project':
-                                        'no_qa_control_section_in_package_json', scoring:{qac:1}}];
+                                        'no_qa_control_section_in_package_json', scoring:{fatal:1}}];
                         }
                         return [];
                     }
@@ -238,7 +238,7 @@ module.exports = function(qaControl){
                 checks:[{
                     warnings:function(info){
                         if(!info.packageJson['qa-control']['package-version']){
-                            return [{warning:'no_package_version_in_qa_control_section', scoring:{qac:1}}];
+                            return [{warning:'no_package_version_in_qa_control_section', scoring:{fatal:1}}];
                         } else {
                             // defino la version para para siguientes checks
                             info.packageVersion = info.packageJson['qa-control']['package-version'];
@@ -265,7 +265,7 @@ module.exports = function(qaControl){
                     warnings:function(info) {
                         var ver=info.packageVersion;
                         if(semver.satisfies(ver, qaControl.deprecatedVersions)){
-                            return [{warning:'deprecated_qa_control_version',params:[ver], scoring:{versions:1}}];
+                            return [{warning:'deprecated_qa_control_version',params:[ver], scoring:{warning:1}}];
                         }
                         return [];
                     }
@@ -324,7 +324,7 @@ module.exports = function(qaControl){
                             }else{
                                 var observedValue=qaControlSection[sectionName];
                                 if(sectionDef.values && !(observedValue in sectionDef.values)){
-                                    warns.push({warning:'invalid_value_1_in_parameter_2',params:[observedValue,sectionName], scoring:{parameters:1}});
+                                    warns.push({warning:'invalid_value_1_in_parameter_2',params:[observedValue,sectionName], scoring:{warnings:1}});
                                 }
                             }
                         }
@@ -360,7 +360,7 @@ module.exports = function(qaControl){
                 checks:[{
                     warnings:function(info){
                         if(info.dotTravis && info.dotTravis.node_js.filter(function(x){ return x[0]==="4" || x[0]==="5";}).length<2){
-                            return [{warning:'no_test_in_node_four', scoring:{versions:1}}];
+                            return [{warning:'no_test_in_node_four', scoring:{conventions:1}}];
                         }
                         return [];
                     }
@@ -387,7 +387,7 @@ module.exports = function(qaControl){
                         var repoParts = qaControl.getRepositoryUrl(info.packageJson).split('/');
                         var projName = repoParts[repoParts.length-1];
                         if(projName !== info.packageJson.name) {
-                            return [{warning:'invalid_repository_section_in_package_json', scoring:{format:1}}];
+                            return [{warning:'invalid_repository_section_in_package_json', scoring:{repository:1}}];
                         }
                         return warns;
                     }
@@ -467,7 +467,7 @@ module.exports = function(qaControl){
                                         var match = makeCheck(custom.match, true);
                                         //console.log(file, " detect:", detect(content), " match: ", match(content))
                                         if(detect(content) && ! match(content)) {
-                                            warns.push({warning:'file_1_does_not_match_custom_2', params:[file,customeName], scoring:{customs:1}});
+                                            warns.push({warning:'file_1_does_not_match_custom_2', params:[file,customeName], scoring:{conventions:1}});
                                         }
                                     }
                                 }
@@ -490,7 +490,7 @@ module.exports = function(qaControl){
                             var projectName = qaControl.first("toLowerCase")(ProjectName);
                             var mainName = ('main' in info.packageJson) ? info.packageJson.main : 'index.js';
                             if(!(mainName in info.files)) {
-                                warns.push({warning:'packagejson_main_file_1_does_not_exists', params:[mainName], scoring:{customs:1}});
+                                warns.push({warning:'packagejson_main_file_1_does_not_exists', params:[mainName], scoring:{warning:1}});
                             } else {
                                 var fileContent = stripBom(info.files[mainName].content);
 
@@ -512,7 +512,7 @@ module.exports = function(qaControl){
                                             }
                                         }
                                     }
-                                    warns.push({warning:'first_lines_does_not_match_in_file_1', params:[mainName], scoring:{customs:1}});
+                                    warns.push({warning:'first_lines_does_not_match_in_file_1', params:[mainName], scoring:{warning:1}});
                                 }
                             }
                         }
@@ -528,7 +528,7 @@ module.exports = function(qaControl){
                             if(file.match(/(.js)$/)) {
                                 var content = info.files[file].content;
                                 if(content.match(/require\(["'](promise|q|rsvp|es6promise)['"]\)/m)) {
-                                    warns.push({warning:'using_normal_promise_in_file_1', params:[file], scoring:{customs:1}});
+                                    warns.push({warning:'using_normal_promise_in_file_1', params:[file], scoring:{conventions:1}});
                                 }
                             }
                         }
@@ -661,7 +661,7 @@ module.exports = function(qaControl){
                                 var depVal = info.packageJson.dependencies[depName];
                                 if(! reDep.test(depVal)) {
                                     // console.log(depName, depVal);
-                                    warns.push({warning:'invalid_dependency_version_number_format_in_dep_1', params:[depName], scoring:{dependencies:1}});
+                                    warns.push({warning:'invalid_dependency_version_number_format_in_dep_1', params:[depName], scoring:{conventions:1}});
                                 }
                             }
                             /*jshint forin: true */
@@ -700,7 +700,7 @@ module.exports = function(qaControl){
                                                 console.log('  '+(l-1)+':"'+prevLine+'"');
                                                 console.log('  '+(l)+':"'+line+'"');
                                             }
-                                            warns.push({warning:'wrong_use_strict_spelling_in_file_1', params:[file], scoring:{customs:1}});
+                                            warns.push({warning:'wrong_use_strict_spelling_in_file_1', params:[file], scoring:{conventions:1}});
                                         }
                                     }
                                     prevLine = line;
