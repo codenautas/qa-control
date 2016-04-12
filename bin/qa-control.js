@@ -51,7 +51,8 @@ qaControl.msgs={
         lack_of_repository_section_in_package_json: 'Falta la sección "repository" en package.json',
         invalid_repository_section_in_package_json: 'La sección "repository" en package.json es inválida',
         invalid_dependency_version_number_format_in_dep_1: 'El formato del numero de version es incorrecto en "$1"',
-        wrong_use_strict_spelling_in_file_1: '"use strict" está mal escrito en "$1"'
+        wrong_use_strict_spelling_in_file_1: '"use strict" está mal escrito en "$1"',
+        lack_of_files_section_in_package_json: 'Falta la sección "files" en package.json'
     }
 };
 

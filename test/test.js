@@ -880,7 +880,8 @@ describe('qa-control main', function(){
                                       +'Falta la sección "repository" en package.json\n'
                                       +'La sección "repository" en package.json es inválida\n'
                                       +'El formato del numero de version es incorrecto en "param1"\n'
-                                      +'"use strict" está mal escrito en "param1"\n');
+                                      +'"use strict" está mal escrito en "param1"\n'
+                                      +'Falta la sección "files" en package.json\n');
                 done();
             }).catch(done);
         });
@@ -920,7 +921,8 @@ describe('qa-control main', function(){
                                        +'lack of repository section in package json\n'
                                        +'invalid repository section in package json\n'
                                        +'invalid dependency version number format in dep param1\n'
-                                       +'wrong use strict spelling in file param1\n');
+                                       +'wrong use strict spelling in file param1\n'
+                                       +'lack of files section in package json\n');
                 done();
             }).catch(done);
         });
