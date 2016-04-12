@@ -483,6 +483,13 @@ var fixtures=[{
         //info.packageJson.files.push('.gitignore');
         info.packageJson.files.push('noexiste');
     }
+},{
+    base:'stable-project-last-version',
+    title:'must control not matching ECMAScript versions in package.json (#59)',
+    test:'incorrect_ecmascript_versions_in_package_json',
+    change:function(info){
+        delete info.packageJson.jshintConfig.esversion;
+    }
 }];
 
 

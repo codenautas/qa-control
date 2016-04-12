@@ -180,7 +180,6 @@ module.exports = function(qaControl){
             }
         },
         jshint_options: { "asi": false, "curly": true, "forin": true },
-        jshint_options_server: { "esversion": 6 },
         eslint_options: {
             "env": {
               "node": false
@@ -189,11 +188,6 @@ module.exports = function(qaControl){
               "strict": 0,
               "no-console": 1,
               "no-unused-vars": 1
-            }
-        },
-        eslint_options_server: {
-            "parserOptions": {
-                "ecmaVersion": 6
             }
         },
         // Si info.scoring == true, cada regla debe agregar junto al warning, un objeto 'scoring'
@@ -540,12 +534,9 @@ module.exports = function(qaControl){
                 checks:[{
                     warnings:function(info){
                         var projDef = qaControl.projectDefinition[info.packageVersion];
-                        var reqOptions = info.packageJson['qa-control']['run-in'] === 'server' ?
-                                         _.assignIn(projDef.jshint_options, projDef.jshint_options_server) :
-                                         projDef.jshint_options;
                         return qaControl.checkLintConfig(info,
                                                          'jshintConfig', 'lack_of_jshintconfig_section_in_package_json',
-                                                         reqOptions,
+                                                         projDef.jshint_options,
                                                          'incorrect_jshintconfig_option_1_in_package_json',
                                                          {jshint:1});
                     }
@@ -555,12 +546,9 @@ module.exports = function(qaControl){
                 checks:[{
                     warnings:function(info){
                         var projDef = qaControl.projectDefinition[info.packageVersion];
-                        var reqOptions = info.packageJson['qa-control']['run-in'] === 'server' ?
-                                         _.assignIn(projDef.eslint_options, projDef.eslint_options_server) :
-                                         projDef.eslint_options;
                         return qaControl.checkLintConfig(info,
                                                          'eslintConfig', 'lack_of_eslintconfig_section_in_package_json',
-                                                         reqOptions,
+                                                         projDef.eslint_options,
                                                          'incorrect_eslintconfig_option_1_in_package_json',
                                                          {eslint:1});
                     }
@@ -752,16 +740,39 @@ module.exports = function(qaControl){
                         return warns;
                     }
                 }]
-            }/*,
+            },
             ecma_version:{
+                eclipsers:['packagejson_main_file_1_does_not_exists', 'first_lines_does_not_match_in_file_1',
+                           'lack_of_eslintconfig_section_in_package_json', 'incorrect_eslintconfig_option_1_in_package_json',
+                           'lack_of_jshintconfig_section_in_package_json', 'incorrect_jshintconfig_option_1_in_package_json'],
                 checks:[{
                     warnings:function(info) {
                         var warns = [];
+                        var ecmaVer = info.packageJson['qa-control']['ecmaVersion'];
+                        var detail = [];
+                        if(ecmaVer) {
+                            var jshint = info.packageJson.jshintConfig;
+                            var eslint = info.packageJson.eslintConfig;
+                            
+                            if(!('esversion' in jshint)) {
+                                detail.push('missing "esversion" in jshintConfig');
+                            } else if(jshint['esversion'] !== ecmaVer) {
+                                detail.push('incorrect "esversion" in jshintConfig');
+                            }
+                            if(!('parserOptions' in eslint) || !('ecmaVersion' in eslint['parserOptions'])) {
+                                detail.push('missing "ecmaVersion" in eslintConfig');
+                            } else if(eslint['parserOptions']['ecmaVersion'] !== ecmaVer) {
+                                detail.push('incorrect "ecmaVersion" in eslintConfig');
+                            }
+                        }
+                        if(detail.length) {
                             warns.push({warning:'incorrect_ecmascript_versions_in_package_json', scoring:{mandatories:1}});
+                            if(qaControl.verbose) { console.log("\t"+detail.join("\n\t")); }
+                        }
                         return warns;
                     }
                 }]
-            }*/
+            }
         }
     };
 };
