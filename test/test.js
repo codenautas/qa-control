@@ -480,7 +480,8 @@ var fixtures=[{
     title:'must detect ivalid "files" section in package.json (#60)',
     test:'invalid_files_section_in_package_json',
     change:function(info){
-        info.packageJson.files.push('.gitignore');
+        //info.packageJson.files.push('.gitignore');
+        info.packageJson.files.push('noexiste');
     }
 }];
 

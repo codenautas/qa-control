@@ -47,6 +47,9 @@
     "test-cov": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter dot --check-leaks test/",
     "start": "node example/server.js"
   },
+  "files": [
+    "bin"
+  ],
   "jshintConfig": {
     "asi": false,
     "forin": true,
