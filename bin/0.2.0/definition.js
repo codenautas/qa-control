@@ -750,10 +750,9 @@ module.exports = function(qaControl){
                         var warns = [];
                         var ecmaVer = info.packageJson['qa-control']['ecmaVersion'];
                         var detail = [];
+                        var jshint = info.packageJson.jshintConfig;
+                        var eslint = info.packageJson.eslintConfig;
                         if(ecmaVer) {
-                            var jshint = info.packageJson.jshintConfig;
-                            var eslint = info.packageJson.eslintConfig;
-                            
                             if(!('esversion' in jshint)) {
                                 detail.push('missing "esversion" in jshintConfig');
                             } else if(jshint['esversion'] !== ecmaVer) {
@@ -763,6 +762,13 @@ module.exports = function(qaControl){
                                 detail.push('missing "ecmaVersion" in eslintConfig');
                             } else if(eslint['parserOptions']['ecmaVersion'] !== ecmaVer) {
                                 detail.push('incorrect "ecmaVersion" in eslintConfig');
+                            }
+                        } else {
+                            if('esversion' in jshint) {
+                                detail.push('unexpected "esversion" in jshintConfig');
+                            }
+                            if('parserOptions' in eslint && 'ecmaVersion' in eslint['parserOptions']) {
+                                detail.push('unexpected "ecmaVersion" in eslintConfig');
                             }
                         }
                         if(detail.length) {

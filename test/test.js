@@ -490,6 +490,13 @@ var fixtures=[{
     change:function(info){
         delete info.packageJson.jshintConfig.esversion;
     }
+},{
+    base:'stable-project-last-version',
+    title:'must reject jshint/eslint ECMAScript directives if missing in qa-control section (#59)',
+    test:'incorrect_ecmascript_versions_in_package_json',
+    change:function(info){
+        delete info.packageJson['qa-control']['ecmaVersion'];
+    }
 }];
 
 
