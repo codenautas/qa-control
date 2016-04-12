@@ -1,7 +1,7 @@
 {
   "name": "qa-control",
   "description": "QA control of things that nobody controls",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "author": "Codenautas <codenautas@googlegroups.com>",
   "license": "MIT",
   "repository": "codenautas/qa-control",
@@ -74,6 +74,7 @@
     "coverage": 90,
     "run-in": "server",
     "stability": "extending",
-    "type": "cmd-tool"
+    "type": "cmd-tool",
+    "ecmaVersion": 6
   }
 }
