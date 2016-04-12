@@ -309,7 +309,23 @@ module.exports = function(qaControl){
                     }
                 }],
                 shouldAbort:true
-            },
+            }/*,
+            files_in_package_json:{
+                checks:[{
+                    warnings:function(info) {
+                        var warns = [];
+                        if(!('files' in info.packageJson)) {
+                            warns.push({warning:'lack_of_files_section_in_package_json', scoring:{mandatories:1}});
+                        } else {
+                            if(! qaControl.getRepositoryUrl(info.packageJson).match(/^([-a-zA-Z0-9_.]+\/[-a-zA-Z0-9_.]+)$/)){
+                                return [{warning:'invalid_files_section_in_package_json', scoring:{mandatories:1}}];
+                            }
+                        }
+                        return warns;
+                    }
+                }],
+                shouldAbort:true
+            }*/,
             valid_values_for_qa_control_keys:{
                 checks:[{
                     warnings:function(info){
