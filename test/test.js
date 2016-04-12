@@ -475,6 +475,13 @@ var fixtures=[{
     change:function(info){
         delete info.packageJson.files;
     }
+},{
+    base:'stable-project-last-version',
+    title:'must detect ivalid "files" section in package.json (#60)',
+    test:'invalid_files_section_in_package_json',
+    change:function(info){
+        info.packageJson.files.push('.gitignore');
+    }
 }];
 
 
