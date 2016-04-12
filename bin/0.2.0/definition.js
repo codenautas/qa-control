@@ -752,7 +752,16 @@ module.exports = function(qaControl){
                         return warns;
                     }
                 }]
-            }
+            }/*,
+            ecma_version:{
+                checks:[{
+                    warnings:function(info) {
+                        var warns = [];
+                            warns.push({warning:'incorrect_ecmascript_versions_in_package_json', scoring:{mandatories:1}});
+                        return warns;
+                    }
+                }]
+            }*/
         }
     };
 };
