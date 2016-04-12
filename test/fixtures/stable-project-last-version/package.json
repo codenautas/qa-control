@@ -31,6 +31,10 @@
   "engines": {
     "node": ">= 0.10.0"
   },
+  "files": [
+    "stable-project.js",
+    "simple.js"
+  ],
   "scripts": {
     "test": "mocha --reporter spec --bail --check-leaks test/",
     "test-ci": "istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- --reporter spec --check-leaks test/",

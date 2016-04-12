@@ -468,6 +468,13 @@ var fixtures=[{
     title:'check for last version (0.2.0 para #52)',
     change:function(info){},
     expected:[]
+},{
+    base:'stable-project-last-version',
+    title:'must detect missing "files" section in package.json (#60)',
+    test:'lack_of_files_section_in_package_json',
+    change:function(info){
+        delete info.packageJson.files;
+    }
 }];
 
 
