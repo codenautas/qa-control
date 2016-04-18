@@ -16,6 +16,17 @@ function stripScoring(warnArray) {
     return warnArray;
 };
 
+function stripNotices(warnArray) {
+    for(var w=0; w<warnArray.length; ++w) {
+        if('gravity' in warnArray[w]) {
+            if(warnArray[w]['gravity']==='notice') {
+                delete warnArray[w];
+            }
+        }
+    }
+    return warnArray;
+};
+
 var fixtures=[{
     base:'stable-project',
     test:'no_package_json',
@@ -613,6 +624,7 @@ describe('qa-control', function(){
                         }
                     }
                     if(! fixture.scoring) { stripScoring(warnings); }
+                    if(! fixture.notices) { stripNotices(warnings); }
                     //qaControl.stringizeWarnings(warnings, 'es').then(function(warns) { console.log(warns); });
                     expect(warnings).to.eql(fixture.expected);
                 }).then(function() {
@@ -667,7 +679,7 @@ describe('qa-control', function(){
                 expect(info['files']['bin/main.js'].content).to.contain('stableProject');
                 return qaControl.controlInfo(info);
             }).then(function(warns){
-                expect(warns).to.eql([]);
+                expect(stripNotices(warns)).to.eql([]);
                 done();
             }).catch(function(err) {
                 console.log("mal", err);
@@ -686,7 +698,7 @@ describe('qa-control', function(){
                 expect(info['files']['index.js'].content).to.contain('StableProject');
                 return qaControl.controlInfo(info);
             }).then(function(warns){
-                expect(warns).to.eql([]);
+                expect(stripNotices(warns)).to.eql([]);
                 done();
             }).catch(function(err) {
                 console.log("mal", err);
@@ -698,7 +710,7 @@ describe('qa-control', function(){
                 expect(info['files']).not.to.have.key('bin/nonexistent.js');
                 return qaControl.controlInfo(info);
             }).then(function(warns){
-                expect(stripScoring(warns)).to.eql([{warning:'packagejson_main_file_1_does_not_exists', params:['bin/nonexistent.js']}]);
+                expect(stripNotices(stripScoring(warns))).to.eql([{warning:'packagejson_main_file_1_does_not_exists', params:['bin/nonexistent.js']}]);
                 done();
             }).catch(function(err) {
                 console.log("err", err);
@@ -835,7 +847,7 @@ describe('qa-control', function(){
                                     info.packageVersion = info.packageJson['qa-control']['package-version'];
                                     return check(info);
                                 }).then(function(warns) {
-                                    expect(stripScoring(warns)).to.eql(warnings);
+                                    expect(stripNotices(stripScoring(warns))).to.eql(warnings);
                                     done();
                                 });
                             }
