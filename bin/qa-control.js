@@ -331,7 +331,7 @@ qaControl.controlInfo=function controlInfo(info, opts){
         }
     }).then(function(){
         if(info.usedDefinition !== qaControl.currentVersion) {
-            resultWarnings.push({warning:'older_version_of_qa_control_in_package_json', scoring:{notice:1}, gravity:'notice'})
+            resultWarnings.push({warning:'older_version_of_qa_control_in_package_json', scoring:{notice:1}})
         }
         return resultWarnings;
     });
