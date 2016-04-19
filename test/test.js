@@ -509,6 +509,12 @@ var fixtures=[{
     change:function(info){
         delete info.packageJson['qa-control']['ecmaVersion'];
     }
+},{
+    base:'stable-project-v0.1.4',
+    title:'must notice the older version of qa-control',
+    test:'older_version_of_qa_control_in_package_json',
+    notices:true,
+    change:function(info){}
 }];
 
 
