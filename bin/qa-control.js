@@ -147,6 +147,8 @@ qaControl.checkLintConfig = function checkLintConfig(info, lintConfigName, warnL
     return warns;
 };
 
+qaControl.nodeVerInTravisRE = /[456]/;
+
 qaControl.verbose = false;
 qaControl.cucardas_always = false;
 qaControl.projectDefinition = {};
