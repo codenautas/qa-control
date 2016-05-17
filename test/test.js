@@ -515,6 +515,13 @@ var fixtures=[{
     test:'older_version_of_qa_control_in_package_json',
     notices:true,
     change:function(info){}
+},{
+    base:'stable-project-last-version',
+    title:'must permit empty "files" section in package.json (#62)',
+    change:function(info){
+        info.packageJson.files = [];
+    },
+    expected:[]
 }];
 
 

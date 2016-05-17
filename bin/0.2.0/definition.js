@@ -706,34 +706,30 @@ module.exports = function(qaControl){
                         if(!('files' in info.packageJson)) {
                             warns.push({warning:'lack_of_files_section_in_package_json', scoring:{mandatories:1}});
                         } else {
-                            if(! info.packageJson.files.length) {
-                                warns.push({warning:'invalid_files_section_in_package_json', scoring:{mandatories:1}});
-                            } else {
-                                var detail=[];
-                                //console.log("info.files", Object.keys(info.files));
-                                //console.log("files", info.packageJson.files.join(" "));
-                                var qaFiles=qaControl.projectDefinition[info.packageVersion].files;
-                                for(var fileName in info.packageJson.files) {
-                                    var file = info.packageJson.files[fileName];
-                                    if(file==='package.json') { detail.push('"'+file+'" is always included by npm'); }
-                                    if(file.match(/^(\.)/)) { detail.push('"'+file+'" is a .dot file'); }
-                                    if(file in qaFiles) {
-                                        detail.push('"'+file+'" cannot be in files section');
-                                    } else {
-                                        try {
-                                            var stat = fs.statSync(Path.resolve(info.projectDir+'/'+file));
-                                            if(! stat.isDirectory()) {
-                                                if(!(file in info.files)) { detail.push('"'+file+'" should exist'); }
-                                            }
-                                        } catch(e) { detail.push('"'+file+'" does not exists'); }
-                                    }
+                            var detail=[];
+                            //console.log("info.files", Object.keys(info.files));
+                            //console.log("files", info.packageJson.files.join(" "));
+                            var qaFiles=qaControl.projectDefinition[info.packageVersion].files;
+                            for(var fileName in info.packageJson.files) {
+                                var file = info.packageJson.files[fileName];
+                                if(file==='package.json') { detail.push('"'+file+'" is always included by npm'); }
+                                if(file.match(/^(\.)/)) { detail.push('"'+file+'" is a .dot file'); }
+                                if(file in qaFiles) {
+                                    detail.push('"'+file+'" cannot be in files section');
+                                } else {
+                                    try {
+                                        var stat = fs.statSync(Path.resolve(info.projectDir+'/'+file));
+                                        if(! stat.isDirectory()) {
+                                            if(!(file in info.files)) { detail.push('"'+file+'" should exist'); }
+                                        }
+                                    } catch(e) { detail.push('"'+file+'" does not exists'); }
                                 }
-                                if(detail.length) {
-                                    warns.push({warning:'invalid_files_section_in_package_json', scoring:{mandatories:1}});
-                                    if(qaControl.verbose) {
-                                        console.log("Invalid files:");
-                                        console.log("\t"+detail.join("\n\t"));
-                                    }
+                            }
+                            if(detail.length) {
+                                warns.push({warning:'invalid_files_section_in_package_json', scoring:{mandatories:1}});
+                                if(qaControl.verbose) {
+                                    console.log("Invalid files:");
+                                    console.log("\t"+detail.join("\n\t"));
                                 }
                             }
                         }
