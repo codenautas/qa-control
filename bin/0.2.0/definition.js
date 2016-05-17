@@ -1,7 +1,7 @@
 "use strict";
 
 var _ = require("lodash");
-var stripBom = require("strip-bom");
+var stripBom = require("strip-bom-string");
 var semver = require("semver");
 var jsh = require('jshint');
 var esl = require('eslint');
