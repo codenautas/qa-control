@@ -154,7 +154,7 @@ module.exports = function(qaControl){
         },
         jshint_options: { "asi": false, "curly": true, "forin": true },
         // Si info.scoring == true, cada regla debe agregar junto al warning, un objeto 'scoring'
-        // con na o más de las siguientes propiedades:
+        // con na o mas de las siguientes propiedades:
         //   qac: 1
         //   mandatories: 1
         //   cucardas:1
@@ -165,7 +165,7 @@ module.exports = function(qaControl){
         //   customs:1
         //   jshint:1
         //   dependencies:1
-        // Emilio redefinirá valores de cada score
+        // Emilio redefinira valores de cada score
         rules:{
             exist_package_json:{
                 checks:[{
@@ -234,6 +234,7 @@ module.exports = function(qaControl){
                     warnings:function(info) {
                         var warns =[];
                         var files=qaControl.projectDefinition[info.packageVersion].files;
+                        /*jshint forin: false */
                         for(var fileName in files) {
                             if(files.hasOwnProperty(fileName)) {
                                 var file = files[fileName];
@@ -246,6 +247,7 @@ module.exports = function(qaControl){
                                 }
                             }
                         }
+                        /*jshint forin: true */
                         return warns;
                     }
                 }],
@@ -312,7 +314,7 @@ module.exports = function(qaControl){
                         return warns;
                     }
                 }]
-            }, // agregar desde acá
+            },
             no_test_in_node_four:{
                 checks:[{
                     warnings:function(info){
@@ -377,7 +379,7 @@ module.exports = function(qaControl){
                                 }
                                 if(readme.indexOf(cucaStr) === -1) {
                                     // si tengo cucarda mal formada, devuelvo warning aunque no sea obligatoria
-                                    // porque existió la intención de definirla
+                                    // porque existio la intencion de definirla
                                     warns.push({warning:'wrong_format_in_cucarda_1', params:[nombreCucarda], scoring:{cucardas:1}});
                                 }
                             }
@@ -414,6 +416,7 @@ module.exports = function(qaControl){
                             }
                             return checker;
                         }
+                        /*jshint forin: false */
                         for(var file in info.files) {
                             if(file.match(/(.js)$/)) {
                                 for(var customeName in customs) {
@@ -430,6 +433,7 @@ module.exports = function(qaControl){
                                 }
                             }
                         }
+                        /*jshint forin: true */
                         return warns;
                     }
                 }]
@@ -458,6 +462,7 @@ module.exports = function(qaControl){
                                         var code=qaControl.fixEOL(fileContent);
                                         var model1=qaControl.fixEOL(firstLines.replace(/nombreDelModulo/g, projectName));
                                         var model2=qaControl.fixEOL(firstLines.replace(/nombreDelModulo/g, ProjectName));
+                                        /*jshint forin: false */
                                         for(var i=0; i<model1.length; i++){
                                             if(code[i]!== model1[i] && code[i] !== model2[i]){
                                                 console.log('RUN-IN', whichRunIn);
@@ -468,6 +473,7 @@ module.exports = function(qaControl){
                                                 break;
                                             }
                                         }
+                                        /*jshint forin: true */
                                     }
                                     warns.push({warning:'first_lines_does_not_match_in_file_1', params:[mainName], scoring:{customs:1}});
                                 }
@@ -481,6 +487,7 @@ module.exports = function(qaControl){
                 checks:[{
                     warnings:function(info){
                         var warns = [];
+                        /*jshint forin: false */
                         for(var file in info.files) {
                             if(file.match(/(.js)$/)) {
                                 var content = info.files[file].content;
@@ -489,6 +496,7 @@ module.exports = function(qaControl){
                                 }
                             }
                         }
+                        /*jshint forin: true */
                         return warns;
                     }
                 }]
@@ -514,6 +522,7 @@ module.exports = function(qaControl){
                         var jshintOpts = 
                             info.packageJson.jshintConfig || 
                             qaControl.projectDefinition[info.packageVersion].jshint_options;
+                        /*jshint forin: false */
                         for(var file in info.files) {
                             if(file.match(/(.js)$/)) {
                                 var content = info.files[file].content;
@@ -531,6 +540,7 @@ module.exports = function(qaControl){
                                 }
                             }
                         }
+                        /*jshint forin: true */
                         return warns;
                     }
                 }]
