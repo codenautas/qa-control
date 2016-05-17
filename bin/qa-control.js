@@ -10,7 +10,7 @@ var Promises = require('best-promise');
 var fs = require('fs-promise');
 var Path = require('path');
 var _ = require('lodash');
-var stripBom = require('strip-bom');
+var stripBom = require('strip-bom-string');
 var yaml = require('js-yaml');
 
 qaControl.msgs={
