@@ -22,10 +22,10 @@
     "js-yaml": "~3.6.0",
     "jshint280": "~1.0.0",
     "jshint": "~2.9.1",
-    "lodash": "~4.11.1",
+    "lodash": "~4.12.0",
     "parameters": "~0.1.5",
     "semver": "~5.1.0",
-    "strip-bom": "~2.0.0",
+    "strip-bom": "~3.0.0",
     
     "best-promise": "~0.2.4",
     "multilang": "~1.0.11"
