@@ -1,7 +1,7 @@
 {
   "name": "qa-control",
   "description": "QA control of things that nobody controls",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "author": "Codenautas <codenautas@googlegroups.com>",
   "license": "MIT",
   "repository": "codenautas/qa-control",
@@ -28,7 +28,7 @@
     "strip-bom-string": "~0.1.2",
     
     "best-promise": "~0.2.4",
-    "multilang": "~1.0.11"
+    "multilang": "~1.0.14"
   },
   "devDependencies": {
     "expect.js": "~0.3.1",
