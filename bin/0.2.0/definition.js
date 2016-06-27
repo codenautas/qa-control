@@ -647,7 +647,9 @@ module.exports = function(qaControl){
                             /*jshint forin: false */
                             for(var depName in info.packageJson.dependencies) {
                                 var depVal = info.packageJson.dependencies[depName];
-                                if(! reDep.test(depVal)) {
+                                //console.log("depVal", depVal)
+                                //if(! reDep.test(depVal)) {
+                                if(! semver.valid(depVal)) {
                                     // console.log(depName, depVal);
                                     warns.push({warning:'invalid_dependency_version_number_format_in_dep_1', params:[depName], scoring:{conventions:1}});
                                 }
