@@ -523,7 +523,6 @@ var fixtures=[{
     },
     expected:[]
 },{
-    skipped: true,
     base:'stable-project-last-version',
     title:'must permit  "~2.0.0-beta3" style of version declarations (#64)',
     change:function(info){

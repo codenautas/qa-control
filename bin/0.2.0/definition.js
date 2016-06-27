@@ -643,14 +643,10 @@ module.exports = function(qaControl){
                     warnings:function(info) {
                         var warns = [];
                         if("dependencies" in info.packageJson) {
-                            var reDep=/^~?\d+\.\d+\.\d+$/;
                             /*jshint forin: false */
                             for(var depName in info.packageJson.dependencies) {
                                 var depVal = info.packageJson.dependencies[depName];
-                                //console.log("depVal", depVal)
-                                //if(! reDep.test(depVal)) {
-                                if(! semver.valid(depVal)) {
-                                    // console.log(depName, depVal);
+                                if(! semver.valid(depVal.match(/^([\^~])/) ? depVal.substring(1) : depVal)) {
                                     warns.push({warning:'invalid_dependency_version_number_format_in_dep_1', params:[depName], scoring:{conventions:1}});
                                 }
                             }
