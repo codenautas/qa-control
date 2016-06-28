@@ -12,6 +12,7 @@ var Path = require('path');
 var _ = require('lodash');
 var stripBom = require('strip-bom-string');
 var yaml = require('js-yaml');
+var semver = require("semver");
 
 qaControl.msgs={
     en:{
@@ -143,6 +144,21 @@ qaControl.checkLintConfig = function checkLintConfig(info, lintConfigName, warnL
                 warns.push({warning:warnIncorrect, params:[op], scoring:scoring});
             }
         }
+    }
+    return warns;
+};
+
+qaControl.checkDepVerNumberFormat = function checkDepVerNumberFormat(info) {
+    var warns = [];
+    if("dependencies" in info.packageJson) {
+        /*jshint forin: false */
+        for(var depName in info.packageJson.dependencies) {
+            var versionNumber = info.packageJson.dependencies[depName];
+            if(! semver.valid(versionNumber.match(/^([\^~])/) ? versionNumber.substring(1) : versionNumber)) {
+                warns.push({warning:'invalid_dependency_version_number_format_in_dep_1', params:[depName], scoring:{conventions:1}});
+            }
+        }
+        /*jshint forin: true */
     }
     return warns;
 };

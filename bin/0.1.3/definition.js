@@ -634,22 +634,7 @@ module.exports = function(qaControl){
             },
             dependencies:{
                 checks:[{
-                    warnings:function(info) {
-                        var warns = [];
-                        if("dependencies" in info.packageJson) {
-                            var reDep=/^~?\d+\.\d+\.\d+$/;
-                            /*jshint forin: false */
-                            for(var depName in info.packageJson.dependencies) {
-                                var depVal = info.packageJson.dependencies[depName];
-                                if(! reDep.test(depVal)) {
-                                    // console.log(depName, depVal);
-                                    warns.push({warning:'invalid_dependency_version_number_format_in_dep_1', params:[depName], scoring:{dependencies:1}});
-                                }
-                            }
-                            /*jshint forin: true */
-                        }
-                        return warns;
-                    }
+                    warnings:qaControl.checkDepVerNumberFormat
                 }]
             }
         }

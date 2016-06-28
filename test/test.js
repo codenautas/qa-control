@@ -420,7 +420,7 @@ var fixtures=[{
     title:'must reject invalid version numbers in "dependencies" section (#38)',
     test:'invalid_dependency_version_number_format_in_dep_1',
     change:function(info){
-        info.packageJson.dependencies['lodash'] = "^3.3.1";
+        info.packageJson.dependencies['lodash'] = "^3.3.";
         info.packageJson.dependencies['best-promise'] = ">=1.3.10";
     },
     expected:[
