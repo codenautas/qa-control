@@ -1,6 +1,6 @@
 # qa-control
 
-Quality assurance tool for Node projects
+Quality assurance tool for node/npm projects
 
 
 ![extending](https://img.shields.io/badge/stability-extending-orange.svg)

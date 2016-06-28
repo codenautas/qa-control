@@ -1,10 +1,10 @@
 # qa-control
 
 <!--lang:es-->
-Herramienta de control de calidad para proyectos Node
+Herramienta de control de calidad para proyectos hechos con node/npm
 
 <!--lang:en--]
-Quality assurance tool for Node projects
+Quality assurance tool for node/npm projects
 
 [!--lang:*-->
 
