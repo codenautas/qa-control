@@ -599,9 +599,9 @@ module.exports = function(qaControl){
                                 var data = esl.linter.verify(content, eslintOpts);
                                 if(data.length) {
                                     if(qaControl.verbose){
-                                        console.log('JSHINT output:');
+                                        console.log('ESLINT output:');
                                         console.log('eslintOpts',eslintOpts);
-                                        console.log(data.length, " JSHINT errors");
+                                        console.log(data.length, " ESLINT errors");
                                         console.log(data);
                                         //console.log(data);
                                     }
