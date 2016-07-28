@@ -529,6 +529,11 @@ var fixtures=[{
         info.packageJson.dependencies['pug'] = "~2.0.0-beta3";
     },
     expected:[]
+},{
+    base:'stable-project-v0.3.0',
+    title:'check for last version (0.3.0)',
+    change:function(info){},
+    expected:[]
 }];
 
 

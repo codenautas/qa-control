@@ -1,0 +1,73 @@
+{
+  "name": "stable-project",
+  "description": "the description",
+  "version": "1.2.1",
+  "author": "Codenautas <codenautas@googlegroups.com>",
+  "license": "MIT",
+  "repository": "codenautas/stable-project",
+  "contributors": [{
+    "name": "Emilio Platzer", "email": "emilioplatzer@gmail.com"
+  }],
+  "dependencies": {
+    "lodash": "3.10.0",
+    "pg": "4.4.0",
+    "promise": "7.0.3",
+    "best-promise": "0.2.2"
+  },
+  "devDependencies": {
+    "istanbul": "~0.3.17",
+    "mocha": "^2.2.5",
+    "expect.js": "^0.3.1",
+    "expect-called": "~0.4.0",
+    "colors": "^1.1.2",
+    "es6-promise": "~2.3.0",
+    "rsvp": "~3.0.18",
+    "bluebird": "~2.9.33",
+    "when": "~3.7.3",
+    "q": "~1.4.1",
+    "native-promise-only": "~0.8.0-a"
+  },
+  "main": "stable-project.js",
+  "engines": {
+    "node": ">= 0.10.0"
+  },
+  "files": [
+    "stable-project.js",
+    "simple.js"
+  ],
+  "scripts": {
+    "test": "mocha --reporter spec --bail --check-leaks test/",
+    "test-ci": "istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- --reporter spec --check-leaks test/",
+    "test-cov":     "set COVER=all&& istanbul cover node_modules/mocha/bin/_mocha -- --reporter dot --check-leaks test/",
+    "test-cov-odb": "set COVER=odb&& istanbul cover node_modules/mocha/bin/_mocha -- --reporter dot --check-leaks test/",
+    "test-cov-ndb": "set COVER=ndb&& istanbul cover node_modules/mocha/bin/_mocha -- --reporter dot --check-leaks test/",
+    "start": "node examples/use-examples.js"
+  },
+  "jshintConfig": {
+    "asi": false,
+    "curly": true,
+    "forin": true,
+    "esversion": 6
+  },
+  "eslintConfig":{
+    "env": {
+      "node": false
+    },
+    "rules": {
+      "strict": 0,
+      "no-console": 1,
+      "no-unused-vars": 1
+    },
+    "parserOptions": {
+      "ecmaVersion": 6
+    }
+  },
+  "qa-control": {
+    "package-version": "0.3.0",
+    "run-in": "server",
+    "test-appveyor": true,
+    "type": "lib",
+    "coverage": 100,
+    "ecmaVersion": 6
+  }
+}
