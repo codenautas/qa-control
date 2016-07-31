@@ -1,5 +1,3 @@
 "use strict";
-/*jshint eqnull:true */
-/*jshint browser:true */
 
 var nombreDelModulo = {};

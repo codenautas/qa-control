@@ -1,6 +1,4 @@
 "use strict";
-/*jshint eqnull:true */
-/*jshint node:true */
 
 (function codenautasModuleDefinition(root, name, factory) {
     /* global define */
