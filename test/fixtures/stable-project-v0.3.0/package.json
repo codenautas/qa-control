@@ -43,12 +43,6 @@
     "test-cov-ndb": "set COVER=ndb&& istanbul cover node_modules/mocha/bin/_mocha -- --reporter dot --check-leaks test/",
     "start": "node examples/use-examples.js"
   },
-  "jshintConfig": {
-    "asi": false,
-    "curly": true,
-    "forin": true,
-    "esversion": 6
-  },
   "eslintConfig":{
     "env": {
       "node": false

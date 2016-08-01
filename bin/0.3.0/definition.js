@@ -530,18 +530,6 @@ module.exports = function(qaControl){
                     }
                 }]
             },
-            jshint_config:{
-                checks:[{
-                    warnings:function(info){
-                        var projDef = qaControl.projectDefinition[info.packageVersion];
-                        return qaControl.checkLintConfig(info,
-                                                         'jshintConfig', 'lack_of_jshintconfig_section_in_package_json',
-                                                         projDef.jshint_options,
-                                                         'incorrect_jshintconfig_option_1_in_package_json',
-                                                         {jshint:1});
-                    }
-                }]
-            },
             eslint_config:{
                 checks:[{
                     warnings:function(info){
@@ -555,8 +543,7 @@ module.exports = function(qaControl){
                 }]
             },
             jshint:{
-                eclipsers:['packagejson_main_file_1_does_not_exists', 'first_lines_does_not_match_in_file_1',
-                           'lack_of_jshintconfig_section_in_package_json', 'incorrect_jshintconfig_option_1_in_package_json'],
+                eclipsers:['packagejson_main_file_1_does_not_exists', 'first_lines_does_not_match_in_file_1'],
                 checks:[{
                     warnings:function(info){
                         var warns = [];
@@ -726,8 +713,7 @@ module.exports = function(qaControl){
             },
             ecma_version:{
                 eclipsers:['packagejson_main_file_1_does_not_exists', 'first_lines_does_not_match_in_file_1',
-                           'lack_of_eslintconfig_section_in_package_json', 'incorrect_eslintconfig_option_1_in_package_json',
-                           'lack_of_jshintconfig_section_in_package_json', 'incorrect_jshintconfig_option_1_in_package_json'],
+                           'lack_of_eslintconfig_section_in_package_json', 'incorrect_eslintconfig_option_1_in_package_json'],
                 checks:[{
                     warnings:function(info) {
                         var warns = [];
@@ -736,11 +722,6 @@ module.exports = function(qaControl){
                         var jshint = info.packageJson.jshintConfig;
                         var eslint = info.packageJson.eslintConfig;
                         if(ecmaVer) {
-                            if(!('esversion' in jshint)) {
-                                detail.push('missing "esversion" in jshintConfig');
-                            } else if(jshint['esversion'] !== ecmaVer) {
-                                detail.push('incorrect "esversion" in jshintConfig');
-                            }
                             if(!('parserOptions' in eslint) || !('ecmaVersion' in eslint['parserOptions'])) {
                                 detail.push('missing "ecmaVersion" in eslintConfig');
                             } else if(eslint['parserOptions']['ecmaVersion'] !== ecmaVer) {
