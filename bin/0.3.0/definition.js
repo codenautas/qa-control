@@ -43,7 +43,9 @@ module.exports = function(qaControl){
                 presentIf:function(packageJson){
                     return !!packageJson['qa-control']["test-appveyor"];
                 }
-            }
+            },
+            '.jshintrc':{ mandatory:true },
+            '.eslintrc':{ mandatory:true }
         },
         cucardas:{
             'proof-of-concept':{
