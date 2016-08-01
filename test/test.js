@@ -951,7 +951,9 @@ describe('qa-control main', function(){
                                       +'Falta la sección "files" en package.json\n'
                                       +'La sección "files" en package.json es inválida\n'
                                       +'Las versiones de ECMAScript utilizadas en package.json son incorrectas\n'
-                                      +'La versión de qa-control en el package.json es vieja\n');
+                                      +'La versión de qa-control en el package.json es vieja\n'
+                                      +'No se esperaba la sección jshintConfig en package.json\n'
+                                      +'No se esperaba la sección eslintConfig en package.json\n');
                 done();
             }).catch(done);
         });
@@ -995,7 +997,9 @@ describe('qa-control main', function(){
                                        +'lack of files section in package json\n'
                                        +'invalid files section in package json\n'
                                        +'incorrect ecmascript versions in package json\n'
-                                       +'older version of qa control in package json\n');
+                                       +'older version of qa control in package json\n'
+                                       +'unexpected jshintconfig section in package json\n'
+                                       +'unexpected eslintconfig section in package json\n');
                 done();
             }).catch(done);
         });

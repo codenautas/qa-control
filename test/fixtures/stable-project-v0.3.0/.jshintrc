@@ -4,4 +4,4 @@
     "curly": true,
     "strict": "global",
     "predef": [ "module" ]
-} 
+}
