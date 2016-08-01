@@ -3,5 +3,5 @@
     "forin": true,
     "curly": true,
     "strict": "global",
-    "-W117": false
+    "predef": [ "module" ]
 } 

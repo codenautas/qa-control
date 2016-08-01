@@ -43,19 +43,6 @@
     "test-cov-ndb": "set COVER=ndb&& istanbul cover node_modules/mocha/bin/_mocha -- --reporter dot --check-leaks test/",
     "start": "node examples/use-examples.js"
   },
-  "eslintConfig":{
-    "env": {
-      "node": false
-    },
-    "rules": {
-      "strict": 0,
-      "no-console": 1,
-      "no-unused-vars": 1
-    },
-    "parserOptions": {
-      "ecmaVersion": 6
-    }
-  },
   "qa-control": {
     "package-version": "0.3.0",
     "run-in": "server",

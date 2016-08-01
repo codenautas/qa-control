@@ -532,18 +532,6 @@ module.exports = function(qaControl){
                     }
                 }]
             },
-            eslint_config:{
-                checks:[{
-                    warnings:function(info){
-                        var projDef = qaControl.projectDefinition[info.packageVersion];
-                        return qaControl.checkLintConfig(info,
-                                                         'eslintConfig', 'lack_of_eslintconfig_section_in_package_json',
-                                                         projDef.eslint_options,
-                                                         'incorrect_eslintconfig_option_1_in_package_json',
-                                                         {eslint:1});
-                    }
-                }]
-            },
             jshint:{
                 eclipsers:['packagejson_main_file_1_does_not_exists', 'first_lines_does_not_match_in_file_1'],
                 checks:[{
@@ -576,8 +564,7 @@ module.exports = function(qaControl){
                 }]
             },
             eslint:{
-                eclipsers:['packagejson_main_file_1_does_not_exists', 'first_lines_does_not_match_in_file_1',
-                           'lack_of_eslintconfig_section_in_package_json', 'incorrect_eslintconfig_option_1_in_package_json'],
+                eclipsers:['packagejson_main_file_1_does_not_exists', 'first_lines_does_not_match_in_file_1'],
                 checks:[{
                     warnings:function(info){
                         var warns = [];
@@ -708,38 +695,6 @@ module.exports = function(qaControl){
                                     console.log("\t"+detail.join("\n\t"));
                                 }
                             }
-                        }
-                        return warns;
-                    }
-                }]
-            },
-            ecma_version:{
-                eclipsers:['packagejson_main_file_1_does_not_exists', 'first_lines_does_not_match_in_file_1',
-                           'lack_of_eslintconfig_section_in_package_json', 'incorrect_eslintconfig_option_1_in_package_json'],
-                checks:[{
-                    warnings:function(info) {
-                        var warns = [];
-                        var ecmaVer = info.packageJson['qa-control']['ecmaVersion'];
-                        var detail = [];
-                        var jshint = info.packageJson.jshintConfig;
-                        var eslint = info.packageJson.eslintConfig;
-                        if(ecmaVer) {
-                            if(!('parserOptions' in eslint) || !('ecmaVersion' in eslint['parserOptions'])) {
-                                detail.push('missing "ecmaVersion" in eslintConfig');
-                            } else if(eslint['parserOptions']['ecmaVersion'] !== ecmaVer) {
-                                detail.push('incorrect "ecmaVersion" in eslintConfig');
-                            }
-                        } else {
-                            if('esversion' in jshint) {
-                                detail.push('unexpected "esversion" in jshintConfig');
-                            }
-                            if('parserOptions' in eslint && 'ecmaVersion' in eslint['parserOptions']) {
-                                detail.push('unexpected "ecmaVersion" in eslintConfig');
-                            }
-                        }
-                        if(detail.length) {
-                            warns.push({warning:'incorrect_ecmascript_versions_in_package_json', scoring:{mandatories:1}});
-                            if(qaControl.verbose) { console.log("\t"+detail.join("\n\t")); }
                         }
                         return warns;
                     }
