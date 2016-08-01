@@ -46,7 +46,7 @@ module.exports = function(qaControl){
                 }
             },
             '.jshintrc':{ mandatory:true },
-            '.eslintrc':{ mandatory:true }
+            '.eslintrc.yml':{ mandatory:true }
         },
         cucardas:{
             'proof-of-concept':{
@@ -565,7 +565,7 @@ module.exports = function(qaControl){
                 checks:[{
                     warnings:function(info){
                         var warns = [];
-                        var eslintOpts = yaml.safeLoad(info.files['.eslintrc'].content);
+                        var eslintOpts = yaml.safeLoad(info.files['.eslintrc.yml'].content);
                         for(var file in info.files) {
                             if(file.match(/(.js)$/)) {
                                 var content = info.files[file].content;
@@ -573,7 +573,7 @@ module.exports = function(qaControl){
                                 if(data.length) {
                                     if(qaControl.verbose){
                                         console.log('ESLINT output:');
-                                        //console.log('eslintOpts',eslintOpts);
+                                        console.log('eslintOpts',eslintOpts);
                                         console.log('There are '+data.length+ " ESLINT errors");
                                         console.log(data);
                                         //console.log(data);

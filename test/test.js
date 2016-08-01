@@ -564,11 +564,11 @@ var fixtures=[{
     title:'lack of mandatory lint files (#65)',
     change:function(info){
         delete info.files['.jshintrc'];
-        delete info.files['.eslintrc'];
+        delete info.files['.eslintrc.yml'];
     },
     expected:[
         { warning:'lack_of_mandatory_file_1',params:['.jshintrc']},
-        { warning:'lack_of_mandatory_file_1',params:['.eslintrc']}
+        { warning:'lack_of_mandatory_file_1',params:['.eslintrc.yml']}
     ]
 }];
 
