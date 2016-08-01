@@ -699,6 +699,20 @@ module.exports = function(qaControl){
                         return warns;
                     }
                 }]
+            },
+            lint_sections_in_package_json:{
+                checks:[{
+                    warnings:function(info) {
+                        var warns = [];
+                        if('jshintConfig' in info.packageJson) {
+                            warns.push({warning:'unexpected_jshintconfig_section_in_package_json', scoring:{conventions:1}});
+                        }
+                        if('eslintConfig' in info.packageJson) {
+                            warns.push({warning:'unexpected_eslintconfig_section_in_package_json', scoring:{conventions:1}});
+                        }
+                        return warns;
+                    }
+                }]
             }
         }
     };

@@ -524,7 +524,7 @@ var fixtures=[{
     expected:[]
 },{
     base:'stable-project-last-version',
-    title:'must permit  "~2.0.0-beta3" style of version declarations (#64)',
+    title:'must permit "~2.0.0-beta3" style of version declarations (#64)',
     change:function(info){
         info.packageJson.dependencies['pug'] = "~2.0.0-beta3";
     },
@@ -534,6 +534,13 @@ var fixtures=[{
     title:'check for last version (0.3.0)',
     change:function(info){},
     expected:[]
+},{
+    base:'stable-project-v0.3.0',
+    title:'must reject jshintConfig in package.json (0.3.0)',
+    test:'unexpected_jshintconfig_section_in_package_json',
+    change:function(info){
+        info.packageJson['jshintConfig'] = {};
+    }
 }];
 
 
