@@ -12,9 +12,9 @@ var obj = {
 
 };
 
-function f() {}
+function f1() {}
 
-f({
+f1({
     algo: {
     },
     "esto así":"asdfasd",
@@ -27,7 +27,7 @@ f({
     ]
 });
 
-f({
+f1({
     "key":""
 });
 

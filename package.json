@@ -51,27 +51,8 @@
   "files": [
     "bin"
   ],
-  "jshintConfig": {
-    "asi": false,
-    "forin": true,
-    "curly": true,
-    "esversion": 6
-  },
-  "eslintConfig":{
-    "env": {
-      "node": false
-    },
-    "rules": {
-      "strict": 0,
-      "no-console": 1,
-      "no-unused-vars": 1
-    },
-    "parserOptions": {
-      "ecmaVersion": 6
-    }
-  },
   "qa-control": {
-    "package-version": "0.2.0",
+    "package-version": "0.3.0",
     "coverage": 90,
     "run-in": "server",
     "stability": "extending",

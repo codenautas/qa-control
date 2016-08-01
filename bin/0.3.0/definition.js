@@ -8,6 +8,7 @@ var esl = require('eslint');
 var multilang = require('multilang');
 var fs = require('fs-promise');
 var Path = require('path');
+var yaml = require('js-yaml');
 
 module.exports = function(qaControl){
     return {
@@ -537,10 +538,6 @@ module.exports = function(qaControl){
                 checks:[{
                     warnings:function(info){
                         var warns = [];
-                        // console.log("Files", info.files['.jshintrc'])
-                        // var jshintOpts = 
-                            // info.packageJson.jshintConfig || 
-                            // qaControl.projectDefinition[info.packageVersion].jshint_options;
                         var jshintOpts = JSON.parse(info.files['.jshintrc'].content);
                         for(var file in info.files) {
                             if(file.match(/(.js)$/)) {
@@ -551,7 +548,7 @@ module.exports = function(qaControl){
                                     if(qaControl.verbose){
                                         console.log('JSHINT output:');
                                         console.log('jshintOpts',jshintOpts);
-                                        console.log(data.errors.length, " JSHINT errors");
+                                        console.log('There are '+data.length+ " JSHINT errors");
                                         console.log(data.errors);
                                         //console.log(data);
                                     }
@@ -568,9 +565,7 @@ module.exports = function(qaControl){
                 checks:[{
                     warnings:function(info){
                         var warns = [];
-                        var eslintOpts = 
-                            info.packageJson.eslintConfig || 
-                            qaControl.projectDefinition[info.packageVersion].eslint_options;
+                        var eslintOpts = yaml.safeLoad(info.files['.eslintrc'].content);
                         for(var file in info.files) {
                             if(file.match(/(.js)$/)) {
                                 var content = info.files[file].content;
@@ -578,8 +573,8 @@ module.exports = function(qaControl){
                                 if(data.length) {
                                     if(qaControl.verbose){
                                         console.log('ESLINT output:');
-                                        console.log('eslintOpts',eslintOpts);
-                                        console.log(data.length, " ESLINT errors");
+                                        //console.log('eslintOpts',eslintOpts);
+                                        console.log('There are '+data.length+ " ESLINT errors");
                                         console.log(data);
                                         //console.log(data);
                                     }

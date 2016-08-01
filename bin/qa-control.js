@@ -1,7 +1,4 @@
 "use strict";
-/*jshint eqnull:true */
-/*jshint node:true */
-/*eslint-disable no-console */
 
 // CMD-TOOL
 var qaControl = {};
@@ -114,7 +111,8 @@ qaControl.generateCucardas = function generateCucardas(cucardas, packageJson) {
     var cucaFileContent = qaControl.cucaMarker+'\n';
     var modulo=packageJson.name;
     var repo=qaControl.getRepositoryUrl(packageJson).replace('/'+modulo,'');
-     /*jshint forin: false */
+    /*jshint forin: false */
+    /*eslint-disable guard-for-in */
     for(var nombreCucarda in cucardas) {
         var cucarda = cucardas[nombreCucarda];
         if(!cucarda.check || cucarda.check(packageJson)) {
@@ -122,10 +120,12 @@ qaControl.generateCucardas = function generateCucardas(cucardas, packageJson) {
             cucaFileContent += cucaStr +'\n';
         }
     }
-     /*jshint forin: true */
+    /*jshint forin: true */
+    /*eslint-enable guard-for-in */
     return cucaFileContent;
 };
 
+/*eslint-disable complexity */
 qaControl.checkLintConfig = function checkLintConfig(info, lintConfigName, warnLackOf, requiredOptions, warnIncorrect, scoring) {
     var warns = [];
     if(!(lintConfigName in info.packageJson)) {
@@ -149,11 +149,13 @@ qaControl.checkLintConfig = function checkLintConfig(info, lintConfigName, warnL
     }
     return warns;
 };
+/*eslint-enable complexity */
 
 qaControl.checkDepVerNumberFormat = function checkDepVerNumberFormat(info) {
     var warns = [];
     if("dependencies" in info.packageJson) {
         /*jshint forin: false */
+        /*eslint-disable guard-for-in */
         for(var depName in info.packageJson.dependencies) {
             var versionNumber = info.packageJson.dependencies[depName];
             if(! semver.valid(versionNumber.match(/^([\^~])/) ? versionNumber.substring(1) : versionNumber)) {
@@ -161,6 +163,7 @@ qaControl.checkDepVerNumberFormat = function checkDepVerNumberFormat(info) {
             }
         }
         /*jshint forin: true */
+        /*eslint-enable guard-for-in */
     }
     return warns;
 };
@@ -213,11 +216,11 @@ var configReading=Promises.all(_.map(qaControl.projectDefinition,function(defini
     definition.firstLines=definition.firstLines||{};
     return Promises.all(_.map(definition.sections['run-in'].values,function(runInProperties, runInValue){
         return Promises.all(_.map(definition.sections.type.values,function(typeProperties, typeValue){
-            return fs.readFile(__dirname+'/'+version+'/first-lines-'+runInValue+'-'+typeValue+'.txt',{encoding: 'utf8'}).catch(function(err){
+            return fs.readFile(Path.join(__dirname,version,'first-lines-'+runInValue+'-'+typeValue+'.txt'),{encoding: 'utf8'}).catch(function(err){
                 if(err.code!=='ENOENT'){
                     throw err;
                 }
-                return fs.readFile(__dirname+'/'+version+'/first-lines-'+runInValue+'.txt',{encoding: 'utf8'});
+                return fs.readFile(Path.join(__dirname,version,'first-lines-'+runInValue+'.txt'),{encoding: 'utf8'});
             }).then(function(content){
                 definition.firstLines[runInValue]=definition.firstLines[runInValue]||{};
                 definition.firstLines[runInValue][typeValue]=content;
@@ -259,8 +262,10 @@ qaControl.loadProject = function loadProject(projectDir) {
     }).then(function(files) {
         info.files = {};
          /*jshint forin: false */
+         /*eslint-disable guard-for-in */
         for(var f in files) { info.files[files[f]] = {}; }
          /*jshint forin: true */
+         /*eslint-enable guard-for-in */
         if(files.indexOf('package.json') !== -1) {
             info.packageJson = {};
         }
@@ -372,7 +377,7 @@ qaControl.stringizeWarnings = function stringizeWarnings(warns, lang) {
             if(numParams) {
                 //console.log(warn.warning, msg, " tiene ", numParams.length, " parametros y params tiene ", warn.params)
                  for(var p=0; p<numParams.length; ++p) {
-                    msg = msg.replace('$'+parseInt(p+1), warn.params[p]);
+                    msg = msg.replace('$'+parseInt(p+1,10), warn.params[p]);
                 }
             }
             if(qaControl.verbose) {
@@ -400,8 +405,10 @@ qaControl.main=function main(parameters) {
             var msgLang =qaControl.cmdMsgs[parameters.lang || 'en'].msg_langs;
             process.stdout.write(msgLang+':');
              /*jshint forin: false */
+             /*eslint-disable guard-for-in */
             for(var lang in qaControl.msgs) { process.stdout.write(" "+lang); }
              /*jshint forin: true */
+             /*eslint-enable guard-for-in */
             process.stdout.write("\n");
         } else {
             qaControl.lang = parameters.lang || "en";
