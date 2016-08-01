@@ -536,11 +536,29 @@ var fixtures=[{
     expected:[]
 },{
     base:'stable-project-v0.3.0',
-    title:'must reject jshintConfig in package.json (0.3.0)',
+    title:'must reject jshintConfig in package.json (#65)',
     test:'unexpected_jshintconfig_section_in_package_json',
     change:function(info){
         info.packageJson['jshintConfig'] = {};
     }
+},{
+    base:'stable-project-v0.3.0',
+    title:'must reject eslintConfig in package.json (#65)',
+    test:'unexpected_eslintconfig_section_in_package_json',
+    change:function(info){
+        info.packageJson['eslintConfig'] = {};
+    }
+},{
+    base:'stable-project-v0.3.0',
+    title:'must reject all lint sections in package.json (#65)',
+    change:function(info){
+        info.packageJson['jshintConfig'] = {};
+        info.packageJson['eslintConfig'] = {};
+    },
+    expected:[
+        { warning: 'unexpected_jshintconfig_section_in_package_json'},
+        { warning: 'unexpected_eslintconfig_section_in_package_json'}
+    ]
 }];
 
 
