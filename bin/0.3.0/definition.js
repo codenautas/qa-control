@@ -560,9 +560,11 @@ module.exports = function(qaControl){
                 checks:[{
                     warnings:function(info){
                         var warns = [];
-                        var jshintOpts = 
-                            info.packageJson.jshintConfig || 
-                            qaControl.projectDefinition[info.packageVersion].jshint_options;
+                        // console.log("Files", info.files['.jshintrc'])
+                        // var jshintOpts = 
+                            // info.packageJson.jshintConfig || 
+                            // qaControl.projectDefinition[info.packageVersion].jshint_options;
+                        var jshintOpts = JSON.parse(info.files['.jshintrc'].content);
                         for(var file in info.files) {
                             if(file.match(/(.js)$/)) {
                                 var content = info.files[file].content;
