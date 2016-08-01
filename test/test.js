@@ -559,6 +559,17 @@ var fixtures=[{
         { warning: 'unexpected_jshintconfig_section_in_package_json'},
         { warning: 'unexpected_eslintconfig_section_in_package_json'}
     ]
+},{
+    base:'stable-project-v0.3.0',
+    title:'lack of mandatory lint files (#65)',
+    change:function(info){
+        delete info.files['.jshintrc'];
+        delete info.files['.eslintrc'];
+    },
+    expected:[
+        { warning:'lack_of_mandatory_file_1',params:['.jshintrc']},
+        { warning:'lack_of_mandatory_file_1',params:['.eslintrc']}
+    ]
 }];
 
 
