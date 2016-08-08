@@ -27,7 +27,8 @@ module.exports = function(qaControl){
                 values: {
                     app: {},
                     lib: {},
-                    "cmd-tool": {}
+                    "cmd-tool": {},
+                    web: {}
                 }
             }
         },
