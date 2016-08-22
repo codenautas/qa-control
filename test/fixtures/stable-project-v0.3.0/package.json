@@ -47,7 +47,7 @@
     "package-version": "0.3.0",
     "run-in": "server",
     "test-appveyor": true,
-    "type": "lib",
+    "type": "web",
     "coverage": 100,
     "ecmaVersion": 6
   }
