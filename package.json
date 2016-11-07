@@ -16,7 +16,7 @@
   "main": "./bin/qa-control.js",
   "dependencies": {
     "commander": "~2.9.0",
-    "eslint": "~2.13.1",
+    "eslint": "~3.9.1",
     "fs-extra": "~1.0.0",
     "fs-promise": "~0.5.0",
     "js-yaml": "~3.6.0",
