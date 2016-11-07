@@ -205,7 +205,7 @@ qaControl.first = function first(toWhat){
         return part.substring(0, 1)[toWhat]()+part.substring(1);
     };
 };
-    
+
 qaControl.jsProjectName = function jsProjectName(projectName) {
     var parts = projectName.split('-');
     return parts.map(qaControl.first("toUpperCase")).join('');
