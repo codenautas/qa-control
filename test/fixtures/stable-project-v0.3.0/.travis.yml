@@ -9,7 +9,5 @@ node_js:
   - "7"
 matrix:
   fast_finish: true
-  allow_failures:
-    - node_js: "7" 
 script: "npm run-script test-ci"
 after_script: "npm install coveralls@2.10.0 && cat ./coverage/lcov.info | coveralls"
