@@ -1,6 +1,5 @@
 "use strict";
 
-var _ = require('lodash');
 var expect = require('expect.js');
 var qaControl = require('..');
 var Promises = require('best-promise');

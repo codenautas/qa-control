@@ -1,6 +1,5 @@
 "use strict";
 
-var _ = require('lodash');
 var expect = require('expect.js');
 var qaControl = require('..');
 var Promises = require('best-promise');
@@ -611,7 +610,7 @@ var fixtures=[{
 
 
 function cloneProject(info){
-    return _.cloneDeep(info);
+    return JSON.parse(JSON.stringify(info));
 }
 
 describe('qa-control', function(){
@@ -653,7 +652,7 @@ describe('qa-control', function(){
             qaControl.loadProject('./test/fixtures/stable-project').then(function(info){
                 var en=qaControl.msgs.en;
                 var es=qaControl.msgs.es;
-                expect(_.keys(en).sort()).to.eql(_.keys(es).sort());
+                expect(Object.keys(en).sort()).to.eql(Object.keys(es).sort());
                 //console.log(qaControl.msgs.en);
                 expect(en['deprecated_qa_control_version']).to.be('deprecated qa-control version');
                 expect(en['deprecated_version']).to.be('deprecated version');
