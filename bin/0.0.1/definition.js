@@ -1,6 +1,5 @@
 "use strict";
 
-var _ = require("lodash");
 var stripBom = require("strip-bom-string");
 var semver = require("semver");
 var jsh = require('jshint280');
@@ -296,7 +295,8 @@ module.exports = function(qaControl){
                     warnings:function(info) {
                         var warns =[];
                         var files=qaControl.projectDefinition[info.packageVersion].files;
-                        _.forEach(files, function(file, fileName) {
+                        for(var fileName in files) {
+                            var file=files[fileName];
                             if(file.mandatoryLines) {
                                 var fileContent = info.files[fileName].content;
                                 file.mandatoryLines.forEach(function(mandatoryLine) {
@@ -308,7 +308,7 @@ module.exports = function(qaControl){
                                    }
                                 });
                             }
-                        });
+                        };
                         return warns;
                     }
                 }]
@@ -537,9 +537,6 @@ module.exports = function(qaControl){
                             if(file !== defReadme) {
                                 var mlContent = multilang.changeNamedDoc(file, content, lang);
                                 if(mlContent !== info.files[file].content) {
-                                    //var now=Date.now();
-                                    // fs.writeFileSync("_"+now+"_gen_"+file, mlContent, 'utf8');
-                                    // fs.writeFileSync("_"+now+"_ori_"+file, info.files[file].content, 'utf8');
                                     warns.push({warning:'readme_multilang_not_sincronized_with_file_1', params:[file], scoring:{multilang:1}});
                                 }
                             }

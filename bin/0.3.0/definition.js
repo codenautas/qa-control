@@ -1,6 +1,5 @@
 "use strict";
 
-var _ = require("lodash");
 var stripBom = require("strip-bom-string");
 var semver = require("semver");
 var jsh = require('jshint');
@@ -337,7 +336,8 @@ module.exports = function(qaControl){
                     warnings:function(info) {
                         var warns =[];
                         var files=qaControl.projectDefinition[info.packageVersion].files;
-                        _.forEach(files, function(file, fileName) {
+                        for(var fileName in files) {
+                            var file=files[fileName];
                             if(file.mandatoryLines) {
                                 var fileContent = info.files[fileName].content;
                                 file.mandatoryLines.forEach(function(mandatoryLine) {
@@ -349,7 +349,7 @@ module.exports = function(qaControl){
                                    }
                                 });
                             }
-                        });
+                        }
                         return warns;
                     }
                 }]

@@ -48,7 +48,8 @@
     "test-cov": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter dot --check-leaks test/",
     "start": "node example/server.js",
     "report": "istanbul report",
-    "all": "npm test && npm run test-cov && npm run report && node bin/qa-control-run.js . -v"
+    "qac": "node bin/qa-control-run.js . -v",
+    "all": "npm test && npm run test-cov && npm run report && npm run qac"
   },
   "files": [
     "bin"
