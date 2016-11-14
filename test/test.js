@@ -6,6 +6,7 @@ var qaControl = require('..');
 var Promises = require('best-promise');
 var fs = require('fs-promise');
 var Path = require('path');
+var yaml = require('js-yaml');
 
 function stripScoring(warnArray) {
     for(var w=0; w<warnArray.length; ++w) {
@@ -569,6 +570,20 @@ var fixtures=[{
     expected:[
         { warning:'lack_of_mandatory_file_1',params:['.jshintrc']},
         { warning:'lack_of_mandatory_file_1',params:['.eslintrc.yml']}
+    ]
+},{
+    base:'stable-project-v0.3.0',
+    title:'check last version (0.3.0)',
+    change:function(info){
+        var content = info.files['.travis.yml'].content;
+        var travis = yaml.safeLoad(info.files['.travis.yml'].content);
+        travis.node_js = ['0.12.7'];
+        info.files['.travis.yml'].content = yaml.safeDump(travis);
+    },
+    expected:[
+        { warning: 'lack_of_travis_check_for_node_version_1', params:['4']},
+        { warning: 'lack_of_travis_check_for_node_version_1', params:['6']},
+        { warning: 'lack_of_travis_check_for_node_version_1', params:['7']}
     ]
 }];
 
