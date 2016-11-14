@@ -6,10 +6,30 @@ var qaControl = {};
 var Promises = require('best-promise');
 var fs = require('fs-promise');
 var Path = require('path');
-var _ = require('lodash');
 var stripBom = require('strip-bom-string');
 var yaml = require('js-yaml');
 var semver = require("semver");
+
+// lodash replacements (para best-globals?)
+function map(obj, func) {
+    var index = -1;
+    var res = [];
+    /*jshint forin: false */
+    /*eslint-disable guard-for-in */
+    for(var key in obj) { res[++index] = func(obj[key], key, obj); }
+    /*jshint forin: true */
+    /*eslint-enable guard-for-in */
+    return res;
+}
+
+function forEach(obj, func) {
+    /*jshint forin: false */
+    /*eslint-disable guard-for-in */
+    for(var key in obj) { func(obj[key], key, obj); }
+    /*jshint forin: true */
+    /*eslint-enable guard-for-in */
+}
+// fin lodash replacements
 
 qaControl.msgs={
     en:{
@@ -212,10 +232,10 @@ qaControl.jsProjectName = function jsProjectName(projectName) {
 };
 
 qaControl.configReady=false;
-var configReading=Promises.all(_.map(qaControl.projectDefinition,function(definition, version){
+var configReading=Promises.all(map(qaControl.projectDefinition,function(definition, version){
     definition.firstLines=definition.firstLines||{};
-    return Promises.all(_.map(definition.sections['run-in'].values,function(runInProperties, runInValue){
-        return Promises.all(_.map(definition.sections.type.values,function(typeProperties, typeValue){
+    return Promises.all(map(definition.sections['run-in'].values,function(runInProperties, runInValue){
+        return Promises.all(map(definition.sections.type.values,function(typeProperties, typeValue){
             return fs.readFile(Path.join(__dirname,version,'first-lines-'+runInValue+'-'+typeValue+'.txt'),{encoding: 'utf8'}).catch(function(err){
                 if(err.code!=='ENOENT'){
                     throw err;
@@ -331,7 +351,7 @@ qaControl.controlInfo=function controlInfo(info, opts){
     if(qaControl.verbose) { process.stdout.write(cmsgs.msg_controlling+info.usedDefinition+"...\n"); }
     var cadenaDePromesas = Promises.start();
     info.scoring = opts && opts.scoring;
-    _.forEach(rules, function(rule, ruleName) {
+    forEach(rules, function(rule, ruleName) {
         rule.checks.forEach(function(checkInfo){
             cadenaDePromesas = cadenaDePromesas.then(function() {
                 if(rule.eclipsers && rule.eclipsers.some(function(warning){ return existingWarnings[warning]; })){
