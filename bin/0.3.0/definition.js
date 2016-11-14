@@ -709,6 +709,28 @@ module.exports = function(qaControl){
                         return warns;
                     }
                 }]
+            },
+            travis_node_versions:{
+                checks:[{
+                    warnings:function(info) {
+                        var warns = [];
+                        var travisYML = yaml.safeLoad(info.files['.travis.yml'].content);
+                        var mandatories = travisYML.node_js;
+                        var optionals = travisYML.matrix.allow_failures;
+                        var versions=[{num:'4'},{num:'6'} ,{num:7, optional:true}];
+                        versions.forEach(function(version) {
+                            var re = RegExp('^('+version.num+'\.?)');
+                            if(! mandatories.some(function(ver) { return re.test(ver); })) {
+                                warns.push({warning:'lack_of_travis_check_for_node_version_1', params:[version.num], scoring:{mandatories:1}});
+                            } else if(! version.optional && optionals) {
+                                if(optionals.some(function(opt) { return opt.node_js && re.test(opt.node_js); })) {
+                                    warns.push({warning:'not_allowed_travis_failure_for_node_version_1', params:[version.num], scoring:{mandatories:1}});
+                                }
+                            }
+                        });
+                        return warns;
+                    }
+                }]
             }
         }
     };
