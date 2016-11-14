@@ -573,7 +573,7 @@ var fixtures=[{
     ]
 },{
     base:'stable-project-v0.3.0',
-    title:'check last version (0.3.0)',
+    title:'lack of mandatory travis checks',
     change:function(info){
         var content = info.files['.travis.yml'].content;
         var travis = yaml.safeLoad(info.files['.travis.yml'].content);
@@ -584,6 +584,18 @@ var fixtures=[{
         { warning: 'lack_of_travis_check_for_node_version_1', params:['4']},
         { warning: 'lack_of_travis_check_for_node_version_1', params:['6']},
         { warning: 'lack_of_travis_check_for_node_version_1', params:['7']}
+    ]
+},{
+    base:'stable-project-v0.3.0',
+    title:'incorrect allowed failures in travis',
+    change:function(info){
+        var content = info.files['.travis.yml'].content;
+        var travis = yaml.safeLoad(info.files['.travis.yml'].content);
+        travis.matrix.allow_failures.push({'node_js':'4'});
+        info.files['.travis.yml'].content = yaml.safeDump(travis);
+    },
+    expected:[
+        { warning: 'not_allowed_travis_failure_for_node_version_1', params:['4']}
     ]
 }];
 
