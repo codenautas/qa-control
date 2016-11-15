@@ -3,7 +3,6 @@
 // CMD-TOOL
 var qaControl = {};
 
-var Promises = require('best-promise');
 var fs = require('fs-promise');
 var Path = require('path');
 var stripBom = require('strip-bom-string');
@@ -22,6 +21,12 @@ function forEach(obj, func) {
     for(var key in obj) { if(obj[key]) { func(obj[key], key, obj); } }
 }
 // fin lodash replacements
+
+function promiseSleep(milliseconds) {
+    return new Promise(function(resolve){
+        setTimeout(resolve,milliseconds);
+    });
+}
 
 qaControl.msgs={
     en:{
@@ -201,7 +206,7 @@ qaControl.mainDoc = function mainDoc() {
 };
 
 qaControl.fixMessages = function fixMessages(messagesToFix) {
-    return Promises.start(function() {
+    return Promise.resolve().then(function() {
         /*jshint forin: false */
         for(var warn in qaControl.msgs.es) {
             if(false === warn in messagesToFix) {
@@ -224,10 +229,10 @@ qaControl.jsProjectName = function jsProjectName(projectName) {
 };
 
 qaControl.configReady=false;
-var configReading=Promises.all(map(qaControl.projectDefinition,function(definition, version){
+var configReading=Promise.all(map(qaControl.projectDefinition,function(definition, version){
     definition.firstLines=definition.firstLines||{};
-    return Promises.all(map(definition.sections['run-in'].values,function(runInProperties, runInValue){
-        return Promises.all(map(definition.sections.type.values,function(typeProperties, typeValue){
+    return Promise.all(map(definition.sections['run-in'].values,function(runInProperties, runInValue){
+        return Promise.all(map(definition.sections.type.values,function(typeProperties, typeValue){
             return fs.readFile(Path.join(__dirname,version,'first-lines-'+runInValue+'-'+typeValue+'.txt'),{encoding: 'utf8'}).catch(function(err){
                 if(err.code!=='ENOENT'){
                     throw err;
@@ -243,7 +248,7 @@ var configReading=Promises.all(map(qaControl.projectDefinition,function(definiti
     return qaControl.fixMessages(qaControl.msgs.en);
 }).then(function(){
     // only for test, in production this sleep must gone
-    return Promises.sleep(500);
+    return promiseSleep(500);
 }).then(function(){
     qaControl.configReady=true;
 }).catch(function(err){
@@ -256,7 +261,7 @@ qaControl.loadProject = function loadProject(projectDir) {
     var info = {projectDir:projectDir};
     var cmsgs = qaControl.cmdMsgs[qaControl.lang];
     if(qaControl.verbose) { process.stdout.write(cmsgs.msg_starting+projectDir+"'...\n"); }
-    return Promises.start(function(){
+    return Promise.resolve().then(function(){
         if(!qaControl.configReady) { return configReading; }
     }).then(function(){
         if(qaControl.verbose) { process.stdout.write(cmsgs.msg_loaded+"\n"); }
@@ -281,9 +286,9 @@ qaControl.loadProject = function loadProject(projectDir) {
         if(files.indexOf('package.json') !== -1) {
             info.packageJson = {};
         }
-        return Promises.all(files.map(function(file){
+        return Promise.all(files.map(function(file){
             var iFile = Path.normalize(projectDir+'/'+file);
-            return Promises.start(function() {
+            return Promise.resolve().then(function() {
                 return fs.stat(iFile);
             }).then(function(stat) {
                 if(stat.isFile()) {
@@ -341,7 +346,7 @@ qaControl.controlInfo=function controlInfo(info, opts){
     var cmsgs = qaControl.cmdMsgs[qaControl.lang];
     var rules = qaControl.projectDefinition[info.usedDefinition].rules;
     if(qaControl.verbose) { process.stdout.write(cmsgs.msg_controlling+info.usedDefinition+"...\n"); }
-    var cadenaDePromesas = Promises.start();
+    var cadenaDePromesas = Promise.resolve().then();
     info.scoring = opts && opts.scoring;
     forEach(rules, function(rule, ruleName) {
         rule.checks.forEach(function(checkInfo){
@@ -378,7 +383,7 @@ qaControl.controlInfo=function controlInfo(info, opts){
 
 qaControl.stringizeWarnings = function stringizeWarnings(warns, lang) {
     var warnStr = '';
-    return Promises.start(function() {
+    return Promise.resolve().then(function() {
         //console.log("stringizeWarnings(", warns, ",", lang, ")");
         if(qaControl.verbose && warns.length) { process.stdout.write("Making warnings readable...\n"); }
         var messages = qaControl.msgs[lang];
@@ -404,7 +409,7 @@ qaControl.stringizeWarnings = function stringizeWarnings(warns, lang) {
 qaControl.controlProject=function controlProject(projectDir, opts){
     qaControl.verbose = opts && opts.verbose;
     qaControl.cucardas_always = opts && opts.cucardas;
-    return Promises.start(function(){
+    return Promise.resolve().then(function(){
         return qaControl.loadProject(projectDir);
     }).then(function(info){
         return qaControl.controlInfo(info, opts);
@@ -412,7 +417,7 @@ qaControl.controlProject=function controlProject(projectDir, opts){
 };
 
 qaControl.main=function main(parameters) {
-    return Promises.start(function() {
+    return Promise.resolve().then(function() {
         if(parameters.listLangs) {
             var msgLang =qaControl.cmdMsgs[parameters.lang || 'en'].msg_langs;
             process.stdout.write(msgLang+':');
