@@ -736,11 +736,12 @@ module.exports = function(qaControl){
                 checks:[{
                     warnings:function(info) {
                         var warns = [];
-                        var nonRecomended = ['lodash', 'best-promise', 'promise-plus'];
-                        var existing = info.packageJson.dependencies;
-                        if(existing) {
+                        var nonRecomended = ['best-promise', 'lodash', 'promise-plus'];
+                        var dependencies = info.packageJson.dependencies;
+                        var devDependencies = info.packageJson.devDependencies;
+                        if(dependencies) {
                             nonRecomended.forEach(function(badDep) {
-                                if(badDep in existing) {
+                                if(badDep in dependencies || badDep in devDependencies) {
                                     warns.push({warning:'non_recomended_dependency_1_in_package_json', params:[badDep], scoring:{dependencies:1}});
                                 }
                             });
