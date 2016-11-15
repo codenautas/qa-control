@@ -196,6 +196,115 @@ qacInit.re = {
     email      : /^(<?[A-Za-z]+[a-z0-9.]+@[a-z0-9]+\.[a-z0-9]+>?)$/ // muy mejorable
 };
 
+function validName(nameparts) {
+    for(var n in nameparts) {
+        if(! nameparts[n].match(qacInit.re.name)) { return false; }
+    }
+    return true;
+}
+    
+qacInit.configParams = [
+    {
+        name:'name', prompt:'Project name', def:'',
+        init:function(ctx) {
+            this.def = ctx.input.existingJson.name ? ctx.input.existingJson.name : Path.basename(ctx.input.outDir);
+        },
+        valid:function(name) { return name.match(qacInit.re.namex); }
+    },{
+        name:'description', prompt:'Project description', def:'',
+        init: function(ctx) {
+            this.def = ctx.input.existingJson.description || ctx.result['name']+' module'; 
+        }
+    },{
+        name:'version', prompt:'Project version', def:'',
+        init: function(ctx) { this.def = ctx.input.existingJson.version || '0.0.1'; },
+        valid:function(ver) { return semver.valid(ver); }
+    },{
+        name:'organization', def:'codenautas', temporary:true,
+        valid:function(org) { return org.match(qacInit.re.namex); }
+    },{
+        name:'author', prompt:'Author (FirstN[ LastL] <EMail>)', def:'',
+        init: function(ctx) {
+            this.def = ctx.input.existingJson.author
+                       || (ctx.result.organization == 'codenautas' ? 'Codenautas <codenautas@googlegroups.com>' : '');
+        },
+        valid:function(author) {
+            var pts = author.split(' ');
+            return validName(pts.slice(0, pts.length-1)) &&  pts[pts.length-1].match(qacInit.re.email);
+        }
+    },{
+        name:'repository', def:'',
+        init: function(ctx) {
+            var repo = ctx.input.existingJson.repository;
+            this.def = repo ? repo.url ?
+                                repo.url.substring(4, repo.url.length-4)
+                                : repo
+                            : ctx.result.organization+'/'+ctx.result.name;
+        }
+    },{
+        name:'license', def:'',
+        init: function(ctx) { this.def = ctx.input.qacJson.license; },
+        valid:function(lic) { return lic.match(qacInit.re.namexcml); }
+    },{
+        name:'contributors', prompt: 'Add contributor (Name: email)', def:'',
+        parseNE:function(nameAndEmail) {
+            var nae = nameAndEmail.split(':');
+            if(nae.length===2) { return {name: nae[0].trim(), email: nae[1].trim()}; }
+            return false;
+        },
+        post: function(ctx) {
+            var contributors = ctx.input.existingJson.contributors || [];
+            var nae = this.parseNE(ctx.result[this.name]);
+            contributors.push({'name':nae.name, 'email':nae.email});
+            return contributors.length ? contributors : null;
+        },
+        valid:function(nameAndEmail) {
+            if(nameAndEmail==='') { return true; }
+            var nae = this.parseNE(nameAndEmail);
+            if(nae) { return validName(nae.name.split(' ')) && nae.email.match(qacInit.re.email); }
+            return false;
+        }
+    },{
+        name:'main', def:'', noPrompt:true, init:function(ctx) { this.def=ctx.input.qacJson['main']; }
+    },{
+        name:'files', def:[], noPrompt:true, init:function(ctx) { this.def=ctx.input.qacJson['files']; }
+    },{
+        name:'dependencies', def:'', noPrompt:true,
+        init: function(ctx) { this.def = ctx.input.qacJson['dependencies']; }
+    },{
+        name:'devDependencies', def:'', noPrompt:true,
+        init: function(ctx) { this.def = ctx.input.qacJson['devDependencies']; }
+    },{
+        name:'engines', def:'', noPrompt:true, init: function(ctx) { this.def = ctx.input.qacJson['engines']; }
+    },{
+        name:'scripts', def:'', noPrompt:true, init: function(ctx) { this.def = ctx.input.qacJson['scripts']; }
+    },{
+        name:'jshintConfig', def:'', noPrompt:true, init: function(ctx) { this.def = ctx.input.qacJson['jshintConfig']; }
+    },{
+        name:'eslintConfig', def:'', noPrompt:true, init: function(ctx) { this.def = ctx.input.qacJson['eslintConfig']; }
+    },{
+        name:'qa-control-version', prompt: 'qa-control package-version', def:'',
+        init: function(ctx) { this.def = ctx.input.qacJson['qa-control']['package-version']; },
+        post: function(ctx) {
+            var contributors = ctx.input.existingJson.contributors || [];
+            var ver = ctx.result[this.name];
+            var qacData = ctx.input.qacJson['qa-control'];
+            qacData['package-version'] = ver;
+            return ver;
+        },
+        valid: function(ver) {
+            if(semver.valid(ver)) {
+                for(var v in qaControl.projectDefinition) {
+                    if(semver.satisfies(ver, v)) { return true; }
+                }
+            }
+            return false;
+        }
+    },{
+        name:'qa-control', def:'', noPrompt:true, init: function(ctx) { this.def = ctx.input.qacJson['qa-control']; }
+    }
+];
+        
 qacInit.init = function init(initParams) {
     var echo = function(message) { process.stdout.write(message); }
     if(! initParams.verbose) { echo = function() {} }
@@ -205,117 +314,10 @@ qacInit.init = function init(initParams) {
         tpls: [],
         other: []
     };
-    function validName(nameparts) {
-        for(var n in nameparts) {
-            if(! nameparts[n].match(qacInit.re.name)) { return false; }
-        }
-        return true;
-    }
     var packageJS;
     return qacInit.initDefaults(initParams).then(function(initResult) {
         inputParams = initResult; //console.log("inputParams", inputParams);
-        var configParams = [
-            {
-                name:'name', prompt:'Project name', def:'',
-                init:function(ctx) {
-                    this.def = ctx.input.existingJson.name ? ctx.input.existingJson.name : Path.basename(ctx.input.outDir);
-                },
-                valid:function(name) { return name.match(qacInit.re.namex); }
-            },{
-                name:'description', prompt:'Project description', def:'',
-                init: function(ctx) {
-                    this.def = ctx.input.existingJson.description || ctx.result['name']+' module'; 
-                }
-            },{
-                name:'version', prompt:'Project version', def:'',
-                init: function(ctx) { this.def = ctx.input.existingJson.version || '0.0.1'; },
-                valid:function(ver) { return semver.valid(ver); }
-            },{
-                name:'organization', def:'codenautas', temporary:true,
-                valid:function(org) { return org.match(qacInit.re.namex); }
-            },{
-                name:'author', prompt:'Author (FirstN[ LastL] <EMail>)', def:'',
-                init: function(ctx) {
-                    this.def = ctx.input.existingJson.author
-                               || (ctx.result.organization == 'codenautas' ? 'Codenautas <codenautas@googlegroups.com>' : '');
-                },
-                valid:function(author) {
-                    var pts = author.split(' ');
-                    return validName(pts.slice(0, pts.length-1)) &&  pts[pts.length-1].match(qacInit.re.email);
-                }
-            },{
-                name:'repository', def:'',
-                init: function(ctx) {
-                    var repo = ctx.input.existingJson.repository;
-                    this.def = repo ? repo.url ?
-                                        repo.url.substring(4, repo.url.length-4)
-                                        : repo
-                                    : ctx.result.organization+'/'+ctx.result.name;
-                }
-            },{
-                name:'license', def:'',
-                init: function(ctx) { this.def = ctx.input.qacJson.license; },
-                valid:function(lic) { return lic.match(qacInit.re.namexcml); }
-            },{
-                name:'contributors', prompt: 'Add contributor (Name: email)', def:'',
-                parseNE:function(nameAndEmail) {
-                    var nae = nameAndEmail.split(':');
-                    if(nae.length===2) { return {name: nae[0].trim(), email: nae[1].trim()}; }
-                    return false;
-                },
-                post: function(ctx) {
-                    var contributors = ctx.input.existingJson.contributors || [];
-                    var nae = this.parseNE(ctx.result[this.name]);
-                    contributors.push({'name':nae.name, 'email':nae.email});
-                    return contributors.length ? contributors : null;
-                },
-                valid:function(nameAndEmail) {
-                    if(nameAndEmail==='') { return true; }
-                    var nae = this.parseNE(nameAndEmail);
-                    if(nae) { return validName(nae.name.split(' ')) && nae.email.match(qacInit.re.email); }
-                    return false;
-                }
-            },{
-                name:'main', def:'', noPrompt:true, init:function(ctx) { this.def=ctx.input.qacJson['main']; }
-            },{
-                name:'files', def:[], noPrompt:true, init:function(ctx) { this.def=ctx.input.qacJson['files']; }
-            },{
-                name:'dependencies', def:'', noPrompt:true,
-                init: function(ctx) { this.def = ctx.input.qacJson['dependencies']; }
-            },{
-                name:'devDependencies', def:'', noPrompt:true,
-                init: function(ctx) { this.def = ctx.input.qacJson['devDependencies']; }
-            },{
-                name:'engines', def:'', noPrompt:true, init: function(ctx) { this.def = ctx.input.qacJson['engines']; }
-            },{
-                name:'scripts', def:'', noPrompt:true, init: function(ctx) { this.def = ctx.input.qacJson['scripts']; }
-            },{
-                name:'jshintConfig', def:'', noPrompt:true, init: function(ctx) { this.def = ctx.input.qacJson['jshintConfig']; }
-            },{
-                name:'eslintConfig', def:'', noPrompt:true, init: function(ctx) { this.def = ctx.input.qacJson['eslintConfig']; }
-            },{
-                name:'qa-control-version', prompt: 'qa-control package-version', def:'',
-                init: function(ctx) { this.def = ctx.input.qacJson['qa-control']['package-version']; },
-                post: function(ctx) {
-                    var contributors = ctx.input.existingJson.contributors || [];
-                    var ver = ctx.result[this.name];
-                    var qacData = ctx.input.qacJson['qa-control'];
-                    qacData['package-version'] = ver;
-                    return ver;
-                },
-                valid: function(ver) {
-                    if(semver.valid(ver)) {
-                        for(var v in qaControl.projectDefinition) {
-                            if(semver.satisfies(ver, v)) { return true; }
-                        }
-                    }
-                    return false;
-                }
-            },{
-                name:'qa-control', def:'', noPrompt:true, init: function(ctx) { this.def = ctx.input.qacJson['qa-control']; }
-            }
-        ];
-        return qacInit.readParameters(inputParams, configParams);
+        return qacInit.readParameters(inputParams, qacInit.configParams);
     }).then(function(data) {
         //console.log("res",data);
         packageJS = data;

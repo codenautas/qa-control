@@ -159,6 +159,22 @@ describe/*.only*/("qa-control --init", function(){
         }, function(err) {
             done(err);
         });
+        it("should valid'ate input parameters (coverage)", function(done){
+            qci.configParams.forEach(function(param) {
+                switch(param.name) {
+                    case 'name': expect(param.valid('proj1')).to.be.ok(); break;
+                    case 'version': expect(param.valid('1.0.0')).to.be.ok(); break;
+                    case 'organization': expect(param.valid('myorganization')).to.be.ok(); break;
+                    case 'author': expect(param.valid('John Doe <john@doe.com>')).to.be.ok(); break;
+                    case 'license': expect(param.valid('MIT')).to.be.ok(); break;
+                    case 'contributos': expect(param.valid('Jane Doe|jane@doe.com')).to.be.ok(); break;
+                    case 'qa-control-version': expect(param.valid('0.3.0')).to.be.ok(); break;
+                }
+            });
+            done();
+        }, function(err) {
+            done(err);
+        });
     });
     describe('readParameters', function(){
         var dummyInput = {
