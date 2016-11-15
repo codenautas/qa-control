@@ -8,6 +8,7 @@ var Path = require('path');
 var stripBom = require('strip-bom-string');
 var yaml = require('js-yaml');
 var semver = require("semver");
+var bestGlobals = require("best-globals");
 
 // lodash replacements (para best-globals?)
 function map(obj, func) {
@@ -21,12 +22,6 @@ function forEach(obj, func) {
     for(var key in obj) { if(obj[key]) { func(obj[key], key, obj); } }
 }
 // fin lodash replacements
-
-function promiseSleep(milliseconds) {
-    return new Promise(function(resolve){
-        setTimeout(resolve,milliseconds);
-    });
-}
 
 qaControl.msgs={
     en:{
@@ -248,7 +243,7 @@ var configReading=Promise.all(map(qaControl.projectDefinition,function(definitio
     return qaControl.fixMessages(qaControl.msgs.en);
 }).then(function(){
     // only for test, in production this sleep must gone
-    return promiseSleep(500);
+    return bestGlobals.sleep(500);
 }).then(function(){
     qaControl.configReady=true;
 }).catch(function(err){
