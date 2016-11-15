@@ -14,20 +14,12 @@ var semver = require("semver");
 function map(obj, func) {
     var index = -1;
     var res = [];
-    /*jshint forin: false */
-    /*eslint-disable guard-for-in */
-    for(var key in obj) { res[++index] = func(obj[key], key, obj); }
-    /*jshint forin: true */
-    /*eslint-enable guard-for-in */
+    for(var key in obj) { if(obj[key]) { res[++index] = func(obj[key], key, obj); } }
     return res;
 }
 
 function forEach(obj, func) {
-    /*jshint forin: false */
-    /*eslint-disable guard-for-in */
-    for(var key in obj) { func(obj[key], key, obj); }
-    /*jshint forin: true */
-    /*eslint-enable guard-for-in */
+    for(var key in obj) { if(obj[key]) { func(obj[key], key, obj); } }
 }
 // fin lodash replacements
 
