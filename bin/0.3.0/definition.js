@@ -731,6 +731,23 @@ module.exports = function(qaControl){
                         return warns;
                     }
                 }]
+            },
+            non_recomended_dependencies:{
+                checks:[{
+                    warnings:function(info) {
+                        var warns = [];
+                        var nonRecomended = ['lodash', 'best-promise', 'promise-plus'];
+                        var existing = info.packageJson.dependencies;
+                        if(existing) {
+                            nonRecomended.forEach(function(badDep) {
+                                if(badDep in existing) {
+                                    warns.push({warning:'non_recomended_dependency_1_in_package_json', params:[badDep], scoring:{dependencies:1}});
+                                }
+                            });
+                        }
+                        return warns;
+                    }
+                }]
             }
         }
     };
