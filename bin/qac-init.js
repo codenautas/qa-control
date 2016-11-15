@@ -216,7 +216,7 @@ qacInit.init = function init(initParams) {
         inputParams = initResult; //console.log("inputParams", inputParams);
         var configParams = [
             {
-                name:'name', prompt:'Project name', def:'def1',
+                name:'name', prompt:'Project name', def:'',
                 init:function(ctx) {
                     this.def = ctx.input.existingJson.name ? ctx.input.existingJson.name : Path.basename(ctx.input.outDir);
                 },
@@ -228,9 +228,7 @@ qacInit.init = function init(initParams) {
                 }
             },{
                 name:'version', prompt:'Project version', def:'',
-                init: function(ctx) {
-                    this.def = ctx.input.existingJson.version || '0.0.1';
-                },
+                init: function(ctx) { this.def = ctx.input.existingJson.version || '0.0.1'; },
                 valid:function(ver) { return semver.valid(ver); }
             },{
                 name:'organization', def:'codenautas', temporary:true,
@@ -278,9 +276,9 @@ qacInit.init = function init(initParams) {
                     return false;
                 }
             },{
-                name:'main', def:'index.js', noPrompt:true
+                name:'main', def:'', noPrompt:true, init:function(ctx) { this.def=ctx.input.qacJson['main']; }
             },{
-                name:'files', def:['index.js'], noPrompt:true
+                name:'files', def:[], noPrompt:true, init:function(ctx) { this.def=ctx.input.qacJson['files']; }
             },{
                 name:'dependencies', def:'', noPrompt:true,
                 init: function(ctx) { this.def = ctx.input.qacJson['dependencies']; }
@@ -297,9 +295,7 @@ qacInit.init = function init(initParams) {
                 name:'eslintConfig', def:'', noPrompt:true, init: function(ctx) { this.def = ctx.input.qacJson['eslintConfig']; }
             },{
                 name:'qa-control-version', prompt: 'qa-control package-version', def:'',
-                init: function(ctx) {
-                    this.def = ctx.input.qacJson['qa-control']['package-version'];
-                },
+                init: function(ctx) { this.def = ctx.input.qacJson['qa-control']['package-version']; },
                 post: function(ctx) {
                     var contributors = ctx.input.existingJson.contributors || [];
                     var ver = ctx.result[this.name];
