@@ -389,17 +389,6 @@ describe/*.only*/("qa-control --init", function(){
             }).catch(done);
         });
     });
-    describe("utilities", function(){
-        it('selectDeps', function(done){
-            var groupWithDeps = { k1:'val', k2:'va2', k3:'va3', k4:'va4' , k5:'va5'};
-            var selected = ['k2', 'k4', 'k5'];
-            var generatedGroup = qci.selectDeps(groupWithDeps, selected);
-            expect(generatedGroup).to.eql({k2:'va2', k4:'va4', k5:'va5'});
-            done(); 
-        }, function(err) {
-            done(err);
-        });
-    });
     describe("regular expressions", function(){
         it('names', function(done){
             expect('pepe').to.match(qci.re.name);
