@@ -67,7 +67,7 @@ qaControl.msgs={
         incorrect_ecmascript_versions_in_package_json: 'Las versiones de ECMAScript utilizadas en package.json son incorrectas',
         older_version_of_qa_control_in_package_json: 'La versión de qa-control en el package.json es vieja',
         unexpected_jshintconfig_section_in_package_json: 'No se esperaba la sección jshintConfig en package.json',
-        unexpected_eslintconfig_section_in_package_json: 'No se esperaba la sección eslintConfig en package.json'
+        non_recomended_dependency_1_in_package_json: 'Dependencia no recomendada "$1" en package.json'
     }
 };
 

@@ -614,6 +614,17 @@ var fixtures=[{
     expected:[
         { warning: 'non_recomended_dependency_1_in_package_json', params:['lodash']}
     ]
+},{
+    base:'stable-project-v0.3.0',
+    title:'non-recomended dependencies (#68)',
+    change:function(info){
+        info.packageJson.dependencies['best-promise'] = "1.0.0";
+        info.packageJson.dependencies['promise-plus'] = "1.0.0";
+    },
+    expected:[
+        { warning: 'non_recomended_dependency_1_in_package_json', params:['best-promise']},
+        { warning: 'non_recomended_dependency_1_in_package_json', params:['promise-plus']}
+    ]
 }];
 
 
@@ -693,6 +704,7 @@ describe('qa-control', function(){
                 expect(en['invalid_repository_section_in_package_json']).to.be('invalid repository section in package json');
                 expect(en['invalid_dependency_version_number_format_in_dep_1']).to.be('invalid dependency version number format in dep $1');
                 expect(en['wrong_use_strict_spelling_in_file_1']).to.be('wrong use strict spelling in file $1');
+                expect(en['non_recomended_dependency_1_in_package_json']).to.be('non recomended dependency $1 in package json');
                 done();
             }).catch(done);
         });
@@ -1033,7 +1045,7 @@ describe('qa-control main', function(){
                                       +'Las versiones de ECMAScript utilizadas en package.json son incorrectas\n'
                                       +'La versión de qa-control en el package.json es vieja\n'
                                       +'No se esperaba la sección jshintConfig en package.json\n'
-                                      +'No se esperaba la sección eslintConfig en package.json\n');
+                                      +'Dependencia no recomendada "param1" en package.json\n');
                 done();
             }).catch(done);
         });
@@ -1079,7 +1091,7 @@ describe('qa-control main', function(){
                                        +'incorrect ecmascript versions in package json\n'
                                        +'older version of qa control in package json\n'
                                        +'unexpected jshintconfig section in package json\n'
-                                       +'unexpected eslintconfig section in package json\n');
+                                       +'non recomended dependency param1 in package json\n');
                 done();
             }).catch(done);
         });
