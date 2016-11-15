@@ -11,13 +11,17 @@
     "mocha": "~2.4.5"
   },
   "engines": {
-    "node": ">= 0.12"
+    "node": ">= 4.0.0"
   },
   "scripts": {
     "test": "mocha --reporter spec --bail --check-leaks test/",
     "test-nc": "mocha --reporter spec --bail --check-leaks --no-colors test/",
     "test-ci": "istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- --reporter spec --check-leaks test/",
     "test-cov": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter dot --check-leaks test/",
+    "test-cli": "node server/karma-server.js --karma karma.conf.js --single-run",
+    "test-cli-h": "node server/karma-server.js --karma karma.conf.js",
+    "test-cli-ff": "npm run test-cli -- --browsers Firefox",
+    "test-cli-saf": "npm run test-cli -- --browsers Safari",
     "start": "node example/server.js",
     "report": "istanbul report",
     "all": "npm test && npm run test-cov && npm run report && qa-control . -v"
