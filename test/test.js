@@ -605,6 +605,15 @@ var fixtures=[{
         info.files['.travis.yml'].content = yaml.safeDump(travis);
     },
     expected:[]
+},{
+    base:'stable-project-v0.3.0',
+    title:'non-recomended dependency (#68)',
+    change:function(info){
+        info.packageJson.dependencies['lodash'] = "4.17.1";
+    },
+    expected:[
+        { warning: 'non_recomended_dependency_1_in_package_json', params:['lodash']}
+    ]
 }];
 
 
