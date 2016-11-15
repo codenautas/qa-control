@@ -616,17 +616,6 @@ var fixtures=[{
     ]
 },{
     base:'stable-project-v0.3.0',
-    title:'non-recomended dependencies (#68)',
-    change:function(info){
-        info.packageJson.dependencies['best-promise'] = "1.0.0";
-        info.packageJson.dependencies['promise-plus'] = "1.0.0";
-    },
-    expected:[
-        { warning: 'non_recomended_dependency_1_in_package_json', params:['best-promise']},
-        { warning: 'non_recomended_dependency_1_in_package_json', params:['promise-plus']}
-    ]
-},{
-    base:'stable-project-v0.3.0',
     title:'non-recomended devDependencies (#68)',
     change:function(info){
         info.packageJson.devDependencies['best-promise'] = "1.0.0";
@@ -637,6 +626,17 @@ var fixtures=[{
         { warning: 'non_recomended_dependency_1_in_package_json', params:['best-promise']},
         { warning: 'non_recomended_dependency_1_in_package_json', params:['lodash']},
         { warning: 'non_recomended_dependency_1_in_package_json', params:['promise-plus']},
+    ]
+},{
+    base:'stable-project-v0.3.0',
+    title:'non-recomended all dependencies (#68)',
+    change:function(info){
+        info.packageJson.devDependencies['best-promise'] = "1.0.0";
+        info.packageJson.dependencies['promise-plus'] = "1.0.0";
+    },
+    expected:[
+        { warning: 'non_recomended_dependency_1_in_package_json', params:['best-promise']},
+        { warning: 'non_recomended_dependency_1_in_package_json', params:['promise-plus']}
     ]
 }];
 
