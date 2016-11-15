@@ -5,7 +5,6 @@
 /* global describe */
 /* global it */
 
-var Promises = require('best-promise');
 var fs = require('fs-promise');
 var Path = require('path');
 
@@ -23,7 +22,7 @@ testHelper.dirbase = Path.normalize(testHelper.dirbase);
 
 before(function(done){
     this.timeout(5000);
-    Promises.start(function(){
+    Promise.resolve().then(function(){
         return fs.remove(testHelper.dirbase);
     }).catch(function(err) {
         console.log("err", err);

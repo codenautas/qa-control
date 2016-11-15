@@ -2,7 +2,6 @@
 
 var expect = require('expect.js');
 var qaControl = require('..');
-var Promises = require('best-promise');
 var fs = require('fs-promise');
 var Path = require('path');
 var yaml = require('js-yaml');
@@ -698,7 +697,7 @@ describe('qa-control', function(){
                 return;
             }
             it(fixtureName,function(done){
-                Promises.start(function(){
+                Promise.resolve().then(function(){
                     if(!perfectProjects[fixture.base]){
                         return qaControl.loadProject('test/fixtures/'+fixture.base).then(function(info){
                             perfectProjects[fixture.base]=info;
@@ -859,9 +858,9 @@ describe('qa-control', function(){
             var basePath='./bin';
             var filesWithBom = [];
             return fs.readdir(basePath).then(function(files) {
-                return Promises.all(files.map(function(file){
+                return Promise.all(files.map(function(file){
                     var iFile = Path.normalize(basePath+'/'+file);
-                    return Promises.start(function() {
+                    return Promise.resolve().then(function() {
                         return fs.stat(iFile);
                     }).then(function(stat) {
                         if(stat.isFile() /*&& iFile.match(/(.js)$/)*/) {
@@ -871,7 +870,7 @@ describe('qa-control', function(){
                         } else if(stat.isDirectory()) {
                             // solo leemos un nivel (si cambia hay que hacerlo recursivo)
                             return fs.readdir(iFile).then(function(files2) {
-                                return Promises.all(files2.map(function(file2) {
+                                return Promise.all(files2.map(function(file2) {
                                     var sdFile = Path.normalize(iFile+'/'+file2);
                                     return fs.stat(sdFile).then(function(stat) {
                                         if(stat.isFile()) {

@@ -26,7 +26,6 @@
     "semver": "~5.3.0",
     "strip-bom-string": "~0.1.2",
     
-    "best-promise": "~0.2.4",
     "multilang": "~1.0.14"
   },
   "devDependencies": {

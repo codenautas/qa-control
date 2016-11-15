@@ -2,7 +2,6 @@
 
 var expect = require('expect.js');
 var qaControl = require('..');
-var Promises = require('best-promise');
 var fs = require('fs-promise');
 var Path = require('path');
 var sinon = require('sinon');
@@ -167,7 +166,7 @@ describe/*.only*/("qa-control --init", function(){
         };
         it("should read an array of parameters", function(done){
             sinon.stub(qci, 'promptForVar', function(param, msgs) {
-                return Promises.resolve('value'+param.name.substr(param.name.length-1, 1));
+                return Promise.resolve('value'+param.name.substr(param.name.length-1, 1));
             });
             var params = [
                 {name:'v1', def:'def1'},
@@ -190,7 +189,7 @@ describe/*.only*/("qa-control --init", function(){
         });
         it("should read an array of parameters using current values", function(done){
             sinon.stub(qci, 'promptForVar', function(param, msgs) {
-                return Promises.resolve(param.def);
+                return Promise.resolve(param.def);
             });
             var params = [
                 {name:'v1', def:'def1'},
@@ -214,8 +213,8 @@ describe/*.only*/("qa-control --init", function(){
         });
         it("should handle errors in the prompt", function(done) {
             sinon.stub(qci, 'promptForVar', function(param, msgs) {
-                if(param.name=='v2') { return Promises.reject('dummy error'); }
-                return Promises.resolve(param.def);
+                if(param.name=='v2') { return Promise.reject('dummy error'); }
+                return Promise.resolve(param.def);
             });
             var params = [ {name:'v1', def:'def1'}, {name:'v2', def:'def2'}];
             qci.readParameters({}, params).then(function(result) {
@@ -228,8 +227,8 @@ describe/*.only*/("qa-control --init", function(){
         });
         it("should default values for valid input", function(done) {
             sinon.stub(qci, 'promptForVar', function(param, msgs) {
-                if(param.name=='v2') { return Promises.reject('dummy error'); }
-                return Promises.resolve(param.def);
+                if(param.name=='v2') { return Promise.reject('dummy error'); }
+                return Promise.resolve(param.def);
             });
             var params = [ {name:'v1', def:'def1'}, {name:'v2', def:'def2'}];
             qci.readParameters({}, params).then(function(result) {
@@ -242,7 +241,7 @@ describe/*.only*/("qa-control --init", function(){
         });
         it("should forward the context to parameters", function(done) {
             sinon.stub(qci, 'promptForVar', function(param, msgs) {
-                return Promises.resolve(param.def);
+                return Promise.resolve(param.def);
             });
             var params = [
                 {name:'v1', def:'def1', init:function(ctx) {
@@ -279,7 +278,7 @@ describe/*.only*/("qa-control --init", function(){
             var promptedParameters=0;
             sinon.stub(qci, 'promptForVar', function(param, msgs) {
                 ++promptedParameters;
-                return Promises.resolve(param.def);
+                return Promise.resolve(param.def);
             });
             var params = [
                 {name:'v1', def:'def1', noPrompt:true},
@@ -301,7 +300,7 @@ describe/*.only*/("qa-control --init", function(){
         });
         it("should exclude temporary parameters where requested", function(done) {
             sinon.stub(qci, 'promptForVar', function(param, msgs) {
-                return Promises.resolve(param.name=='v2' ? 'promptedV2' : param.def);
+                return Promise.resolve(param.name=='v2' ? 'promptedV2' : param.def);
             });
             var params = [
                 {name:'v1', def:'def1', noPrompt:true},
@@ -354,10 +353,10 @@ describe/*.only*/("qa-control --init", function(){
             var tests = {};
             sinon.stub(fs, 'writeFile', function(fileName, content) {
                 //console.log("stub writeFile", fileName, content)
-                return Promises.resolve(content);
+                return Promise.resolve(content);
             });
             return fs.readdir(testTplDir).then(function(files) {
-                return Promises.all(files.map(function(file){
+                return Promise.all(files.map(function(file){
                     var fPath = Path.normalize(testTplDir+'/'+file);
                     return fs.readFile(fPath, {encoding:'utf8'}).then(function(content) {
                         var name = file.substr(0, file.length-4);
@@ -378,7 +377,7 @@ describe/*.only*/("qa-control --init", function(){
                 });
                 var testsArray = [];
                 for(var t in tests) { testsArray.push(tests[t]); }
-                return Promises.all(testsArray.map(function(test) {
+                return Promise.all(testsArray.map(function(test) {
                     return qci.writeTemplate(test.input.file, test.output.file, kvPairs).then(function(out) {
                         expect(out).to.eql(test.output.data);
 						//console.log("out", out);
@@ -453,7 +452,7 @@ describe/*.only*/("qa-control --init", function(){
         function loadDir(fullPath) {
             var info = {};
             return fs.readdir(fullPath).then(function(files) {
-                return Promises.all(files.map(function(file){
+                return Promise.all(files.map(function(file){
                     var fPath = Path.normalize(fullPath+'/'+file);
                     return fs.readFile(fPath, {encoding:'utf8'}).then(function(content) {
                         info[file] = content;
@@ -474,7 +473,7 @@ describe/*.only*/("qa-control --init", function(){
                     case 'description': ret='The description'; break;
                     case 'contributors': ret='Diego:diegoefe@unemail.com'; break;
                 }
-                return Promises.resolve(ret);
+                return Promise.resolve(ret);
             });
             fs.mkdir(outDir).then(function() {
                 return qci.init({projectDir:outDir});

@@ -5,7 +5,6 @@
 var program = require('commander');
 var qaControl = require('./qa-control');
 var qacInit = require('./qac-init');
-var Promises = require('best-promise');
 var fs = require('fs-promise');
 var path = require('path');
 

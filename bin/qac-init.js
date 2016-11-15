@@ -6,7 +6,6 @@
 
 var qacInit = {};
 
-var Promises = require('best-promise');
 var fs = require('fs-promise');
 var Path = require('path');
 var qaControl = require('./qa-control.js');
@@ -116,7 +115,7 @@ qacInit.ask = function ask(param, msgs, callback) {
 };
 
 qacInit.promptForVar = function promptForVar(param, msgs) {
-    return Promises.make(function(resolve, reject) {
+    return new Promise(function(resolve, reject) {
         qacInit.ask(param, msgs, function (data) {
             resolve(data);
         });
@@ -124,7 +123,7 @@ qacInit.promptForVar = function promptForVar(param, msgs) {
 };
 
 function getParam(param, ctx) {
-    return Promises.start(function() {
+    return Promise.resolve().then(function() {
         if(param.init) { param.init(ctx); }
         if(param.noPrompt) {
             return param.def;
@@ -144,7 +143,7 @@ qacInit.readParameters = function readParameters(inputParams, params) {
         result:{},
         input: inputParams
     };
-    var cadenaDePromesas = Promises.start();
+    var cadenaDePromesas = Promise.resolve().then();
     params.forEach(function(param) {
         cadenaDePromesas = cadenaDePromesas.then(function() {
             return getParam(param, ctx);
@@ -165,7 +164,7 @@ qacInit.readParameters = function readParameters(inputParams, params) {
 
 // utiliza templateJson como plantilla
 qacInit.generateJSon = function generateJSon(readedParameters, templateJson) {
-    return Promises.start(function() {
+    return Promise.resolve().then(function() {
         var outJson = JSON.parse(JSON.stringify(templateJson));
         for(var paramName in readedParameters) {
             var val = readedParameters[paramName];
@@ -358,14 +357,14 @@ qacInit.init = function init(initParams) {
         tplData.tpls = files.filter(function(file) { return file.match(/(.tpl)$/); });
         tplData.other = files.filter(function(file) { return tplData.tpls.indexOf(file) < 0 })
         //console.log("tplData", tplData);
-        return Promises.all(tplData.other.map(function(file){
+        return Promise.all(tplData.other.map(function(file){
             var oFile = file;
             if(file.match(/^(dot-)/)) { oFile = '.'+file.substring(4); }
             echo('  '+inputParams.msgs.msg_copying+' '+oFile+'...\n');
             return fs.copy(Path.resolve(inputParams.tplDir+'/'+file), Path.resolve(inputParams.outDir+'/'+oFile));                
         }));
     }).then(function() {
-        return Promises.all(tplData.tpls.map(function(file) {
+        return Promise.all(tplData.tpls.map(function(file) {
             var oFile = file.substr(0, file.length-4); // removemos '.tpl'
             echo('  '+inputParams.msgs.msg_generating+' '+oFile+'...\n');
             return qacInit.writeTemplate(Path.resolve(inputParams.tplDir+'/'+file),Path.resolve(inputParams.outDir+'/'+oFile), tplData.vars).then(function(out) {
