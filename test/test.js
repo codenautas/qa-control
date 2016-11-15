@@ -1045,6 +1045,8 @@ describe('qa-control main', function(){
                                       +'Las versiones de ECMAScript utilizadas en package.json son incorrectas\n'
                                       +'La versión de qa-control en el package.json es vieja\n'
                                       +'No se esperaba la sección jshintConfig en package.json\n'
+                                      +'Falta el checkeo de node versión param1 en .travis.yml\n'
+                                      +'No se permite la falla de node versión param1 en .travis.yml\n'
                                       +'Dependencia no recomendada "param1" en package.json\n');
                 done();
             }).catch(done);
@@ -1091,6 +1093,8 @@ describe('qa-control main', function(){
                                        +'incorrect ecmascript versions in package json\n'
                                        +'older version of qa control in package json\n'
                                        +'unexpected jshintconfig section in package json\n'
+                                       +'lack of travis check for node version param1\n'
+                                       +'not allowed travis failure for node version param1\n'
                                        +'non recomended dependency param1 in package json\n');
                 done();
             }).catch(done);

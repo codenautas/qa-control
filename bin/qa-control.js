@@ -67,6 +67,8 @@ qaControl.msgs={
         incorrect_ecmascript_versions_in_package_json: 'Las versiones de ECMAScript utilizadas en package.json son incorrectas',
         older_version_of_qa_control_in_package_json: 'La versión de qa-control en el package.json es vieja',
         unexpected_jshintconfig_section_in_package_json: 'No se esperaba la sección jshintConfig en package.json',
+        lack_of_travis_check_for_node_version_1: 'Falta el checkeo de node versión $1 en .travis.yml',
+        not_allowed_travis_failure_for_node_version_1: 'No se permite la falla de node versión $1 en .travis.yml',
         non_recomended_dependency_1_in_package_json: 'Dependencia no recomendada "$1" en package.json'
     }
 };
