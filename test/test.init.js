@@ -16,7 +16,7 @@ describe/*.only*/("qa-control --init", function(){
     var templateDir = Path.resolve('./bin/init-template');
     var qacPackageJson;
     before(function() {
-        return fs.readJson('./package.json').then(function(content) {
+        return fs.readJson('./bin/init-package.json').then(function(content) {
             qacPackageJson = content;
         });
     });
@@ -33,7 +33,7 @@ describe/*.only*/("qa-control --init", function(){
             done(err);
         });
         it('load J-Son file', function(done){
-            return qci.loadJsonIfExists('./package.json').then(function(content) {
+            return qci.loadJsonIfExists('./bin/init-package.json').then(function(content) {
                 expect(content).to.be.eql(qacPackageJson);
                 return qci.loadJsonIfExists('./my/inexistent/file.json');
             }).then(function(content) {

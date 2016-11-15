@@ -64,7 +64,7 @@ qacInit.initDefaults = function initDefaults(initParams) {
     };
     var oriREADME = Path.normalize(rv.outDir+'/README.md');
     var oriPackageJson = Path.normalize(rv.outDir+'/package.json');
-    var qacPackageJson = Path.normalize(Path.dirname(__dirname)+'/package.json');
+    var qacPackageJson = Path.normalize(__dirname+'/init-package.json');
     var qacJson;
     return fs.readJson(qacPackageJson).then(function(json) {
         rv.qacJson = json;

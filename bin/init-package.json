@@ -1,0 +1,50 @@
+{
+  "license": "MIT",
+  "main": "index.js",
+  "dependencies": {
+    "commander": "~2.9.0",
+    "eslint": "~3.10.0",
+    "fs-extra": "~1.0.0",
+    "fs-promise": "~1.0.0",
+    "js-yaml": "~3.7.0",
+    "jshint280": "~1.0.0",
+    "jshint": "~2.9.1",
+    "parameters": "~0.1.5",
+    "semver": "~5.3.0",
+    "strip-bom-string": "~0.1.2",
+    
+    "best-globals": "~0.5.5",
+    "multilang": "~1.0.14"
+  },
+  "devDependencies": {
+    "expect.js": "~0.3.1",
+    "istanbul": "~0.4.3",
+    "mocha": "~2.4.5",
+    "sinon": "~1.17.3",
+
+    "expect-called": "~0.4.0"
+  },
+  "engines": {
+    "node": ">= 0.12"
+  },
+  "scripts": {
+    "test": "mocha --reporter spec --bail --check-leaks test/",
+    "test-nc": "mocha --reporter spec --bail --check-leaks --no-colors test/",
+    "test-ci": "istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- --reporter spec --check-leaks test/",
+    "test-cov": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter dot --check-leaks test/",
+    "start": "node example/server.js",
+    "report": "istanbul report",
+    "all": "npm test && npm run test-cov && npm run report && qa-control . -v"
+  },
+  "files": [
+    "index.js"
+  ],
+  "qa-control": {
+    "package-version": "0.3.0",
+    "coverage": 90,
+    "run-in": "server",
+    "stability": "extending",
+    "type": "cmd-tool",
+    "ecmaVersion": 6
+  }
+}
