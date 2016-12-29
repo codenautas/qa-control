@@ -31,3 +31,5 @@ node_modules
 
 local-*
 *-local.*
+
+desktop.ini
