@@ -29,7 +29,7 @@ qaControl.msgs={
         repository_name_not_found: 'packageJson.repository must be in format /{[-a-zA-Z0-9_.]+}\/[-a-zA-Z0-9_.]+/'
     },
     es:{
-        no_test_in_node_four: 'falta probar para node 4 en .travis.yaml',
+        no_test_in_last_node: 'falta probar para la última versión de node .travis.yaml',
         deprecated_qa_control_version: 'la versión de qa-control es vieja',
         deprecated_version: 'la version es demasiado vieja',
         invalid_qa_control_version: 'la sección "package-version" en qa-control contiene un valor incorrecto',
@@ -182,7 +182,7 @@ qaControl.checkDepVerNumberFormat = function checkDepVerNumberFormat(info) {
     return warns;
 };
 
-qaControl.nodeVerInTravisRE = /[456]/;
+qaControl.nodeVerInTravisRE = /[678]/;
 
 qaControl.verbose = false;
 qaControl.cucardas_always = false;

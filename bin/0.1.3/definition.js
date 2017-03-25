@@ -348,7 +348,12 @@ module.exports = function(qaControl){
             no_test_in_node_four:{
                 checks:[{
                     warnings:function(info){
-                        if(info.dotTravis && info.dotTravis.node_js.filter(function(x){ return x[0].match(qaControl.nodeVerInTravisRE); }).length<2){
+                        if(info.dotTravis && info.dotTravis.node_js.filter(function(x){ return x[0].match(/[45678]/); }).length<2){
+                            console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
+                            console.log('length',info.dotTravis.node_js.filter(function(x){ 
+                                console.log('x',x,x[0],x[0].match(/[45678]/));
+                                return x[0].match(/[45678]/); 
+                            }).length);
                             return [{warning:'no_test_in_node_four', scoring:{versions:1}}];
                         }
                         return [];

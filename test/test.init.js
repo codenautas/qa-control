@@ -21,28 +21,21 @@ describe/*.only*/("qa-control --init", function(){
         });
     });
     describe("load*IfExists()", function(){
-        it('load simple file', function(done){
+        it('load simple file', function(){
             return qci.loadIfExists('./test/fixtures-init/templates/LEEME.tpl').then(function(content) {
                 expect(content.length).to.be.above(10);
                 return qci.loadIfExists('./my/inexistent/file');
             }).then(function(content) {
                 expect(content).to.be(null);
-                done();
             });
-        }, function(err) {
-            done(err);
         });
-        it('load J-Son file', function(done){
+        it('load J-Son file', function(){
             return qci.loadJsonIfExists('./bin/init-package.json').then(function(content) {
                 expect(content).to.be.eql(qacPackageJson);
                 return qci.loadJsonIfExists('./my/inexistent/file.json');
             }).then(function(content) {
                 expect(content).to.be(null);
-                done();
             });
-            
-        }, function(err) {
-            done(err);
         });
     });
     describe('test initialization by fixtures', function(){
@@ -108,7 +101,7 @@ describe/*.only*/("qa-control --init", function(){
                 it.skip(fixtureName, function(){});
                 return;
             }
-            it(fixtureName, function(done) {
+            it(fixtureName, function() {
                 var oriJson = Path.resolve('./test/fixtures-init/'+fixture.base+'/package.json');
                 var oriReadme = Path.resolve('./test/fixtures-init/'+fixture.base+'/README.md');
                 var expParam = { qacPackageJson:qacPackageJson };
@@ -123,13 +116,12 @@ describe/*.only*/("qa-control --init", function(){
                 }).then(function(result) {
                     expect(result).to.eql(fixture.expected(expParam));  
                 }).then(function(){
-                    done();
-                }).catch(done);
+                });
             });
         });
     });
     describe("parameters", function(){
-        it('may use current result', function(done){
+        it('may use current result', function(){
             var p1 = {name:'v1', def:'def1'};
             var p2 = {name:'v2', def:'def2', init: function(ctx) {
                 if(ctx.result.v1) {
@@ -144,22 +136,16 @@ describe/*.only*/("qa-control --init", function(){
             p2.init(ctx);
             expect(p1.def).to.eql('def1');
             expect(p2.def).to.eql('using val1');
-            done();
-        }, function(err) {
-            done(err);
         });
-        it('may do post-processing', function(done){
+        it('may do post-processing', function(){
             var p1 = {name:'v1', def:'def1', post: function(ctx) {
                 return '"'+ctx.result.v1+'"';
             }};
             expect(p1.name).to.eql('v1');
             expect(p1.def).to.eql('def1');
             expect(p1.post({result:{'v1':p1.def}})).to.eql('"'+p1.def+'"');
-            done();
-        }, function(err) {
-            done(err);
         });
-        it("should valid'ate input parameters (coverage)", function(done){
+        it("should valid'ate input parameters (coverage)", function(){
             qci.configParams.forEach(function(param) {
                 switch(param.name) {
                     case 'name': expect(param.valid('proj1')).to.be.ok(); break;
@@ -171,16 +157,13 @@ describe/*.only*/("qa-control --init", function(){
                     case 'qa-control-version': expect(param.valid('0.3.0')).to.be.ok(); break;
                 }
             });
-            done();
-        }, function(err) {
-            done(err);
         });
     });
     describe('readParameters', function(){
         var dummyInput = {
            msgs: qci.cmdMsgs.en 
         };
-        it("should read an array of parameters", function(done){
+        it("should read an array of parameters", function(){
             sinon.stub(qci, 'promptForVar', function(param, msgs) {
                 return Promise.resolve('value'+param.name.substr(param.name.length-1, 1));
             });
@@ -189,7 +172,6 @@ describe/*.only*/("qa-control --init", function(){
                 {name:'v3', def:'def3'},
                 {name:'v2', def:'def2'}
             ];
-            
             return qci.readParameters(dummyInput, params).then(function(result) {
                 qci.promptForVar.restore();
                 expect(result).to.eql({
@@ -197,13 +179,9 @@ describe/*.only*/("qa-control --init", function(){
                        v3: 'value3',
                        v2: 'value2'
                 });
-                done();
-            }).catch(function(err) {
-                console.log("err", err)
-                done(err);
             });
         });
-        it("should read an array of parameters using current values", function(done){
+        it("should read an array of parameters using current values", function(){
             sinon.stub(qci, 'promptForVar', function(param, msgs) {
                 return Promise.resolve(param.def);
             });
@@ -221,10 +199,6 @@ describe/*.only*/("qa-control --init", function(){
                        v3: 'have v2',
                        v4: '<def4>'
                 });
-                done();
-            }).catch(function(err) {
-                console.log("err", err)
-                done(err);
             });
         });
         it("should handle errors in the prompt", function(done) {
@@ -255,7 +229,7 @@ describe/*.only*/("qa-control --init", function(){
                 done();                    
             });
         });
-        it("should forward the context to parameters", function(done) {
+        it("should forward the context to parameters", function() {
             sinon.stub(qci, 'promptForVar', function(param, msgs) {
                 return Promise.resolve(param.def);
             });
@@ -275,7 +249,7 @@ describe/*.only*/("qa-control --init", function(){
                 existingJson : {e1:'e1', e2:'e2'},
                 qacJson: {qa1:'qa1', qa2:'qa2'}
             };
-            qci.readParameters(inputParams, params).then(function(result) {
+            return qci.readParameters(inputParams, params).then(function(result) {
                 qci.promptForVar.restore();
                 expect(result.v1).to.be(inputParams.existingJson.e1);
                 expect(result.v2).to.be(inputParams.qacJson.qa2);
@@ -285,12 +259,9 @@ describe/*.only*/("qa-control --init", function(){
                        v2: 'qa2',
                        v3: 'dummy'
                 });
-                done();
-            }).catch(function(err) {
-                done(err);                    
             });
         });
-        it("should skip parameters where requested", function(done) {
+        it("should skip parameters where requested", function() {
             var promptedParameters=0;
             sinon.stub(qci, 'promptForVar', function(param, msgs) {
                 ++promptedParameters;
@@ -302,7 +273,7 @@ describe/*.only*/("qa-control --init", function(){
                 {name:'v3', def:'def3', noPrompt:true, init:function(ctx) { this.def = 'init v3'}},
                 {name:'v4', def:'def4'},
             ];
-            qci.readParameters(dummyInput, params).then(function(result) {
+            return qci.readParameters(dummyInput, params).then(function(result) {
                 expect(promptedParameters).to.eql(2);
                 expect(result).to.eql({
                     v1: 'def1',
@@ -310,11 +281,10 @@ describe/*.only*/("qa-control --init", function(){
                     v3: 'init v3',
                     v4: 'def4',
                 })
-                qci.promptForVar.restore();
-                done();
-            }).catch(done);
+                return qci.promptForVar.restore();
+            });
         });
-        it("should exclude temporary parameters where requested", function(done) {
+        it("should exclude temporary parameters where requested", function() {
             sinon.stub(qci, 'promptForVar', function(param, msgs) {
                 return Promise.resolve(param.name=='v2' ? 'promptedV2' : param.def);
             });
@@ -323,28 +293,24 @@ describe/*.only*/("qa-control --init", function(){
                 {name:'v2', def:'def2', temporary:true},
                 {name:'v3', def:'def3', post:function(ctx) { return 'v3 haves '+ctx.result.v2; } }
             ];
-            qci.readParameters(dummyInput, params).then(function(result) {
+            return qci.readParameters(dummyInput, params).then(function(result) {
                 //console.log("result", result);
                 expect(result).to.eql({
                     v1: 'def1',
                     v3: 'v3 haves promptedV2'
                 });
                 qci.promptForVar.restore();
-                done();
-            }).catch(done);
+            });
         });
     });
     describe("J-Son output", function(){
-        it('should clone provided template .json', function(done){
-            qci.generateJSon({}, qacPackageJson).then(function(generatedJson) {
+        it('should clone provided template .json', function(){
+            return qci.generateJSon({}, qacPackageJson).then(function(generatedJson) {
                expect(generatedJson).to.eql(qacPackageJson);
                expect(generatedJson).not.to.be(qacPackageJson);
-               done(); 
             });
-        }, function(err) {
-            done(err);
         });
-        it('should modify only provided properties in readed parameters', function(done){
+        it('should modify only provided properties in readed parameters', function(){
             var readedParams = {
                 'name': 'fixed name',
                 'description': 'fixed description',
@@ -354,17 +320,14 @@ describe/*.only*/("qa-control --init", function(){
             resJson['name'] = readedParams.name;
             resJson['description'] = readedParams.description;
             resJson['engines']= readedParams.engines;
-            qci.generateJSon(readedParams, qacPackageJson).then(function(generatedJson) {
+            return qci.generateJSon(readedParams, qacPackageJson).then(function(generatedJson) {
                //console.log(generatedJson);
                expect(generatedJson).to.eql(resJson);
-               done(); 
             });
-        }, function(err) {
-            done(err);
         });
     });
     describe("templates", function(){
-        it('should substitute values', function(done){
+        it('should substitute values', function(){
             var testTplDir = './test/fixtures-init/templates';
             var tests = {};
             sinon.stub(fs, 'writeFile', function(fileName, content) {
@@ -400,13 +363,12 @@ describe/*.only*/("qa-control --init", function(){
                     });
                 }));
             }).then(function() {
-                fs.writeFile.restore();
-                done();
-            }).catch(done);
+                return fs.writeFile.restore();
+            }).catch();
         });
     });
     describe("regular expressions", function(){
-        it('names', function(done){
+        it('names', function(){
             expect('pepe').to.match(qci.re.name);
             expect('Pepe').to.match(qci.re.name);
             expect('P').not.to.match(qci.re.name);
@@ -434,12 +396,8 @@ describe/*.only*/("qa-control --init", function(){
             expect('Pa').to.match(qci.re.namexcml);
             expect('Pepe1').to.match(qci.re.namexcml);
             expect('pepe2').not.to.match(qci.re.namexcml);
-            
-            done(); 
-        }, function(err) {
-            done(err);
         });
-       it('e-mail', function(done){
+       it('e-mail', function(){
             expect('pepe@server').not.to.match(qci.re.email);
             expect('pepe@server.dom').to.match(qci.re.email);
             expect('<pepe@server.dom>').to.match(qci.re.email);
@@ -448,9 +406,6 @@ describe/*.only*/("qa-control --init", function(){
             expect('<Pepe.sanchez@server.dom>').to.match(qci.re.email);
             // hay que mejorarla para que falle con el siguiente
             // expect('<Pepe.sanchez@server.dom').not.to.match(qci.re.email);
-            done(); 
-        }, function(err) {
-            done(err);
         });
     });
     describe("generation", function(){
@@ -467,7 +422,7 @@ describe/*.only*/("qa-control --init", function(){
                 return info;
             });
         }
-        it('init', function(done) {
+        it('init', function() {
             var outDir = Path.resolve(helper.dirbase+'/gen-init');
             var testDir = Path.resolve('./test/fixtures-init/initialized');
             var infoGen, infoTest;
@@ -495,14 +450,8 @@ describe/*.only*/("qa-control --init", function(){
                    //console.log("file", file);
                    expect(infoTest[file].content).to.eql(infoGen[file].content);
                }
-               qci.promptForVar.restore();
-               done(); 
-            }).catch(function(err) {
-                console.log("err", err)
-                done(err);
+               return qci.promptForVar.restore();
             });
-        }, function(err) {
-            done(err);
         });
     });
 });

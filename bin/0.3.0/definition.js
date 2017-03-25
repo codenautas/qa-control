@@ -354,11 +354,11 @@ module.exports = function(qaControl){
                     }
                 }]
             }, // agregar desde acá
-            no_test_in_node_four:{
+            no_test_in_last_node:{
                 checks:[{
                     warnings:function(info){
                         if(info.dotTravis && info.dotTravis.node_js.filter(function(x){ return x[0].match(qaControl.nodeVerInTravisRE); }).length<2){
-                            return [{warning:'no_test_in_node_four', scoring:{conventions:1}}];
+                            return [{warning:'no_test_in_last_node', scoring:{conventions:1}}];
                         }
                         return [];
                     }

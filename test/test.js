@@ -65,11 +65,14 @@ var fixtures=[{
         { warning:'invalid_qa_control_version',params:['not-a-version-number']},
     ]
 },{
-    base:'stable-project',
-    test:'no_test_in_node_four',
+    base:'stable-project-v0.3.0',
+    test:'no_test_in_last_node',
     change:function(info){
-        info.dotTravis.node_js = ['0.10', '0.12'];
-    }
+        info.dotTravis.node_js = ['0.10', '0.12', '4'];
+    },
+    expected:[
+        { warning:'no_test_in_last_node'},
+    ]
 },{
     base:'stable-project',
     title:'abort on deprecated qa-control section version (#4)',
@@ -647,18 +650,17 @@ function cloneProject(info){
 
 describe('qa-control', function(){
     describe('load project', function(){
-        it('waits for config already readed', function(done){
-            qaControl.loadProject('./test/fixtures/stable-project').then(function(info){
+        it('waits for config already readed', function(){
+            return qaControl.loadProject('./test/fixtures/stable-project').then(function(info){
                 expect(qaControl.configReady).to.ok();
                 expect(
                     qaControl.projectDefinition['0.0.1'].firstLines['server']['lib']
                 ).to.match(/^"use strict";/);
-                done();
-            }).catch(done);
+            });
         });
-        it('loads ok', function(done){
+        it('loads ok', function(){
             var projDir = './test/fixtures/stable-project';
-            qaControl.loadProject(projDir).then(function(info){
+            return qaControl.loadProject(projDir).then(function(info){
                 expect(Object.keys(info)).to.eql([
                     'projectDir',
                     'files',
@@ -677,11 +679,10 @@ describe('qa-control', function(){
                 expect(info.packageJson["qa-control"]["coverage"]).to.eql(100);
                 expect(info.files['LEEME.md'].content).to.match(/^<!--multilang v0 es:LEEME.md en:README.md -->/);
                 expect(info.dotTravis.node_js).to.eql(['0.10','0.11','0.12','4.2','5.1']);
-                done();
-            }).catch(done);
+            });
         });
-        it('generates english messages from spanish warnings', function(done){
-            qaControl.loadProject('./test/fixtures/stable-project').then(function(info){
+        it('generates english messages from spanish warnings', function(){
+            return qaControl.loadProject('./test/fixtures/stable-project').then(function(info){
                 var en=qaControl.msgs.en;
                 var es=qaControl.msgs.es;
                 expect(Object.keys(en).sort()).to.eql(Object.keys(es).sort());
@@ -718,8 +719,7 @@ describe('qa-control', function(){
                 expect(en['invalid_dependency_version_number_format_in_dep_1']).to.be('invalid dependency version number format in dep $1');
                 expect(en['wrong_use_strict_spelling_in_file_1']).to.be('wrong use strict spelling in file $1');
                 expect(en['non_recomended_dependency_1_in_package_json']).to.be('non recomended dependency $1 in package json');
-                done();
-            }).catch(done);
+            });
         });
     });
     describe('test qa-control by fixtures', function(){
@@ -730,8 +730,8 @@ describe('qa-control', function(){
                 it.skip(fixtureName, function(){});
                 return;
             }
-            it(fixtureName,function(done){
-                Promise.resolve().then(function(){
+            it(fixtureName,function(){
+                return Promise.resolve().then(function(){
                     if(!perfectProjects[fixture.base]){
                         return qaControl.loadProject('test/fixtures/'+fixture.base).then(function(info){
                             perfectProjects[fixture.base]=info;
@@ -761,9 +761,7 @@ describe('qa-control', function(){
                     return fs.unlink(Path.normalize(perfectProjects[fixture.base].projectDir+'/cucardas.log'));
                 }).catch(function(err) {
                     if(err.code !== 'ENOENT') { throw err; }
-                }).then(function(){
-                    done();
-                }).catch(done);
+                });
             });
         });
     });
@@ -816,41 +814,32 @@ describe('qa-control', function(){
                 done(err);
             });
         });
-        it('generate warnings but not exception when no exists package.json', function(done){
-            qaControl.controlProject('./test/fixtures/without-package-json').then(function(warnings){
+        it('generate warnings but not exception when no exists package.json', function(){
+            return qaControl.controlProject('./test/fixtures/without-package-json').then(function(warnings){
                 expect(stripScoring(warnings)).to.eql([{warning:'no_package_json'}]);
-                done();
-            }).catch(done);
+            });
         });
-       it('packageJson.main must default to index.js', function(done){
-            qaControl.loadProject('./test/fixtures/stable-project-with-default-main').then(function(info){
+       it('packageJson.main must default to index.js', function(){
+            return qaControl.loadProject('./test/fixtures/stable-project-with-default-main').then(function(info){
                 expect(info['files']).to.have.key('index.js');
                 expect(info['files']['index.js'].content).to.contain('StableProject');
                 return qaControl.controlInfo(info);
             }).then(function(warns){
                 expect(stripNotices(warns)).to.eql([]);
-                done();
-            }).catch(function(err) {
-                console.log("mal", err);
-                done(err);
             });
         });
-       it('packageJson.main must gracefully fail if file does not exists (#37)', function(done){
-            qaControl.loadProject('./test/fixtures/stable-project-with-inexistent-main').then(function(info){
+       it('packageJson.main must gracefully fail if file does not exists (#37)', function(){
+            return qaControl.loadProject('./test/fixtures/stable-project-with-inexistent-main').then(function(info){
                 expect(info['files']).not.to.have.key('bin/nonexistent.js');
                 return qaControl.controlInfo(info);
             }).then(function(warns){
                 expect(stripScoring(stripNotices(warns))).to.eql([{warning:'packagejson_main_file_1_does_not_exists', params:['bin/nonexistent.js']}]);
-                done();
-            }).catch(function(err) {
-                console.log("err", err);
-                done(err);
             });
         });
     });
     describe('integrity tests', function(){
-        it('verify that qa-control.js only uses existent warning IDs (#24)', function(done){
-            fs.readFile('./bin/qa-control.js', {encoding: 'utf8'}).then(function(content) {
+        it('verify that qa-control.js only uses existent warning IDs (#24)', function(){
+            return fs.readFile('./bin/qa-control.js', {encoding: 'utf8'}).then(function(content) {
                 //console.log("con", content);
                 var reWarn = /\bwarning\b\s*:\s*['"]([^'"]+)['"]/;
                 var reIncompleteWarn = /\bwarning\b\s*:\s*$/;
@@ -878,17 +867,12 @@ describe('qa-control', function(){
                     }
                 }
                 if(numWarns) {
-                    done('Tengo '+numWarns+' warnings');
-                } else {
-                    done();
+                    throw new Error('Tengo '+numWarns+' warnings');
                 }
-            }).catch(function(err) {
-                console.log("mal", err);
-                done(err);
             });
         });
         function hasBOM(content) { return content.charCodeAt(0) === 0xFEFF; }
-        it('verify that qa-control\'s core files don\'t have UTF-8 BOM (#33)', function(done){
+        it('verify that qa-control\'s core files don\'t have UTF-8 BOM (#33)', function(){
             var basePath='./bin';
             var filesWithBom = [];
             return fs.readdir(basePath).then(function(files) {
@@ -921,13 +905,9 @@ describe('qa-control', function(){
                 })).then(function() {
                     if(filesWithBom.length) {
                         console.log("FILES with BOM", filesWithBom);
-                        done("ERROR: Have core files with BOM!");
-                        
-                    } else { done(); }
+                        throw new Error("ERROR: Have core files with BOM!");
+                    }
                 });
-            }).catch(function(err) {
-                console.log("mal", err);
-                done(err);
             });
         });
     });
@@ -1022,7 +1002,7 @@ describe('qa-control main', function(){
                 return qaControl.stringizeWarnings(generateWarningsArray('es'), 'es');
             }).then(function(warnStr){
                 //console.log(warnStr);
-                expect(warnStr).to.eql('falta probar para node 4 en .travis.yaml\n'
+                expect(warnStr).to.eql('falta probar para la última versión de node .travis.yaml\n'
                                       +'la versión de qa-control es vieja\n'
                                       +'la version es demasiado vieja\n'
                                       +'la sección "package-version" en qa-control contiene un valor incorrecto\n'
@@ -1072,7 +1052,7 @@ describe('qa-control main', function(){
                 //console.log(warnStr);
                 expect(warnStr).to.eql('deprecated qa-control version\n'
                                        +'packageJson.repository must be in format /{[-a-zA-Z0-9_.]+}/[-a-zA-Z0-9_.]+/\n'
-                                       +'no test in node four\n'
+                                       +'no test in last node\n'
                                        +'deprecated version\n'
                                        +'invalid qa control version\n'
                                        +'invalid value param1 in parameter param2\n'
