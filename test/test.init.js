@@ -164,7 +164,7 @@ describe/*.only*/("qa-control --init", function(){
            msgs: qci.cmdMsgs.en 
         };
         it("should read an array of parameters", function(){
-            sinon.stub(qci, 'promptForVar', function(param, msgs) {
+            sinon.stub(qci, 'promptForVar').callsFake(function(param, msgs) {
                 return Promise.resolve('value'+param.name.substr(param.name.length-1, 1));
             });
             var params = [
@@ -182,7 +182,7 @@ describe/*.only*/("qa-control --init", function(){
             });
         });
         it("should read an array of parameters using current values", function(){
-            sinon.stub(qci, 'promptForVar', function(param, msgs) {
+            sinon.stub(qci, 'promptForVar').callsFake(function(param, msgs) {
                 return Promise.resolve(param.def);
             });
             var params = [
@@ -202,7 +202,7 @@ describe/*.only*/("qa-control --init", function(){
             });
         });
         it("should handle errors in the prompt", function(done) {
-            sinon.stub(qci, 'promptForVar', function(param, msgs) {
+            sinon.stub(qci, 'promptForVar').callsFake(function(param, msgs) {
                 if(param.name=='v2') { return Promise.reject('dummy error'); }
                 return Promise.resolve(param.def);
             });
@@ -216,7 +216,7 @@ describe/*.only*/("qa-control --init", function(){
             });
         });
         it("should default values for valid input", function(done) {
-            sinon.stub(qci, 'promptForVar', function(param, msgs) {
+            sinon.stub(qci, 'promptForVar').callsFake(function(param, msgs) {
                 if(param.name=='v2') { return Promise.reject('dummy error'); }
                 return Promise.resolve(param.def);
             });
@@ -230,7 +230,7 @@ describe/*.only*/("qa-control --init", function(){
             });
         });
         it("should forward the context to parameters", function() {
-            sinon.stub(qci, 'promptForVar', function(param, msgs) {
+            sinon.stub(qci, 'promptForVar').callsFake(function(param, msgs) {
                 return Promise.resolve(param.def);
             });
             var params = [
@@ -263,7 +263,7 @@ describe/*.only*/("qa-control --init", function(){
         });
         it("should skip parameters where requested", function() {
             var promptedParameters=0;
-            sinon.stub(qci, 'promptForVar', function(param, msgs) {
+            sinon.stub(qci, 'promptForVar').callsFake(function(param, msgs) {
                 ++promptedParameters;
                 return Promise.resolve(param.def);
             });
@@ -285,7 +285,7 @@ describe/*.only*/("qa-control --init", function(){
             });
         });
         it("should exclude temporary parameters where requested", function() {
-            sinon.stub(qci, 'promptForVar', function(param, msgs) {
+            sinon.stub(qci, 'promptForVar').callsFake(function(param, msgs) {
                 return Promise.resolve(param.name=='v2' ? 'promptedV2' : param.def);
             });
             var params = [
@@ -330,7 +330,7 @@ describe/*.only*/("qa-control --init", function(){
         it('should substitute values', function(){
             var testTplDir = './test/fixtures-init/templates';
             var tests = {};
-            sinon.stub(fs, 'writeFile', function(fileName, content) {
+            sinon.stub(fs, 'writeFile').callsFake(function(fileName, content) {
                 //console.log("stub writeFile", fileName, content)
                 return Promise.resolve(content);
             });
@@ -426,7 +426,7 @@ describe/*.only*/("qa-control --init", function(){
             var outDir = Path.resolve(helper.dirbase+'/gen-init');
             var testDir = Path.resolve('./test/fixtures-init/initialized');
             var infoGen, infoTest;
-            sinon.stub(qci, 'promptForVar', function(param, msgs) {
+            sinon.stub(qci, 'promptForVar').callsFake(function(param, msgs) {
                 //console.log("PFV", param)
                 var ret=param.def;
                 switch(param.name) {

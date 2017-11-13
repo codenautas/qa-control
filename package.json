@@ -1,40 +1,43 @@
 {
   "name": "qa-control",
   "description": "QA control of things that nobody controls",
-  "version": "0.4.11",
+  "version": "0.4.12",
   "author": "Codenautas <codenautas@googlegroups.com>",
   "license": "MIT",
   "repository": "codenautas/qa-control",
-  "contributors": [{
-    "name": "Emilio Platzer", "email": "emilioplatzer@gmail.com"
-  },{
-    "name": "Diego Florio", "email": "diegoefe@gmail.com"
-  }],
+  "contributors": [
+    {
+      "name": "Emilio Platzer",
+      "email": "emilioplatzer@gmail.com"
+    },
+    {
+      "name": "Diego Florio",
+      "email": "diegoefe@gmail.com"
+    }
+  ],
   "bin": {
     "qa-control": "./bin/qa-control-run.js"
   },
   "main": "./bin/qa-control.js",
   "dependencies": {
     "commander": "~2.11.0",
-    "eslint": "~4.5.0",
-    "fs-extra": "~4.0.1",
+    "eslint": "~4.11.0",
+    "fs-extra": "~4.0.2",
     "fs-promise": "~2.0.3",
-    "js-yaml": "~3.9.1",
+    "js-yaml": "~3.10.0",
     "jshint280": "~1.0.0",
     "jshint": "~2.9.5",
-    "parameters": "~0.1.6",
+    "parameters": "~0.2.0",
     "semver": "~5.4.1",
     "strip-bom-string": "~1.0.0",
-    
-    "best-globals": "~0.9.15",
-    "multilang": "~1.0.19"
+    "best-globals": "~0.10.1",
+    "multilang": "~1.0.20"
   },
   "devDependencies": {
     "expect.js": "~0.3.1",
     "istanbul": "~0.4.5",
-    "mocha": "~3.5.0",
-    "sinon": "~2.3.1",
-
+    "mocha": "~4.0.1",
+    "sinon": "~4.1.2",
     "expect-called": "~0.4.0"
   },
   "engines": {
