@@ -20,24 +20,24 @@
   },
   "main": "./bin/qa-control.js",
   "dependencies": {
-    "commander": "~2.15.1",
-    "eslint": "~4.19.1",
-    "fs-extra": "~6.0.1",
+    "commander": "~2.16.0",
+    "eslint": "~5.2.0",
+    "fs-extra": "~7.0.0",
     "fs-promise": "~2.0.3",
-    "js-yaml": "~3.11.0",
+    "js-yaml": "~3.12.0",
     "jshint280": "~1.0.0",
     "jshint": "~2.9.5",
     "parameters": "~0.4.3",
     "semver": "~5.5.0",
     "strip-bom-string": "~1.0.0",
-    "best-globals": "~0.10.4",
+    "best-globals": "~0.10.5",
     "multilang": "~1.0.21"
   },
   "devDependencies": {
     "expect.js": "~0.3.1",
     "istanbul": "~0.4.5",
     "mocha": "~5.2.0",
-    "sinon": "~5.0.10",
+    "sinon": "~6.1.4",
     "expect-called": "~0.4.0"
   },
   "engines": {
