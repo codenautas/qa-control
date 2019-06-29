@@ -2,7 +2,7 @@
 
 var stripBom = require("strip-bom-string");
 var semver = require("semver");
-var jsh = require('jshint280');
+var jsh = require('jshint');
 var esl = require('eslint');
 var multilang = require('multilang');
 var fs = require('fs-promise');
@@ -185,7 +185,7 @@ module.exports = function(qaControl){
             }
         },
         // Si info.scoring == true, cada regla debe agregar junto al warning, un objeto 'scoring'
-        // con na o más de las siguientes propiedades:
+        // con na o mï¿½s de las siguientes propiedades:
         //   qac: 1
         //   mandatories: 1
         //   cucardas:1
@@ -196,7 +196,7 @@ module.exports = function(qaControl){
         //   customs:1
         //   jshint:1
         //   dependencies:1
-        // Emilio redefinirá valores de cada score
+        // Emilio redefinirï¿½ valores de cada score
         rules:{
             exist_package_json:{
                 checks:[{
@@ -344,7 +344,7 @@ module.exports = function(qaControl){
                         return warns;
                     }
                 }]
-            }, // agregar desde acá
+            }, // agregar desde acï¿½
             no_test_in_node_four:{
                 checks:[{
                     warnings:function(info){
@@ -414,7 +414,7 @@ module.exports = function(qaControl){
                                 }
                                 if(readme.indexOf(cucaStr) === -1) {
                                     // si tengo cucarda mal formada, devuelvo warning aunque no sea obligatoria
-                                    // porque existió la intención de definirla
+                                    // porque existiï¿½ la intenciï¿½n de definirla
                                     warns.push({warning:'wrong_format_in_cucarda_1', params:[nombreCucarda], scoring:{cucardas:1}});
                                 }
                             }

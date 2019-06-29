@@ -2,7 +2,7 @@
 
 var stripBom = require("strip-bom-string");
 var semver = require("semver");
-var jsh = require('jshint280');
+var jsh = require('jshint');
 var multilang = require('multilang');
 var fs = require('fs-promise');
 var Path = require('path');

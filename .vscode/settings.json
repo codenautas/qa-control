@@ -1,0 +1,3 @@
+{
+    "window.title": "qa ${dirty}${separator}${rootName}${separator}${activeEditorMedium}"
+}
