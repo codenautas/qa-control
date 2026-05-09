@@ -11,7 +11,9 @@
       "Bash(node -e \"const fc = require\\('@eslint/eslintrc'\\); console.log\\(Object.keys\\(fc\\)\\);\")",
       "Bash(node -e \"const js = require\\('@eslint/js'\\); console.log\\(typeof js.configs\\);\")",
       "Bash(node -e \"console.log\\(typeof process.stdin.end\\)\")",
-      "Bash(node -e \"const s = process.stdin; console.log\\(s.constructor.name, typeof s.end, typeof s.push, typeof s.write\\)\")"
+      "Bash(node -e \"const s = process.stdin; console.log\\(s.constructor.name, typeof s.end, typeof s.push, typeof s.write\\)\")",
+      "Bash(node -e \"const c = require\\('commander'\\); console.log\\(typeof c, Object.keys\\(c\\).join\\(', '\\)\\)\")",
+      "Bash(node c:/hecho/npm/qa-control2/bin/qa-control-run.js --help)"
     ]
   }
 }
