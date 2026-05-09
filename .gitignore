@@ -33,5 +33,3 @@ local-*
 *-local.*
 
 desktop.ini
-
-package-lock.json
