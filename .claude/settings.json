@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"const esl = require\\('eslint'\\); console.log\\(Object.keys\\(esl\\)\\);\")",
+      "Bash(node -e \"console.log\\(require\\('eslint/package.json'\\).version\\)\")",
+      "Bash(node -e \"const {Linter} = require\\('eslint'\\); const l = new Linter\\({configType:'eslintrc'}\\); console.log\\(typeof l.verify\\);\")",
+      "Bash(node -e ' *)",
+      "Bash(node -e \"console.log\\(Object.keys\\(require\\('globals'\\)\\).join\\(', '\\)\\)\")",
+      "Bash(node -e \"const esl=require\\('eslint'\\); console.log\\(esl.Linter.version || 'no version prop'\\)\")",
+      "Bash(node -e \"console.log\\(require\\('@eslint/core/package.json'\\).version\\)\")",
+      "Bash(node -e \"const fc = require\\('@eslint/eslintrc'\\); console.log\\(Object.keys\\(fc\\)\\);\")",
+      "Bash(node -e \"const js = require\\('@eslint/js'\\); console.log\\(typeof js.configs\\);\")",
+      "Bash(node -e \"console.log\\(typeof process.stdin.end\\)\")",
+      "Bash(node -e \"const s = process.stdin; console.log\\(s.constructor.name, typeof s.end, typeof s.push, typeof s.write\\)\")"
+    ]
+  }
+}

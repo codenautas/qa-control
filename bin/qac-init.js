@@ -150,13 +150,13 @@ qacInit.readParameters = function readParameters(inputParams, params) {
         });
     });
     return cadenaDePromesas.then(function() {
-        process.stdin.end();
+        process.stdin.destroy();
         params.forEach(function(param) {
             if(param.temporary) { delete ctx.result[param.name]; }
         });
-        return ctx.result; 
+        return ctx.result;
     }).catch(function(err) {
-        process.stdin.end();
+        process.stdin.destroy();
         //console.log("err.stack", err.stack)
         throw { message:'input_error', desc:err };
     });

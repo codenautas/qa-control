@@ -577,9 +577,9 @@ var fixtures=[{
     title:'lack of mandatory travis checks (#67)',
     change:function(info){
         var content = info.files['.travis.yml'].content;
-        var travis = yaml.safeLoad(info.files['.travis.yml'].content);
+        var travis = yaml.load(info.files['.travis.yml'].content);
         travis.node_js = ['0.12.7'];
-        info.files['.travis.yml'].content = yaml.safeDump(travis);
+        info.files['.travis.yml'].content = yaml.dump(travis);
     },
     expected:[
         { warning: 'lack_of_travis_check_for_node_version_1', params:['4']},
@@ -591,9 +591,9 @@ var fixtures=[{
     title:'incorrect allowed failures in travis (#67)',
     change:function(info){
         var content = info.files['.travis.yml'].content;
-        var travis = yaml.safeLoad(info.files['.travis.yml'].content);
+        var travis = yaml.load(info.files['.travis.yml'].content);
         travis.matrix.allow_failures = [ {'node_js':'4'} ];
-        info.files['.travis.yml'].content = yaml.safeDump(travis);
+        info.files['.travis.yml'].content = yaml.dump(travis);
     },
     expected:[
         { warning: 'not_allowed_travis_failure_for_node_version_1', params:['4']}
@@ -603,9 +603,9 @@ var fixtures=[{
     title:'allowed failures in travis (#67)',
     change:function(info){
         var content = info.files['.travis.yml'].content;
-        var travis = yaml.safeLoad(info.files['.travis.yml'].content);
+        var travis = yaml.load(info.files['.travis.yml'].content);
         travis.matrix.allow_failures = [ {'node_js':'7'} ];
-        info.files['.travis.yml'].content = yaml.safeDump(travis);
+        info.files['.travis.yml'].content = yaml.dump(travis);
     },
     expected:[]
 },{

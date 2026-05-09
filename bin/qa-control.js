@@ -323,7 +323,7 @@ qaControl.loadProject = function loadProject(projectDir) {
             }
         }).then(function() {
             if(info.files['.travis.yml']){
-                info.dotTravis = yaml.safeLoad(info.files['.travis.yml'].content);
+                info.dotTravis = yaml.load(info.files['.travis.yml'].content);
             }
         });
     }).then(function() {

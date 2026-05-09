@@ -4,6 +4,15 @@ var stripBom = require("strip-bom-string");
 var semver = require("semver");
 var jsh = require('jshint');
 var esl = require('eslint');
+var eslintLinter = new esl.Linter();
+function eslintrcToFlatConfig(rc) {
+    var flat = {};
+    if (rc.rules) { flat.rules = rc.rules; }
+    var sourceType = (rc.env && rc.env.node) ? 'commonjs' : 'script';
+    flat.languageOptions = { ecmaVersion: 'latest', sourceType: sourceType };
+    flat.linterOptions = { reportUnusedDisableDirectives: 'off' };
+    return flat;
+}
 var multilang = require('multilang');
 var fs = require('fs-promise');
 var Path = require('path');
@@ -589,13 +598,13 @@ module.exports = function(qaControl){
                 checks:[{
                     warnings:function(info){
                         var warns = [];
-                        var eslintOpts = 
-                            info.packageJson.eslintConfig || 
-                            qaControl.projectDefinition[info.packageVersion].eslint_options;
+                        var eslintOpts = eslintrcToFlatConfig(
+                            info.packageJson.eslintConfig ||
+                            qaControl.projectDefinition[info.packageVersion].eslint_options);
                         for(var file in info.files) {
                             if(file.match(/(.js)$/)) {
                                 var content = info.files[file].content;
-                                var data = esl.linter.verify(content, eslintOpts);
+                                var data = eslintLinter.verify(content, eslintOpts);
                                 if(data.length) {
                                     if(qaControl.verbose){
                                         console.log('ESLINT output:');

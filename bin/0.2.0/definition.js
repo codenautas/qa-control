@@ -4,6 +4,15 @@ var stripBom = require("strip-bom-string");
 var semver = require("semver");
 var jsh = require('jshint');
 var esl = require('eslint');
+var eslintLinter = new esl.Linter();
+function eslintrcToFlatConfig(rc) {
+    var flat = {};
+    if (rc.rules) { flat.rules = rc.rules; }
+    var sourceType = (rc.env && rc.env.node) ? 'commonjs' : 'script';
+    flat.languageOptions = { ecmaVersion: 'latest', sourceType: sourceType };
+    flat.linterOptions = { reportUnusedDisableDirectives: 'off' };
+    return flat;
+}
 var multilang = require('multilang');
 var fs = require('fs-promise');
 var Path = require('path');
@@ -190,7 +199,7 @@ module.exports = function(qaControl){
             }
         },
         // Si info.scoring == true, cada regla debe agregar junto al warning, un objeto 'scoring'
-        // con na o más de las siguientes propiedades:
+        // con na o mï¿½s de las siguientes propiedades:
         //   qac: 1
         //   mandatories: 1
         //   cucardas:1
@@ -201,7 +210,7 @@ module.exports = function(qaControl){
         //   customs:1
         //   jshint:1
         //   dependencies:1
-        // Emilio redefinirá valores de cada score
+        // Emilio redefinirï¿½ valores de cada score
         rules:{
             exist_package_json:{
                 checks:[{
@@ -349,7 +358,7 @@ module.exports = function(qaControl){
                         return warns;
                     }
                 }]
-            }, // agregar desde acá
+            }, // agregar desde acï¿½
             no_test_in_node_four:{
                 checks:[{
                     warnings:function(info){
@@ -414,7 +423,7 @@ module.exports = function(qaControl){
                                 }
                                 if(readme.indexOf(cucaStr) === -1) {
                                     // si tengo cucarda mal formada, devuelvo warning aunque no sea obligatoria
-                                    // porque existió la intención de definirla
+                                    // porque existiï¿½ la intenciï¿½n de definirla
                                     warns.push({warning:'wrong_format_in_cucarda_1', params:[nombreCucarda], scoring:{cucardas:1}});
                                 }
                             }
@@ -590,13 +599,13 @@ module.exports = function(qaControl){
                 checks:[{
                     warnings:function(info){
                         var warns = [];
-                        var eslintOpts = 
-                            info.packageJson.eslintConfig || 
-                            qaControl.projectDefinition[info.packageVersion].eslint_options;
+                        var eslintOpts = eslintrcToFlatConfig(
+                            info.packageJson.eslintConfig ||
+                            qaControl.projectDefinition[info.packageVersion].eslint_options);
                         for(var file in info.files) {
                             if(file.match(/(.js)$/)) {
                                 var content = info.files[file].content;
-                                var data = esl.linter.verify(content, eslintOpts);
+                                var data = eslintLinter.verify(content, eslintOpts);
                                 if(data.length) {
                                     if(qaControl.verbose){
                                         console.log('ESLINT output:');
