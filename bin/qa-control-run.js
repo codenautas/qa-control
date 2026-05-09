@@ -10,6 +10,7 @@ var path = require('path');
 
 program
     .version(require('../package').version)
+    .argument('[projectDirectory]', 'Project directory to check')
     .usage('[[options] projectDirectory|--list-langs]')
     .option('-l, --lang [lang]', 'Language to generate')
     .option('-v, --verbose', 'Show progress information')

@@ -13,7 +13,13 @@
       "Bash(node -e \"console.log\\(typeof process.stdin.end\\)\")",
       "Bash(node -e \"const s = process.stdin; console.log\\(s.constructor.name, typeof s.end, typeof s.push, typeof s.write\\)\")",
       "Bash(node -e \"const c = require\\('commander'\\); console.log\\(typeof c, Object.keys\\(c\\).join\\(', '\\)\\)\")",
-      "Bash(node c:/hecho/npm/qa-control2/bin/qa-control-run.js --help)"
+      "Bash(node c:/hecho/npm/qa-control2/bin/qa-control-run.js --help)",
+      "Bash(node c:/hecho/npm/qa-control2/bin/qa-control-run.js c:\\\\hecho\\\\npm\\\\best-globals)",
+      "Bash(node -e \"const { program } = require\\('commander'\\); program.argument\\('[dir]', 'dir'\\).parse\\(['node','test','c:\\\\\\\\\\\\\\\\hecho\\\\\\\\\\\\\\\\npm\\\\\\\\\\\\\\\\best-globals']\\); console.log\\(JSON.stringify\\(program.args\\)\\);\")",
+      "Bash(node -e \"process.argv.push\\('c:\\\\\\\\hecho\\\\\\\\npm\\\\\\\\best-globals'\\); const { program } = require\\('commander'\\); program.argument\\('[dir]', 'dir'\\).parse\\(process.argv\\); console.log\\(JSON.stringify\\(program.args[0]\\)\\);\")",
+      "Bash(node -e \"const args = process.argv; args.push\\('C:/hecho/npm/best-globals'\\); console.log\\(args[args.length-1]\\);\")",
+      "Bash(node -e \"console.log\\(process.argv\\)\" -- \"c:\\\\hecho\\\\npm\\\\best-globals\")",
+      "Bash(node c:/hecho/npm/qa-control2/bin/qa-control-run.js \"c:\\\\hecho\\\\npm\\\\best-globals\")"
     ]
   }
 }
