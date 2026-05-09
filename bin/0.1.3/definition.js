@@ -41,7 +41,6 @@ module.exports = function(qaControl){
         files:{
             'README.md':{ mandatory:true },
             'LEEME.md':{ mandatory:true },
-            '.travis.yml':{ mandatory:true },
             '.gitignore':{
                 mandatory:true,
                 mandatoryLines:['local-*','*-local.*']

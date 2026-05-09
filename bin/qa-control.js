@@ -29,7 +29,6 @@ qaControl.msgs={
         repository_name_not_found: 'packageJson.repository must be in format /{[-a-zA-Z0-9_.]+}\/[-a-zA-Z0-9_.]+/'
     },
     es:{
-        no_test_in_last_node: 'falta probar para la última versión de node .travis.yaml',
         deprecated_qa_control_version: 'la versión de qa-control es vieja',
         deprecated_version: 'la version es demasiado vieja',
         invalid_qa_control_version: 'la sección "package-version" en qa-control contiene un valor incorrecto',
@@ -67,8 +66,6 @@ qaControl.msgs={
         incorrect_ecmascript_versions_in_package_json: 'Las versiones de ECMAScript utilizadas en package.json son incorrectas',
         older_version_of_qa_control_in_package_json: 'La versión de qa-control en el package.json es vieja',
         unexpected_jshintconfig_section_in_package_json: 'No se esperaba la sección jshintConfig en package.json',
-        lack_of_travis_check_for_node_version_1: 'Falta el checkeo de node versión $1 en .travis.yml',
-        not_allowed_travis_failure_for_node_version_1: 'No se permite la falla de node versión $1 en .travis.yml',
         non_recomended_dependency_1_in_package_json: 'Dependencia no recomendada "$1" en package.json'
     }
 };
@@ -321,10 +318,6 @@ qaControl.loadProject = function loadProject(projectDir) {
                     });
                 }            
             }
-        }).then(function() {
-            if(info.files['.travis.yml']){
-                info.dotTravis = yaml.load(info.files['.travis.yml'].content);
-            }
         });
     }).then(function() {
         var verCheck = ((info.packageJson || {})['qa-control'] || {})['package-version'];
@@ -342,6 +335,7 @@ qaControl.controlInfo=function controlInfo(info, opts){
     var existingWarnings={};
     var cmsgs = qaControl.cmdMsgs[qaControl.lang];
     var rules = qaControl.projectDefinition[info.usedDefinition].rules;
+    var silenced = ((info.packageJson || {})['qa-control'] || {}).silenced || [];
     if(qaControl.verbose) { process.stdout.write(cmsgs.msg_controlling+info.usedDefinition+"...\n"); }
     var cadenaDePromesas = Promise.resolve().then();
     info.scoring = opts && opts.scoring;
@@ -354,10 +348,11 @@ qaControl.controlInfo=function controlInfo(info, opts){
                 if(qaControl.verbose) { process.stdout.write(cmsgs.msg_checking+" '"+ruleName+"'...\n"); }
                 return checkInfo.warnings(info);
             }).then(function(warningsOfThisRule) {
-                if(warningsOfThisRule.length) {
-                    resultWarnings=resultWarnings.concat(warningsOfThisRule);
-                    warningsOfThisRule.forEach(function(warning){
-                        existingWarnings[warning.warning]=true; 
+                var activeWarnings = warningsOfThisRule.filter(function(w){ return silenced.indexOf(w.warning) === -1; });
+                if(activeWarnings.length) {
+                    resultWarnings=resultWarnings.concat(activeWarnings);
+                    activeWarnings.forEach(function(warning){
+                        existingWarnings[warning.warning]=true;
                     });
                     if(rule.shouldAbort) { throw new Error("ruleIsAborting"); }
                 }

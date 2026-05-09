@@ -43,7 +43,6 @@ module.exports = function(qaControl){
         files:{
             'README.md':{ mandatory:true },
             'LEEME.md':{ mandatory:true },
-            '.travis.yml':{ mandatory:true },
             '.gitignore':{
                 mandatory:true,
                 mandatoryLines:['local-*','*-local.*']
@@ -363,16 +362,6 @@ module.exports = function(qaControl){
                     }
                 }]
             }, // agregar desde ac�
-            no_test_in_last_node:{
-                checks:[{
-                    warnings:function(info){
-                        if(info.dotTravis && info.dotTravis.node_js.filter(function(x){ return x[0].match(qaControl.nodeVerInTravisRE); }).length<2){
-                            return [{warning:'no_test_in_last_node', scoring:{conventions:1}}];
-                        }
-                        return [];
-                    }
-                }],
-            },
             no_multilang_section_in_1:{
                 checks:[{
                     warnings:function(info){
@@ -715,28 +704,6 @@ module.exports = function(qaControl){
                         if('eslintConfig' in info.packageJson) {
                             warns.push({warning:'unexpected_eslintconfig_section_in_package_json', scoring:{conventions:1}});
                         }
-                        return warns;
-                    }
-                }]
-            },
-            travis_node_versions:{
-                checks:[{
-                    warnings:function(info) {
-                        var warns = [];
-                        var travisYML = yaml.load(info.files['.travis.yml'].content);
-                        var mandatories = travisYML.node_js;
-                        var optionals = travisYML.matrix.allow_failures;
-                        var versions=[{num:'4'},{num:'6'} ,{num:7, optional:true}];
-                        versions.forEach(function(version) {
-                            var re = RegExp('^('+version.num+'\.?)');
-                            if(! mandatories.some(function(ver) { return re.test(ver); })) {
-                                warns.push({warning:'lack_of_travis_check_for_node_version_1', params:[version.num], scoring:{mandatories:1}});
-                            } else if(! version.optional && optionals) {
-                                if(optionals.some(function(opt) { return opt.node_js && re.test(opt.node_js); })) {
-                                    warns.push({warning:'not_allowed_travis_failure_for_node_version_1', params:[version.num], scoring:{mandatories:1}});
-                                }
-                            }
-                        });
                         return warns;
                     }
                 }]

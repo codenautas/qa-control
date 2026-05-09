@@ -65,15 +65,6 @@ var fixtures=[{
         { warning:'invalid_qa_control_version',params:['not-a-version-number']},
     ]
 },{
-    base:'stable-project-v0.3.0',
-    test:'no_test_in_last_node',
-    change:function(info){
-        info.dotTravis.node_js = ['0.10', '0.12', '4'];
-    },
-    expected:[
-        { warning:'no_test_in_last_node'},
-    ]
-},{
     base:'stable-project',
     title:'abort on deprecated qa-control section version (#4)',
     test:'deprecated_qa_control_version',
@@ -101,7 +92,6 @@ var fixtures=[{
     change:function(info){
         //delete info.files['README.md']; // si saco este salta no_multilang_section_in_1
         delete info.files['LEEME.md'];
-        delete info.files['.travis.yml'];
         delete info.files['.gitignore'];
         delete info.files['LICENSE'];
         delete info.files['appveyor.yml'];
@@ -109,7 +99,6 @@ var fixtures=[{
     },
     expected:[
         { warning:'lack_of_mandatory_file_1',params:['LEEME.md']},
-        { warning:'lack_of_mandatory_file_1',params:['.travis.yml']},
         { warning:'lack_of_mandatory_file_1',params:['.gitignore']},
         { warning:'lack_of_mandatory_file_1',params:['LICENSE']}
     ]
@@ -120,13 +109,11 @@ var fixtures=[{
     change:function(info){
         //delete info.files['README.md']; // si saco este salta no_multilang_section_in_1
         delete info.files['LEEME.md'];
-        delete info.files['.travis.yml'];
         delete info.files['.gitignore'];
         delete info.files['LICENSE'];
     },
     expected:[
         { warning:'lack_of_mandatory_file_1',params:['LEEME.md']},
-        { warning:'lack_of_mandatory_file_1',params:['.travis.yml']},
         { warning:'lack_of_mandatory_file_1',params:['.gitignore']},
         { warning:'lack_of_mandatory_file_1',params:['LICENSE']}
     ]
@@ -574,42 +561,6 @@ var fixtures=[{
     ]
 },{
     base:'stable-project-v0.3.0',
-    title:'lack of mandatory travis checks (#67)',
-    change:function(info){
-        var content = info.files['.travis.yml'].content;
-        var travis = yaml.load(info.files['.travis.yml'].content);
-        travis.node_js = ['0.12.7'];
-        info.files['.travis.yml'].content = yaml.dump(travis);
-    },
-    expected:[
-        { warning: 'lack_of_travis_check_for_node_version_1', params:['4']},
-        { warning: 'lack_of_travis_check_for_node_version_1', params:['6']},
-        { warning: 'lack_of_travis_check_for_node_version_1', params:['7']}
-    ]
-},{
-    base:'stable-project-v0.3.0',
-    title:'incorrect allowed failures in travis (#67)',
-    change:function(info){
-        var content = info.files['.travis.yml'].content;
-        var travis = yaml.load(info.files['.travis.yml'].content);
-        travis.matrix.allow_failures = [ {'node_js':'4'} ];
-        info.files['.travis.yml'].content = yaml.dump(travis);
-    },
-    expected:[
-        { warning: 'not_allowed_travis_failure_for_node_version_1', params:['4']}
-    ]
-},{
-    base:'stable-project-v0.3.0',
-    title:'allowed failures in travis (#67)',
-    change:function(info){
-        var content = info.files['.travis.yml'].content;
-        var travis = yaml.load(info.files['.travis.yml'].content);
-        travis.matrix.allow_failures = [ {'node_js':'7'} ];
-        info.files['.travis.yml'].content = yaml.dump(travis);
-    },
-    expected:[]
-},{
-    base:'stable-project-v0.3.0',
     title:'non-recomended dependency (#68)',
     change:function(info){
         info.packageJson.dependencies['lodash'] = "4.17.1";
@@ -665,11 +616,10 @@ describe('qa-control', function(){
                     'projectDir',
                     'files',
                     'packageJson',
-                    'dotTravis',
                     'usedDefinition'
                 ]);
                 expect(info.projectDir).to.eql(projDir);
-                expect(Object.keys(info.files)).to.eql(['.gitignore','.travis.yml','LEEME.md','LICENSE','README.md','appveyor.yml','package.json','simple.js','stable-project.js']);
+                expect(Object.keys(info.files)).to.eql(['.gitignore','LEEME.md','LICENSE','README.md','appveyor.yml','package.json','simple.js','stable-project.js']);
                 expect(info.files['package.json'].content).to.match(/^{\n  "name": "stable-project"/);
                 expect(info.packageJson.name).to.be('stable-project');
                 expect(info.packageJson["qa-control"]["package-version"]).to.eql("0.1.3");
@@ -678,7 +628,6 @@ describe('qa-control', function(){
                 expect(info.packageJson["qa-control"]["type"]).to.eql("lib");
                 expect(info.packageJson["qa-control"]["coverage"]).to.eql(100);
                 expect(info.files['LEEME.md'].content).to.match(/^<!--multilang v0 es:LEEME.md en:README.md -->/);
-                expect(info.dotTravis.node_js).to.eql(['0.10','0.11','0.12','4.2','5.1']);
             });
         });
         it('generates english messages from spanish warnings', function(){
@@ -1002,8 +951,7 @@ describe('qa-control main', function(){
                 return qaControl.stringizeWarnings(generateWarningsArray('es'), 'es');
             }).then(function(warnStr){
                 //console.log(warnStr);
-                expect(warnStr).to.eql('falta probar para la última versión de node .travis.yaml\n'
-                                      +'la versión de qa-control es vieja\n'
+                expect(warnStr).to.eql('la versión de qa-control es vieja\n'
                                       +'la version es demasiado vieja\n'
                                       +'la sección "package-version" en qa-control contiene un valor incorrecto\n'
                                       +'valor invalido "param1" para el parametro "param2" en la sección qa-control\n'
@@ -1038,8 +986,6 @@ describe('qa-control main', function(){
                                       +'Las versiones de ECMAScript utilizadas en package.json son incorrectas\n'
                                       +'La versión de qa-control en el package.json es vieja\n'
                                       +'No se esperaba la sección jshintConfig en package.json\n'
-                                      +'Falta el checkeo de node versión param1 en .travis.yml\n'
-                                      +'No se permite la falla de node versión param1 en .travis.yml\n'
                                       +'Dependencia no recomendada "param1" en package.json\n');
                 done();
             }).catch(done);
@@ -1052,7 +998,6 @@ describe('qa-control main', function(){
                 //console.log(warnStr);
                 expect(warnStr).to.eql('deprecated qa-control version\n'
                                        +'packageJson.repository must be in format /{[-a-zA-Z0-9_.]+}/[-a-zA-Z0-9_.]+/\n'
-                                       +'no test in last node\n'
                                        +'deprecated version\n'
                                        +'invalid qa control version\n'
                                        +'invalid value param1 in parameter param2\n'
@@ -1086,8 +1031,6 @@ describe('qa-control main', function(){
                                        +'incorrect ecmascript versions in package json\n'
                                        +'older version of qa control in package json\n'
                                        +'unexpected jshintconfig section in package json\n'
-                                       +'lack of travis check for node version param1\n'
-                                       +'not allowed travis failure for node version param1\n'
                                        +'non recomended dependency param1 in package json\n');
                 done();
             }).catch(done);

@@ -19,7 +19,9 @@
       "Bash(node -e \"process.argv.push\\('c:\\\\\\\\hecho\\\\\\\\npm\\\\\\\\best-globals'\\); const { program } = require\\('commander'\\); program.argument\\('[dir]', 'dir'\\).parse\\(process.argv\\); console.log\\(JSON.stringify\\(program.args[0]\\)\\);\")",
       "Bash(node -e \"const args = process.argv; args.push\\('C:/hecho/npm/best-globals'\\); console.log\\(args[args.length-1]\\);\")",
       "Bash(node -e \"console.log\\(process.argv\\)\" -- \"c:\\\\hecho\\\\npm\\\\best-globals\")",
-      "Bash(node c:/hecho/npm/qa-control2/bin/qa-control-run.js \"c:\\\\hecho\\\\npm\\\\best-globals\")"
+      "Bash(node c:/hecho/npm/qa-control2/bin/qa-control-run.js \"c:\\\\hecho\\\\npm\\\\best-globals\")",
+      "Bash(ls c:/hecho/npm/best-globals/.travis.yml 2>/dev/null && echo \"exists\" || echo \"not found\")",
+      "Read(//c/hecho/npm/best-globals/**)"
     ]
   }
 }

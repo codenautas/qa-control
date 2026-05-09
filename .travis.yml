@@ -1,8 +1,0 @@
-language: node_js
-node_js:
-  - "10"
-  - "12"
-matrix:
-  fast_finish: true
-script: "npm run-script test-ci"
-after_script: "npm install coveralls@2.11.8 && cat ./coverage/lcov.info | coveralls"
