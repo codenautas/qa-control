@@ -283,19 +283,6 @@ qacInit.configParams = [
     },{
         name:'eslintConfig', def:'', noPrompt:true, init: function(ctx) { this.def = ctx.input.qacJson['eslintConfig']; }
     },{
-        name:'qa-control-version', prompt: 'qa-control package-version', def:'',
-        init: function(ctx) { this.def = ctx.input.qacJson['qa-control']['package-version']; },
-        post: function(ctx) {
-            var contributors = ctx.input.existingJson.contributors || [];
-            var ver = ctx.result[this.name];
-            var qacData = ctx.input.qacJson['qa-control'];
-            qacData['package-version'] = ver;
-            return ver;
-        },
-        valid: function(ver) {
-            return !!semver.valid(ver);
-        }
-    },{
         name:'qa-control', def:'', noPrompt:true, init: function(ctx) { this.def = ctx.input.qacJson['qa-control']; }
     }
 ];

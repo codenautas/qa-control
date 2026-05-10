@@ -3,6 +3,5 @@
   "repository": "codetrip/the-project",
   "version": "1.0.0",
   "qa-control": {
-    "package-version": "0.1.4"
   }
 }

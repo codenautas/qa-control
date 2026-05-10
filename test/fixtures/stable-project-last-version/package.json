@@ -42,7 +42,6 @@
     "start": "node examples/use-examples.js"
   },
   "qa-control": {
-    "package-version": "0.2.0",
     "run-in": "server",
     "test-appveyor": true,
     "type": "lib",

@@ -76,3 +76,19 @@ La versión activa del proyecto en el repositorio es `0.3.0`, con definiciones d
   4. Ejecutar JSHint/ESLint sobre los archivos de código.
   5. Validar `.travis.yml` y dependencias.
 - Documentar ese flujo en un README/CLAUDE donde el objetivo sea muy claro: "Un QA tool local + GHA para mantener los boilerplates de Codenautas sincronizados".
+
+
+## TODO (not now)
+
+### qa-control mandatory:
+
+Agregrar en `/test/fixtures/cucardas-proof-of-concept/warnings.json`:
+
+```json
+,
+  {
+    "warning": "lack_of_mandatory_cucarda_1", "params": ["qa-control"]
+  }
+```
+
+También en: `test\fixtures\cucardas-extending\warnings.json`

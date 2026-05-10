@@ -25,13 +25,10 @@ function forEach(obj, func) {
 
 qaControl.msgs={
     en:{
-        deprecated_qa_control_version: 'deprecated qa-control version',
         repository_name_not_found: 'packageJson.repository must be in format /{[-a-zA-Z0-9_.]+}\/[-a-zA-Z0-9_.]+/'
     },
     es:{
-        deprecated_qa_control_version: 'la versión de qa-control es vieja',
         deprecated_version: 'la version es demasiado vieja',
-        invalid_qa_control_version: 'la sección "package-version" en qa-control contiene un valor incorrecto',
         invalid_value_1_in_parameter_2: 'valor invalido "$1" para el parametro "$2" en la sección qa-control',
         lack_of_mandatory_file_1: 'falta el archivo obligatorio "$1"',
         //lack_of_mandatory_parameter_1: 'falta el parámetro obligatorio "$1"',
@@ -39,9 +36,7 @@ qaControl.msgs={
         no_qa_control_section_in_codenautas_project: 'falta la sección "qa-control" en package.json y aparenta ser un proyecto codenautas',
         no_multilang_section_in_1: 'falta la sección multilang en el archivo $1',
         no_package_json: 'falta el archivo package.json',
-        no_package_version_in_qa_control_section: 'falta la sección "package-version" en la sección qa-control',
         no_qa_control_section_in_package_json: 'falta la sección qa-control en package.json',
-        no_version_in_section_codenautas: 'falta la entrada para "package-version" en la sección codenautas del package.json',
         //unparseable_package_json: 'existe package.json pero no puede parsearse',
         lack_of_cucarda_marker_in_readme:'falta la sección "cucardas" en README.md',
         lack_of_mandatory_cucarda_1: 'falta la cucarda oblicatoria $1',
@@ -185,7 +180,6 @@ qaControl.cucardas_always = false;
 qaControl.definition = require("./definition/definition.js")(qaControl);
 
 qaControl.lang = process.env.qa_control_lang || 'en';
-qaControl.deprecatedVersions = '< 0.0.1';
 
 qaControl.mainDoc = function mainDoc() {
     return qaControl.definition.fileNameMainDoc;

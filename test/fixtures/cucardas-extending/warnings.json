@@ -10,8 +10,5 @@
   },
   {
     "warning": "lack_of_mandatory_cucarda_1", "params": ["dependencies"]
-  },
-  {
-    "warning": "lack_of_mandatory_cucarda_1", "params": ["qa-control"]
   }
 ]

@@ -55,7 +55,6 @@
     }
   },
   "qa-control": {
-    "package-version": "0.0.3",
     "run-in": "server",
     "test-appveyor": true,
     "type": "lib",

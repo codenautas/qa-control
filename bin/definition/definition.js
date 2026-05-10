@@ -53,8 +53,8 @@ module.exports = function(qaControl){
                     return !!packageJson['qa-control']["test-appveyor"];
                 }
             },
-            '.jshintrc':{ mandatory:true },
-            '.eslintrc.yml':{ mandatory:true }
+            '.jshintrc':{ presentIf: function(pj) { return pj['qa-control'] && pj['qa-control'].profile !== 'minimum'; } },
+            '.eslintrc.yml':{ presentIf: function(pj) { return pj['qa-control'] && pj['qa-control'].profile !== 'minimum'; } }
         },
         cucardas:{
             'proof-of-concept':{
@@ -100,8 +100,8 @@ module.exports = function(qaControl){
                 check: function(packageJson){
                     return semver.satisfies(packageJson.version,'>=1.0.0') && !packageJson['qa-control'].purpose;
                 },
-                md:'![stable](https://img.shields.io/badge/stability-stable-brightgreen.svg)',
-                imgExample:'https://img.shields.io/badge/stability-stable-brightgreen.svg'
+                md:'![stable](https://img.shields.io/badge/stability-stable-blue.svg)',
+                imgExample:'https://img.shields.io/badge/stability-stable-blue.svg'
             },
             'npm-version':{
                 mandatory:true,
@@ -119,7 +119,7 @@ module.exports = function(qaControl){
                 check: function(packageJson){
                     return !packageJson['qa-control']['test-appveyor'];
                 },
-                md:'[![build](https://img.shields.io/travis/xxx/yyy/master.svg)](https://travis-ci.org/xxx/yyy)',
+                md:'[![build](https://github.com/xxx/yyy/workflows/node.js.yml/badge.svg)](https://github.com/xxx/yyy/workflows/node.js.yml)',
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/medalla-ejemplo-linux.png',
                 docDescription: 'linux/build'
             },
@@ -127,7 +127,7 @@ module.exports = function(qaControl){
                 check: function(packageJson){
                     return !!packageJson['qa-control']['test-appveyor'];
                 },
-                md:'[![linux](https://img.shields.io/travis/xxx/yyy/master.svg)](https://travis-ci.org/xxx/yyy)',
+                md:'[![linux](https://github.com/xxx/yyy/workflows/node.js.yml/badge.svg)](https://github.com/xxx/yyy/workflows/node.js.yml)',
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/medalla-ejemplo-linux.png',
                 hideInManual: true,
             },
@@ -162,7 +162,7 @@ module.exports = function(qaControl){
                 docDescription: ''
             },
             'qa-control':{
-                mandatory:true,
+                mandatory:false,
                 md:'[![qa-control](http://codenautas.com/github/xxx/yyy.svg)](http://codenautas.com/github/xxx/yyy)',
                 docDescription: ''
             }
@@ -220,44 +220,6 @@ module.exports = function(qaControl){
                             return [{warning:info.files['package.json'].content.match(/codenautas/)?
                                         'no_qa_control_section_in_codenautas_project':
                                         'no_qa_control_section_in_package_json', scoring:{fatal:1}}];
-                        }
-                        return [];
-                    }
-                }],
-                shouldAbort:true
-            },
-            package_version_in_qa_control_section:{
-                checks:[{
-                    warnings:function(info){
-                        if(!info.packageJson['qa-control']['package-version']){
-                            return [{warning:'no_package_version_in_qa_control_section', scoring:{fatal:1}}];
-                        } else {
-                            // defino la version para para siguientes checks
-                            info.packageVersion = info.packageJson['qa-control']['package-version'];
-                        }
-                        return [];
-                    }
-                }],
-                shouldAbort:true
-            },
-            invalid_qa_control_version: {
-                checks:[{
-                    warnings:function(info){
-                        var ver=info.packageVersion;
-                        if(! semver.valid(ver)){
-                            return [{warning:'invalid_qa_control_version',params:[ver], scoring:{versions:1}}];
-                        }
-                        return [];
-                    }
-                }],
-                shouldAbort:true
-            },
-            deprecated_control_version: {
-                checks:[{
-                    warnings:function(info) {
-                        var ver=info.packageVersion;
-                        if(semver.satisfies(ver, qaControl.deprecatedVersions)){
-                            return [{warning:'deprecated_qa_control_version',params:[ver], scoring:{warning:1}}];
                         }
                         return [];
                     }
@@ -521,8 +483,10 @@ module.exports = function(qaControl){
             },
             jshint:{
                 eclipsers:['packagejson_main_file_1_does_not_exists', 'first_lines_does_not_match_in_file_1'],
+                mandatory:false,
                 checks:[{
                     warnings:function(info){
+                        if(info.packageJson['qa-control'] && info.packageJson['qa-control'].profile === 'minimum') { return []; }
                         var warns = [];
                         var jshintOpts = JSON.parse(info.files['.jshintrc'].content);
                         for(var file in info.files) {
@@ -550,6 +514,7 @@ module.exports = function(qaControl){
                 eclipsers:['packagejson_main_file_1_does_not_exists', 'first_lines_does_not_match_in_file_1'],
                 checks:[{
                     warnings:function(info){
+                        if(info.packageJson['qa-control'] && info.packageJson['qa-control'].profile === 'minimum') { return []; }
                         var warns = [];
                         var eslintOpts = eslintrcToFlatConfig(yaml.load(info.files['.eslintrc.yml'].content));
                         for(var file in info.files) {

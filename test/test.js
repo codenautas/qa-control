@@ -48,34 +48,6 @@ var fixtures=[{
     expected: [{ warning: 'no_qa_control_section_in_package_json', scoring:{fatal:1} } ]
 },{
     base:'stable-project',
-    title:'no package-version in qa-control section (#3)',
-    test:'no_package_version_in_qa_control_section',
-    scoring:true,
-    change:function(info){
-        delete info.packageJson['qa-control']['package-version'];
-    },
-    expected: [{ warning: 'no_package_version_in_qa_control_section', scoring:{fatal:1} } ]
-},{
-    base:'stable-project',
-    test:'invalid_qa_control_version',
-    change:function(info){
-        info.packageJson['qa-control']['package-version']='not-a-version-number';
-    },
-    expected:[
-        { warning:'invalid_qa_control_version',params:['not-a-version-number']},
-    ]
-},{
-    base:'stable-project',
-    title:'abort on deprecated qa-control section version (#4)',
-    test:'deprecated_qa_control_version',
-    change:function(info){
-        info.packageJson['qa-control']['package-version']='0.0.0';
-    },
-    expected:[
-        { warning:'deprecated_qa_control_version',params:['0.0.0']},
-    ]
-},{
-    base:'stable-project',
     test:'lack_of_mandatory_section_1',
     change:function(info){
         delete info.packageJson['qa-control']['run-in'];
@@ -503,6 +475,15 @@ var fixtures=[{
         { warning: 'non_recomended_dependency_1_in_package_json', params:['best-promise']},
         { warning: 'non_recomended_dependency_1_in_package_json', params:['promise-plus']}
     ]
+},{
+    base:'stable-project-v0.3.0',
+    title:'minimum profile skips linters and lint config files',
+    change:function(info){
+        info.packageJson['qa-control']['profile'] = 'minimum';
+        delete info.files['.jshintrc'];
+        delete info.files['.eslintrc.yml'];
+    },
+    expected:[]
 }];
 
 
@@ -532,7 +513,6 @@ describe('qa-control', function(){
                 expect(Object.keys(info.files)).to.eql(['.eslintrc.yml','.gitignore','.jshintrc','LEEME.md','LICENSE','README.md','appveyor.yml','package.json','simple.js','stable-project.js']);
                 expect(info.files['package.json'].content).to.match(/^{\n  "name": "stable-project"/);
                 expect(info.packageJson.name).to.be('stable-project');
-                expect(info.packageJson["qa-control"]["package-version"]).to.eql("0.1.3");
                 expect(info.packageJson["qa-control"]["run-in"]).to.eql("server");
                 expect(info.packageJson["qa-control"]["test-appveyor"]).to.eql(true);
                 expect(info.packageJson["qa-control"]["type"]).to.eql("lib");
@@ -546,9 +526,7 @@ describe('qa-control', function(){
                 var es=qaControl.msgs.es;
                 expect(Object.keys(en).sort()).to.eql(Object.keys(es).sort());
                 //console.log(qaControl.msgs.en);
-                expect(en['deprecated_qa_control_version']).to.be('deprecated qa-control version');
                 expect(en['deprecated_version']).to.be('deprecated version');
-                expect(en['invalid_qa_control_version']).to.be('invalid qa control version');
                 expect(en['invalid_value_1_in_parameter_2']).to.be('invalid value $1 in parameter $2');
                 expect(en['lack_of_mandatory_file_1']).to.be('lack of mandatory file $1');
                 //expect(en['lack_of_mandatory_parameter']).to.be('lack of mandatory parameter');
@@ -556,9 +534,7 @@ describe('qa-control', function(){
                 expect(en['no_qa_control_section_in_codenautas_project']).to.be('no qa control section in codenautas project');
                 expect(en['no_multilang_section_in_1']).to.be('no multilang section in $1');
                 expect(en['no_package_json']).to.be('no package json');
-                expect(en['no_package_version_in_qa_control_section']).to.be('no package version in qa control section');
                 expect(en['no_qa_control_section_in_package_json']).to.be('no qa control section in package json');
-                expect(en['no_version_in_section_codenautas']).to.be('no version in section codenautas');
                 expect(en['lack_of_cucarda_marker_in_readme']).to.be('lack of cucarda marker in readme');
                 expect(en['lack_of_mandatory_cucarda_1']).to.be('lack of mandatory cucarda $1');
                 expect(en['wrong_format_in_cucarda_1']).to.be('wrong format in cucarda $1');
@@ -647,14 +623,6 @@ describe('qa-control', function(){
             }).catch(function(err){
                 expect(err).to.match(/is not a directory/);
                 done();
-            });
-        });
-        it('must succeed if qa-control version is any valid semver', function(done){
-            qaControl.loadProject('./test/fixtures/with-wrong-qa-control-version').then(function(info){
-                expect(info.packageJson['qa-control']['package-version']).to.be('0.0.3');
-                done();
-            }).catch(function(err) {
-                done(err);
             });
         });
     });
@@ -811,7 +779,6 @@ describe('qa-control', function(){
                             if(warnings) {
                                 return qaControl.loadProject(base).then(function(info) {
                                     //console.log("info", info);
-                                    info.packageVersion = info.packageJson['qa-control']['package-version'];
                                     return check(info);
                                 }).then(function(warns) {
                                     expect(stripScoring(stripNotices(warns))).to.eql(warnings);
@@ -859,18 +826,14 @@ describe('qa-control main', function(){
                 return qaControl.stringizeWarnings(generateWarningsArray('es'), 'es');
             }).then(function(warnStr){
                 //console.log(warnStr);
-                expect(warnStr).to.eql('la versión de qa-control es vieja\n'
-                                      +'la version es demasiado vieja\n'
-                                      +'la sección "package-version" en qa-control contiene un valor incorrecto\n'
+                expect(warnStr).to.eql('la version es demasiado vieja\n'
                                       +'valor invalido "param1" para el parametro "param2" en la sección qa-control\n'
                                       +'falta el archivo obligatorio "param1"\n'
                                       +'falta la sección obligatoria "param1" en la sección qa-control\n'
                                       +'falta la sección "qa-control" en package.json y aparenta ser un proyecto codenautas\n'
                                       +'falta la sección multilang en el archivo param1\n'
                                       +'falta el archivo package.json\n'
-                                      +'falta la sección "package-version" en la sección qa-control\n'
                                       +'falta la sección qa-control en package.json\n'
-                                      +'falta la entrada para "package-version" en la sección codenautas del package.json\n'
                                       +'falta la sección "cucardas" en README.md\n'
                                       +'falta la cucarda oblicatoria param1\n'
                                       +'la cucarda "param1" tiene formato incorrecto\n'
@@ -903,19 +866,15 @@ describe('qa-control main', function(){
                 return qaControl.stringizeWarnings(generateWarningsArray('en'), 'en');
             }).then(function(warnStr){
                 //console.log(warnStr);
-                expect(warnStr).to.eql('deprecated qa-control version\n'
-                                       +'packageJson.repository must be in format /{[-a-zA-Z0-9_.]+}/[-a-zA-Z0-9_.]+/\n'
+                expect(warnStr).to.eql('packageJson.repository must be in format /{[-a-zA-Z0-9_.]+}/[-a-zA-Z0-9_.]+/\n'
                                        +'deprecated version\n'
-                                       +'invalid qa control version\n'
                                        +'invalid value param1 in parameter param2\n'
                                        +'lack of mandatory file param1\n'
                                        +'lack of mandatory section param1\n'
                                        +'no qa control section in codenautas project\n'
                                        +'no multilang section in param1\n'
                                        +'no package json\n'
-                                       +'no package version in qa control section\n'
                                        +'no qa control section in package json\n'
-                                       +'no version in section codenautas\n'
                                        +'lack of cucarda marker in readme\n'
                                        +'lack of mandatory cucarda param1\n'
                                        +'wrong format in cucarda param1\n'
