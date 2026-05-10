@@ -34,7 +34,7 @@ var fixtures=[{
         delete info.files['package.json'];
     },
     expected:[
-        { warning:'no_package_json',scoring:{mandatories:1}},
+        { warning:'no_package_json',scoring:{fatal:1}},
     ]
 },{
     base:'stable-project',
@@ -45,7 +45,7 @@ var fixtures=[{
         delete info.packageJson['qa-control'];
         info.files['package.json'].content = "otro contenido";        
     },
-    expected: [{ warning: 'no_qa_control_section_in_package_json', scoring:{qac:1} } ]
+    expected: [{ warning: 'no_qa_control_section_in_package_json', scoring:{fatal:1} } ]
 },{
     base:'stable-project',
     title:'no package-version in qa-control section (#3)',
@@ -54,7 +54,7 @@ var fixtures=[{
     change:function(info){
         delete info.packageJson['qa-control']['package-version'];
     },
-    expected: [{ warning: 'no_package_version_in_qa_control_section', scoring:{qac:1} } ]
+    expected: [{ warning: 'no_package_version_in_qa_control_section', scoring:{fatal:1} } ]
 },{
     base:'stable-project',
     test:'invalid_qa_control_version',
@@ -153,7 +153,7 @@ var fixtures=[{
     change:function(info){
         delete info.packageJson['qa-control'];
     },
-    expected:[{warning:'no_qa_control_section_in_codenautas_project', scoring:{qac:1}}]
+    expected:[{warning:'no_qa_control_section_in_codenautas_project', scoring:{fatal:1}}]
 },{
     base:'stable-project',
     title:'cucardas marker must exist in README.md (#8)',
@@ -315,41 +315,6 @@ var fixtures=[{
     ]
 },{
     base:'stable-project',
-    title:'lack of jshintConfig section in package.json (#27)',
-    test:'lack_of_jshintconfig_section_in_package_json',
-    change:function(info){
-        delete info['packageJson']['jshintConfig'];
-    }
-},{
-    base:'stable-project',
-    title:'missing options in jshintConfig in package.json (#27)',
-    test:'incorrect_jshintconfig_option_1_in_package_json',
-    change:function(info){
-        delete info['packageJson']['jshintConfig']['curly'];
-        delete info['packageJson']['jshintConfig']['forin'];
-    },
-    expected:[
-        { warning:'incorrect_jshintconfig_option_1_in_package_json',params:['curly']},
-        { warning:'incorrect_jshintconfig_option_1_in_package_json',params:['forin']}
-    ]
-},{
-    base:'stable-project',
-    title:'incorrect options in jshintConfig in package.json (#27)',
-    test:'incorrect_jshintconfig_option_1_in_package_json',
-    change:function(info){
-        var jsh = info['packageJson']['jshintConfig'];
-        jsh.asi = true;
-        jsh.curly = false;
-        jsh.forin = false;
-        info['packageJson']['jshintConfig'] = jsh;
-    },
-    expected:[
-        { warning:'incorrect_jshintconfig_option_1_in_package_json',params:['asi']},
-        { warning:'incorrect_jshintconfig_option_1_in_package_json',params:['curly']},
-        { warning:'incorrect_jshintconfig_option_1_in_package_json',params:['forin']}
-    ]
-},{
-    base:'stable-project',
     title:'lack of repository section in package json (#28)',
     test:'lack_of_repository_section_in_package_json',
     change:function(info){
@@ -371,12 +336,10 @@ var fixtures=[{
     test:'lack_of_mandatory_line_1_in_file_2',
     change:function(info){
         info.files['.gitignore'].content = info.files['.gitignore'].content.replace('local-*','').replace('*-local.*','');
-        delete info['packageJson']['jshintConfig'];
     },
     expected:[
         { warning:'lack_of_mandatory_line_1_in_file_2',params:['local-*', '.gitignore']},
-        { warning:'lack_of_mandatory_line_1_in_file_2',params:['*-local.*', '.gitignore']},
-        { warning: 'lack_of_jshintconfig_section_in_package_json'}
+        { warning:'lack_of_mandatory_line_1_in_file_2',params:['*-local.*', '.gitignore']}
     ]
 },{
     base:'stable-project',
@@ -409,12 +372,12 @@ var fixtures=[{
     title:'must reject invalid version numbers in "dependencies" section (#38)',
     test:'invalid_dependency_version_number_format_in_dep_1',
     change:function(info){
-        info.packageJson.dependencies['lodash'] = "^3.3.";
-        info.packageJson.dependencies['best-promise'] = ">=1.3.10";
+        info.packageJson.dependencies['pg'] = "~4.4.";
+        info.packageJson.dependencies['promise'] = ">=7.0.";
     },
     expected:[
-        { warning:'invalid_dependency_version_number_format_in_dep_1',params:['lodash'] },
-        { warning:'invalid_dependency_version_number_format_in_dep_1',params:['best-promise'] }
+        { warning:'invalid_dependency_version_number_format_in_dep_1',params:['pg'] },
+        { warning:'invalid_dependency_version_number_format_in_dep_1',params:['promise'] }
     ]
 },{
     base:'stable-project-v0.1.4',
@@ -432,38 +395,6 @@ var fixtures=[{
     test:'wrong_use_strict_spelling_in_file_1',
     change:function(info) {},
     expected:[]
-},{
-    base:'stable-project',
-    title:'coverage for version "0.0.2"',
-    scoring:true,
-    change:function(info){
-        info.files['stable-project.js'].content = info.files['stable-project.js'].content.replace("/*eslint-disable no-console */\n", "");
-        info.usedDefinition = '0.0.2';
-        info.packageJson['qa-control']['package-version']=info.usedDefinition;  
-    },
-    expected: []
-},{
-    base:'stable-project',
-    title:'must detect missing eslint options',
-    test:'incorrect_eslintconfig_option_1_in_package_json',
-    change:function(info){
-        info.files['package.json'].content = info.files['package.json'].content.replace('"no-console": 1', '"no-console": 0');
-        info.packageJson.eslintConfig.rules['no-console'] = 0;
-    },
-    expected:[
-        { warning:'incorrect_eslintconfig_option_1_in_package_json', params:['rules'] }
-    ]
-},{
-    base:'stable-project-v0.1.4',
-    title:'must detect missing jshint options',
-    test:'incorrect_jshintconfig_option_1_in_package_json',
-    change:function(info){
-        info.files['package.json'].content = info.files['package.json'].content.replace('"forin": true', '"forin": false');
-        info.packageJson.jshintConfig["forin"] = false;
-    },
-    expected:[
-        { warning:'incorrect_jshintconfig_option_1_in_package_json', params:['forin'] }
-    ]
 },{
     base:'stable-project-last-version',
     title:'check for last version (0.2.0 para #52)',
@@ -484,26 +415,6 @@ var fixtures=[{
         //info.packageJson.files.push('.gitignore');
         info.packageJson.files.push('noexiste');
     }
-},{
-    base:'stable-project-last-version',
-    title:'must control not matching ECMAScript versions in package.json (#59)',
-    test:'incorrect_ecmascript_versions_in_package_json',
-    change:function(info){
-        delete info.packageJson.jshintConfig.esversion;
-    }
-},{
-    base:'stable-project-last-version',
-    title:'must reject jshint/eslint ECMAScript directives if missing in qa-control section (#59)',
-    test:'incorrect_ecmascript_versions_in_package_json',
-    change:function(info){
-        delete info.packageJson['qa-control']['ecmaVersion'];
-    }
-},{
-    base:'stable-project-v0.1.4',
-    title:'must notice the older version of qa-control',
-    test:'older_version_of_qa_control_in_package_json',
-    notices:true,
-    change:function(info){}
 },{
     base:'stable-project-last-version',
     title:'must permit empty "files" section in package.json (#62)',
@@ -605,7 +516,7 @@ describe('qa-control', function(){
             return qaControl.loadProject('./test/fixtures/stable-project').then(function(info){
                 expect(qaControl.configReady).to.ok();
                 expect(
-                    qaControl.projectDefinition['0.0.1'].firstLines['server']['lib']
+                    qaControl.definition.firstLines['server']['lib']
                 ).to.match(/^"use strict";/);
             });
         });
@@ -615,11 +526,10 @@ describe('qa-control', function(){
                 expect(Object.keys(info)).to.eql([
                     'projectDir',
                     'files',
-                    'packageJson',
-                    'usedDefinition'
+                    'packageJson'
                 ]);
                 expect(info.projectDir).to.eql(projDir);
-                expect(Object.keys(info.files)).to.eql(['.gitignore','LEEME.md','LICENSE','README.md','appveyor.yml','package.json','simple.js','stable-project.js']);
+                expect(Object.keys(info.files)).to.eql(['.eslintrc.yml','.gitignore','.jshintrc','LEEME.md','LICENSE','README.md','appveyor.yml','package.json','simple.js','stable-project.js']);
                 expect(info.files['package.json'].content).to.match(/^{\n  "name": "stable-project"/);
                 expect(info.packageJson.name).to.be('stable-project');
                 expect(info.packageJson["qa-control"]["package-version"]).to.eql("0.1.3");
@@ -739,13 +649,12 @@ describe('qa-control', function(){
                 done();
             });
         });
-        it('must fail if qa-control version does not exists', function(done){
+        it('must succeed if qa-control version is any valid semver', function(done){
             qaControl.loadProject('./test/fixtures/with-wrong-qa-control-version').then(function(info){
-                console.log(info)
-                done(info);
-            }).catch(function(err) {
-                expect(err).to.match(/inexistent qa-control version/);
+                expect(info.packageJson['qa-control']['package-version']).to.be('0.0.3');
                 done();
+            }).catch(function(err) {
+                done(err);
             });
         });
     });
@@ -890,9 +799,8 @@ describe('qa-control', function(){
                             cucardasOut = o;
                             return fs.exists(base+'/LEEME.md');
                         }).then(function(readme) {
-                            var packVer = packageJson['qa-control']['package-version'];
-                            var project = qaControl.projectDefinition[packVer];
-                            var cucardas = qaControl.projectDefinition[packVer].cucardas;
+                            var project = qaControl.definition;
+                            var cucardas = qaControl.definition.cucardas;
                             var check = project.rules.cucardas['checks'][0].warnings;
                             if(cucardasOut) {
                                 var cucaContent = qaControl.generateCucardas(cucardas,packageJson);
@@ -984,7 +892,6 @@ describe('qa-control main', function(){
                                       +'Falta la sección "files" en package.json\n'
                                       +'La sección "files" en package.json es inválida\n'
                                       +'Las versiones de ECMAScript utilizadas en package.json son incorrectas\n'
-                                      +'La versión de qa-control en el package.json es vieja\n'
                                       +'No se esperaba la sección jshintConfig en package.json\n'
                                       +'Dependencia no recomendada "param1" en package.json\n');
                 done();
@@ -1029,7 +936,6 @@ describe('qa-control main', function(){
                                        +'lack of files section in package json\n'
                                        +'invalid files section in package json\n'
                                        +'incorrect ecmascript versions in package json\n'
-                                       +'older version of qa control in package json\n'
                                        +'unexpected jshintconfig section in package json\n'
                                        +'non recomended dependency param1 in package json\n');
                 done();

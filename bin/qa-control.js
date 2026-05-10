@@ -64,7 +64,6 @@ qaControl.msgs={
         lack_of_files_section_in_package_json: 'Falta la sección "files" en package.json',
         invalid_files_section_in_package_json: 'La sección "files" en package.json es inválida',
         incorrect_ecmascript_versions_in_package_json: 'Las versiones de ECMAScript utilizadas en package.json son incorrectas',
-        older_version_of_qa_control_in_package_json: 'La versión de qa-control en el package.json es vieja',
         unexpected_jshintconfig_section_in_package_json: 'No se esperaba la sección jshintConfig en package.json',
         non_recomended_dependency_1_in_package_json: 'Dependencia no recomendada "$1" en package.json'
     }
@@ -183,20 +182,13 @@ qaControl.nodeVerInTravisRE = /[678]/;
 
 qaControl.verbose = false;
 qaControl.cucardas_always = false;
-qaControl.projectDefinition = {};
-qaControl.projectDefinition['0.0.1'] = require("./0.0.1/definition.js")(qaControl);
-qaControl.projectDefinition['0.0.2'] = require("./0.0.2/definition.js")(qaControl);
-qaControl.projectDefinition['0.1.3'] = require("./0.1.3/definition.js")(qaControl);
-qaControl.projectDefinition['0.1.4'] = require("./0.1.4/definition.js")(qaControl);
-qaControl.projectDefinition['0.2.0'] = require("./0.2.0/definition.js")(qaControl);
-qaControl.projectDefinition['0.3.0'] = require("./0.3.0/definition.js")(qaControl);
+qaControl.definition = require("./definition/definition.js")(qaControl);
 
 qaControl.lang = process.env.qa_control_lang || 'en';
 qaControl.deprecatedVersions = '< 0.0.1';
-qaControl.currentVersion = '0.3.0';
 
 qaControl.mainDoc = function mainDoc() {
-    return qaControl.projectDefinition[qaControl.currentVersion].fileNameMainDoc;
+    return qaControl.definition.fileNameMainDoc;
 };
 
 qaControl.fixMessages = function fixMessages(messagesToFix) {
@@ -223,22 +215,23 @@ qaControl.jsProjectName = function jsProjectName(projectName) {
 };
 
 qaControl.configReady=false;
-var configReading=Promise.all(map(qaControl.projectDefinition,function(definition, version){
+var configReading=(function(){
+    var definition = qaControl.definition;
     definition.firstLines=definition.firstLines||{};
     return Promise.all(map(definition.sections['run-in'].values,function(runInProperties, runInValue){
         return Promise.all(map(definition.sections.type.values,function(typeProperties, typeValue){
-            return fs.readFile(Path.join(__dirname,version,'first-lines-'+runInValue+'-'+typeValue+'.txt'),{encoding: 'utf8'}).catch(function(err){
+            return fs.readFile(Path.join(__dirname,'definition','first-lines-'+runInValue+'-'+typeValue+'.txt'),{encoding: 'utf8'}).catch(function(err){
                 if(err.code!=='ENOENT'){
                     throw err;
                 }
-                return fs.readFile(Path.join(__dirname,version,'first-lines-'+runInValue+'.txt'),{encoding: 'utf8'});
+                return fs.readFile(Path.join(__dirname,'definition','first-lines-'+runInValue+'.txt'),{encoding: 'utf8'});
             }).then(function(content){
                 definition.firstLines[runInValue]=definition.firstLines[runInValue]||{};
                 definition.firstLines[runInValue][typeValue]=content;
             });
         }));
     }));
-})).then(function(){
+})().then(function(){
     return qaControl.fixMessages(qaControl.msgs.en);
 }).then(function(){
     // only for test, in production this sleep must gone
@@ -321,12 +314,6 @@ qaControl.loadProject = function loadProject(projectDir) {
             }
         });
     }).then(function() {
-        var verCheck = ((info.packageJson || {})['qa-control'] || {})['package-version'];
-        //console.log("verCheck", verCheck)
-        if(verCheck && ! (verCheck in qaControl.projectDefinition)) {
-            throw new Error("inexistent qa-control version: "+verCheck);
-        }
-        info.usedDefinition = (verCheck in qaControl.projectDefinition) ? verCheck : qaControl.currentVersion;
         return info;
     });
 };
@@ -335,9 +322,8 @@ qaControl.controlInfo=function controlInfo(info, opts){
     var resultWarnings=[];
     var existingWarnings={};
     var cmsgs = qaControl.cmdMsgs[qaControl.lang];
-    var rules = qaControl.projectDefinition[info.usedDefinition].rules;
+    var rules = qaControl.definition.rules;
     var silenced = ((info.packageJson || {})['qa-control'] || {}).silenced || [];
-    if(qaControl.verbose) { process.stdout.write(cmsgs.msg_controlling+info.usedDefinition+"...\n"); }
     var cadenaDePromesas = Promise.resolve().then();
     info.scoring = opts && opts.scoring;
     forEach(rules, function(rule, ruleName) {
@@ -366,9 +352,6 @@ qaControl.controlInfo=function controlInfo(info, opts){
             throw err;
         }
     }).then(function(){
-        if(info.usedDefinition !== qaControl.currentVersion) {
-            resultWarnings.push({warning:'older_version_of_qa_control_in_package_json', scoring:{notice:1}});
-        }
         return resultWarnings;
     });
     return cadenaDePromesas;

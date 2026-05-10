@@ -16,6 +16,7 @@ function eslintrcToFlatConfig(rc) {
 var multilang = require('multilang');
 var fs = require('fs-promise');
 var Path = require('path');
+var yaml = require('js-yaml');
 
 module.exports = function(qaControl){
     return {
@@ -34,7 +35,8 @@ module.exports = function(qaControl){
                 values: {
                     app: {},
                     lib: {},
-                    "cmd-tool": {}
+                    "cmd-tool": {},
+                    web: {}
                 }
             }
         },
@@ -50,18 +52,20 @@ module.exports = function(qaControl){
                 presentIf:function(packageJson){
                     return !!packageJson['qa-control']["test-appveyor"];
                 }
-            }
+            },
+            '.jshintrc':{ mandatory:true },
+            '.eslintrc.yml':{ mandatory:true }
         },
         cucardas:{
             'proof-of-concept':{
-                check: function(packageJson){ 
+                check: function(packageJson){
                     return packageJson['qa-control'].purpose==='proof-of-concept';
                 },
                 md:'![proof-of-concept](https://img.shields.io/badge/stability-proof_of_concept-ff70c0.svg)',
                 imgExample:'https://img.shields.io/badge/stability-designing-red.svg'
             },
             designing:{
-                check: function(packageJson){ 
+                check: function(packageJson){
                     return semver.satisfies(packageJson.version,'0.0.x') && !packageJson['qa-control'].purpose;
                 },
                 md:'![designing](https://img.shields.io/badge/stability-designing-red.svg)',
@@ -69,7 +73,7 @@ module.exports = function(qaControl){
                 docDescription: 'opt. manual'
             },
             extending:{
-                check: function(packageJson){ 
+                check: function(packageJson){
                     return semver.satisfies(packageJson.version,'0.x.x') &&
                             !semver.satisfies(packageJson.version,'0.0.x') &&
                             !packageJson['qa-control'].purpose;
@@ -79,21 +83,21 @@ module.exports = function(qaControl){
                 docDescription: 'opt. manual'
             },
             training:{
-                check: function(packageJson){ 
+                check: function(packageJson){
                     return packageJson['qa-control'].purpose==='training';
                 },
                 md:'![training](https://img.shields.io/badge/stability-training-ffa0c0.svg)',
                 imgExample:'https://img.shields.io/badge/stability-training-ffa0c0.svg'
             },
             example:{
-                check: function(packageJson){ 
+                check: function(packageJson){
                     return packageJson['qa-control'].purpose==='example';
                 },
                 md:'![example](https://img.shields.io/badge/stability-example-a0a0f0.svg)',
                 imgExample:'https://img.shields.io/badge/stability-example-a0a0f0.svg'
             },
             stable:{
-                check: function(packageJson){ 
+                check: function(packageJson){
                     return semver.satisfies(packageJson.version,'>=1.0.0') && !packageJson['qa-control'].purpose;
                 },
                 md:'![stable](https://img.shields.io/badge/stability-stable-brightgreen.svg)',
@@ -112,7 +116,7 @@ module.exports = function(qaControl){
                 docDescription: ''
             },
             build:{
-                check: function(packageJson){ 
+                check: function(packageJson){
                     return !packageJson['qa-control']['test-appveyor'];
                 },
                 md:'[![build](https://img.shields.io/travis/xxx/yyy/master.svg)](https://travis-ci.org/xxx/yyy)',
@@ -120,7 +124,7 @@ module.exports = function(qaControl){
                 docDescription: 'linux/build'
             },
             linux:{
-                check: function(packageJson){ 
+                check: function(packageJson){
                     return !!packageJson['qa-control']['test-appveyor'];
                 },
                 md:'[![linux](https://img.shields.io/travis/xxx/yyy/master.svg)](https://travis-ci.org/xxx/yyy)',
@@ -128,7 +132,7 @@ module.exports = function(qaControl){
                 hideInManual: true,
             },
             windows:{
-                check: function(packageJson){ 
+                check: function(packageJson){
                     return !!packageJson['qa-control']['test-appveyor'];
                 },
                 md:'[![windows](https://ci.appveyor.com/api/projects/status/github/xxx/yyy?svg=true)](https://ci.appveyor.com/project/xxx/yyy)',
@@ -136,7 +140,7 @@ module.exports = function(qaControl){
                 docDescription: 'casos especiales'
             },
             coverage:{
-                check: function(packageJson){ 
+                check: function(packageJson){
                     return packageJson['qa-control'].coverage;
                 },
                 md:'[![coverage](https://img.shields.io/coveralls/xxx/yyy/master.svg)](https://coveralls.io/r/xxx/yyy)',
@@ -144,7 +148,7 @@ module.exports = function(qaControl){
                 docDescription: ''
             },
             climate:{
-                check: function(packageJson){ 
+                check: function(packageJson){
                     return packageJson['qa-control'].coverage || ! packageJson['qa-control'].purpose;
                 },
                 md:'[![climate](https://img.shields.io/codeclimate/github/xxx/yyy.svg)](https://codeclimate.com/github/xxx/yyy)',
@@ -197,25 +201,12 @@ module.exports = function(qaControl){
               "no-unused-vars": 1
             }
         },
-        // Si info.scoring == true, cada regla debe agregar junto al warning, un objeto 'scoring'
-        // con na o m�s de las siguientes propiedades:
-        //   qac: 1
-        //   mandatories: 1
-        //   cucardas:1
-        //   multilang:1
-        //   versions:1
-        //   parameters:1
-        //   format:1
-        //   customs:1
-        //   jshint:1
-        //   dependencies:1
-        // Emilio redefinir� valores de cada score
         rules:{
             exist_package_json:{
                 checks:[{
                     warnings:function(info){
                         if(!info.files['package.json']){
-                            return [{warning:'no_package_json', scoring:{mandatories:1}}];
+                            return [{warning:'no_package_json', scoring:{fatal:1}}];
                         }
                         return [];
                     }
@@ -228,7 +219,7 @@ module.exports = function(qaControl){
                         if(!info.packageJson['qa-control']){
                             return [{warning:info.files['package.json'].content.match(/codenautas/)?
                                         'no_qa_control_section_in_codenautas_project':
-                                        'no_qa_control_section_in_package_json', scoring:{qac:1}}];
+                                        'no_qa_control_section_in_package_json', scoring:{fatal:1}}];
                         }
                         return [];
                     }
@@ -239,7 +230,7 @@ module.exports = function(qaControl){
                 checks:[{
                     warnings:function(info){
                         if(!info.packageJson['qa-control']['package-version']){
-                            return [{warning:'no_package_version_in_qa_control_section', scoring:{qac:1}}];
+                            return [{warning:'no_package_version_in_qa_control_section', scoring:{fatal:1}}];
                         } else {
                             // defino la version para para siguientes checks
                             info.packageVersion = info.packageJson['qa-control']['package-version'];
@@ -266,7 +257,7 @@ module.exports = function(qaControl){
                     warnings:function(info) {
                         var ver=info.packageVersion;
                         if(semver.satisfies(ver, qaControl.deprecatedVersions)){
-                            return [{warning:'deprecated_qa_control_version',params:[ver], scoring:{versions:1}}];
+                            return [{warning:'deprecated_qa_control_version',params:[ver], scoring:{warning:1}}];
                         }
                         return [];
                     }
@@ -277,7 +268,7 @@ module.exports = function(qaControl){
                 checks:[{
                     warnings:function(info) {
                         var warns =[];
-                        var files=qaControl.projectDefinition[info.packageVersion].files;
+                        var files=qaControl.definition.files;
                         for(var fileName in files) {
                             if(files.hasOwnProperty(fileName)) {
                                 var file = files[fileName];
@@ -316,7 +307,7 @@ module.exports = function(qaControl){
                     warnings:function(info){
                         var warns=[];
                         var qaControlSection=info.packageJson['qa-control'];
-                        var sections=qaControl.projectDefinition[info.packageVersion].sections;
+                        var sections=qaControl.definition.sections;
                          /*jshint forin: false */
                         for(var sectionName in sections){
                             var sectionDef=sections[sectionName];
@@ -325,7 +316,7 @@ module.exports = function(qaControl){
                             }else{
                                 var observedValue=qaControlSection[sectionName];
                                 if(sectionDef.values && !(observedValue in sectionDef.values)){
-                                    warns.push({warning:'invalid_value_1_in_parameter_2',params:[observedValue,sectionName], scoring:{parameters:1}});
+                                    warns.push({warning:'invalid_value_1_in_parameter_2',params:[observedValue,sectionName], scoring:{warnings:1}});
                                 }
                             }
                         }
@@ -339,7 +330,7 @@ module.exports = function(qaControl){
                 checks:[{
                     warnings:function(info) {
                         var warns =[];
-                        var files=qaControl.projectDefinition[info.packageVersion].files;
+                        var files=qaControl.definition.files;
                         for(var fileName in files) {
                             var file=files[fileName];
                             if(file.mandatoryLines) {
@@ -353,28 +344,18 @@ module.exports = function(qaControl){
                                    }
                                 });
                             }
-                        };
+                        }
                         return warns;
                     }
                 }]
-            }, // agregar desde ac�
-            no_test_in_node_four:{
-                checks:[{
-                    warnings:function(info){
-                        if(info.dotTravis && info.dotTravis.node_js.filter(function(x){ return x[0].match(/[45678]/); }).length<2){
-                            return [{warning:'no_test_in_node_four', scoring:{versions:1}}];
-                        }
-                        return [];
-                    }
-                }],
             },
             no_multilang_section_in_1:{
                 checks:[{
                     warnings:function(info){
                         if(!info.files[qaControl.mainDoc()].content.match(/<!--multilang v[0-9]+\s+(.+)(-->)/)) {
                             return [{
-                                warning:'no_multilang_section_in_1', 
-                                params:[qaControl.mainDoc()], 
+                                warning:'no_multilang_section_in_1',
+                                params:[qaControl.mainDoc()],
                                 scoring:{multilang:1}
                             }];
                         }
@@ -389,7 +370,7 @@ module.exports = function(qaControl){
                         var repoParts = qaControl.getRepositoryUrl(info.packageJson).split('/');
                         var projName = repoParts[repoParts.length-1];
                         if(projName !== info.packageJson.name) {
-                            return [{warning:'invalid_repository_section_in_package_json', scoring:{format:1}}];
+                            return [{warning:'invalid_repository_section_in_package_json', scoring:{repository:1}}];
                         }
                         return warns;
                     }
@@ -404,7 +385,7 @@ module.exports = function(qaControl){
                         if(readme.indexOf(qaControl.cucaMarker) === -1) {
                             warns.push({warning:'lack_of_cucarda_marker_in_readme'});
                         }
-                        var cucardas=qaControl.projectDefinition[info.packageVersion].cucardas;
+                        var cucardas=qaControl.definition.cucardas;
                         var modulo=info.packageJson.name;
                         var repo=qaControl.getRepositoryUrl(info.packageJson).replace('/'+modulo,'');
                          /*jshint forin: false */
@@ -422,7 +403,7 @@ module.exports = function(qaControl){
                                 }
                                 if(readme.indexOf(cucaStr) === -1) {
                                     // si tengo cucarda mal formada, devuelvo warning aunque no sea obligatoria
-                                    // porque existi� la intenci�n de definirla
+                                    // porque existió la intención de definirla
                                     warns.push({warning:'wrong_format_in_cucarda_1', params:[nombreCucarda], scoring:{cucardas:1}});
                                 }
                             }
@@ -439,7 +420,7 @@ module.exports = function(qaControl){
                 checks:[{
                     warnings:function(info) {
                         var warns=[];
-                        var customs = qaControl.projectDefinition[info.packageVersion].customs;
+                        var customs = qaControl.definition.customs;
                         function makeCheck(strOrRegexp, isMatchFunc) {
                             var checker;
                             if(!strOrRegexp){
@@ -469,7 +450,7 @@ module.exports = function(qaControl){
                                         var match = makeCheck(custom.match, true);
                                         //console.log(file, " detect:", detect(content), " match: ", match(content))
                                         if(detect(content) && ! match(content)) {
-                                            warns.push({warning:'file_1_does_not_match_custom_2', params:[file,customeName], scoring:{customs:1}});
+                                            warns.push({warning:'file_1_does_not_match_custom_2', params:[file,customeName], scoring:{conventions:1}});
                                         }
                                     }
                                 }
@@ -486,17 +467,17 @@ module.exports = function(qaControl){
                         var qaControlSection=info.packageJson['qa-control'];
                         var whichRunIn=qaControlSection['run-in'];
                         var whichType=qaControlSection.type;
-                        var firstLines=qaControl.projectDefinition[info.packageVersion].firstLines[whichRunIn][whichType];
+                        var firstLines=qaControl.definition.firstLines[whichRunIn][whichType];
                         if(firstLines) {
                             var ProjectName = qaControl.jsProjectName(info.packageJson.name);
                             var projectName = qaControl.first("toLowerCase")(ProjectName);
                             var mainName = ('main' in info.packageJson) ? info.packageJson.main : 'index.js';
                             if(!(mainName in info.files)) {
-                                warns.push({warning:'packagejson_main_file_1_does_not_exists', params:[mainName], scoring:{customs:1}});
+                                warns.push({warning:'packagejson_main_file_1_does_not_exists', params:[mainName], scoring:{warning:1}});
                             } else {
                                 var fileContent = stripBom(info.files[mainName].content);
 
-                                if(!qaControl.startsWith(fileContent, firstLines.replace(/nombreDelModulo/g, ProjectName)) && 
+                                if(!qaControl.startsWith(fileContent, firstLines.replace(/nombreDelModulo/g, ProjectName)) &&
                                       !qaControl.startsWith(fileContent, firstLines.replace(/nombreDelModulo/g, projectName))
                                 ) {
                                     if(qaControl.verbose){
@@ -530,7 +511,7 @@ module.exports = function(qaControl){
                             if(file.match(/(.js)$/)) {
                                 var content = info.files[file].content;
                                 if(content.match(/require\(["'](promise|q|rsvp|es6promise)['"]\)/m)) {
-                                    warns.push({warning:'using_normal_promise_in_file_1', params:[file], scoring:{customs:1}});
+                                    warns.push({warning:'using_normal_promise_in_file_1', params:[file], scoring:{conventions:1}});
                                 }
                             }
                         }
@@ -538,39 +519,12 @@ module.exports = function(qaControl){
                     }
                 }]
             },
-            jshint_config:{
-                checks:[{
-                    warnings:function(info){
-                        return qaControl.checkLintConfig(info,
-                                                         'jshintConfig',
-                                                         'lack_of_jshintconfig_section_in_package_json',
-                                                         qaControl.projectDefinition[info.packageVersion].jshint_options,
-                                                         'incorrect_jshintconfig_option_1_in_package_json',
-                                                         {jshint:1});
-                    }
-                }]
-            },
-            eslint_config:{
-                checks:[{
-                    warnings:function(info){
-                        return qaControl.checkLintConfig(info,
-                                                         'eslintConfig',
-                                                         'lack_of_eslintconfig_section_in_package_json',
-                                                         qaControl.projectDefinition[info.packageVersion].eslint_options,
-                                                         'incorrect_eslintconfig_option_1_in_package_json',
-                                                         {eslint:1});
-                    }
-                }]
-            },
             jshint:{
-                eclipsers:['packagejson_main_file_1_does_not_exists', 'first_lines_does_not_match_in_file_1',
-                           'lack_of_jshintconfig_section_in_package_json', 'incorrect_jshintconfig_option_1_in_package_json'],
+                eclipsers:['packagejson_main_file_1_does_not_exists', 'first_lines_does_not_match_in_file_1'],
                 checks:[{
                     warnings:function(info){
                         var warns = [];
-                        var jshintOpts = 
-                            info.packageJson.jshintConfig || 
-                            qaControl.projectDefinition[info.packageVersion].jshint_options;
+                        var jshintOpts = JSON.parse(info.files['.jshintrc'].content);
                         for(var file in info.files) {
                             if(file.match(/(.js)$/)) {
                                 var content = info.files[file].content;
@@ -580,7 +534,7 @@ module.exports = function(qaControl){
                                     if(qaControl.verbose){
                                         console.log('JSHINT output:');
                                         console.log('jshintOpts',jshintOpts);
-                                        console.log(data.errors.length, " JSHINT errors");
+                                        console.log('There are '+data.length+ " JSHINT errors");
                                         console.log(data.errors);
                                         //console.log(data);
                                     }
@@ -593,14 +547,11 @@ module.exports = function(qaControl){
                 }]
             },
             eslint:{
-                eclipsers:['packagejson_main_file_1_does_not_exists', 'first_lines_does_not_match_in_file_1',
-                           'lack_of_eslintconfig_section_in_package_json', 'incorrect_eslintconfig_option_1_in_package_json'],
+                eclipsers:['packagejson_main_file_1_does_not_exists', 'first_lines_does_not_match_in_file_1'],
                 checks:[{
                     warnings:function(info){
                         var warns = [];
-                        var eslintOpts = eslintrcToFlatConfig(
-                            info.packageJson.eslintConfig ||
-                            qaControl.projectDefinition[info.packageVersion].eslint_options);
+                        var eslintOpts = eslintrcToFlatConfig(yaml.load(info.files['.eslintrc.yml'].content));
                         for(var file in info.files) {
                             if(file.match(/(.js)$/)) {
                                 var content = info.files[file].content;
@@ -609,7 +560,7 @@ module.exports = function(qaControl){
                                     if(qaControl.verbose){
                                         console.log('ESLINT output:');
                                         console.log('eslintOpts',eslintOpts);
-                                        console.log(data.length, " ESLINT errors");
+                                        console.log('There are '+data.length+ " ESLINT errors");
                                         console.log(data);
                                         //console.log(data);
                                     }
@@ -645,28 +596,16 @@ module.exports = function(qaControl){
             },
             snyk:{
                 checks:[{
-                    warnings:function(info) {
-                        var warns = [];
-                        if("dependencies" in info.packageJson) {
-                            var reDep=/^~?\d+\.\d+\.\d+$/;
-                            /*jshint forin: false */
-                            for(var depName in info.packageJson.dependencies) {
-                                var depVal = info.packageJson.dependencies[depName];
-                                if(! reDep.test(depVal)) {
-                                    // console.log(depName, depVal);
-                                    warns.push({warning:'invalid_dependency_version_number_format_in_dep_1', params:[depName], scoring:{dependencies:1}});
-                                }
-                            }
-                            /*jshint forin: true */
-                        }
-                        return warns;
-                    }
+                    warnings:qaControl.checkDepVerNumberFormat
                 }]
             },
             use_strict:{
                 checks:[{
                     warnings:function(info){
                         var warns = [];
+                        function hasColonOutsideQuotes(line) {
+                            return line.replace(/([\'"])(.*?)\1/g,'').match(/:/);
+                        }
                         for(var file in info.files) {
                             if(file.match(/(.js)$/)) {
                                 var content = info.files[file].content;
@@ -677,11 +616,12 @@ module.exports = function(qaControl){
                                     var trimLine = line.replace(/^(\s+)/,'');
                                     //console.log("line:"+l, '['+line+']', "trimmed", '['+trimLine+']', "prev", '['+prevLine+']');
                                     if(trimLine.length>0
-                                        && trimLine[0].match(/['"']/)
+                                        && trimLine[0].match(/['"]/)
                                         && prevLine
-                                        && prevLine.match(/{$/)
-                                        && ! prevLine.match(/[a-zA-Z0-9_]+\s?:/)
-                                        )
+                                        && prevLine.match(/{\s?$/)
+                                        //&& ! line.match(/["'].*["']\s*:/)
+                                        && ! hasColonOutsideQuotes(trimLine)
+                                      )
                                     {
                                         if(! trimLine.match(/"use strict";/)) {
                                             if(qaControl.verbose){
@@ -689,12 +629,82 @@ module.exports = function(qaControl){
                                                 console.log('  '+(l-1)+':"'+prevLine+'"');
                                                 console.log('  '+(l)+':"'+line+'"');
                                             }
-                                            warns.push({warning:'wrong_use_strict_spelling_in_file_1', params:[file], scoring:{customs:1}});
+                                            warns.push({warning:'wrong_use_strict_spelling_in_file_1', params:[file], scoring:{conventions:1}});
                                         }
                                     }
                                     prevLine = line;
                                 }
                             }
+                        }
+                        return warns;
+                    }
+                }]
+            },
+            files_in_package_json:{
+                checks:[{
+                    warnings:function(info) {
+                        var warns = [];
+                        if(!('files' in info.packageJson)) {
+                            warns.push({warning:'lack_of_files_section_in_package_json', scoring:{mandatories:1}});
+                        } else {
+                            var detail=[];
+                            //console.log("info.files", Object.keys(info.files));
+                            //console.log("files", info.packageJson.files.join(" "));
+                            var qaFiles=qaControl.definition.files;
+                            for(var fileName in info.packageJson.files) {
+                                var file = info.packageJson.files[fileName];
+                                if(file==='package.json') { detail.push('"'+file+'" is always included by npm'); }
+                                if(file.match(/^(\.)/)) { detail.push('"'+file+'" is a .dot file'); }
+                                if(file in qaFiles) {
+                                    detail.push('"'+file+'" cannot be in files section');
+                                } else {
+                                    try {
+                                        var stat = fs.statSync(Path.resolve(info.projectDir+'/'+file));
+                                        if(! stat.isDirectory()) {
+                                            if(!(file in info.files)) { detail.push('"'+file+'" should exist'); }
+                                        }
+                                    } catch(e) { detail.push('"'+file+'" does not exists'); }
+                                }
+                            }
+                            if(detail.length) {
+                                warns.push({warning:'invalid_files_section_in_package_json', scoring:{mandatories:1}});
+                                if(qaControl.verbose) {
+                                    console.log("Invalid files:");
+                                    console.log("\t"+detail.join("\n\t"));
+                                }
+                            }
+                        }
+                        return warns;
+                    }
+                }]
+            },
+            lint_sections_in_package_json:{
+                checks:[{
+                    warnings:function(info) {
+                        var warns = [];
+                        if('jshintConfig' in info.packageJson) {
+                            warns.push({warning:'unexpected_jshintconfig_section_in_package_json', scoring:{conventions:1}});
+                        }
+                        if('eslintConfig' in info.packageJson) {
+                            warns.push({warning:'unexpected_eslintconfig_section_in_package_json', scoring:{conventions:1}});
+                        }
+                        return warns;
+                    }
+                }]
+            },
+            non_recomended_snyk:{
+                checks:[{
+                    warnings:function(info) {
+                        var warns = [];
+                        var nonRecomended = ['best-promise', 'lodash', 'promise-plus'];
+                        var dependencies = info.packageJson.dependencies;
+                        var devDependencies = info.packageJson.devDependencies;
+                        if(dependencies) {
+                            nonRecomended.forEach(function(badDep) {
+                                if(badDep in dependencies || badDep in devDependencies) {
+                                    warns.push({warning:'non_recomended_dependency_1_in_package_json', params:[badDep], scoring:{dependencies:1}});
+                                }
+                            });
                         }
                         return warns;
                     }

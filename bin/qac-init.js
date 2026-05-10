@@ -293,12 +293,7 @@ qacInit.configParams = [
             return ver;
         },
         valid: function(ver) {
-            if(semver.valid(ver)) {
-                for(var v in qaControl.projectDefinition) {
-                    if(semver.satisfies(ver, v)) { return true; }
-                }
-            }
-            return false;
+            return !!semver.valid(ver);
         }
     },{
         name:'qa-control', def:'', noPrompt:true, init: function(ctx) { this.def = ctx.input.qacJson['qa-control']; }

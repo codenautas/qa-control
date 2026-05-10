@@ -8,11 +8,10 @@
   "contributors": [{
     "name": "Emilio Platzer", "email": "emilioplatzer@gmail.com"
   }],
+  "files": ["simple.js"],
   "dependencies": {
-    "lodash": "3.10.0",
     "pg": "4.4.0",
-    "promise": "7.0.3",
-    "best-promise": "0.2.2"
+    "promise": "7.0.3"
   },
   "devDependencies": {
     "istanbul": "~0.3.17",
@@ -39,13 +38,8 @@
     "test-cov-ndb": "set COVER=ndb&& istanbul cover node_modules/mocha/bin/_mocha -- --reporter dot --check-leaks test/",
     "start": "node examples/use-examples.js"
   },
-  "jshintConfig": {
-    "asi": false,
-    "curly": true,
-    "forin": true
-  },
   "qa-control": {
-    "package-version": "0.0.1",
+    "package-version": "0.3.0",
     "run-in": "server",
     "test-appveyor": true,
     "type": "lib",

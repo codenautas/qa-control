@@ -1,7 +1,4 @@
-﻿"use strict";
-/*jshint eqnull:true */
-/*jshint globalstrict:true */
-/*jshint node:true */
+"use strict";
 
 var stableProject = {};
 

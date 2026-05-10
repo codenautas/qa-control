@@ -1,0 +1,6 @@
+{
+    "asi": false,
+    "curly": true,
+    "forin": true,
+    "node": true
+}
