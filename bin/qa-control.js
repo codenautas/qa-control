@@ -272,6 +272,7 @@ qaControl.loadProject = function loadProject(projectDir) {
         return fs.readdir(projectDir);
     }).then(function(files) {
         info.files = {};
+        files = files.filter(function(f){ return f !== 'cucardas.log'; });
          /*jshint forin: false */
          /*eslint-disable guard-for-in */
         for(var f in files) { info.files[files[f]] = {}; }

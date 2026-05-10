@@ -151,9 +151,9 @@ module.exports = function(qaControl){
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/climate.png',
                 docDescription: ''
             },
-            dependencies:{
+            snyk:{
                 mandatory:true,
-                md:'[![dependencies](https://img.shields.io/david/xxx/yyy.svg)](https://david-dm.org/xxx/yyy)',
+                md:'[![snyk](https://snyk.io/test/github/xxx/yyy/badge.svg)](https://snyk.io/test/github/xxx/yyy)',
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/medalla-ejemplo-dependencies.png',
                 docDescription: ''
             },
@@ -643,7 +643,7 @@ module.exports = function(qaControl){
                     }
                 }]
             },
-            dependencies:{
+            snyk:{
                 checks:[{
                     warnings:qaControl.checkDepVerNumberFormat
                 }]
