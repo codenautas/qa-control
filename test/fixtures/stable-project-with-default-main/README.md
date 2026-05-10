@@ -7,7 +7,7 @@ the description
 [![windows](https://ci.appveyor.com/api/projects/status/github/codenautas/stable-project?svg=true)](https://ci.appveyor.com/project/codenautas/stable-project)
 [![coverage](https://img.shields.io/coveralls/codenautas/stable-project/master.svg)](https://coveralls.io/r/codenautas/stable-project)
 [![climate](https://img.shields.io/codeclimate/github/codenautas/stable-project.svg)](https://codeclimate.com/github/codenautas/stable-project)
-[![snyk](https://snyk.io/test/github/codenautas/stable-project/badge.svg)](https://snyk.io/test/github/codenautas/stable-project)
+[![dependencies](https://snyk.io/test/github/codenautas/stable-project/badge.svg)](https://snyk.io/test/github/codenautas/stable-project)
 [![qa-control](http://codenautas.com/github/codenautas/stable-project.svg)](http://codenautas.com/github/codenautas/stable-project)
 
 

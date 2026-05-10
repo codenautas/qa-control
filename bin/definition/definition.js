@@ -155,9 +155,9 @@ module.exports = function(qaControl){
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/climate.png',
                 docDescription: ''
             },
-            snyk:{
+            dependencies:{
                 mandatory:true,
-                md:'[![snyk](https://snyk.io/test/github/xxx/yyy/badge.svg)](https://snyk.io/test/github/xxx/yyy)',
+                md:'[![dependencies](https://snyk.io/test/github/xxx/yyy/badge.svg)](https://snyk.io/test/github/xxx/yyy)',
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/medalla-ejemplo-dependencies.png',
                 docDescription: ''
             },
@@ -594,7 +594,7 @@ module.exports = function(qaControl){
                     }
                 }]
             },
-            snyk:{
+            dependencies:{
                 checks:[{
                     warnings:qaControl.checkDepVerNumberFormat
                 }]
@@ -692,7 +692,7 @@ module.exports = function(qaControl){
                     }
                 }]
             },
-            non_recomended_snyk:{
+            non_recomended_dependencies:{
                 checks:[{
                     warnings:function(info) {
                         var warns = [];

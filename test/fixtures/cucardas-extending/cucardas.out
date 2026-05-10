@@ -5,5 +5,5 @@
 [![build](https://img.shields.io/travis/sourcenauta/the-project/master.svg)](https://travis-ci.org/sourcenauta/the-project)
 [![coverage](https://img.shields.io/coveralls/sourcenauta/the-project/master.svg)](https://coveralls.io/r/sourcenauta/the-project)
 [![climate](https://img.shields.io/codeclimate/github/sourcenauta/the-project.svg)](https://codeclimate.com/github/sourcenauta/the-project)
-[![snyk](https://snyk.io/test/github/sourcenauta/the-project/badge.svg)](https://snyk.io/test/github/sourcenauta/the-project)
+[![dependencies](https://snyk.io/test/github/sourcenauta/the-project/badge.svg)](https://snyk.io/test/github/sourcenauta/the-project)
 [![qa-control](http://codenautas.com/github/sourcenauta/the-project.svg)](http://codenautas.com/github/sourcenauta/the-project)
