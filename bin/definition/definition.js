@@ -119,7 +119,7 @@ module.exports = function(qaControl){
                 check: function(packageJson){
                     return !packageJson['qa-control']['test-appveyor'];
                 },
-                md:'[![build](https://github.com/xxx/yyy/workflows/node.js.yml/badge.svg)](https://github.com/xxx/yyy/workflows/node.js.yml)',
+                md:'[![build](https://github.com/xxx/yyy/actions/workflows/node.js.yml/badge.svg)](https://github.com/xxx/yyy/actions/workflows/node.js.yml)',
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/medalla-ejemplo-linux.png',
                 docDescription: 'linux/build'
             },
@@ -127,7 +127,7 @@ module.exports = function(qaControl){
                 check: function(packageJson){
                     return !!packageJson['qa-control']['test-appveyor'];
                 },
-                md:'[![linux](https://github.com/xxx/yyy/workflows/node.js.yml/badge.svg)](https://github.com/xxx/yyy/workflows/node.js.yml)',
+                md:'[![linux](https://github.com/xxx/yyy/actions/workflows/node.js.yml/badge.svg)](https://github.com/xxx/yyy/actions/workflows/node.js.yml)',
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/medalla-ejemplo-linux.png',
                 hideInManual: true,
             },
@@ -165,6 +165,10 @@ module.exports = function(qaControl){
                 mandatory:false,
                 md:'[![qa-control](http://codenautas.com/github/xxx/yyy.svg)](http://codenautas.com/github/xxx/yyy)',
                 docDescription: ''
+            },
+            'outdated-deps':{
+                forbidden:true,
+                md:'[![outdated-deps](https://img.shields.io/david/xxx/yyy.svg)](https://david-dm.org/xxx/yyy)'
             }
         },
         customs:{
@@ -355,7 +359,11 @@ module.exports = function(qaControl){
                             var cucarda = cucardas[nombreCucarda];
                             var cucaID = '!['+/!\[([-a-z]+)]/.exec(cucarda.md)[1]+']';
                             var cucaStr = cucarda.md.replace(/\bxxx\b/g,repo).replace(/\byyy\b/g,modulo);
-                            if(readme.indexOf(cucaID) === -1) {
+                            if(cucarda.forbidden) {
+                                if(readme.indexOf(cucaID) !== -1) {
+                                    warns.push({warning:'forbidden_cucarda_1', params:[nombreCucarda], scoring:{cucardas:1}});
+                                }
+                            } else if(readme.indexOf(cucaID) === -1) {
                                 if(cucarda.mandatory) {
                                     warns.push({warning:'lack_of_mandatory_cucarda_1', params:[nombreCucarda], scoring:{cucardas:1}});
                                 }

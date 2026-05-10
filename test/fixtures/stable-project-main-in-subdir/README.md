@@ -3,7 +3,7 @@ the description
 
 [![npm-version](https://img.shields.io/npm/v/stable-project.svg)](https://npmjs.org/package/stable-project)
 [![downloads](https://img.shields.io/npm/dm/stable-project.svg)](https://npmjs.org/package/stable-project)
-[![linux](https://github.com/codenautas/stable-project/workflows/node.js.yml/badge.svg)](https://github.com/codenautas/stable-project/workflows/node.js.yml)
+[![linux](https://github.com/codenautas/stable-project/actions/workflows/node.js.yml/badge.svg)](https://github.com/codenautas/stable-project/actions/workflows/node.js.yml)
 [![windows](https://ci.appveyor.com/api/projects/status/github/codenautas/stable-project?svg=true)](https://ci.appveyor.com/project/codenautas/stable-project)
 [![coverage](https://img.shields.io/coveralls/codenautas/stable-project/master.svg)](https://coveralls.io/r/codenautas/stable-project)
 [![climate](https://img.shields.io/codeclimate/github/codenautas/stable-project.svg)](https://codeclimate.com/github/codenautas/stable-project)

@@ -16,7 +16,7 @@ $ npm install gen-init
 ![designing](https://img.shields.io/badge/stability-designing-red.svg)
 [![npm-version](https://img.shields.io/npm/v/gen-init.svg)](https://npmjs.org/package/gen-init)
 [![downloads](https://img.shields.io/npm/dm/gen-init.svg)](https://npmjs.org/package/gen-init)
-[![build](https://github.com/codenautas/gen-init/workflows/node.js.yml/badge.svg)](https://github.com/codenautas/gen-init/workflows/node.js.yml)
+[![build](https://github.com/codenautas/gen-init/actions/workflows/node.js.yml/badge.svg)](https://github.com/codenautas/gen-init/actions/workflows/node.js.yml)
 [![coverage](https://img.shields.io/coveralls/codenautas/gen-init/master.svg)](https://coveralls.io/r/codenautas/gen-init)
 [![climate](https://img.shields.io/codeclimate/github/codenautas/gen-init.svg)](https://codeclimate.com/github/codenautas/gen-init)
 [![dependencies](https://img.shields.io/david/codenautas/gen-init.svg)](https://david-dm.org/codenautas/gen-init)

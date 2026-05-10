@@ -476,6 +476,23 @@ var fixtures=[{
         { warning: 'non_recomended_dependency_1_in_package_json', params:['promise-plus']}
     ]
 },{
+    base:'stable-project',
+    title:'forbidden cucarda outdated-deps',
+    change:function(info){
+        var badge = '[![outdated-deps](https://img.shields.io/david/codenautas/stable-project.svg)](https://david-dm.org/codenautas/stable-project)';
+        info.files['LEEME.md'].content = info.files['LEEME.md'].content.replace(
+            '<!-- cucardas -->\n',
+            '<!-- cucardas -->\n'+badge+'\n'
+        );
+        info.files['README.md'].content = info.files['README.md'].content.replace(
+            '[![npm-version]',
+            badge+'\n'+'[![npm-version]'
+        );
+    },
+    expected:[
+        { warning:'forbidden_cucarda_1', params:['outdated-deps']}
+    ]
+},{
     base:'stable-project-v0.3.0',
     title:'minimum profile skips linters and lint config files',
     change:function(info){
@@ -837,6 +854,7 @@ describe('qa-control main', function(){
                                       +'falta la sección "cucardas" en README.md\n'
                                       +'falta la cucarda oblicatoria param1\n'
                                       +'la cucarda "param1" tiene formato incorrecto\n'
+                                      +'la cucarda "param1" no debe usarse en README.md\n'
                                       +'falta la linea obligatoria param1 en el archivo param2\n'
                                       +'param1 no respeta la custombre param2\n'
                                       +'las primeras líneas no coinciden en param1\n'
@@ -878,6 +896,7 @@ describe('qa-control main', function(){
                                        +'lack of cucarda marker in readme\n'
                                        +'lack of mandatory cucarda param1\n'
                                        +'wrong format in cucarda param1\n'
+                                       +'forbidden cucarda param1\n'
                                        +'lack of mandatory line param1 in file param2\n'
                                        +'file param1 does not match custom param2\n'
                                        +'first lines does not match in file param1\n'

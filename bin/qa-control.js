@@ -41,6 +41,7 @@ qaControl.msgs={
         lack_of_cucarda_marker_in_readme:'falta la sección "cucardas" en README.md',
         lack_of_mandatory_cucarda_1: 'falta la cucarda oblicatoria $1',
         wrong_format_in_cucarda_1: 'la cucarda "$1" tiene formato incorrecto',
+        forbidden_cucarda_1: 'la cucarda "$1" no debe usarse en README.md',
         lack_of_mandatory_line_1_in_file_2: 'falta la linea obligatoria $1 en el archivo $2',
         file_1_does_not_match_custom_2: '$1 no respeta la custombre $2',
         first_lines_does_not_match_in_file_1: 'las primeras líneas no coinciden en $1',
@@ -120,6 +121,7 @@ qaControl.generateCucardas = function generateCucardas(cucardas, packageJson) {
     /*eslint-disable guard-for-in */
     for(var nombreCucarda in cucardas) {
         var cucarda = cucardas[nombreCucarda];
+        if(cucarda.forbidden) { continue; }
         if(!cucarda.check || cucarda.check(packageJson)) {
             var cucaStr = cucarda.md.replace(/\bxxx\b/g,repo).replace(/\byyy\b/g,modulo);
             cucaFileContent += cucaStr +'\n';
