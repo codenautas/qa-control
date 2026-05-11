@@ -241,7 +241,7 @@ var configReading=(function(){
 });
 
 qaControl.loadProject = function loadProject(projectDir) {
-    var info = {projectDir:projectDir};
+    var info = /** @type {ProjectInfo} */ ({projectDir:projectDir});
     var cmsgs = qaControl.cmdMsgs[qaControl.lang];
     if(qaControl.verbose) { process.stdout.write(cmsgs.msg_starting+projectDir+"'...\n"); }
     return Promise.resolve().then(function(){
@@ -320,8 +320,7 @@ qaControl.controlInfo=function controlInfo(info, opts){
     var cmsgs = qaControl.cmdMsgs[qaControl.lang];
     var rules = qaControl.definition.rules;
     var silenced = ((info.packageJson || {})['qa-control'] || {}).silenced || [];
-    /** @type {Promise<any>} */
-    var cadenaDePromesas = Promise.resolve().then();
+    var cadenaDePromesas = Promise.resolve(/** @type {Warning[]} */ ([]));
     info.scoring = opts && opts.scoring;
     forEach(rules, function(rule, ruleName) {
         rule.checks.forEach(function(checkInfo){
