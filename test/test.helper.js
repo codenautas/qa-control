@@ -8,7 +8,7 @@
 var fs = require('fs-promise');
 var Path = require('path');
 
-var testHelper = {};
+var testHelper = { dirbase: '' };
 
 if(process.env.TRAVIS){
     testHelper.dirbase = process.env.HOME;
@@ -30,7 +30,7 @@ before(function(done){
         return fs.mkdir(testHelper.dirbase);
     }).catch(function(err){
         console.log(err);
-        done(_.isArray(err)?err[0]:err);
+        done(Array.isArray(err)?err[0]:err);
     }).then(function() {
         done();
     });

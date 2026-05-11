@@ -102,7 +102,7 @@ qacInit.ask = function ask(param, msgs, callback) {
     stdin.resume();
     var prompt = param.prompt || param.name.substring(0,1).toUpperCase()+param.name.substring(1);
     stdout.write(prompt+def+ ": ");
-    stdin.once('data', function(data) {
+    stdin.once('data', function(/** @type {any} */ data) {
         data = data.toString().trim();
         if(data === '') { data = param.def; }
         if((param.valid && param.valid(data)) || (! param.valid  && data !== '')) {
@@ -254,7 +254,7 @@ qacInit.configParams = [
         },
         post: function(ctx) {
             var contributors = ctx.input.existingJson.contributors || [];
-            var nae = this.parseNE(ctx.result[this.name]);
+            var nae = /** @type {{name: string, email: string}} */ (this.parseNE(ctx.result[this.name]));
             contributors.push({'name':nae.name, 'email':nae.email});
             return contributors.length ? contributors : null;
         },
@@ -293,8 +293,8 @@ qacInit.init = function init(initParams) {
     var inputParams;
     var tplData = {
         vars: {},
-        tpls: [],
-        other: []
+        tpls: /** @type {string[]} */ ([]),
+        other: /** @type {string[]} */ ([])
     };
     var packageJS;
     return qacInit.initDefaults(initParams).then(function(initResult) {

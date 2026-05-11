@@ -26,6 +26,7 @@ function stripNotices(warnArray) {
     return warnArray;
 };
 
+/** @type {Fixture[]} */
 var fixtures=[{
     base:'stable-project',
     test:'no_package_json',
@@ -617,9 +618,9 @@ describe('qa-control', function(){
                     return qaControl.controlInfo(clonedInfo, {scoring:fixture.scoring});
                 }).then(function(warnings){
                     if(!fixture.expected){
-                        fixture.expected=[{warning:fixture.test}];
+                        fixture.expected=[{warning: /** @type {string} */ (fixture.test)}];
                         if(fixture.expectedParams){
-                            fixture.expected.params=fixture.expectedParams;
+                            /** @type {any} */ (fixture.expected).params=fixture.expectedParams;
                         }
                     }
                     if(! fixture.notices) { stripNotices(warnings); }
@@ -715,12 +716,12 @@ describe('qa-control', function(){
                                 var warn = matches[1];
                                 //console.log(ln+1, ":", warn);
                                 if(false === warn in qaControl.msgs[msg]) {
-                                    console.log("Inexistent warning '"+warn+"' on line "+parseInt(ln+1));
+                                    console.log("Inexistent warning '"+warn+"' on line "+(ln+1));
                                     ++numWarns;
                                 }
                             }
                             if(reIncompleteWarn.test(line)) {
-                                console.log("Incomplete warning on line "+parseInt(ln+1));
+                                console.log("Incomplete warning on line "+(ln+1));
                                 ++numWarns;
                             }
                         }
@@ -843,7 +844,7 @@ function generateWarningsArray(lang) {
         if(numParams) {
             var params = [];
             for(var p=0; p<numParams.length; ++p) {
-                params.push('param'+parseInt(p+1));
+                params.push('param'+(p+1));
             }
             warn['params'] = params;
         }

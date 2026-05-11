@@ -10,7 +10,7 @@ function eslintrcToFlatConfig(rc) {
     if (rc.rules) { flat.rules = rc.rules; }
     var sourceType = (rc.env && rc.env.node) ? 'commonjs' : 'script';
     flat.languageOptions = { ecmaVersion: 'latest', sourceType: sourceType };
-    flat.linterOptions = { reportUnusedDisableDirectives: 'off' };
+    flat.linterOptions = { reportUnusedDisableDirectives: false };
     return flat;
 }
 var multilang = require('multilang');
@@ -18,6 +18,10 @@ var fs = require('fs-promise');
 var Path = require('path');
 var yaml = require('js-yaml');
 
+/**
+ * @param {object} qaControl
+ * @returns {QADefinition}
+ */
 module.exports = function(qaControl){
     return {
         fileNameMainDoc: 'LEEME.md',

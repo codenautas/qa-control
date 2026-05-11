@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "target": "ES2015",
+    "module": "commonjs",
+    "moduleResolution": "node10",
+    "noImplicitAny": false,
+    "skipLibCheck": true,
+    "resolveJsonModule": true
+  },
+  "include": [
+    "declarations.d.ts",
+    "bin/**/*.js",
+    "test/test.js",
+    "test/test.helper.js"
+  ]
+}

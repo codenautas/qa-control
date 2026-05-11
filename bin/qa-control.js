@@ -320,6 +320,7 @@ qaControl.controlInfo=function controlInfo(info, opts){
     var cmsgs = qaControl.cmdMsgs[qaControl.lang];
     var rules = qaControl.definition.rules;
     var silenced = ((info.packageJson || {})['qa-control'] || {}).silenced || [];
+    /** @type {Promise<any>} */
     var cadenaDePromesas = Promise.resolve().then();
     info.scoring = opts && opts.scoring;
     forEach(rules, function(rule, ruleName) {
@@ -366,7 +367,7 @@ qaControl.stringizeWarnings = function stringizeWarnings(warns, lang) {
             if(numParams) {
                 //console.log(warn.warning, msg, " tiene ", numParams.length, " parametros y params tiene ", warn.params)
                  for(var p=0; p<numParams.length; ++p) {
-                    msg = msg.replace('$'+parseInt(p+1,10), warn.params[p]);
+                    msg = msg.replace('$'+(p+1), warn.params[p]);
                 }
             }
             if(qaControl.verbose) {

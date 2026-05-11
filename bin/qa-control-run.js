@@ -9,7 +9,7 @@ var fs = require('fs-promise');
 var path = require('path');
 
 program
-    .version(require('../package').version)
+    .version(require('../package.json').version)
     .argument('[projectDirectory]', 'Project directory to check')
     .usage('[[options] projectDirectory|--list-langs]')
     .option('-l, --lang [lang]', 'Language to generate')
@@ -21,7 +21,7 @@ program
 
 var opts = program.opts();
 
-if( ( !opts.init && !opts.listLangs && (""==program.args && !opts.projectDir))
+if( ( !opts.init && !opts.listLangs && (program.args.length===0 && !opts.projectDir))
     || (opts.lang && false === opts.lang in qaControl.msgs) )
 {
     program.help();
