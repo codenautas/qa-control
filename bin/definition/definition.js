@@ -167,8 +167,7 @@ module.exports = function(qaControl){
                 docDescription: ''
             },
             'outdated-deps':{
-                forbidden:true,
-                md:'[![outdated-deps](https://img.shields.io/david/xxx/yyy.svg)](https://david-dm.org/xxx/yyy)'
+                forbidden:true
             }
         },
         customs:{
@@ -357,8 +356,8 @@ module.exports = function(qaControl){
                          /*jshint forin: false */
                         for(var nombreCucarda in cucardas) {
                             var cucarda = cucardas[nombreCucarda];
-                            var cucaID = '!['+/!\[([-a-z]+)]/.exec(cucarda.md)[1]+']';
-                            var cucaStr = cucarda.md.replace(/\bxxx\b/g,repo).replace(/\byyy\b/g,modulo);
+                            var cucaID = cucarda.forbidden ? '!['+nombreCucarda+']' : '!['+/!\[([-a-z]+)]/.exec(cucarda.md)[1]+']';
+                            var cucaStr = cucarda.md ? cucarda.md.replace(/\bxxx\b/g,repo).replace(/\byyy\b/g,modulo) : '';
                             if(cucarda.forbidden) {
                                 if(readme.indexOf(cucaID) !== -1) {
                                     warns.push({warning:'forbidden_cucarda_1', params:[nombreCucarda], scoring:{cucardas:1}});
