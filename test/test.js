@@ -493,6 +493,23 @@ var fixtures=[{
         { warning:'forbidden_cucarda_1', params:['outdated-deps']}
     ]
 },{
+    base:'stable-project',
+    title:'forbidden cucarda climate',
+    change:function(info){
+        var badge = '[![climate](https://api.codeclimate.com/v1/badges/codenautas/stable-project/maintainability)](https://codeclimate.com/github/codenautas/stable-project)';
+        info.files['LEEME.md'].content = info.files['LEEME.md'].content.replace(
+            '<!-- cucardas -->\n',
+            '<!-- cucardas -->\n'+badge+'\n'
+        );
+        info.files['README.md'].content = info.files['README.md'].content.replace(
+            '[![npm-version]',
+            badge+'\n'+'[![npm-version]'
+        );
+    },
+    expected:[
+        { warning:'forbidden_cucarda_1', params:['climate']}
+    ]
+},{
     base:'stable-project-v0.3.0',
     title:'minimum profile skips linters and lint config files',
     change:function(info){

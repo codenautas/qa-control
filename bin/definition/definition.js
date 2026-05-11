@@ -147,14 +147,6 @@ module.exports = function(qaControl){
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/coverage.png',
                 docDescription: ''
             },
-            climate:{
-                check: function(packageJson){
-                    return packageJson['qa-control'].coverage || ! packageJson['qa-control'].purpose;
-                },
-                md:'[![climate](https://img.shields.io/codeclimate/github/xxx/yyy.svg)](https://codeclimate.com/github/xxx/yyy)',
-                imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/climate.png',
-                docDescription: ''
-            },
             dependencies:{
                 mandatory:true,
                 md:'[![dependencies](https://snyk.io/test/github/xxx/yyy/badge.svg)](https://snyk.io/test/github/xxx/yyy)',
@@ -167,6 +159,9 @@ module.exports = function(qaControl){
                 docDescription: ''
             },
             'outdated-deps':{
+                forbidden:true
+            },
+            'climate':{
                 forbidden:true
             }
         },
