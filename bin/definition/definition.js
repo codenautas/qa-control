@@ -18,6 +18,16 @@ var fs = require('fs-promise');
 var Path = require('path');
 var yaml = require('js-yaml');
 
+/** @param {string} realRegex */
+function softRegExp(realRegex) {
+    var re=realRegex.replace(/\\/g, '\\\\')
+                    .replace(/\s*(=+)\s*/g,'\\s*$1\\s*')
+                    .replace(/ /g, '\\s+')
+                    .replace(/\(/g, '\\(')
+                    .replace(/\)/g, '\\)');
+    return new RegExp(re, 'im');
+}
+
 /**
  * @param {object} qaControl
  * @returns {QADefinition}
@@ -170,14 +180,6 @@ module.exports = function(qaControl){
             }
         },
         customs:{
-            softRegExp:function(realRegex) {
-                var re=realRegex.replace(/\\/g, '\\\\')
-                                .replace(/\s*(=+)\s*/g,'\\s*$1\\s*')
-                                .replace(/ /g, '\\s+')
-                                .replace(/\(/g, '\\(')
-                                .replace(/\)/g, '\\)');
-                return new RegExp(re, 'im');
-            },
             funtion_eid:{
                 detect:'function eid',
                 match:'function eid(id){ return document.getElementById(id); }'
@@ -402,7 +404,7 @@ module.exports = function(qaControl){
                                     if(isMatchFunc) {
                                         return str.indexOf(strOrRegexp) !== -1;
                                     } else {
-                                        return customs.softRegExp(strOrRegexp).test(str);
+                                        return softRegExp(strOrRegexp).test(str);
                                     }
                                 };
                             }

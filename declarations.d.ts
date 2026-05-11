@@ -79,7 +79,7 @@ interface QADefinition {
     sections: Record<string, QASection>;
     files: Record<string, QAFile>;
     cucardas: Record<string, QACucarda>;
-    customs: any;
+    customs: Record<string, {detect:string, match:string}>;
     jshint_options: any;
     eslint_options: any;
     rules: Record<string, QARule>;
