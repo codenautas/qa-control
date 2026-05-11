@@ -268,7 +268,7 @@ qaControl.loadProject = function loadProject(projectDir) {
          /*jshint forin: true */
          /*eslint-enable guard-for-in */
         if(files.indexOf('package.json') !== -1) {
-            info.packageJson = {};
+            info.packageJson = /** @type {PackageJson} */ ({});
         }
         return Promise.all(files.map(function(file){
             var iFile = Path.normalize(projectDir+'/'+file);

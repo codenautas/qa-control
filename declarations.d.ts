@@ -11,10 +11,34 @@ interface FileInfo {
     content?: string;
 }
 
+interface QAControlSection {
+    purpose?: string;
+    'test-appveyor'?: boolean;
+    'run-in'?: string;
+    type?: string;
+    'package-version'?: string;
+    coverage?: number;
+    silenced?: string[];
+    profile?: string;
+}
+
+interface PackageJson {
+    name: string;
+    version: string;
+    main?: string;
+    repository?: string | { url: string };
+    dependencies?: Record<string, string>;
+    devDependencies?: Record<string, string>;
+    files?: string[];
+    'qa-control'?: QAControlSection;
+    jshintConfig?: Record<string, unknown>;
+    eslintConfig?: Record<string, unknown>;
+}
+
 interface ProjectInfo {
     projectDir: string;
     files: Record<string, FileInfo>;
-    packageJson: any;
+    packageJson: PackageJson;
     scoring?: boolean;
 }
 
@@ -32,7 +56,7 @@ interface QARule {
 interface QAFile {
     mandatory?: boolean;
     mandatoryLines?: string[];
-    presentIf?: (packageJson: any) => boolean;
+    presentIf?: (packageJson: PackageJson) => boolean;
 }
 
 interface QASection {
@@ -43,7 +67,7 @@ interface QASection {
 interface QACucarda {
     mandatory?: boolean;
     forbidden?: boolean;
-    check?: (packageJson: any) => boolean;
+    check?: (packageJson: PackageJson) => boolean | number | undefined;
     md?: string;
     imgExample?: string;
     docDescription?: string;
