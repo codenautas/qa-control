@@ -6,9 +6,11 @@
     "target": "ES2015",
     "module": "commonjs",
     "moduleResolution": "node10",
+    "strictNullChecks": false,
     "noImplicitAny": false,
     "skipLibCheck": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "types": ["mocha", "node"]
   },
   "include": [
     "declarations.d.ts",

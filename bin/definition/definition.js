@@ -528,7 +528,7 @@ module.exports = function(qaControl){
                         for(var file in info.files) {
                             if(file.match(/(.js)$/)) {
                                 var content = info.files[file].content;
-                                var data = eslintLinter.verify(content, eslintOpts);
+                                var data = eslintLinter.verify(content || '', eslintOpts);
                                 if(data.length) {
                                     if(qaControl.verbose){
                                         console.log('ESLINT output:');
@@ -582,7 +582,8 @@ module.exports = function(qaControl){
                         for(var file in info.files) {
                             if(file.match(/(.js)$/)) {
                                 var content = info.files[file].content;
-                                var lines = info.files[file].content.split(/\r?\n/);
+                                if(content === undefined) { continue; }
+                                var lines = content.split(/\r?\n/);
                                 var prevLine = null;
                                 for(var l=0; l<lines.length; ++l) {
                                     var line = lines[l];
@@ -674,7 +675,7 @@ module.exports = function(qaControl){
                         var devDependencies = info.packageJson.devDependencies;
                         if(dependencies) {
                             nonRecomended.forEach(function(badDep) {
-                                if(badDep in dependencies || badDep in devDependencies) {
+                                if(badDep in (dependencies||{}) || (devDependencies && badDep in devDependencies)) {
                                     warns.push({warning:'non_recomended_dependency_1_in_package_json', params:[badDep], scoring:{dependencies:1}});
                                 }
                             });
