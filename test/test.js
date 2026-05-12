@@ -456,6 +456,15 @@ var fixtures=[{
         { warning: 'non_recomended_dependency_1_in_package_json', params:['promise-plus']}
     ]
 },{
+    base:'stable-project-v0.3.0',
+    title:'must reject eslint as devDependency (bundled in qa-control)',
+    change:function(info){
+        info.packageJson.devDependencies['eslint'] = "^10.0.0";
+    },
+    expected:[
+        { warning: 'non_recomended_dependency_1_in_package_json', params:['eslint']}
+    ]
+},{
     base:'stable-project',
     title:'forbidden cucarda outdated-deps',
     change:function(info){

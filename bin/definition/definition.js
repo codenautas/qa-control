@@ -635,7 +635,7 @@ module.exports = function(qaControl){
                 checks:[{
                     warnings:function(info) {
                         var warns = [];
-                        var nonRecomended = ['best-promise', 'lodash', 'promise-plus'];
+                        var nonRecomended = ['best-promise', 'eslint', 'lodash', 'promise-plus'];
                         var dependencies = info.packageJson.dependencies;
                         var devDependencies = info.packageJson.devDependencies;
                         if(dependencies) {
