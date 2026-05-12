@@ -48,10 +48,7 @@ qaControl.msgs={
         repository_name_not_found: 'packageJson.repository no tiene el formato /{[-a-zA-Z0-9_.]+}\/[-a-zA-Z0-9_.]+/',
         using_normal_promise_in_file_1: 'se han usado Promise(s) normales en "$1"',
         packagejson_main_file_1_does_not_exists: 'no existe el archivo "main" ($1) declarado en package.json',
-        jshint_warnings_in_file_1: 'el archivo "$1" tiene warnings de JSHint',
         eslint_warnings_in_file_1: 'el archivo "$1" tiene warnings de ESLint',
-        lack_of_jshintconfig_section_in_package_json: 'falta la sección "jshintConfig" en package.json',
-        incorrect_jshintconfig_option_1_in_package_json: 'la opcion "$1" en "jshintConfig" es incorrecta en package.json',
         readme_multilang_not_sincronized_with_file_1: 'README.md no esta sincronizado con "$1" para multilang',
         lack_of_repository_section_in_package_json: 'Falta la sección "repository" en package.json',
         invalid_repository_section_in_package_json: 'La sección "repository" en package.json es inválida',
@@ -60,7 +57,6 @@ qaControl.msgs={
         lack_of_files_section_in_package_json: 'Falta la sección "files" en package.json',
         invalid_files_section_in_package_json: 'La sección "files" en package.json es inválida',
         incorrect_ecmascript_versions_in_package_json: 'Las versiones de ECMAScript utilizadas en package.json son incorrectas',
-        unexpected_jshintconfig_section_in_package_json: 'No se esperaba la sección jshintConfig en package.json',
         non_recomended_dependency_1_in_package_json: 'Dependencia no recomendada "$1" en package.json'
     }
 };

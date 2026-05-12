@@ -19,28 +19,31 @@
     "qa-control": "./bin/qa-control-run.js"
   },
   "main": "./bin/qa-control.js",
+  "overrides": {
+    "diff": ">=8.0.2",
+    "serialize-javascript": ">=7.0.0",
+    "uuid": ">=14.0.0"
+  },
   "dependencies": {
-    "best-globals": "~2.1.3",
-    "commander": "~14.0.3",
-    "eslint": "~10.3.0",
-    "fs-extra": "~11.3.5",
-    "fs-promise": "~2.0.3",
-    "js-yaml": "~4.1.1",
-    "jshint": "~2.13.6",
-    "multilang": "~1.2.0",
-    "parameters": "~0.8.1",
-    "semver": "~7.8.0",
-    "strip-bom-string": "~1.0.0"
+    "best-globals": "^2.1.4",
+    "commander": "^14.0.3",
+    "eslint": "^10.3.0",
+    "fs-extra": "^11.3.5",
+    "fs-promise": "^2.0.3",
+    "js-yaml": "^4.1.1",
+    "multilang": "^1.2.1",
+    "semver": "^7.8.0",
+    "strip-bom-string": "^1.0.0"
   },
   "devDependencies": {
-    "@types/mocha": "~10.0.10",
-    "@types/node": "~22.15.0",
-    "expect-called": "~0.4.0",
-    "expect.js": "~0.3.1",
-    "istanbul": "~0.4.5",
-    "mocha": "~11.7.5",
-    "sinon": "~22.0.0",
-    "typescript": "~5.8.0"
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^25.7.0",
+    "expect-called": "^0.4.0",
+    "expect.js": "^0.3.1",
+    "mocha": "^11.7.5",
+    "nyc": "^18.0.0",
+    "sinon": "^22.0.0",
+    "typescript": "^6.0.3"
   },
   "engines": {
     "node": ">= 10"
@@ -48,10 +51,10 @@
   "scripts": {
     "test": "mocha --reporter spec --bail --check-leaks test/",
     "test-nc": "mocha --reporter spec --bail --check-leaks --no-colors test/",
-    "test-ci": "istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- --reporter spec --check-leaks test/",
-    "test-cov": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter dot --check-leaks test/",
+    "test-ci": "nyc --reporter=lcov mocha --reporter spec --check-leaks test/",
+    "test-cov": "nyc mocha --reporter dot --check-leaks test/",
     "start": "node example/server.js",
-    "report": "istanbul report",
+    "report": "nyc report",
     "qac": "node bin/qa-control-run.js . -v",
     "typecheck": "tsc",
     "all": "npm test && npm run test-cov && npm run report && npm run qac"

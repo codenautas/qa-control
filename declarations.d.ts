@@ -80,7 +80,6 @@ interface QADefinition {
     files: Record<string, QAFile>;
     cucardas: Record<string, QACucarda>;
     customs: Record<string, {detect:string, match:string}>;
-    jshint_options: any;
     eslint_options: any;
     rules: Record<string, QARule>;
     firstLines?: Record<string, Record<string, string>>;

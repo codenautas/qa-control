@@ -278,16 +278,6 @@ var fixtures=[{
     ]
 },{
     base:'stable-project',
-    title:'must warn if JSHINT haves warnings (#26)',
-    test:'jshint_warnings_in_file_1',
-    change:function(info){
-        info.files['stable-project.js'].content=info.files['stable-project.js'].content.replace('};//;','}//');
-    },
-    expected:[
-        { warning:'jshint_warnings_in_file_1',params:['stable-project.js']}
-    ]
-},{
-    base:'stable-project',
     title:'lack of repository section in package json (#28)',
     test:'lack_of_repository_section_in_package_json',
     change:function(info){
@@ -409,13 +399,6 @@ var fixtures=[{
     expected:[]
 },{
     base:'stable-project-v0.3.0',
-    title:'must reject jshintConfig in package.json (#65)',
-    test:'unexpected_jshintconfig_section_in_package_json',
-    change:function(info){
-        info.packageJson['jshintConfig'] = {};
-    }
-},{
-    base:'stable-project-v0.3.0',
     title:'must reject eslintConfig in package.json (#65)',
     test:'unexpected_eslintconfig_section_in_package_json',
     change:function(info){
@@ -425,22 +408,18 @@ var fixtures=[{
     base:'stable-project-v0.3.0',
     title:'must reject all lint sections in package.json (#65)',
     change:function(info){
-        info.packageJson['jshintConfig'] = {};
         info.packageJson['eslintConfig'] = {};
     },
     expected:[
-        { warning: 'unexpected_jshintconfig_section_in_package_json'},
         { warning: 'unexpected_eslintconfig_section_in_package_json'}
     ]
 },{
     base:'stable-project-v0.3.0',
     title:'lack of mandatory lint files (#65)',
     change:function(info){
-        delete info.files['.jshintrc'];
         delete info.files['.eslintrc.yml'];
     },
     expected:[
-        { warning:'lack_of_mandatory_file_1',params:['.jshintrc']},
         { warning:'lack_of_mandatory_file_1',params:['.eslintrc.yml']}
     ]
 },{
@@ -515,7 +494,6 @@ var fixtures=[{
     title:'minimum profile skips linters and lint config files',
     change:function(info){
         info.packageJson['qa-control']['profile'] = 'minimum';
-        delete info.files['.jshintrc'];
         delete info.files['.eslintrc.yml'];
     },
     expected:[]
@@ -579,10 +557,7 @@ describe('qa-control', function(){
                 expect(en['repository_name_not_found']).to.be('packageJson.repository must be in format /{[-a-zA-Z0-9_.]+}\/[-a-zA-Z0-9_.]+/');
                 expect(en['using_normal_promise_in_file_1']).to.be('using normal promise in file $1');
                 expect(en['packagejson_main_file_1_does_not_exists']).to.be('packagejson main file $1 does not exists');
-                expect(en['jshint_warnings_in_file_1']).to.be('jshint warnings in file $1');
                 expect(en['eslint_warnings_in_file_1']).to.be('eslint warnings in file $1');
-                expect(en['lack_of_jshintconfig_section_in_package_json']).to.be('lack of jshintconfig section in package json');
-                expect(en['incorrect_jshintconfig_option_1_in_package_json']).to.be('incorrect jshintconfig option $1 in package json');
                 expect(en['readme_multilang_not_sincronized_with_file_1']).to.be('readme multilang not sincronized with file $1');
                 expect(en['lack_of_repository_section_in_package_json']).to.be('lack of repository section in package json');
                 expect(en['invalid_repository_section_in_package_json']).to.be('invalid repository section in package json');
@@ -879,10 +854,7 @@ describe('qa-control main', function(){
                                       +'packageJson.repository no tiene el formato /{[-a-zA-Z0-9_.]+}/[-a-zA-Z0-9_.]+/\n'
                                       +'se han usado Promise(s) normales en "param1"\n'
                                       +'no existe el archivo "main" (param1) declarado en package.json\n'
-                                      +'el archivo "param1" tiene warnings de JSHint\n'
                                       +'el archivo "param1" tiene warnings de ESLint\n'
-                                      +'falta la sección "jshintConfig" en package.json\n'
-                                      +'la opcion "param1" en "jshintConfig" es incorrecta en package.json\n'
                                       +'README.md no esta sincronizado con "param1" para multilang\n'
                                       +'Falta la sección "repository" en package.json\n'
                                       +'La sección "repository" en package.json es inválida\n'
@@ -891,7 +863,6 @@ describe('qa-control main', function(){
                                       +'Falta la sección "files" en package.json\n'
                                       +'La sección "files" en package.json es inválida\n'
                                       +'Las versiones de ECMAScript utilizadas en package.json son incorrectas\n'
-                                      +'No se esperaba la sección jshintConfig en package.json\n'
                                       +'Dependencia no recomendada "param1" en package.json\n');
                 done();
             }).catch(done);
@@ -920,10 +891,7 @@ describe('qa-control main', function(){
                                        +'first lines does not match in file param1\n'
                                        +'using normal promise in file param1\n'
                                        +'packagejson main file param1 does not exists\n'
-                                       +'jshint warnings in file param1\n'
                                        +'eslint warnings in file param1\n'
-                                       +'lack of jshintconfig section in package json\n'
-                                       +'incorrect jshintconfig option param1 in package json\n'
                                        +'readme multilang not sincronized with file param1\n'
                                        +'lack of repository section in package json\n'
                                        +'invalid repository section in package json\n'
@@ -932,7 +900,6 @@ describe('qa-control main', function(){
                                        +'lack of files section in package json\n'
                                        +'invalid files section in package json\n'
                                        +'incorrect ecmascript versions in package json\n'
-                                       +'unexpected jshintconfig section in package json\n'
                                        +'non recomended dependency param1 in package json\n');
                 done();
             }).catch(done);

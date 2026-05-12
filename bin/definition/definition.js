@@ -2,7 +2,6 @@
 
 var stripBom = require("strip-bom-string");
 var semver = require("semver");
-var jsh = require('jshint');
 var esl = require('eslint');
 var eslintLinter = new esl.Linter();
 function eslintrcToFlatConfig(rc) {
@@ -67,7 +66,6 @@ module.exports = function(qaControl){
                     return !!packageJson['qa-control']["test-appveyor"];
                 }
             },
-            '.jshintrc':{ presentIf: function(pj) { return pj['qa-control'] && pj['qa-control'].profile !== 'minimum'; } },
             '.eslintrc.yml':{ presentIf: function(pj) { return pj['qa-control'] && pj['qa-control'].profile !== 'minimum'; } }
         },
         cucardas:{
@@ -194,7 +192,6 @@ module.exports = function(qaControl){
                 match:"var Path = require('path');"
             }
         },
-        jshint_options: { "asi": false, "curly": true, "forin": true },
         eslint_options: {
             "env": {
               "node": false
@@ -489,35 +486,6 @@ module.exports = function(qaControl){
                     }
                 }]
             },
-            jshint:{
-                eclipsers:['packagejson_main_file_1_does_not_exists', 'first_lines_does_not_match_in_file_1'],
-                mandatory:false,
-                checks:[{
-                    warnings:function(info){
-                        if(info.packageJson['qa-control'] && info.packageJson['qa-control'].profile === 'minimum') { return []; }
-                        var warns = [];
-                        var jshintOpts = JSON.parse(info.files['.jshintrc'].content);
-                        for(var file in info.files) {
-                            if(file.match(/(.js)$/)) {
-                                var content = info.files[file].content;
-                                jsh.JSHINT(content, jshintOpts , false);
-                                var data = jsh.JSHINT.data();
-                                if(data.errors) {
-                                    if(qaControl.verbose){
-                                        console.log('JSHINT output:');
-                                        console.log('jshintOpts',jshintOpts);
-                                        console.log('There are '+data.length+ " JSHINT errors");
-                                        console.log(data.errors);
-                                        //console.log(data);
-                                    }
-                                    warns.push({warning:'jshint_warnings_in_file_1', params:[file], scoring:{jshint:1}});
-                                }
-                            }
-                        }
-                        return warns;
-                    }
-                }]
-            },
             eslint:{
                 eclipsers:['packagejson_main_file_1_does_not_exists', 'first_lines_does_not_match_in_file_1'],
                 checks:[{
@@ -656,9 +624,6 @@ module.exports = function(qaControl){
                 checks:[{
                     warnings:function(info) {
                         var warns = [];
-                        if('jshintConfig' in info.packageJson) {
-                            warns.push({warning:'unexpected_jshintconfig_section_in_package_json', scoring:{conventions:1}});
-                        }
                         if('eslintConfig' in info.packageJson) {
                             warns.push({warning:'unexpected_eslintconfig_section_in_package_json', scoring:{conventions:1}});
                         }
