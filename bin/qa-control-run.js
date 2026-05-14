@@ -17,6 +17,7 @@ program
     .option('-L, --list-langs', 'List available languages')
     .option('-c, --cucardas', 'Always generate cucardas.log')
     .option('-i, --init', 'Initialize project with qa-control specs')
+    .option('--repo-is <owner_or_org/repo>', 'Expected GitHub repository (owner_or_org/repo)')
     .parse(process.argv);
 
 var opts = program.opts();
@@ -33,6 +34,7 @@ params.verbose = opts.verbose;
 params.listLangs = opts.listLangs;
 params.lang = opts.lang;
 params.cucardas = opts.cucardas;
+params.repoIs = opts.repoIs || process.env.GITHUB_REPOSITORY || null;
 // console.log(opts); process.exit(0);
 // console.log(params); process.exit(0);
 

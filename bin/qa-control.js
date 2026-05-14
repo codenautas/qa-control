@@ -52,6 +52,7 @@ qaControl.msgs={
         readme_multilang_not_sincronized_with_file_1: 'README.md no esta sincronizado con "$1" para multilang',
         lack_of_repository_section_in_package_json: 'Falta la sección "repository" en package.json',
         invalid_repository_section_in_package_json: 'La sección "repository" en package.json es inválida',
+        repository_does_not_match_1: 'el repositorio no coincide con el esperado "$1"',
         invalid_dependency_version_number_format_in_dep_1: 'El formato del numero de version es incorrecto en "$1"',
         wrong_use_strict_spelling_in_file_1: '"use strict" está mal escrito en "$1"',
         lack_of_files_section_in_package_json: 'Falta la sección "files" en package.json',
@@ -175,6 +176,7 @@ qaControl.nodeVerInTravisRE = /[678]/;
 
 qaControl.verbose = false;
 qaControl.cucardas_always = false;
+qaControl.repoIs = null;
 qaControl.definition = require("./definition/definition.js")(qaControl);
 
 qaControl.lang = process.env.qa_control_lang || 'en';
@@ -377,6 +379,7 @@ qaControl.stringizeWarnings = function stringizeWarnings(warns, lang) {
 qaControl.controlProject=function controlProject(projectDir, opts){
     qaControl.verbose = opts && opts.verbose;
     qaControl.cucardas_always = opts && opts.cucardas;
+    qaControl.repoIs = (opts && opts.repoIs) || null;
     return Promise.resolve().then(function(){
         return qaControl.loadProject(projectDir);
     }).then(function(info){

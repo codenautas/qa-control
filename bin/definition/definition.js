@@ -339,6 +339,20 @@ module.exports = function(qaControl){
                     }
                 }]
             },
+            github_repository:{
+                eclipsers:['lack_of_repository_section_in_package_json', 'repository_name_not_found', 'invalid_repository_section_in_package_json'],
+                checks:[{
+                    warnings:function(info) {
+                        if(!qaControl.repoIs) { return []; }
+                        var actual = qaControl.getRepositoryUrl(info.packageJson).replace(/\.git$/, '');
+                        var expected = qaControl.repoIs.replace(/\.git$/, '');
+                        if(actual !== expected) {
+                            return [{warning:'repository_does_not_match_1', params:[expected], scoring:{repository:1}}];
+                        }
+                        return [];
+                    }
+                }]
+            },
             cucardas:{
                 eclipsers:['invalid_repository_section_in_package_json', 'lack_of_repository_section_in_package_json'],
                 checks:[{

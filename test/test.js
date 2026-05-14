@@ -570,6 +570,7 @@ describe('qa-control', function(){
                 expect(en['readme_multilang_not_sincronized_with_file_1']).to.be('readme multilang not sincronized with file $1');
                 expect(en['lack_of_repository_section_in_package_json']).to.be('lack of repository section in package json');
                 expect(en['invalid_repository_section_in_package_json']).to.be('invalid repository section in package json');
+                expect(en['repository_does_not_match_1']).to.be('repository does not match $1');
                 expect(en['invalid_dependency_version_number_format_in_dep_1']).to.be('invalid dependency version number format in dep $1');
                 expect(en['wrong_use_strict_spelling_in_file_1']).to.be('wrong use strict spelling in file $1');
                 expect(en['non_recomended_dependency_1_in_package_json']).to.be('non recomended dependency $1 in package json');
@@ -679,6 +680,36 @@ describe('qa-control', function(){
                 return qaControl.controlInfo(info);
             }).then(function(warns){
                 expect(stripScoring(stripNotices(warns))).to.eql([{warning:'packagejson_main_file_1_does_not_exists', params:['bin/nonexistent.js']}]);
+            });
+        });
+    });
+    describe('github_repository rule', function(){
+        var stableInfo;
+        before(function(){
+            return qaControl.loadProject('./test/fixtures/stable-project').then(function(info){
+                stableInfo = info;
+            });
+        });
+        afterEach(function(){
+            qaControl.repoIs = null;
+        });
+        it('skips check when repoIs is not set', function(){
+            return qaControl.controlInfo(cloneProject(stableInfo)).then(function(warns){
+                expect(stripNotices(stripScoring(warns))).to.eql([]);
+            });
+        });
+        it('passes when repoIs matches package.json repository', function(){
+            qaControl.repoIs = 'codenautas/stable-project';
+            return qaControl.controlInfo(cloneProject(stableInfo)).then(function(warns){
+                expect(stripNotices(stripScoring(warns))).to.eql([]);
+            });
+        });
+        it('warns when repoIs does not match package.json repository', function(){
+            qaControl.repoIs = 'codenautas/other-project';
+            return qaControl.controlInfo(cloneProject(stableInfo)).then(function(warns){
+                expect(stripNotices(stripScoring(warns))).to.eql([
+                    {warning:'repository_does_not_match_1', params:['codenautas/other-project']}
+                ]);
             });
         });
     });
@@ -867,6 +898,7 @@ describe('qa-control main', function(){
                                       +'README.md no esta sincronizado con "param1" para multilang\n'
                                       +'Falta la sección "repository" en package.json\n'
                                       +'La sección "repository" en package.json es inválida\n'
+                                      +'el repositorio no coincide con el esperado "param1"\n'
                                       +'El formato del numero de version es incorrecto en "param1"\n'
                                       +'"use strict" está mal escrito en "param1"\n'
                                       +'Falta la sección "files" en package.json\n'
@@ -904,6 +936,7 @@ describe('qa-control main', function(){
                                        +'readme multilang not sincronized with file param1\n'
                                        +'lack of repository section in package json\n'
                                        +'invalid repository section in package json\n'
+                                       +'repository does not match param1\n'
                                        +'invalid dependency version number format in dep param1\n'
                                        +'wrong use strict spelling in file param1\n'
                                        +'lack of files section in package json\n'
