@@ -53,7 +53,7 @@
     "test-nc": "mocha --reporter spec --bail --check-leaks --no-colors test/",
     "test-ci": "nyc --reporter=lcov mocha --reporter spec --check-leaks test/",
     "test-cov": "nyc mocha --reporter dot --check-leaks test/",
-    "start": "node example/server.js",
+    "start": "node ./bin/qa-control-run.js",
     "report": "nyc report",
     "qac": "node bin/qa-control-run.js . -v",
     "typecheck": "tsc",

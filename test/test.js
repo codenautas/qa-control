@@ -457,12 +457,12 @@ var fixtures=[{
     ]
 },{
     base:'stable-project-v0.3.0',
-    title:'must reject eslint as devDependency (bundled in qa-control)',
+    title:'must reject jslint as devDependency (bundled in qa-control)',
     change:function(info){
-        info.packageJson.devDependencies['eslint'] = "^10.0.0";
+        info.packageJson.devDependencies['jslint'] = "^10.0.0";
     },
     expected:[
-        { warning: 'non_recomended_dependency_1_in_package_json', params:['eslint']}
+        { warning: 'non_recomended_dependency_1_in_package_json', params:['jslint']}
     ]
 },{
     base:'stable-project',
@@ -504,6 +504,14 @@ var fixtures=[{
     change:function(info){
         info.packageJson['qa-control']['profile'] = 'minimum';
         delete info.files['.eslintrc.yml'];
+    },
+    expected:[]
+},{
+    base:'stable-project-v0.3.0',
+    title:'multilang:no skips LEEME.md requirement and multilang checks',
+    change:function(info){
+        info.packageJson['qa-control']['multilang'] = 'no';
+        delete info.files['LEEME.md'];
     },
     expected:[]
 }];

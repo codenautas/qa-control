@@ -55,7 +55,7 @@ module.exports = function(qaControl){
         },
         files:{
             'README.md':{ mandatory:true },
-            'LEEME.md':{ mandatory:true },
+            'LEEME.md':{ presentIf: function(pj) { return !(pj['qa-control'] && pj['qa-control'].multilang === 'no'); } },
             '.gitignore':{
                 mandatory:true,
                 mandatoryLines:['local-*','*-local.*']
@@ -315,6 +315,7 @@ module.exports = function(qaControl){
             no_multilang_section_in_1:{
                 checks:[{
                     warnings:function(info){
+                        if(info.packageJson['qa-control'] && info.packageJson['qa-control'].multilang === 'no') { return []; }
                         if(!info.files[qaControl.mainDoc()].content.match(/<!--multilang v[0-9]+\s+(.+)(-->)/)) {
                             return [{
                                 warning:'no_multilang_section_in_1',
@@ -357,6 +358,7 @@ module.exports = function(qaControl){
                 eclipsers:['invalid_repository_section_in_package_json', 'lack_of_repository_section_in_package_json'],
                 checks:[{
                     warnings:function(info){
+                        if(info.packageJson['qa-control'] && info.packageJson['qa-control'].multilang === 'no') { return []; }
                         var warns=[];
                         var readme=info.files[qaControl.mainDoc()].content;
                         if(readme.indexOf(qaControl.cucaMarker) === -1) {
@@ -530,6 +532,7 @@ module.exports = function(qaControl){
             multilang:{
                 checks:[{
                     warnings:function(info) {
+                        if(info.packageJson['qa-control'] && info.packageJson['qa-control'].multilang === 'no') { return []; }
                         var warns = [];
                         var defReadme = qaControl.mainDoc();
                         var content = info.files[defReadme].content;
@@ -649,7 +652,7 @@ module.exports = function(qaControl){
                 checks:[{
                     warnings:function(info) {
                         var warns = [];
-                        var nonRecomended = ['best-promise', 'eslint', 'lodash', 'promise-plus'];
+                        var nonRecomended = ['best-promise', 'jslint', 'lodash', 'promise-plus'];
                         var dependencies = info.packageJson.dependencies;
                         var devDependencies = info.packageJson.devDependencies;
                         if(dependencies) {

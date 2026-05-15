@@ -20,6 +20,7 @@ interface QAControlSection {
     coverage?: number;
     silenced?: string[];
     profile?: string;
+    multilang?: string;
 }
 
 interface PackageJson {
