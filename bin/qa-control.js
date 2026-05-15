@@ -25,6 +25,7 @@ function forEach(obj, func) {
 
 qaControl.msgs={
     en:{
+        lack_of_mandatory_section_1: 'lack of mandatory section "$1" in qa-control section of package.json',
         repository_name_not_found: 'packageJson.repository must be in format /{[-a-zA-Z0-9_.]+}\/[-a-zA-Z0-9_.]+/'
     },
     es:{

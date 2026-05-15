@@ -227,6 +227,49 @@ module.exports = function(qaControl){
                 }],
                 shouldAbort:true
             },
+            repository_in_package_json:{
+                checks:[{
+                    warnings:function(info) {
+                        var warns = [];
+                        if(!('repository' in info.packageJson)) {
+                            warns.push({warning:'lack_of_repository_section_in_package_json', scoring:{mandatories:1}});
+                        } else {
+                            if(! qaControl.getRepositoryUrl(info.packageJson).match(/^([-a-zA-Z0-9_.]+\/[-a-zA-Z0-9_.]+)$/)){
+                                return [{warning:'repository_name_not_found', scoring:{mandatories:1}}];
+                            }
+                        }
+                        return warns;
+                    }
+                }],
+                shouldAbort:true
+            },
+            invalid_repository_in_package_json:{
+                checks:[{
+                    warnings:function(info) {
+                        var warns = [];
+                        var repoParts = qaControl.getRepositoryUrl(info.packageJson).split('/');
+                        var projName = repoParts[repoParts.length-1];
+                        if(projName !== info.packageJson.name) {
+                            return [{warning:'invalid_repository_section_in_package_json', scoring:{repository:1}}];
+                        }
+                        return warns;
+                    }
+                }]
+            },
+            github_repository:{
+                eclipsers:['lack_of_repository_section_in_package_json', 'repository_name_not_found', 'invalid_repository_section_in_package_json'],
+                checks:[{
+                    warnings:function(info) {
+                        if(!qaControl.repoIs) { return []; }
+                        var actual = qaControl.getRepositoryUrl(info.packageJson).replace(/\.git$/, '');
+                        var expected = qaControl.repoIs.replace(/\.git$/, '');
+                        if(actual !== expected) {
+                            return [{warning:'repository_does_not_match_1', params:[expected], scoring:{repository:1}}];
+                        }
+                        return [];
+                    }
+                }]
+            },
             mandatory_files:{
                 checks:[{
                     warnings:function(info) {
@@ -242,22 +285,6 @@ module.exports = function(qaControl){
                                         warns.push({warning:'lack_of_mandatory_file_1', params:[fileName], scoring:{mandatories:1}});
                                     }
                                 }
-                            }
-                        }
-                        return warns;
-                    }
-                }],
-                shouldAbort:true
-            },
-            repository_in_package_json:{
-                checks:[{
-                    warnings:function(info) {
-                        var warns = [];
-                        if(!('repository' in info.packageJson)) {
-                            warns.push({warning:'lack_of_repository_section_in_package_json', scoring:{mandatories:1}});
-                        } else {
-                            if(! qaControl.getRepositoryUrl(info.packageJson).match(/^([-a-zA-Z0-9_.]+\/[-a-zA-Z0-9_.]+)$/)){
-                                return [{warning:'repository_name_not_found', scoring:{mandatories:1}}];
                             }
                         }
                         return warns;
@@ -322,33 +349,6 @@ module.exports = function(qaControl){
                                 params:[qaControl.mainDoc()],
                                 scoring:{multilang:1}
                             }];
-                        }
-                        return [];
-                    }
-                }]
-            },
-            invalid_repository_in_package_json:{
-                checks:[{
-                    warnings:function(info) {
-                        var warns = [];
-                        var repoParts = qaControl.getRepositoryUrl(info.packageJson).split('/');
-                        var projName = repoParts[repoParts.length-1];
-                        if(projName !== info.packageJson.name) {
-                            return [{warning:'invalid_repository_section_in_package_json', scoring:{repository:1}}];
-                        }
-                        return warns;
-                    }
-                }]
-            },
-            github_repository:{
-                eclipsers:['lack_of_repository_section_in_package_json', 'repository_name_not_found', 'invalid_repository_section_in_package_json'],
-                checks:[{
-                    warnings:function(info) {
-                        if(!qaControl.repoIs) { return []; }
-                        var actual = qaControl.getRepositoryUrl(info.packageJson).replace(/\.git$/, '');
-                        var expected = qaControl.repoIs.replace(/\.git$/, '');
-                        if(actual !== expected) {
-                            return [{warning:'repository_does_not_match_1', params:[expected], scoring:{repository:1}}];
                         }
                         return [];
                     }
