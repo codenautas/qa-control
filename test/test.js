@@ -560,7 +560,7 @@ describe('qa-control', function(){
                 expect(en['invalid_value_1_in_parameter_2']).to.be('invalid value $1 in parameter $2');
                 expect(en['lack_of_mandatory_file_1']).to.be('lack of mandatory file $1');
                 //expect(en['lack_of_mandatory_parameter']).to.be('lack of mandatory parameter');
-                expect(en['lack_of_mandatory_section_1']).to.be('lack of mandatory section $1');
+                expect(en['lack_of_mandatory_section_1']).to.be('lack of mandatory section "$1" in qa-control section of package.json');
                 expect(en['no_qa_control_section_in_codenautas_project']).to.be('no qa control section in codenautas project');
                 expect(en['no_multilang_section_in_1']).to.be('no multilang section in $1');
                 expect(en['no_package_json']).to.be('no package json');
@@ -922,11 +922,11 @@ describe('qa-control main', function(){
                 return qaControl.stringizeWarnings(generateWarningsArray('en'), 'en');
             }).then(function(warnStr){
                 //console.log(warnStr);
-                expect(warnStr).to.eql('packageJson.repository must be in format /{[-a-zA-Z0-9_.]+}/[-a-zA-Z0-9_.]+/\n'
+                expect(warnStr).to.eql('lack of mandatory section "param1" in qa-control section of package.json\n'
+                                       +'packageJson.repository must be in format /{[-a-zA-Z0-9_.]+}/[-a-zA-Z0-9_.]+/\n'
                                        +'deprecated version\n'
                                        +'invalid value param1 in parameter param2\n'
                                        +'lack of mandatory file param1\n'
-                                       +'lack of mandatory section param1\n'
                                        +'no qa control section in codenautas project\n'
                                        +'no multilang section in param1\n'
                                        +'no package json\n'

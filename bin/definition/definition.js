@@ -446,6 +446,7 @@ module.exports = function(qaControl){
             first_lines:{
                 checks:[{
                     warnings:function(info) {
+                        if(info.packageJson['qa-control'] && info.packageJson['qa-control'].profile === 'minimum') { return []; }
                         var warns=[];
                         var qaControlSection=info.packageJson['qa-control'];
                         var whichRunIn=qaControlSection['run-in'];
