@@ -26,7 +26,8 @@ function forEach(obj, func) {
 qaControl.msgs={
     en:{
         lack_of_mandatory_section_1: 'lack of mandatory section "$1" in qa-control section of package.json',
-        repository_name_not_found: 'packageJson.repository must be in format /{[-a-zA-Z0-9_.]+}\/[-a-zA-Z0-9_.]+/'
+        repository_name_not_found: 'packageJson.repository must be in format /{[-a-zA-Z0-9_.]+}\/[-a-zA-Z0-9_.]+/',
+        bailing_could_be_more: '--bail(ing)! There could be more issues'
     },
     es:{
         deprecated_version: 'la version es demasiado vieja',
@@ -59,7 +60,8 @@ qaControl.msgs={
         lack_of_files_section_in_package_json: 'Falta la sección "files" en package.json',
         invalid_files_section_in_package_json: 'La sección "files" en package.json es inválida',
         incorrect_ecmascript_versions_in_package_json: 'Las versiones de ECMAScript utilizadas en package.json son incorrectas',
-        non_recomended_dependency_1_in_package_json: 'Dependencia no recomendada "$1" en package.json'
+        non_recomended_dependency_1_in_package_json: 'Dependencia no recomendada "$1" en package.json',
+        bailing_could_be_more: '¡Qué --bail(e)! Podrían haber más problemas, correr de nuevo después de corregir estos'
     }
 };
 
@@ -321,6 +323,7 @@ qaControl.controlInfo=function controlInfo(info, opts){
     var silenced = ((info.packageJson || {})['qa-control'] || {}).silenced || [];
     var cadenaDePromesas = Promise.resolve(/** @type {Warning[]} */ ([]));
     info.scoring = opts && opts.scoring;
+    var bailed = false;
     forEach(rules, function(rule, ruleName) {
         rule.checks.forEach(function(checkInfo){
             cadenaDePromesas = cadenaDePromesas.then(function() {
@@ -336,7 +339,7 @@ qaControl.controlInfo=function controlInfo(info, opts){
                     activeWarnings.forEach(function(warning){
                         existingWarnings[warning.warning]=true;
                     });
-                    if(rule.shouldAbort) { throw new Error("ruleIsAborting"); }
+                    if(rule.couldBail && opts && opts.bail) { bailed = true; throw new Error("ruleIsAborting"); }
                 }
                 return resultWarnings;
             });
@@ -347,6 +350,7 @@ qaControl.controlInfo=function controlInfo(info, opts){
             throw err;
         }
     }).then(function(){
+        if(bailed) { resultWarnings.push({warning:'bailing_could_be_more'}); }
         return resultWarnings;
     });
     return cadenaDePromesas;

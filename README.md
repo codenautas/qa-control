@@ -9,7 +9,8 @@ Quality assurance tool for node/npm projects
 [![build](https://github.com/codenautas/qa-control/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/codenautas/qa-control/actions/workflows/build-and-test.yml)
 [![coverage](https://img.shields.io/coveralls/codenautas/qa-control/master.svg)](https://coveralls.io/r/codenautas/qa-control)
 [![dependencies](https://snyk.io/test/github/codenautas/qa-control/badge.svg)](https://snyk.io/test/github/codenautas/qa-control)
-[![qa-control](https://github.com/codenautas/qa-control/actions/workflows/qa-control.yml/badge.svg)](https://github.com/codenautas/qa-control/actions/workflows/qa-control.yml)
+[![qa-control](https://github.com/codenautas/qa-control/actions/workflows/qa-control.yml/badge.svg)]
+(https://github.com/codenautas/qa-control/actions/workflows/qa-control.yml)
 
 
 

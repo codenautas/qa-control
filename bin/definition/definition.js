@@ -212,7 +212,7 @@ module.exports = function(qaControl){
                         return [];
                     }
                 }],
-                shouldAbort:true
+                couldBail:true
             },
             qa_control_section_in_package_json:{
                 checks:[{
@@ -225,7 +225,7 @@ module.exports = function(qaControl){
                         return [];
                     }
                 }],
-                shouldAbort:true
+                couldBail:true
             },
             repository_in_package_json:{
                 checks:[{
@@ -241,7 +241,7 @@ module.exports = function(qaControl){
                         return warns;
                     }
                 }],
-                shouldAbort:true
+                couldBail:true
             },
             invalid_repository_in_package_json:{
                 checks:[{
@@ -290,7 +290,7 @@ module.exports = function(qaControl){
                         return warns;
                     }
                 }],
-                shouldAbort:true
+                couldBail:true
             },
             valid_values_for_qa_control_keys:{
                 checks:[{
@@ -314,7 +314,7 @@ module.exports = function(qaControl){
                         return warns;
                     }
                 }],
-                shouldAbort:true
+                couldBail:true
             },
             mandatory_lines:{
                 checks:[{

@@ -49,7 +49,7 @@ interface QACheck {
 
 interface QARule {
     checks: QACheck[];
-    shouldAbort?: boolean;
+    couldBail?: boolean;
     eclipsers?: string[];
     mandatory?: boolean;
 }
