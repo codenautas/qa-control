@@ -61,6 +61,8 @@ qaControl.msgs={
         invalid_files_section_in_package_json: 'La sección "files" en package.json es inválida',
         incorrect_ecmascript_versions_in_package_json: 'Las versiones de ECMAScript utilizadas en package.json son incorrectas',
         non_recomended_dependency_1_in_package_json: 'Dependencia no recomendada "$1" en package.json',
+        lack_of_workflow_file_1: 'falta el archivo de workflow "$1"',
+        workflow_file_1_differs: 'el archivo de workflow "$1" difiere del template de qa-control',
         bailing_could_be_more: '¡Qué --bail(e)! Podrían haber más problemas, correr de nuevo después de corregir estos'
     }
 };

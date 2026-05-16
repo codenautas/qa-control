@@ -678,6 +678,36 @@ module.exports = function(qaControl){
                         return warns;
                     }
                 }]
+            },
+            workflows:{
+                checks:[{
+                    warnings:function(info) {
+                        var qaWorkflowsDir = Path.join(__dirname, '../../.github/workflows');
+                        var projWorkflowsDir = Path.join(info.projectDir, '.github/workflows');
+                        return fs.readdir(qaWorkflowsDir).then(function(qaFiles) {
+                            return Promise.all(qaFiles.map(function(fileName) {
+                                return fs.readFile(Path.join(qaWorkflowsDir, fileName), 'utf8').then(function(qaContent) {
+                                    return fs.readFile(Path.join(projWorkflowsDir, fileName), 'utf8').then(function(projContent) {
+                                        if(qaContent !== projContent) {
+                                            return [{warning:'workflow_file_1_differs', params:[fileName], scoring:{workflows:1}}];
+                                        }
+                                        return [];
+                                    }).catch(function(err) {
+                                        if(err.code === 'ENOENT') {
+                                            return [{warning:'lack_of_workflow_file_1', params:[fileName], scoring:{workflows:1}}];
+                                        }
+                                        throw err;
+                                    });
+                                });
+                            }));
+                        }).then(function(results) {
+                            return results.reduce(function(acc, arr) { return acc.concat(arr); }, []);
+                        }).catch(function(err) {
+                            if(err.code === 'ENOENT') { return []; }
+                            throw err;
+                        });
+                    }
+                }]
             }
         }
     };

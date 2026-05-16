@@ -2,7 +2,7 @@
 
 var expect = require('expect.js');
 var qaControl = require('..');
-var fs = require('fs-promise');
+var fs = require('fs-extra');
 var Path = require('path');
 var yaml = require('js-yaml');
 
@@ -28,6 +28,17 @@ function stripNotices(warnArray) {
 
 const WARNING_CANT_CONTINUE = {warning:'cant_continue'};
 const WARNING_BAILING_CONTINUE = {warning:'bailing_could_be_more'};
+
+async function startTests(){
+    var root = './test/fixtures'
+    var dirs = await fs.readdir(root);
+    var workflowPath = '.github/workflows/'
+    for (var dir of dirs) {
+        await fs.copy(workflowPath, root+'/'+dir+'/'+workflowPath);
+    };
+}
+
+startTests()
 
 /** @type {Fixture[]} */
 var fixtures=[{
@@ -942,6 +953,8 @@ describe('qa-control main', function(){
                                       +'La sección "files" en package.json es inválida\n'
                                       +'Las versiones de ECMAScript utilizadas en package.json son incorrectas\n'
                                       +'Dependencia no recomendada "param1" en package.json\n'
+                                      +'falta el archivo de workflow "param1"\n'
+                                      +'el archivo de workflow "param1" difiere del template de qa-control\n'
                                       +'¡Qué --bail(e)! Podrían haber más problemas, correr de nuevo después de corregir estos\n');
                 done();
             }).catch(done);
@@ -981,7 +994,9 @@ describe('qa-control main', function(){
                                        +'lack of files section in package json\n'
                                        +'invalid files section in package json\n'
                                        +'incorrect ecmascript versions in package json\n'
-                                       +'non recomended dependency param1 in package json\n');
+                                       +'non recomended dependency param1 in package json\n'
+                                       +'lack of workflow file param1\n'
+                                       +'workflow file param1 differs\n');
                 done();
             }).catch(done);
         });
