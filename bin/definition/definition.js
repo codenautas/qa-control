@@ -160,10 +160,10 @@ module.exports = function(qaControl){
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/coverage.png',
                 docDescription: ''
             },
-            dependencies:{
+            security:{
                 mandatory:true,
-                md:'[![dependencies](https://snyk.io/test/github/xxx/yyy/badge.svg)](https://snyk.io/test/github/xxx/yyy)',
-                imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/medalla-ejemplo-dependencies.png',
+                md:'[![security](https://socket.dev/api/badge/npm/package/yyy)](https://socket.dev/npm/package/yyy)',
+                imgExample:'https://socket.dev/api/badge/npm/package/my-package',
                 docDescription: ''
             },
             'qa-control':{

@@ -12,7 +12,7 @@ the description
 [![linux](https://github.com/codenautas/stable-project/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/codenautas/stable-project/actions/workflows/build-and-test.yml)
 [![windows](https://ci.appveyor.com/api/projects/status/github/codenautas/stable-project?svg=true)](https://ci.appveyor.com/project/codenautas/stable-project)
 [![coverage](https://img.shields.io/coveralls/codenautas/stable-project/master.svg)](https://coveralls.io/r/codenautas/stable-project)
-[![dependencies](https://snyk.io/test/github/codenautas/stable-project/badge.svg)](https://snyk.io/test/github/codenautas/stable-project)
+[![security](https://socket.dev/api/badge/npm/package/stable-project)](https://socket.dev/npm/package/stable-project)
 [![qa-control](https://github.com/codenautas/stable-project/actions/workflows/qa-control.yml/badge.svg)](https://github.com/codenautas/stable-project/actions/workflows/qa-control.yml)
 
 <!--multilang buttons-->

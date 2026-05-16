@@ -158,12 +158,12 @@ var fixtures=[{
         var readme=info.files['LEEME.md'].content;
         info.files['LEEME.md'].content = readme.replace('![npm-version]','')
                                                 .replace('![downloads]','')
-                                                .replace('![dependencies]','');
+                                                .replace('![security]','');
     },
     expected:[
         { warning:'lack_of_mandatory_cucarda_1',params:['npm-version']},
         { warning:'lack_of_mandatory_cucarda_1',params:['downloads']},
-        { warning:'lack_of_mandatory_cucarda_1',params:['dependencies']},
+        { warning:'lack_of_mandatory_cucarda_1',params:['security']},
         { warning:'readme_multilang_not_sincronized_with_file_1', params:['README.md']}
     ]
 },{
@@ -189,14 +189,14 @@ var fixtures=[{
         var readme=info.files['LEEME.md'].content;
         info.files['LEEME.md'].content = readme.replace('![npm-version](https://img.shields.io/npm','![npm-version](https://HHHimg.shields.io/npm')
                                                 .replace('[![downloads](https://img.shields.io/npm/','[![downloads](https://im__shields.io/npm/')
-                                                .replace('[![dependencies](https://snyk.io','[![dependencies](https://EEsnyk.io');
+                                                .replace('[![security](https://socket.dev','[![security](https://EEsocket.dev');
         delete info.packageJson['qa-control']["coverage"];
     },
     expected:[
         { warning:'wrong_format_in_cucarda_1',params:['npm-version']},
         { warning:'wrong_format_in_cucarda_1',params:['downloads']},
         { warning:'wrong_format_in_cucarda_1',params:['coverage']},
-        { warning:'wrong_format_in_cucarda_1',params:['dependencies']},
+        { warning:'wrong_format_in_cucarda_1',params:['security']},
         { warning:'readme_multilang_not_sincronized_with_file_1', params:['README.md']}
     ]
 },{

@@ -3,6 +3,6 @@
     "warning": "wrong_format_in_cucarda_1", "params": ["linux"]
   },
   {
-    "warning": "wrong_format_in_cucarda_1", "params": ["dependencies"]
+    "warning": "lack_of_mandatory_cucarda_1", "params": ["security"]
   }
 ]
