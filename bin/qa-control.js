@@ -105,7 +105,7 @@ qaControl.startsWith = function startsWith(bufTest, bufStart) {
 };
 
 qaControl.getRepositoryUrl = function getRepositoryUrl(packageJson) {
-    var repo = packageJson.repository.url ? packageJson.repository.url : packageJson.repository;
+    var repo = packageJson.repository?.url ?? packageJson.repository ?? "";
     var ghRepo = /(https:\/\/github\.com\/)/.exec(repo);
     if(ghRepo) { repo = repo.replace(ghRepo[1], ''); }
     return repo;
@@ -315,6 +315,12 @@ qaControl.loadProject = function loadProject(projectDir) {
     });
 };
 
+/**
+ * 
+ * @param {ProjectInfo} info 
+ * @param {QAOptions} opts
+ * @returns 
+ */
 qaControl.controlInfo=function controlInfo(info, opts){
     var resultWarnings=[];
     var existingWarnings={};
@@ -324,6 +330,7 @@ qaControl.controlInfo=function controlInfo(info, opts){
     var cadenaDePromesas = Promise.resolve(/** @type {Warning[]} */ ([]));
     info.scoring = opts && opts.scoring;
     var bailed = false;
+    info.warningCount = 0;
     forEach(rules, function(rule, ruleName) {
         rule.checks.forEach(function(checkInfo){
             cadenaDePromesas = cadenaDePromesas.then(function() {
@@ -339,8 +346,15 @@ qaControl.controlInfo=function controlInfo(info, opts){
                     activeWarnings.forEach(function(warning){
                         existingWarnings[warning.warning]=true;
                     });
-                    if(rule.couldBail && opts && opts.bail) { bailed = true; throw new Error("ruleIsAborting"); }
+                    if(rule.couldBail && opts && opts.bail) { 
+                        bailed = true; 
+                        throw new Error("ruleIsAborting"); 
+                    }
+                    if(rule.mustAbort) { 
+                        throw new Error("ruleIsAborting"); 
+                    }
                 }
+                info.warningCount += warningsOfThisRule.length;
                 return resultWarnings;
             });
         });

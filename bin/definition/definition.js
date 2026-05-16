@@ -17,6 +17,15 @@ var fs = require('fs-promise');
 var Path = require('path');
 var yaml = require('js-yaml');
 
+/**
+ * 
+ * @param {PackageJson} packageJson 
+ * @returns boolean
+ */
+function testAppVeyor(packageJson){
+    return !!packageJson?.['qa-control']?.["test-appveyor"];
+}
+
 /** @param {string} realRegex */
 function softRegExp(realRegex) {
     var re=realRegex.replace(/\\/g, '\\\\')
@@ -62,23 +71,21 @@ module.exports = function(qaControl){
             },
             'LICENSE':{ mandatory:true },
             'appveyor.yml':{
-                presentIf:function(packageJson){
-                    return !!packageJson['qa-control']["test-appveyor"];
-                }
+                presentIf: testAppVeyor
             },
             '.eslintrc.yml':{ presentIf: function(pj) { return pj['qa-control'] && pj['qa-control'].profile !== 'minimum'; } }
         },
         cucardas:{
             'proof-of-concept':{
                 check: function(packageJson){
-                    return packageJson['qa-control'].purpose==='proof-of-concept';
+                    return packageJson?.['qa-control']?.purpose==='proof-of-concept';
                 },
                 md:'![proof-of-concept](https://img.shields.io/badge/stability-proof_of_concept-ff70c0.svg)',
                 imgExample:'https://img.shields.io/badge/stability-designing-red.svg'
             },
             designing:{
                 check: function(packageJson){
-                    return semver.satisfies(packageJson.version,'0.0.x') && !packageJson['qa-control'].purpose;
+                    return semver.satisfies(packageJson.version,'0.0.x') && !packageJson?.['qa-control']?.purpose;
                 },
                 md:'![designing](https://img.shields.io/badge/stability-designing-red.svg)',
                 imgExample:'https://img.shields.io/badge/stability-designing-red.svg',
@@ -88,7 +95,7 @@ module.exports = function(qaControl){
                 check: function(packageJson){
                     return semver.satisfies(packageJson.version,'0.x.x') &&
                             !semver.satisfies(packageJson.version,'0.0.x') &&
-                            !packageJson['qa-control'].purpose;
+                            !packageJson?.['qa-control'].purpose;
                 },
                 md:'![extending](https://img.shields.io/badge/stability-extending-orange.svg)',
                 imgExample:'https://img.shields.io/badge/stability-extending-orange.svg',
@@ -96,21 +103,21 @@ module.exports = function(qaControl){
             },
             training:{
                 check: function(packageJson){
-                    return packageJson['qa-control'].purpose==='training';
+                    return packageJson?.['qa-control']?.purpose==='training';
                 },
                 md:'![training](https://img.shields.io/badge/stability-training-ffa0c0.svg)',
                 imgExample:'https://img.shields.io/badge/stability-training-ffa0c0.svg'
             },
             example:{
                 check: function(packageJson){
-                    return packageJson['qa-control'].purpose==='example';
+                    return packageJson?.['qa-control']?.purpose==='example';
                 },
                 md:'![example](https://img.shields.io/badge/stability-example-a0a0f0.svg)',
                 imgExample:'https://img.shields.io/badge/stability-example-a0a0f0.svg'
             },
             stable:{
                 check: function(packageJson){
-                    return semver.satisfies(packageJson.version,'>=1.0.0') && !packageJson['qa-control'].purpose;
+                    return semver.satisfies(packageJson.version,'>=1.0.0') && !packageJson?.['qa-control']?.purpose;
                 },
                 md:'![stable](https://img.shields.io/badge/stability-stable-blue.svg)',
                 imgExample:'https://img.shields.io/badge/stability-stable-blue.svg'
@@ -128,32 +135,26 @@ module.exports = function(qaControl){
                 docDescription: ''
             },
             build:{
-                check: function(packageJson){
-                    return !packageJson['qa-control']['test-appveyor'];
-                },
+                check: (...args) => !testAppVeyor(...args),
                 md:'[![build](https://github.com/xxx/yyy/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/xxx/yyy/actions/workflows/build-and-test.yml)',
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/medalla-ejemplo-linux.png',
                 docDescription: 'linux/build'
             },
             linux:{
-                check: function(packageJson){
-                    return !!packageJson['qa-control']['test-appveyor'];
-                },
+                check: testAppVeyor,
                 md:'[![linux](https://github.com/xxx/yyy/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/xxx/yyy/actions/workflows/build-and-test.yml)',
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/medalla-ejemplo-linux.png',
                 hideInManual: true,
             },
             windows:{
-                check: function(packageJson){
-                    return !!packageJson['qa-control']['test-appveyor'];
-                },
+                check: testAppVeyor,
                 md:'[![windows](https://ci.appveyor.com/api/projects/status/github/xxx/yyy?svg=true)](https://ci.appveyor.com/project/xxx/yyy)',
                 imgExample:'https://ci.appveyor.com/api/projects/status/github/codenautas/pg-promise-strict?svg=true',
                 docDescription: 'casos especiales'
             },
             coverage:{
                 check: function(packageJson){
-                    return packageJson['qa-control'].coverage;
+                    return packageJson?.['qa-control']?.coverage;
                 },
                 md:'[![coverage](https://img.shields.io/coveralls/xxx/yyy/master.svg)](https://coveralls.io/r/xxx/yyy)',
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/coverage.png',
@@ -206,7 +207,7 @@ module.exports = function(qaControl){
             exist_package_json:{
                 checks:[{
                     warnings:function(info){
-                        if(!info.files['package.json']){
+                        if(!info.files?.['package.json']){
                             return [{warning:'no_package_json', scoring:{fatal:1}}];
                         }
                         return [];
@@ -217,15 +218,15 @@ module.exports = function(qaControl){
             qa_control_section_in_package_json:{
                 checks:[{
                     warnings:function(info){
-                        if(!info.packageJson['qa-control']){
-                            return [{warning:info.files['package.json'].content.match(/codenautas/)?
+                        if(!info.packageJson?.['qa-control']){
+                            return [{warning:info.files?.['package.json']?.content?.match(/codenautas/)?
                                         'no_qa_control_section_in_codenautas_project':
                                         'no_qa_control_section_in_package_json', scoring:{fatal:1}}];
                         }
                         return [];
                     }
                 }],
-                couldBail:true
+                mustAbort:true
             },
             repository_in_package_json:{
                 checks:[{
@@ -296,7 +297,7 @@ module.exports = function(qaControl){
                 checks:[{
                     warnings:function(info){
                         var warns=[];
-                        var qaControlSection=info.packageJson['qa-control'];
+                        var qaControlSection=info.packageJson?.['qa-control'] ?? {};
                         var sections=qaControl.definition.sections;
                          /*jshint forin: false */
                         for(var sectionName in sections){
@@ -315,6 +316,17 @@ module.exports = function(qaControl){
                     }
                 }],
                 couldBail:true
+            },
+            cant_continue:{
+                checks:[{
+                    warnings: function(info){
+                        if (info.warningCount) {
+                            return [{warning:'cant_continue', scoring:{fatal:1}}];
+                        }
+                        return []
+                    }
+                }],
+                mustAbort:true
             },
             mandatory_lines:{
                 checks:[{
@@ -448,7 +460,7 @@ module.exports = function(qaControl){
                     warnings:function(info) {
                         if(info.packageJson['qa-control'] && info.packageJson['qa-control'].profile === 'minimum') { return []; }
                         var warns=[];
-                        var qaControlSection=info.packageJson['qa-control'];
+                        var qaControlSection=info.packageJson['qa-control'] ?? {};
                         var whichRunIn=qaControlSection['run-in'];
                         var whichType=qaControlSection.type;
                         var firstLines=qaControl.definition.firstLines[whichRunIn][whichType];

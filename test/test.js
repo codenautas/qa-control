@@ -26,22 +26,26 @@ function stripNotices(warnArray) {
     return warnArray;
 };
 
+const WARNING_CANT_CONTINUE = {warning:'cant_continue'};
+const WARNING_BAILING_CONTINUE = {warning:'bailing_could_be_more'};
+
 /** @type {Fixture[]} */
 var fixtures=[{
     base:'stable-project',
     test:'no_package_json',
-    scoring: true,
+    options: {scoring: true},
     change:function(info){
         delete info.files['package.json'];
     },
     expected:[
         { warning:'no_package_json',scoring:{fatal:1}},
+        { warning:'cant_continue',scoring:{fatal:1}},
     ]
 },{
     base:'stable-project',
     title:'no qa-control section in package.json (#2)',
     test:'no_qa_control_section_in_package_json',
-    scoring: true,
+    options:{scoring: true},
     change:function(info){
         delete info.packageJson['qa-control'];
         info.files['package.json'].content = "otro contenido";        
@@ -50,13 +54,15 @@ var fixtures=[{
 },{
     base:'stable-project',
     test:'lack_of_mandatory_section_1',
+    options:{bail:true},
     change:function(info){
         delete info.packageJson['qa-control']['run-in'];
         delete info.packageJson['qa-control']['type'];
     },
     expected:[
         { warning:'lack_of_mandatory_section_1',params:['run-in']},
-        { warning:'lack_of_mandatory_section_1',params:['type']}
+        { warning:'lack_of_mandatory_section_1',params:['type']},
+        WARNING_BAILING_CONTINUE
     ]
 },{
     base:'stable-project',
@@ -73,12 +79,13 @@ var fixtures=[{
     expected:[
         { warning:'lack_of_mandatory_file_1',params:['LEEME.md']},
         { warning:'lack_of_mandatory_file_1',params:['.gitignore']},
-        { warning:'lack_of_mandatory_file_1',params:['LICENSE']}
+        { warning:'lack_of_mandatory_file_1',params:['LICENSE']},
+        WARNING_CANT_CONTINUE
     ]
 },{
     base:'stable-project',
-    title:'lack of mandatory files (#6)',
-    test:'lack_of_mandatory_file_1',
+    title:'lack of mandatory files v2',
+    test:'lack_of_mandatory_file_v2_1',
     change:function(info){
         //delete info.files['README.md']; // si saco este salta no_multilang_section_in_1
         delete info.files['LEEME.md'];
@@ -88,7 +95,8 @@ var fixtures=[{
     expected:[
         { warning:'lack_of_mandatory_file_1',params:['LEEME.md']},
         { warning:'lack_of_mandatory_file_1',params:['.gitignore']},
-        { warning:'lack_of_mandatory_file_1',params:['LICENSE']}
+        { warning:'lack_of_mandatory_file_1',params:['LICENSE']},
+        WARNING_CANT_CONTINUE
     ]
 },{
     base:'stable-project',
@@ -96,10 +104,13 @@ var fixtures=[{
     change:function(info){
         info.packageJson['qa-control']['run-in']='invalid-run-in-for-test';
     },
-    expected:[{
-        warning:'invalid_value_1_in_parameter_2',
-        params:['invalid-run-in-for-test','run-in']
-    }]
+    expected:[
+        {
+            warning:'invalid_value_1_in_parameter_2',
+            params:['invalid-run-in-for-test','run-in']
+        },
+        WARNING_CANT_CONTINUE
+    ]
 },{
     base:'stable-project',
     title:'no "multilang" section in main doc LEEME.md (#7)',
@@ -122,7 +133,7 @@ var fixtures=[{
     base:'stable-project',
     title:'no "qa-control" section in "codenautas" project (#21)',
     test:'no_qa_control_section_in_codenautas_project',
-    scoring: true,
+    options: {scoring: true},
     change:function(info){
         delete info.packageJson['qa-control'];
     },
@@ -237,7 +248,12 @@ var fixtures=[{
     test:'repository_name_not_found',
     change:function(info){
         info.packageJson.repository = "sourcenauta/other/the-project";
-    }
+    },
+    expected:[
+        { warning:'repository_name_not_found'},
+        { warning: "invalid_repository_section_in_package_json"},
+        WARNING_CANT_CONTINUE
+    ]
 },{
     base:'stable-project',
     title:'must warn the use of non best-promise\'s Promises (#13)',
@@ -282,16 +298,22 @@ var fixtures=[{
     test:'lack_of_repository_section_in_package_json',
     change:function(info){
         delete info['packageJson']['repository'];
-    }
+    },
+    expected:[ 
+        { warning: 'lack_of_repository_section_in_package_json' },
+        { warning: 'invalid_repository_section_in_package_json' },
+        WARNING_CANT_CONTINUE]
 },{
     base:'stable-project',
-    title:'invalid repository section in package json (#28)',
-    test:'invalid_repository_section_in_package_json',
+    title:'invalid repository section in package json (repo changed)',
+    test:'invalid_repository_section_in_package_json_repo_changed',
+    options: {bail:true},
     change:function(info){
         info['packageJson']['repository'] = info['packageJson']['repository'].replace('stable-project', 'another-proyect');
     },
     expected:[
-        { warning:'invalid_repository_section_in_package_json' }
+        { warning:'invalid_repository_section_in_package_json' },
+        WARNING_CANT_CONTINUE
     ]
 },{
     base:'stable-project',
@@ -312,7 +334,8 @@ var fixtures=[{
         delete info.files['appveyor.yml'];
     },
     expected:[
-        { warning:'lack_of_mandatory_file_1',params:['appveyor.yml']}
+        { warning:'lack_of_mandatory_file_1',params:['appveyor.yml']},
+        WARNING_CANT_CONTINUE
     ]
 },{
     base:'stable-project',
@@ -420,7 +443,8 @@ var fixtures=[{
         delete info.files['.eslintrc.yml'];
     },
     expected:[
-        { warning:'lack_of_mandatory_file_1',params:['.eslintrc.yml']}
+        { warning:'lack_of_mandatory_file_1',params:['.eslintrc.yml']},
+        WARNING_CANT_CONTINUE
     ]
 },{
     base:'stable-project-v0.3.0',
@@ -608,7 +632,8 @@ describe('qa-control', function(){
                 }).then(function(clonedInfo){
                     fixture.change(clonedInfo);
                     // qaControl.verbose = true;
-                    return qaControl.controlInfo(clonedInfo, {scoring:fixture.scoring});
+                    var options = fixture.options ?? {}
+                    return qaControl.controlInfo(clonedInfo, options);
                 }).then(function(warnings){
                     if(!fixture.expected){
                         fixture.expected=[{warning: /** @type {string} */ (fixture.test)}];
@@ -617,7 +642,7 @@ describe('qa-control', function(){
                         }
                     }
                     if(! fixture.notices) { stripNotices(warnings); }
-                    if(! fixture.scoring) { stripScoring(warnings); }
+                    if(! fixture.options?.scoring) { stripScoring(warnings); }
                     //qaControl.stringizeWarnings(warnings, 'es').then(function(warns) { console.log(warns); });
                     expect(warnings).to.eql(fixture.expected);
                 }).then(function() {
@@ -670,7 +695,10 @@ describe('qa-control', function(){
         });
         it('generate warnings but not exception when no exists package.json', function(){
             return qaControl.controlProject('./test/fixtures/without-package-json').then(function(warnings){
-                expect(stripScoring(warnings)).to.eql([{warning:'no_package_json'}]);
+                expect(stripScoring(warnings)).to.eql([
+                    {warning:'no_package_json'},
+                    {warning:'no_qa_control_section_in_package_json'}
+                ]);
             });
         });
        it('packageJson.main must default to index.js', function(){
@@ -716,7 +744,8 @@ describe('qa-control', function(){
             qaControl.repoIs = 'codenautas/other-project';
             return qaControl.controlInfo(cloneProject(stableInfo)).then(function(warns){
                 expect(stripNotices(stripScoring(warns))).to.eql([
-                    {warning:'repository_does_not_match_1', params:['codenautas/other-project']}
+                    {warning:'repository_does_not_match_1', params:['codenautas/other-project']},
+                    WARNING_CANT_CONTINUE
                 ]);
             });
         });
@@ -912,7 +941,8 @@ describe('qa-control main', function(){
                                       +'Falta la sección "files" en package.json\n'
                                       +'La sección "files" en package.json es inválida\n'
                                       +'Las versiones de ECMAScript utilizadas en package.json son incorrectas\n'
-                                      +'Dependencia no recomendada "param1" en package.json\n');
+                                      +'Dependencia no recomendada "param1" en package.json\n'
+                                      +'¡Qué --bail(e)! Podrían haber más problemas, correr de nuevo después de corregir estos\n');
                 done();
             }).catch(done);
         });
@@ -924,6 +954,7 @@ describe('qa-control main', function(){
                 //console.log(warnStr);
                 expect(warnStr).to.eql('lack of mandatory section "param1" in qa-control section of package.json\n'
                                        +'packageJson.repository must be in format /{[-a-zA-Z0-9_.]+}/[-a-zA-Z0-9_.]+/\n'
+                                       +'--bail(ing)! There could be more issues\n' // TODO: esto debería estar abajo
                                        +'deprecated version\n'
                                        +'invalid value param1 in parameter param2\n'
                                        +'lack of mandatory file param1\n'

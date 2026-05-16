@@ -41,6 +41,13 @@ interface ProjectInfo {
     files: Record<string, FileInfo>;
     packageJson: PackageJson;
     scoring?: boolean;
+    couldBail?: boolean;
+    warningCount?: number;
+}
+
+interface QAOptions{
+    scoring?: boolean
+    bail?: boolean
 }
 
 interface QACheck {
@@ -52,6 +59,7 @@ interface QARule {
     couldBail?: boolean;
     eclipsers?: string[];
     mandatory?: boolean;
+    mustAbort?: true;
 }
 
 interface QAFile {
@@ -90,7 +98,7 @@ interface Fixture {
     base: string;
     test?: string;
     title?: string;
-    scoring?: boolean;
+    options?:{scoring?:boolean, bail?:boolean};
     skipped?: boolean;
     notices?: boolean;
     expectedParams?: string[];
