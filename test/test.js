@@ -34,7 +34,17 @@ async function startTests(){
     var dirs = await fs.readdir(root);
     var workflowPath = '.github/workflows/'
     for (var dir of dirs) {
-        await fs.copy(workflowPath, root+'/'+dir+'/'+workflowPath);
+        var target = root+'/'+dir+'/'+workflowPath
+        try {
+            await fs.stat(target);
+        } catch (err) {
+            /** @type {any} */
+            var error = err;
+            if (error.code === 'ENOENT') {
+                await fs.copy(workflowPath, target);
+            }
+            throw err;
+        }
     };
 }
 
@@ -392,6 +402,15 @@ var fixtures=[{
     test:'wrong_use_strict_spelling_in_file_1',
     change:function(info) {},
     expected:[]
+},{
+    base:'with-wrong-qa-control-version',
+    test:'must-detect-GHA-issues',
+    change:function(info) {},
+    expected:[ 
+        { warning: 'workflow_file_1_differs', params: [ 'build-and-test.yml' ] },
+        { warning: 'lack_of_workflow_file_1', params: [ 'publish.yml' ] },
+        { warning: 'workflow_file_1_differs', params: [ 'qa-control.yml' ] }
+    ]
 },{
     base:'stable-project-last-version',
     title:'check for last version (0.2.0 para #52)',
