@@ -49,7 +49,7 @@
     "node": ">= 10"
   },
   "scripts": {
-    "test": "mocha --reporter spec --bail --check-leaks test/",
+    "test": "mocha --reporter spec  --check-leaks test/",
     "test-nc": "mocha --reporter spec --bail --check-leaks --no-colors test/",
     "test-ci": "nyc --reporter=lcov mocha --reporter spec --check-leaks test/",
     "test-cov": "nyc mocha --reporter dot --check-leaks test/",

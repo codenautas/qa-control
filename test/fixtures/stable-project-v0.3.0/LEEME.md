@@ -10,11 +10,11 @@ the description
 ![stable](https://img.shields.io/badge/stability-stable-blue.svg)
 [![npm-version](https://img.shields.io/npm/v/stable-project.svg)](https://npmjs.org/package/stable-project)
 [![downloads](https://img.shields.io/npm/dm/stable-project.svg)](https://npmjs.org/package/stable-project)
-[![linux](https://github.com/codenautas/stable-project/actions/workflows/node.js.yml/badge.svg)](https://github.com/codenautas/stable-project/actions/workflows/node.js.yml)
+[![linux](https://github.com/codenautas/stable-project/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/codenautas/stable-project/actions/workflows/build-and-test.yml)
 [![windows](https://ci.appveyor.com/api/projects/status/github/codenautas/stable-project?svg=true)](https://ci.appveyor.com/project/codenautas/stable-project)
 [![coverage](https://img.shields.io/coveralls/codenautas/stable-project/master.svg)](https://coveralls.io/r/codenautas/stable-project)
 [![dependencies](https://snyk.io/test/github/codenautas/stable-project/badge.svg)](https://snyk.io/test/github/codenautas/stable-project)
-[![qa-control](http://codenautas.com/github/codenautas/stable-project.svg)](http://codenautas.com/github/codenautas/stable-project)
+[![qa-control](https://github.com/codenautas/stable-project/actions/workflows/qa-control.yml/badge.svg)](https://github.com/codenautas/stable-project/actions/workflows/qa-control.yml)
 
 <!--multilang buttons-->
 

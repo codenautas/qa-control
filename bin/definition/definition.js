@@ -131,7 +131,7 @@ module.exports = function(qaControl){
                 check: function(packageJson){
                     return !packageJson['qa-control']['test-appveyor'];
                 },
-                md:'[![build](https://github.com/xxx/yyy/actions/workflows/node.js.yml/badge.svg)](https://github.com/xxx/yyy/actions/workflows/node.js.yml)',
+                md:'[![build](https://github.com/xxx/yyy/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/xxx/yyy/actions/workflows/build-and-test.yml)',
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/medalla-ejemplo-linux.png',
                 docDescription: 'linux/build'
             },
@@ -139,7 +139,7 @@ module.exports = function(qaControl){
                 check: function(packageJson){
                     return !!packageJson['qa-control']['test-appveyor'];
                 },
-                md:'[![linux](https://github.com/xxx/yyy/actions/workflows/node.js.yml/badge.svg)](https://github.com/xxx/yyy/actions/workflows/node.js.yml)',
+                md:'[![linux](https://github.com/xxx/yyy/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/xxx/yyy/actions/workflows/build-and-test.yml)',
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/medalla-ejemplo-linux.png',
                 hideInManual: true,
             },
@@ -167,7 +167,7 @@ module.exports = function(qaControl){
             },
             'qa-control':{
                 mandatory:false,
-                md:'[![qa-control](http://codenautas.com/github/xxx/yyy.svg)](http://codenautas.com/github/xxx/yyy)',
+                md:'[![qa-control](https://github.com/xxx/yyy/actions/workflows/qa-control.yml/badge.svg)](https://github.com/xxx/yyy/actions/workflows/qa-control.yml)',
                 docDescription: ''
             },
             'outdated-deps':{

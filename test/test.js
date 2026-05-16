@@ -102,7 +102,7 @@ var fixtures=[{
     }]
 },{
     base:'stable-project',
-    title:'no "multilang" section in README.md (#7)',
+    title:'no "multilang" section in main doc LEEME.md (#7)',
     test:'no_multilang_section_in_1',
     change:function(info){
         info.files['LEEME.md'].content = info.files['LEEME.md'].content.replace('multilang v0','');
