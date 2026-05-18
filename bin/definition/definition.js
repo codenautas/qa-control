@@ -682,6 +682,9 @@ module.exports = function(qaControl){
             workflows:{
                 checks:[{
                     warnings:function(info) {
+                        var qaSection = info.packageJson?.['qa-control'] || {};
+                        var gha = qaSection.gha;
+                        if(gha === 'skip' || (qaSection.profile === 'minimum' && !gha)) { return []; }
                         var qaWorkflowsDir = Path.join(__dirname, '../../.github/workflows');
                         var projWorkflowsDir = Path.join(info.projectDir, '.github/workflows');
                         return fs.readdir(qaWorkflowsDir).then(function(qaFiles) {

@@ -46,6 +46,7 @@
     "test-appveyor": true,
     "type": "web",
     "coverage": 100,
-    "ecmaVersion": 6
+    "ecmaVersion": 6,
+    "gha": "skip"
   }
 }

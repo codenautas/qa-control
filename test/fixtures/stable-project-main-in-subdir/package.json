@@ -42,6 +42,7 @@
     "run-in": "server",
     "test-appveyor": true,
     "type": "lib",
-    "coverage": 100
+    "coverage": 100,
+    "gha": "skip"
   }
 }

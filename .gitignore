@@ -33,5 +33,3 @@ local-*
 *-local.*
 
 desktop.ini
-
-test/fixtures/**/workflows

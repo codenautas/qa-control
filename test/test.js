@@ -29,27 +29,6 @@ function stripNotices(warnArray) {
 const WARNING_CANT_CONTINUE = {warning:'cant_continue'};
 const WARNING_BAILING_CONTINUE = {warning:'bailing_could_be_more'};
 
-async function startTests(){
-    var root = './test/fixtures'
-    var dirs = await fs.readdir(root);
-    var workflowPath = '.github/workflows/'
-    for (var dir of dirs) {
-        var target = root+'/'+dir+'/'+workflowPath
-        try {
-            await fs.stat(target);
-        } catch (err) {
-            /** @type {any} */
-            var error = err;
-            if (error.code === 'ENOENT') {
-                await fs.copy(workflowPath, target);
-            }
-            throw err;
-        }
-    };
-}
-
-startTests()
-
 /** @type {Fixture[]} */
 var fixtures=[{
     base:'stable-project',

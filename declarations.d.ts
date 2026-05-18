@@ -19,8 +19,9 @@ interface QAControlSection {
     'package-version'?: string;
     coverage?: number;
     silenced?: string[];
-    profile?: string;
+    profile?: 'minimum'|'default';
     multilang?: string;
+    gha?: 'skip'|'all'
 }
 
 interface PackageJson {

@@ -3,6 +3,7 @@
   "repository": "sourcenauta/the-project",
   "version": "0.9.0",
   "qa-control": {
-    "coverage": 90
+    "coverage": 90,
+    "gha": "skip"
   }
 }
