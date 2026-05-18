@@ -5,8 +5,6 @@
 var { program } = require('commander');
 var qaControl = require('./qa-control');
 var qacInit = require('./qac-init');
-var fs = require('fs-promise');
-var path = require('path');
 
 program
     .version(require('../package.json').version)

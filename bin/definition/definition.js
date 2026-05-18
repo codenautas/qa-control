@@ -13,7 +13,7 @@ function eslintrcToFlatConfig(rc) {
     return flat;
 }
 var multilang = require('multilang');
-var fs = require('fs-promise');
+var fs = require('fs-extra');
 var Path = require('path');
 var yaml = require('js-yaml');
 

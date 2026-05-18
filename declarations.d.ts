@@ -1,5 +1,5 @@
 // fs-promise es un paquete legacy con declaraciones de TypeScript incompletas
-declare module 'fs-promise';
+declare module 'fs-extra';
 
 interface Warning {
     warning: string;

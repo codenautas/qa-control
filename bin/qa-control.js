@@ -3,7 +3,7 @@
 // CMD-TOOL
 var qaControl = {};
 
-var fs = require('fs-promise');
+var fs = require('fs-extra');
 var Path = require('path');
 var stripBom = require('strip-bom-string');
 var yaml = require('js-yaml');

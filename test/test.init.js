@@ -2,7 +2,7 @@
 
 var expect = require('expect.js');
 var qaControl = require('..');
-var fs = require('fs-promise');
+var fs = require('fs-extra');
 var Path = require('path');
 var sinon = require('sinon');
 var qci = require('../bin/qac-init.js');

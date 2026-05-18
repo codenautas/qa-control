@@ -6,7 +6,7 @@
 
 var qacInit = {};
 
-var fs = require('fs-promise');
+var fs = require('fs-extra');
 var Path = require('path');
 var qaControl = require('./qa-control.js');
 var multilang = require('multilang');

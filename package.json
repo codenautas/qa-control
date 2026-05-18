@@ -25,9 +25,9 @@
     "uuid": ">=14.0.0"
   },
   "dependencies": {
-    "best-globals": "^2.1.4",
+    "best-globals": "^2.1.5",
     "commander": "^14.0.3",
-    "eslint": "^10.3.0",
+    "eslint": "^10.4.0",
     "fs-extra": "^11.3.5",
     "js-yaml": "^4.1.1",
     "multilang": "^1.2.1",
@@ -36,7 +36,7 @@
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
-    "@types/node": "^25.7.0",
+    "@types/node": "^25.9.0",
     "expect-called": "^0.4.0",
     "expect.js": "^0.3.1",
     "mocha": "^11.7.5",
