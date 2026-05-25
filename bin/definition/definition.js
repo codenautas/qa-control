@@ -37,6 +37,68 @@ function softRegExp(realRegex) {
 }
 
 /**
+ * 
+ * @param {string} tagText 
+ * @param {string} colour 
+ * @param {string|null} [label]
+ * @returns 
+ */
+function stabilityCucarda(tagText, colour, label){
+
+    return '!['+tagText+'](https://img.shields.io/badge/stability-'+encodeURIComponent(label || tagText)+'-'+colour+'.svg)';
+    /*
+            var colour = 'red';
+        if(/^rc/i.test(lqa)) { colour = 'yellow'; }
+        else if(/beta/i.test(lqa)) { colour = 'orange'; }
+        var badge = 
+        cucaFileContent += badge + '\n';
+        return cucaFileContent;
+        */
+}
+
+function cucardaDefinition(colour, tag, type, opts){
+    function theTag(packageJson){
+        var qaTag = semver.prerelease(packageJson.version)?.[0];
+        if(qaTag) {
+            var tagText = String(qaTag);
+            var lqa = tagText.toLowerCase();
+            return lqa;
+        }
+        return '';
+    }
+    switch (type) {
+    case 'purpose':
+        return {
+            check: function(packageJson) {
+                return packageJson?.['qa-control']?.purpose === tag
+            },
+            md:'![proof-of-concept](https://img.shields.io/badge/stability-' + (opts||tag) + '-' + colour + '.svg)'
+        }
+    case 'tag':
+        return {
+            check: function(packageJson) { 
+                return !packageJson?.['qa-control']?.purpose &&
+                    (theTag(packageJson) == tag || tag == 'unkown-tag' && !theTag(packageJson).match(/^(rc|beta|alpha)$/i));
+            },
+            md: stabilityCucarda(tag, colour, tag)
+        }
+    case 'version':
+        return {
+            check: function(packageJson) { 
+                return !packageJson?.['qa-control']?.purpose && !theTag(packageJson) &&
+                    semver.satisfies(packageJson.version, opts);
+            },
+            md: stabilityCucarda(tag, colour, tag)
+        }
+    default:
+        throw new Error('Cucarda mal definida: '+JSON.stringify(arguments))
+    }
+}
+
+    // If package sets an explicit tag in qa-control or top-level tag, use it
+
+
+/**
  * @param {object} qaControl
  * @returns {QADefinition}
  */
@@ -76,52 +138,15 @@ module.exports = function(qaControl){
             '.eslintrc.yml':{ presentIf: function(pj) { return pj['qa-control'] && pj['qa-control'].profile !== 'minimum'; } }
         },
         cucardas:{
-            'proof-of-concept':{
-                check: function(packageJson){
-                    return packageJson?.['qa-control']?.purpose==='proof-of-concept';
-                },
-                md:'![proof-of-concept](https://img.shields.io/badge/stability-proof_of_concept-ff70c0.svg)',
-                imgExample:'https://img.shields.io/badge/stability-designing-red.svg'
-            },
-            designing:{
-                check: function(packageJson){
-                    return semver.satisfies(packageJson.version,'0.0.x') && !packageJson?.['qa-control']?.purpose;
-                },
-                md:'![designing](https://img.shields.io/badge/stability-designing-red.svg)',
-                imgExample:'https://img.shields.io/badge/stability-designing-red.svg',
-                docDescription: 'opt. manual'
-            },
-            extending:{
-                check: function(packageJson){
-                    return semver.satisfies(packageJson.version,'0.x.x') &&
-                            !semver.satisfies(packageJson.version,'0.0.x') &&
-                            !packageJson?.['qa-control'].purpose;
-                },
-                md:'![extending](https://img.shields.io/badge/stability-extending-orange.svg)',
-                imgExample:'https://img.shields.io/badge/stability-extending-orange.svg',
-                docDescription: 'opt. manual'
-            },
-            training:{
-                check: function(packageJson){
-                    return packageJson?.['qa-control']?.purpose==='training';
-                },
-                md:'![training](https://img.shields.io/badge/stability-training-ffa0c0.svg)',
-                imgExample:'https://img.shields.io/badge/stability-training-ffa0c0.svg'
-            },
-            example:{
-                check: function(packageJson){
-                    return packageJson?.['qa-control']?.purpose==='example';
-                },
-                md:'![example](https://img.shields.io/badge/stability-example-a0a0f0.svg)',
-                imgExample:'https://img.shields.io/badge/stability-example-a0a0f0.svg'
-            },
-            stable:{
-                check: function(packageJson){
-                    return semver.satisfies(packageJson.version,'>=1.0.0') && !packageJson?.['qa-control']?.purpose;
-                },
-                md:'![stable](https://img.shields.io/badge/stability-stable-blue.svg)',
-                imgExample:'https://img.shields.io/badge/stability-stable-blue.svg'
-            },
+            'proof-of-concept': cucardaDefinition('ff70c0', 'proof-of-concept', 'purpose', 'proof_of_concept'),
+            rc: cucardaDefinition('yellow', 'rc', 'tag'),
+            beta: cucardaDefinition('orange', 'beta', 'tag'),
+            alpha: cucardaDefinition('red', 'alpha', 'tag'),
+            designing: cucardaDefinition('red', 'designing', 'version', '~0.0.0'),
+            extending: cucardaDefinition('orange', 'extending', 'version', '>=0.1.0 <1.0.0'),
+            stable: cucardaDefinition('blue', 'stable', 'version', '>=1.0.0'),
+            training: cucardaDefinition('ffa0c0', 'training', 'purpose'),
+            example: cucardaDefinition('a0a0f0', 'example', 'purpose'),
             'npm-version':{
                 mandatory:true,
                 md:'[![npm-version](https://img.shields.io/npm/v/yyy.svg)](https://npmjs.org/package/yyy)',
@@ -382,7 +407,11 @@ module.exports = function(qaControl){
                          /*jshint forin: false */
                         for(var nombreCucarda in cucardas) {
                             var cucarda = cucardas[nombreCucarda];
-                            var cucaID = cucarda.forbidden ? '!['+nombreCucarda+']' : '!['+/!\[([-a-z]+)]/.exec(cucarda.md)[1]+']';
+                            try{
+                                var cucaID = cucarda.forbidden ? '!['+nombreCucarda+']' : '!['+/!\[([-a-z]+)]/.exec(cucarda.md)[1]+']';
+                            }catch(err){
+                                console.log('######################################', cucarda, err)
+                            }
                             var cucaStr = cucarda.md ? cucarda.md.replace(/\bxxx\b/g,repo).replace(/\byyy\b/g,modulo) : '';
                             if(cucarda.forbidden) {
                                 if(readme.indexOf(cucaID) !== -1) {

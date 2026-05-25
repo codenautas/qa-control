@@ -77,7 +77,7 @@ interface QASection {
 interface QACucarda {
     mandatory?: boolean;
     forbidden?: boolean;
-    check?: (packageJson: PackageJson) => boolean | number | undefined;
+    check?: (packageJson: PackageJson) => boolean | number | undefined | string;
     md?: string;
     imgExample?: string;
     docDescription?: string;
@@ -105,4 +105,5 @@ interface Fixture {
     expectedParams?: string[];
     change: (info: any) => void;
     expected?: Warning[];
+    scoring?: boolean;
 }

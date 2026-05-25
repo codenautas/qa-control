@@ -23,7 +23,8 @@
     "bluebird": "~2.9.33",
     "when": "~3.7.3",
     "q": "~1.4.1",
-    "native-promise-only": "~0.8.0-a"
+    "native-promise-only": "~0.8.0-a",
+    "qa-control": "^0.6.8"
   },
   "main": "stable-project.js",
   "engines": {
@@ -45,6 +46,7 @@
     "run-in": "server",
     "test-appveyor": true,
     "type": "lib",
-    "coverage": 100
+    "coverage": 100,
+    "gha": true
   }
 }

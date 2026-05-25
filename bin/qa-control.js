@@ -121,6 +121,8 @@ qaControl.getRepositoryUrl = function getRepositoryUrl(packageJson) {
 qaControl.cucaMarker = '<!-- cucardas -->';
 qaControl.generateCucardas = function generateCucardas(cucardas, packageJson) {
     var cucaFileContent = qaControl.cucaMarker+'\n';
+    /** @type {{tag:string|null}} */
+    var info = { tag: null }
     var modulo=packageJson.name;
     var repo=qaControl.getRepositoryUrl(packageJson).replace('/'+modulo,'');
     /*jshint forin: false */
@@ -324,7 +326,7 @@ qaControl.loadProject = function loadProject(projectDir) {
 /**
  * 
  * @param {ProjectInfo} info 
- * @param {QAOptions} opts
+ * @param {QAOptions} [opts]
  * @returns 
  */
 qaControl.controlInfo=function controlInfo(info, opts){
