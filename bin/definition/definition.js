@@ -679,6 +679,35 @@ module.exports = function(qaControl){
                     }
                 }]
             },
+            qa_control_dev_dependency:{
+                checks:[{
+                    warnings:function(info) {
+                        var warns = [];
+                        // Only check if project has qa-control section AND has gha configured (but not "skip")
+                        var qaSection = info.packageJson && info.packageJson['qa-control'];
+                        if(!qaSection || !qaSection.gha || qaSection.gha === 'skip') { return warns; }
+                        var devDependencies = info.packageJson.devDependencies || {};
+                        if(!('qa-control' in devDependencies)) {
+                            warns.push({warning:'lack_of_qa_control_in_dev_dependencies', scoring:{dependencies:1}});
+                            return warns;
+                        }
+                        var actualVersion = devDependencies['qa-control'];
+                        var toolPkgPath = Path.join(__dirname, '../../package.json');
+                        var toolVersion;
+                        try {
+                            toolVersion = fs.readJsonSync(toolPkgPath).version;
+                        } catch(e) {
+                            try { toolVersion = require('../../package.json').version; } catch(e2) { toolVersion = null; }
+                        }
+                        if(!toolVersion) { return warns; }
+                        var expectedCaret = '^' + toolVersion;
+                        if(actualVersion !== expectedCaret && actualVersion !== toolVersion && actualVersion !== '~' + toolVersion) {
+                            warns.push({warning:'qa_control_version_mismatch_in_dev_dependencies_1_expected_2', params:[actualVersion, expectedCaret], scoring:{dependencies:1}});
+                        }
+                        return warns;
+                    }
+                }]
+            },
             workflows:{
                 checks:[{
                     warnings:function(info) {

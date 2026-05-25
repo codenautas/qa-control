@@ -67,6 +67,7 @@
     "run-in": "server",
     "stability": "extending",
     "type": "cmd-tool",
-    "ecmaVersion": 6
+    "ecmaVersion": 6,
+    "gha": "all"
   }
 }

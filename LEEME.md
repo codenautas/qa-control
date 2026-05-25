@@ -76,11 +76,11 @@ Done without warnings!
 
 [!--lang:es-->
 
-## Uso (código)
+## Uso avanzado
 
 <!--lang:en--]
 
-## Usage (code)
+## Advenced  usage
 
 [!--lang:*-->
 

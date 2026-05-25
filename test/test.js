@@ -953,6 +953,8 @@ describe('qa-control main', function(){
                                       +'Dependencia no recomendada "param1" en package.json\n'
                                       +'falta el archivo de workflow "param1"\n'
                                       +'el archivo de workflow "param1" difiere del template de qa-control\n'
+                                      +'qa-control debe estar en devDependencies con la misma versión que qa-control.package-version\n'
+                                      +'La versión de qa-control en devDependencies es "param1" pero se esperaba "param2"\n'
                                       +'¡Qué --bail(e)! Podrían haber más problemas, correr de nuevo después de corregir estos\n');
                 done();
             }).catch(done);
@@ -965,6 +967,8 @@ describe('qa-control main', function(){
                 //console.log(warnStr);
                 expect(warnStr).to.eql('lack of mandatory section "param1" in qa-control section of package.json\n'
                                        +'packageJson.repository must be in format /{[-a-zA-Z0-9_.]+}/[-a-zA-Z0-9_.]+/\n'
+                                       +'qa-control must be in devDependencies with the same version as qa-control.package-version\n'
+                                       +'qa-control version in devDependencies is "param1" but expected "param2"\n'
                                        +'--bail(ing)! There could be more issues\n' // TODO: esto debería estar abajo
                                        +'deprecated version\n'
                                        +'invalid value param1 in parameter param2\n'

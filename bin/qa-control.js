@@ -27,6 +27,8 @@ qaControl.msgs={
     en:{
         lack_of_mandatory_section_1: 'lack of mandatory section "$1" in qa-control section of package.json',
         repository_name_not_found: 'packageJson.repository must be in format /{[-a-zA-Z0-9_.]+}\/[-a-zA-Z0-9_.]+/',
+        lack_of_qa_control_in_dev_dependencies: 'qa-control must be in devDependencies with the same version as qa-control.package-version',
+        qa_control_version_mismatch_in_dev_dependencies_1_expected_2: 'qa-control version in devDependencies is "$1" but expected "$2"',
         bailing_could_be_more: '--bail(ing)! There could be more issues'
     },
     es:{
@@ -63,6 +65,8 @@ qaControl.msgs={
         non_recomended_dependency_1_in_package_json: 'Dependencia no recomendada "$1" en package.json',
         lack_of_workflow_file_1: 'falta el archivo de workflow "$1"',
         workflow_file_1_differs: 'el archivo de workflow "$1" difiere del template de qa-control',
+        lack_of_qa_control_in_dev_dependencies: 'qa-control debe estar en devDependencies con la misma versión que qa-control.package-version',
+        qa_control_version_mismatch_in_dev_dependencies_1_expected_2: 'La versión de qa-control en devDependencies es "$1" pero se esperaba "$2"',
         bailing_could_be_more: '¡Qué --bail(e)! Podrían haber más problemas, correr de nuevo después de corregir estos'
     }
 };
