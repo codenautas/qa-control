@@ -59,7 +59,8 @@
     "all": "npm test && npm run test-cov && npm run report && npm run qac"
   },
   "files": [
-    "bin"
+    "bin",
+    ".github/workflows"
   ],
   "qa-control": {
     "package-version": "0.3.0",
