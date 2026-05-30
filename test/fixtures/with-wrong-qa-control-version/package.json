@@ -47,6 +47,9 @@
     "test-appveyor": true,
     "type": "lib",
     "coverage": 100,
-    "gha": true
+    "gha": true,
+    "silenced": [
+      "qa_control_version_mismatch_in_dev_dependencies_1_expected_2"
+    ]
   }
 }
