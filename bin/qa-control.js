@@ -34,7 +34,7 @@ qaControl.msgs={
     },
     es:{
         deprecated_version: 'la version es demasiado vieja',
-        invalid_value_1_in_parameter_2: 'valor invalido "$1" para el parametro "$2" en la sección qa-control',
+        invalid_value_1_in_parameter_2_valid_values_3: 'valor invalido "$1" para el parametro "$2" en la sección qa-control. Valores válidos: $3',
         lack_of_mandatory_file_1: 'falta el archivo obligatorio "$1"',
         //lack_of_mandatory_parameter_1: 'falta el parámetro obligatorio "$1"',
         lack_of_mandatory_section_1: 'falta la sección obligatoria "$1" en la sección qa-control',

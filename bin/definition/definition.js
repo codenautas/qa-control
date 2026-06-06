@@ -332,7 +332,7 @@ module.exports = function(qaControl){
                             }else{
                                 var observedValue=qaControlSection[sectionName];
                                 if(sectionDef.values && !(observedValue in sectionDef.values)){
-                                    warns.push({warning:'invalid_value_1_in_parameter_2',params:[observedValue,sectionName], scoring:{warnings:1}});
+                                    warns.push({warning:'invalid_value_1_in_parameter_2_valid_values_3',params:[observedValue,sectionName,Object.keys(sectionDef.values).join(', ')], scoring:{warnings:1}});
                                 }
                             }
                         }

@@ -100,14 +100,14 @@ var fixtures=[{
     ]
 },{
     base:'stable-project',
-    test:'invalid_value_1_in_parameter_2',
+    test:'invalid_value_1_in_parameter_2_valid_values_3',
     change:function(info){
         info.packageJson['qa-control']['run-in']='invalid-run-in-for-test';
     },
     expected:[
         {
-            warning:'invalid_value_1_in_parameter_2',
-            params:['invalid-run-in-for-test','run-in']
+            warning:'invalid_value_1_in_parameter_2_valid_values_3',
+            params:['invalid-run-in-for-test','run-in','server, both, client']
         },
         WARNING_CANT_CONTINUE
     ]
@@ -590,7 +590,7 @@ describe('qa-control', function(){
                 expect(Object.keys(en).sort()).to.eql(Object.keys(es).sort());
                 //console.log(qaControl.msgs.en);
                 expect(en['deprecated_version']).to.be('deprecated version');
-                expect(en['invalid_value_1_in_parameter_2']).to.be('invalid value $1 in parameter $2');
+                expect(en['invalid_value_1_in_parameter_2_valid_values_3']).to.be('invalid value $1 in parameter $2 valid values $3');
                 expect(en['lack_of_mandatory_file_1']).to.be('lack of mandatory file $1');
                 //expect(en['lack_of_mandatory_parameter']).to.be('lack of mandatory parameter');
                 expect(en['lack_of_mandatory_section_1']).to.be('lack of mandatory section "$1" in qa-control section of package.json');
@@ -923,7 +923,7 @@ describe('qa-control main', function(){
             }).then(function(warnStr){
                 //console.log(warnStr);
                 expect(warnStr).to.eql('la version es demasiado vieja\n'
-                                      +'valor invalido "param1" para el parametro "param2" en la sección qa-control\n'
+                                      +'valor invalido "param1" para el parametro "param2" en la sección qa-control. Valores válidos: param3\n'
                                       +'falta el archivo obligatorio "param1"\n'
                                       +'falta la sección obligatoria "param1" en la sección qa-control\n'
                                       +'falta la sección "qa-control" en package.json y aparenta ser un proyecto codenautas\n'
@@ -971,7 +971,7 @@ describe('qa-control main', function(){
                                        +'qa-control version in devDependencies is "param1" but expected "param2"\n'
                                        +'--bail(ing)! There could be more issues\n' // TODO: esto debería estar abajo
                                        +'deprecated version\n'
-                                       +'invalid value param1 in parameter param2\n'
+                                       +'invalid value param1 in parameter param2 valid values param3\n'
                                        +'lack of mandatory file param1\n'
                                        +'no qa control section in codenautas project\n'
                                        +'no multilang section in param1\n'
