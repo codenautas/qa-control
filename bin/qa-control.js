@@ -5,6 +5,7 @@ var qaControl = {};
 
 var fs = require('fs-extra');
 var Path = require('path');
+var os = require('os');
 var stripBom = require('strip-bom-string');
 var yaml = require('js-yaml');
 var semver = require("semver");
@@ -102,7 +103,7 @@ qaControl.cmdMsgs = {
 
 // devuelve un buffer con los \n, \r\n, \r como \n
 qaControl.fixEOL = function fixEOL(buf) {
-    return buf.replace(/\s*\r?\n/g, '\n').replace(/\s*\r/g, '\n');
+    return buf.replace(/[^\S\r\n]*(?:\r\n?|\n)/g, os.EOL);
 };
 
 // bufTest debe empezar con bufStart

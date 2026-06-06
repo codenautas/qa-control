@@ -584,7 +584,7 @@ module.exports = function(qaControl){
                             var file=obtainedLangs.langs[lang].fileName;
                             if(file !== defReadme) {
                                 var mlContent = multilang.changeNamedDoc(file, content, lang);
-                                if(mlContent !== info.files[file].content) {
+                                if(qaControl.fixEOL(mlContent) !== qaControl.fixEOL(info.files[file].content)) {
                                     warns.push({warning:'readme_multilang_not_sincronized_with_file_1', params:[file], scoring:{multilang:1}});
                                 }
                             }
@@ -749,7 +749,7 @@ module.exports = function(qaControl){
                             return Promise.all(qaFiles.map(function(fileName) {
                                 return fs.readFile(Path.join(qaWorkflowsDir, fileName), 'utf8').then(function(qaContent) {
                                     return fs.readFile(Path.join(projWorkflowsDir, fileName), 'utf8').then(function(projContent) {
-                                        if(qaContent !== projContent) {
+                                        if(qaControl.fixEOL(qaContent) !== qaControl.fixEOL(projContent)) {
                                             return [{warning:'workflow_file_1_differs', params:[fileName], scoring:{workflows:1}}];
                                         }
                                         return [];
