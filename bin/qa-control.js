@@ -103,7 +103,7 @@ qaControl.cmdMsgs = {
 
 // devuelve un buffer con los \n, \r\n, \r como \n
 qaControl.fixEOL = function fixEOL(buf) {
-    return buf.replace(/[^\S\r\n]*(?:\r\n?|\n)/g, os.EOL);
+    return buf.replace(/[^\S\r\n]*(?:\r\n?|\n)/g, os.EOL).replace(/(\r?\n)+$/g, os.EOL);
 };
 
 // bufTest debe empezar con bufStart
@@ -313,10 +313,10 @@ qaControl.loadProject = function loadProject(projectDir) {
                         if(err.code === 'ENOENT') {
                             delete info.files[mainName];
                         } else {
-                            throw err;                            
+                            throw err;
                         }
                     });
-                }            
+                }
             }
         });
     }).then(function() {
@@ -325,10 +325,10 @@ qaControl.loadProject = function loadProject(projectDir) {
 };
 
 /**
- * 
- * @param {ProjectInfo} info 
+ *
+ * @param {ProjectInfo} info
  * @param {QAOptions} [opts]
- * @returns 
+ * @returns
  */
 qaControl.controlInfo=function controlInfo(info, opts){
     var resultWarnings=[];
@@ -355,12 +355,12 @@ qaControl.controlInfo=function controlInfo(info, opts){
                     activeWarnings.forEach(function(warning){
                         existingWarnings[warning.warning]=true;
                     });
-                    if(rule.couldBail && opts && opts.bail) { 
-                        bailed = true; 
-                        throw new Error("ruleIsAborting"); 
+                    if(rule.couldBail && opts && opts.bail) {
+                        bailed = true;
+                        throw new Error("ruleIsAborting");
                     }
-                    if(rule.mustAbort) { 
-                        throw new Error("ruleIsAborting"); 
+                    if(rule.mustAbort) {
+                        throw new Error("ruleIsAborting");
                     }
                 }
                 info.warningCount += warningsOfThisRule.length;
@@ -434,9 +434,8 @@ qaControl.main=function main(parameters) {
                 process.stdout.write(warnString);
                 return warnString;
             });
-        }        
+        }
     });
 };
 
 module.exports = qaControl;
-

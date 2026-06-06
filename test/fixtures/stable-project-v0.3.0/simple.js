@@ -20,8 +20,8 @@ f1({
     "esto así":"asdfasd",
     "esto otro": 1,
     aquello: null,
-    "mas uno": [ 
-        "etc", 
+    "mas uno": [
+        "etc",
         "etc",
         "etc",
     ]
@@ -39,4 +39,3 @@ function fn() {
 var f = fn();
 
 f += 2;
-

@@ -30,7 +30,7 @@ pg-strict-promise implementa una versión con Promise/A+ en el sentido estricto 
  * Con pruebas que cubren el 100% del código en dos grupos: un grupo de pruebas que usa una base de datos real (postgresl 9.3) y otro que testea solo las llamadas (adaptaciones) que se hacen sobre PG. Ambos grupos de pruebas cubren el 100% del código. Así obtenemos una **cobertura de 2 × 100%**.
  * No se reimplementa nada de lo que PG ya implementa
  * Algunos [agregados](docs/agregados.md) mínimos para mayor comodidad
- 
+
 <!--lang:en--]
 
 # Features
@@ -66,7 +66,7 @@ $ npm install stable-project
 
 [!--lang:*-->
 
-```js 
+```js
 var pg = require('stable-project');
 
 pg.easy = true;
@@ -110,14 +110,14 @@ var pg = require('stable-project');
 pg.easy = true;
 
 var conString = "postgres://username:password@localhost/database";
- 
+
 pg.connect(conString).then(function(client){
     return client.query('SELECT $1::int AS number', ['1']);
 }).then(function(result)){
     console.log(result.rows[0].number);
 }).catch(err){
     return console.error('error fetching client from pool or running query', err);
-}).then(function(){    
+}).then(function(){
     client.done(); // original done function of callback of PG.connect
 });
 ```
@@ -138,7 +138,7 @@ In this example you see:
 
 ### Example without connection pool
 
-Corresponds to calls to [PG](https://github.com/brianc/node-postgres#client-instance) 
+Corresponds to calls to [PG](https://github.com/brianc/node-postgres#client-instance)
 direct client instance
 
 [!--lang:*-->
@@ -165,20 +165,20 @@ client.connect().then(function(client){
 
 ### Ejemplo procesando de a una fila a la vez
 
-Corresponde al ejemplo de llamada a [PG](https://github.com/brianc/node-postgres/wiki/Client#simple-query-without-callback).query 
+Corresponde al ejemplo de llamada a [PG](https://github.com/brianc/node-postgres/wiki/Client#simple-query-without-callback).query
 sin función callback. En la documentación de [PG](https://github.com/brianc/node-postgres/wiki/Client#parameters-1),
 [Brian C](https://github.com/brianc) dice *no especifique una function callback para consultas que devuelven grandes conjuntos de datos salvo que quiera que se acumule todo en memoria*
- 
+
 Esta es la manera de procesar fila por fila
- 
+
 <!--lang:en--]
 
 ### Example with fetch row by row
 
-Corresponds to calls to [PG](https://github.com/brianc/node-postgres/wiki/Client#simple-query-without-callback).query 
-without callback. In [PG](https://github.com/brianc/node-postgres/wiki/Client#parameters-1) documentation 
+Corresponds to calls to [PG](https://github.com/brianc/node-postgres/wiki/Client#simple-query-without-callback).query
+without callback. In [PG](https://github.com/brianc/node-postgres/wiki/Client#parameters-1) documentation
 [Brian C](https://github.com/brianc) says *do not provide callback function for large result sets unless you're okay with loading the entire result set into memory*
- 
+
 This is the way for process data row by row
 
 [!--lang:*-->
@@ -201,12 +201,12 @@ pg.connect({user: 'brianc', database: 'test'}).then(function(client){
 Para correr los test, además de clonar el repositorio e instalar con npm
 tenemos que proveer una conexión a la base de datos *postgresql-9.3* para
 poder crear el usuario *test_user* y la base *test_db*.
- 
+
 <!--lang:en--]
 
 # Running tests
 
-Clone the repository and install the developer dependencies in then normal way. 
+Clone the repository and install the developer dependencies in then normal way.
 You must provide a *postgresql-9.3* instalation for create a *test_db*.
 Then you can test stable-project
 
@@ -214,7 +214,7 @@ Then you can test stable-project
 
 ```sh
 $ git clone git://github.com/codenautas/stable-project.git stable-project
-$ cd stable-project 
+$ cd stable-project
 $ npm install
 $ psql --file test/create_db.sql
 $ npm test
@@ -222,12 +222,12 @@ $ npm test
 
 <!--lang:es-->
 
-Luego se puede verificar la covertura de código probarndo por separado los test con conexion a la base de datos (odb) 
-o sin conexión (ndb, usando funciones sustitutas *mock functions* en vez de llamadas reales). 
+Luego se puede verificar la covertura de código probarndo por separado los test con conexion a la base de datos (odb)
+o sin conexión (ndb, usando funciones sustitutas *mock functions* en vez de llamadas reales).
 
 <!--lang:en--]
 
-Then you can also check coverage separadly: with only real db or with no-db (with mock functions). 
+Then you can also check coverage separadly: with only real db or with no-db (with mock functions).
 
 [!--lang:*-->
 

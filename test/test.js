@@ -48,7 +48,7 @@ var fixtures=[{
     options:{scoring: true},
     change:function(info){
         delete info.packageJson['qa-control'];
-        info.files['package.json'].content = "otro contenido";        
+        info.files['package.json'].content = "otro contenido";
     },
     expected: [{ warning: 'no_qa_control_section_in_package_json', scoring:{fatal:1} } ]
 },{
@@ -260,12 +260,12 @@ var fixtures=[{
     test:'using_normal_promise_in_file_1',
     change:function(info){
         info.files['simple.js'].content =
-            info.files['simple.js'].content = 
+            info.files['simple.js'].content =
                 "var Promise = require('promise');\n\n" + info.files['simple.js'].content;
     },
     expected:[
         { warning:'using_normal_promise_in_file_1',params:['simple.js']},
-        { warning:'eslint_warnings_in_file_1',params:['simple.js']}, 
+        { warning:'eslint_warnings_in_file_1',params:['simple.js']},
     ]
 },{
     base:'stable-project',
@@ -274,13 +274,13 @@ var fixtures=[{
     change:function(info){
         info.files['simple.js'].content += '\n\nvar promise = require("rsvp");\n\n';
         info.files['stable-project.js'].content += '\n\nvar Promise = require("q");\n\n';
-        
+
     },
     expected:[
         { warning:'using_normal_promise_in_file_1',params:['simple.js']},
         { warning:'using_normal_promise_in_file_1',params:['stable-project.js']},
-        { warning:'eslint_warnings_in_file_1',params:['simple.js']}, 
-        { warning:'eslint_warnings_in_file_1',params:['stable-project.js']}, 
+        { warning:'eslint_warnings_in_file_1',params:['simple.js']},
+        { warning:'eslint_warnings_in_file_1',params:['stable-project.js']},
     ]
 },{
     base:'stable-project-main-in-subdir',
@@ -299,7 +299,7 @@ var fixtures=[{
     change:function(info){
         delete info['packageJson']['repository'];
     },
-    expected:[ 
+    expected:[
         { warning: 'lack_of_repository_section_in_package_json' },
         { warning: 'invalid_repository_section_in_package_json' },
         WARNING_CANT_CONTINUE]
@@ -385,7 +385,7 @@ var fixtures=[{
     base:'with-wrong-qa-control-version',
     test:'must-detect-GHA-issues',
     change:function(info) {},
-    expected:[ 
+    expected:[
         { warning: 'workflow_file_1_differs', params: [ 'build-and-test.yml' ] },
         { warning: 'lack_of_workflow_file_1', params: [ 'publish.yml' ] },
         { warning: 'workflow_file_1_differs', params: [ 'qa-control.yml' ] }
@@ -820,10 +820,10 @@ describe('qa-control', function(){
                                         }
                                     });
                                 }));
-                                
+
                             });
                         }
-                    });                    
+                    });
                 })).then(function() {
                     if(filesWithBom.length) {
                         console.log("FILES with BOM", filesWithBom);
@@ -913,7 +913,7 @@ function generateWarningsArray(lang) {
     }
     return warns;
 }
-    
+
 describe('qa-control main', function(){
     describe('tests of warning output', function(){
         it('stringize warnings in lang "es"', function(done){

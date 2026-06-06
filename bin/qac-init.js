@@ -184,14 +184,14 @@ qacInit.writeTemplate = function writeTemplate(inputFile, outputFile, vars) {
         cont = content;
         return fs.writeFile(outputFile, cont);
     }).then(function() {
-       return cont; 
+       return cont;
     });
 };
 
 qacInit.re = {
     name      : /^([a-zA-Z][a-zA-Z]+)$/,                            // alpha, minusculas
     namex    : /^([a-z]+[a-z0-9-]*[a-z0-9]+)$/,                     // alnum+'-', minusculas
-    namexs    : /^([a-z]+[a-z0-9.-]*[a-z0-9]+)$/,                   // alnum+'-'+'.', minusculas 
+    namexs    : /^([a-z]+[a-z0-9.-]*[a-z0-9]+)$/,                   // alnum+'-'+'.', minusculas
     namexcml : /^([A-Z]+[A-Za-z0-9.-]*[A-Za-z0-9]+)$/,              // alnum+'-'+'.', minusculas, primera en mayusculas
     email      : /^(<?[A-Za-z]+[a-z0-9.]+@[a-z0-9]+\.[a-z0-9]+>?)$/ // muy mejorable
 };
@@ -202,7 +202,7 @@ function validName(nameparts) {
     }
     return true;
 }
-    
+
 qacInit.configParams = [
     {
         name:'name', prompt:'Project name', def:'',
@@ -213,7 +213,7 @@ qacInit.configParams = [
     },{
         name:'description', prompt:'Project description', def:'',
         init: function(ctx) {
-            this.def = ctx.input.existingJson.description || ctx.result['name']+' module'; 
+            this.def = ctx.input.existingJson.description || ctx.result['name']+' module';
         }
     },{
         name:'version', prompt:'Project version', def:'',
@@ -286,7 +286,7 @@ qacInit.configParams = [
         name:'qa-control', def:'', noPrompt:true, init: function(ctx) { this.def = ctx.input.qacJson['qa-control']; }
     }
 ];
-        
+
 qacInit.init = function init(initParams) {
     var echo = function(message) { process.stdout.write(message); }
     if(! initParams.verbose) { echo = function() {} }
@@ -326,7 +326,7 @@ qacInit.init = function init(initParams) {
             var oFile = file;
             if(file.match(/^(dot-)/)) { oFile = '.'+file.substring(4); }
             echo('  '+inputParams.msgs.msg_copying+' '+oFile+'...\n');
-            return fs.copy(Path.resolve(inputParams.tplDir+'/'+file), Path.resolve(inputParams.outDir+'/'+oFile));                
+            return fs.copy(Path.resolve(inputParams.tplDir+'/'+file), Path.resolve(inputParams.outDir+'/'+oFile));
         }));
     }).then(function() {
         return Promise.all(tplData.tpls.map(function(file) {

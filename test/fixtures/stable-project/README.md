@@ -164,4 +164,3 @@ $ npm run-script test-cov-ndb
 ## License
 
 [MIT](LICENSE)
-

@@ -70,7 +70,7 @@ Listo sin advertencias!
 $ qa-control --list-langs
 Available languages: en es
 
-$ qa-control . 
+$ qa-control .
 Done without warnings!
 ```
 
@@ -98,5 +98,3 @@ qaControl.controlProject('./path/to/my/project').then(function(warnings){
 [MIT](LICENSE)
 
 ----------------
-
-

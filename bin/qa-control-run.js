@@ -67,5 +67,5 @@ if(opts.init) {
         if(! params.listLangs) {
             process.stderr.write(msgs.msg_done+(""===warnStr ? ' '+msgs.msg_nowarns:'')+'!');
         }
-    }).catch(function(err){ printErr(err); });    
+    }).catch(function(err){ printErr(err); });
 }

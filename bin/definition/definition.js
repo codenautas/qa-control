@@ -18,8 +18,8 @@ var Path = require('path');
 var yaml = require('js-yaml');
 
 /**
- * 
- * @param {PackageJson} packageJson 
+ *
+ * @param {PackageJson} packageJson
  * @returns boolean
  */
 function testAppVeyor(packageJson){
@@ -37,11 +37,11 @@ function softRegExp(realRegex) {
 }
 
 /**
- * 
- * @param {string} tagText 
- * @param {string} colour 
+ *
+ * @param {string} tagText
+ * @param {string} colour
  * @param {string|null} [label]
- * @returns 
+ * @returns
  */
 function stabilityCucarda(tagText, colour, label){
 
@@ -50,7 +50,7 @@ function stabilityCucarda(tagText, colour, label){
             var colour = 'red';
         if(/^rc/i.test(lqa)) { colour = 'yellow'; }
         else if(/beta/i.test(lqa)) { colour = 'orange'; }
-        var badge = 
+        var badge =
         cucaFileContent += badge + '\n';
         return cucaFileContent;
         */
@@ -76,7 +76,7 @@ function cucardaDefinition(colour, tag, type, opts){
         }
     case 'tag':
         return {
-            check: function(packageJson) { 
+            check: function(packageJson) {
                 return !packageJson?.['qa-control']?.purpose &&
                     (theTag(packageJson) == tag || tag == 'unkown-tag' && !theTag(packageJson).match(/^(rc|beta|alpha)$/i));
             },
@@ -84,7 +84,7 @@ function cucardaDefinition(colour, tag, type, opts){
         }
     case 'version':
         return {
-            check: function(packageJson) { 
+            check: function(packageJson) {
                 return !packageJson?.['qa-control']?.purpose && !theTag(packageJson) &&
                     semver.satisfies(packageJson.version, opts);
             },

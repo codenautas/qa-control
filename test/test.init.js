@@ -114,7 +114,7 @@ describe/*.only*/("qa-control --init", function(){
                     if(fixture.lang) { params['lang'] = fixture.lang; }
                     return qci.initDefaults(params);
                 }).then(function(result) {
-                    expect(result).to.eql(fixture.expected(expParam));  
+                    expect(result).to.eql(fixture.expected(expParam));
                 }).then(function(){
                 });
             });
@@ -161,7 +161,7 @@ describe/*.only*/("qa-control --init", function(){
     });
     describe('readParameters', function(){
         var dummyInput = {
-           msgs: qci.cmdMsgs.en 
+           msgs: qci.cmdMsgs.en
         };
         it("should read an array of parameters", function(){
             sinon.stub(qci, 'promptForVar').callsFake(function(param, msgs) {
@@ -212,7 +212,7 @@ describe/*.only*/("qa-control --init", function(){
             }).catch(function(err) {
                 qci.promptForVar.restore();
                 expect(err).to.eql({message:'input_error', desc:'dummy error'});
-                done();                    
+                done();
             });
         });
         it("should default values for valid input", function(done) {
@@ -226,7 +226,7 @@ describe/*.only*/("qa-control --init", function(){
             }).catch(function(err) {
                 qci.promptForVar.restore();
                 expect(err).to.eql({message:'input_error', desc:'dummy error'});
-                done();                    
+                done();
             });
         });
         it("should forward the context to parameters", function() {
@@ -352,7 +352,7 @@ describe/*.only*/("qa-control --init", function(){
                 var keys = ['year', 'author', 'name', 'desc', 'cucardas'];
                 var kvPairs = {};
                 keys.forEach(function(key) {
-                   kvPairs[key] = 'valueOf'+ key.charAt(0).toUpperCase() + key.slice(1); 
+                   kvPairs[key] = 'valueOf'+ key.charAt(0).toUpperCase() + key.slice(1);
                 });
                 var testsArray = [];
                 for(var t in tests) { testsArray.push(tests[t]); }
@@ -374,13 +374,13 @@ describe/*.only*/("qa-control --init", function(){
             expect('P').not.to.match(qci.re.name);
             expect('P3').not.to.match(qci.re.name);
             expect('_pepe_').not.to.match(qci.re.name);
-            
+
             expect('pepe').to.match(qci.re.namex);
             expect('pepe-sanchez').to.match(qci.re.namex);
             expect('pepewithwith-slash').to.match(qci.re.namex);
             expect('p').not.to.match(qci.re.namex);
             expect('P').not.to.match(qci.re.namex);
-            
+
             expect('pepe').to.match(qci.re.namexs);
             expect('pepe-sanchez').to.match(qci.re.namexs);
             expect('pepewith-slashesand.dot').to.match(qci.re.namexs);
@@ -388,7 +388,7 @@ describe/*.only*/("qa-control --init", function(){
             expect('pa').to.match(qci.re.namexs);
             expect('pepe1').to.match(qci.re.namexs);
             expect('pepe2').to.match(qci.re.namexs);
-            
+
             expect('pepe').not.to.match(qci.re.namexcml);
             expect('pepe-sanchez').not.to.match(qci.re.namexcml);
             expect('pepewith-slashesand.dot').not.to.match(qci.re.namexcml);
@@ -441,7 +441,7 @@ describe/*.only*/("qa-control --init", function(){
                 return loadDir(outDir);
             }).then(function(info) {
                 infoGen = info;
-                return loadDir(testDir);                
+                return loadDir(testDir);
             }).then(function(info) {
                infoTest = info;
                //console.log("gen", infoGen); console.log("test", infoTest);
