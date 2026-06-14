@@ -2,11 +2,31 @@
 
 ## Contexto
 
-`qa-control` es una herramienta de control de calidad para proyectos Node/npm creada por Codenautas. Su objetivo principal era validar que los paquetes sigan convenciones internas y boilerplates comunes, especialmente en `package.json`, `README.md`/`LEEME.md`, archivos de configuración de lint, `travis`/`appveyor`, y badgets de estado.
+`qa-control` es una herramienta de control de calidad para proyectos Node/npm creada por Codenautas.
+Su objetivo principal es validar que los paquetes sigan convenciones internas y boilerplates comunes,
+especialmente en `package.json`, `README.md`/`LEEME.md`, archivos de configuración de lint,
+GHA y badgets de estado.
 
-La versión activa del proyecto en el repositorio es `0.3.0`, con definiciones de reglas cargadas desde `bin/0.3.0/definition.js`.
+## Contexto
 
-## Qué reglas había
+Hay dos maneras de uso equivalentes:
+
+`qa-control MY_REPO_PATH`
+
+o
+
+`npx qa-control .` (que se usa cuando qa-control está como dependencia)
+
+Devuelve en la consola la lista de problemas encontrados
+
+## Estructura interna
+
+Hay una lista de reglas que hay que cumplir. Las opciones por proyecto se deben setear en el package.json
+en la sección "qa-control".
+
+## Reglas de la versión 0.3.0
+
+_Hay que tratar de mantener actualizada esta sección_
 
 ### 1. Estructura y metadatos básicos
 - Debe existir `package.json`.
@@ -51,44 +71,3 @@ La versión activa del proyecto en el repositorio es `0.3.0`, con definiciones d
 - Se detectan dependencias no recomendadas: `best-promise`, `lodash`, `promise-plus`.
 - Se comprueba que `.travis.yml` pruebe al menos Node 4 y 6, y que estas versiones no tengan fallos permitidos.
 - Se comprueba que los archivos de traducción de `multilang` estén sincronizados con el `README.md`/`LEEME.md` principal.
-
-## Estado actual y observaciones
-
-- El proyecto está construido como un CLI (`qa-control`) con un archivo principal en `bin/qa-control.js`.
-- Las reglas están versionadas internamente y la versión actual es `0.3.0`.
-- Hay soporte de inicialización con `bin/qac-init.js` y templates en `bin/init-template`.
-- El repositorio usa tests mocha/istanbul, fixtures de ejemplo y casos de control en `test/`.
-
-## Objetivo inicial
-
-1. Restablecer `qa-control` como una herramienta de control de calidad fácil de ejecutar localmente y dentro de GitHub Actions.
-2. Consolidar las reglas existentes en una definición clara y actualizada que pueda ejecutarse como:
-   - `npx qa-control .` para ejecución local
-   - `npx qa-control .` dentro de un workflow de GitHub Actions
-3. Priorizar la modernización de la capa de ejecución y el soporte de CI sin perder las validaciones de metadata, badges, linting, `cucardas` y convenciones de `package.json`.
-
-## Propuesta de primer paso
-
-- Definir el flujo mínimo para una verificación completa de proyecto:
-  1. Cargar `package.json` y validar `qa-control` + `package-version`.
-  2. Verificar la presencia de archivos obligatorios y la configuración de `repository`.
-  3. Validar `README.md`/`LEEME.md` con `cucardas` y `multilang`.
-  4. Ejecutar JSHint/ESLint sobre los archivos de código.
-  5. Validar `.travis.yml` y dependencias.
-- Documentar ese flujo en un README/CLAUDE donde el objetivo sea muy claro: "Un QA tool local + GHA para mantener los boilerplates de Codenautas sincronizados".
-
-
-## TODO (not now)
-
-### qa-control mandatory:
-
-Agregrar en `/test/fixtures/cucardas-proof-of-concept/warnings.json`:
-
-```json
-,
-  {
-    "warning": "lack_of_mandatory_cucarda_1", "params": ["qa-control"]
-  }
-```
-
-También en: `test\fixtures\cucardas-extending\warnings.json`
