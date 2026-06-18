@@ -97,6 +97,16 @@ function cucardaDefinition(colour, tag, type, opts){
 
     // If package sets an explicit tag in qa-control or top-level tag, use it
 
+/**
+ *
+ * @param {PackageJson} packageJson
+ * @returns {boolean}
+ */
+
+function usingGHA(packageJson){
+    var qaSection = packageJson?.['qa-control'];
+    return qaSection && qaSection.gha && qaSection.gha != 'skip' || qaSection.profile && qaSection.profile != "minimum";
+}
 
 /**
  * @param {object} qaControl
@@ -263,6 +273,18 @@ module.exports = function(qaControl){
                             if(! qaControl.getRepositoryUrl(info.packageJson).match(/^([-a-zA-Z0-9_.]+\/[-a-zA-Z0-9_.]+)$/)){
                                 return [{warning:'repository_name_not_found', scoring:{mandatories:1}}];
                             }
+                        }
+                        return warns;
+                    }
+                }],
+                couldBail:true
+            },
+            test_ci_in_scripts:{
+                checks:[{
+                    warnings:function(info) {
+                        var warns = [];
+                        if(usingGHA(info.packageJson) && !info.packageJson?.scripts?.["test-ci"]) {
+                            warns.push({warning:'lack_of_test_ci_script_in_package_json', scoring:{mandatories:1}});
                         }
                         return warns;
                     }
@@ -584,8 +606,9 @@ module.exports = function(qaControl){
                             var file=obtainedLangs.langs[lang].fileName;
                             if(file !== defReadme) {
                                 var mlContent = multilang.changeNamedDoc(file, content, lang);
-                                if(qaControl.fixEOL(mlContent) !== qaControl.fixEOL(info.files[file].content)) {
-                                    warns.push({warning:'readme_multilang_not_sincronized_with_file_1', params:[file], scoring:{multilang:1}});
+                                var warning = 'readme_multilang_not_sincronized_with_file_1';
+                                if (!qaControl.compareContentIsOk(mlContent, info.files[file].content, warning)) {
+                                    warns.push({warning, params:[file], scoring:{multilang:1}});
                                 }
                             }
                         }
@@ -712,9 +735,7 @@ module.exports = function(qaControl){
                 checks:[{
                     warnings:function(info) {
                         var warns = [];
-                        // Only check if project has qa-control section AND has gha configured (but not "skip")
-                        var qaSection = info.packageJson && info.packageJson['qa-control'];
-                        if(!qaSection || !qaSection.gha || qaSection.gha === 'skip') { return warns; }
+                        if (!usingGHA(info.packageJson)) { return warns; }
                         var devDependencies = info.packageJson.devDependencies || {};
                         if(!('qa-control' in devDependencies)) {
                             warns.push({warning:'lack_of_qa_control_in_dev_dependencies', scoring:{dependencies:1}});
@@ -740,9 +761,7 @@ module.exports = function(qaControl){
             workflows:{
                 checks:[{
                     warnings:function(info) {
-                        var qaSection = info.packageJson?.['qa-control'] || {};
-                        var gha = qaSection.gha;
-                        if(gha === 'skip' || (qaSection.profile === 'minimum' && !gha)) { return []; }
+                        if (!usingGHA(info.packageJson)) { return []; }
                         var qaWorkflowsDir = Path.join(__dirname, '../../.github/workflows');
                         var projWorkflowsDir = Path.join(info.projectDir, '.github/workflows');
                         return fs.readdir(qaWorkflowsDir).then(function(qaFiles) {

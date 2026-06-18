@@ -35,6 +35,7 @@ interface PackageJson {
     'qa-control'?: QAControlSection;
     jshintConfig?: Record<string, unknown>;
     eslintConfig?: Record<string, unknown>;
+    scripts?: Record<string, string>;
 }
 
 interface ProjectInfo {

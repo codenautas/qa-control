@@ -5,6 +5,7 @@ var qaControl = require('..');
 var fs = require('fs-extra');
 var Path = require('path');
 var yaml = require('js-yaml');
+var OS = require('os');
 
 function stripScoring(warnArray) {
     for(var w=0; w<warnArray.length; ++w) {
@@ -503,12 +504,12 @@ var fixtures=[{
     change:function(info){
         var badge = '[![outdated-deps](https://img.shields.io/david/codenautas/stable-project.svg)](https://david-dm.org/codenautas/stable-project)';
         info.files['LEEME.md'].content = info.files['LEEME.md'].content.replace(
-            '<!-- cucardas -->\n',
-            '<!-- cucardas -->\n'+badge+'\n'
+            '<!-- cucardas -->'+OS.EOL,
+            '<!-- cucardas -->'+OS.EOL+badge+'\n'
         );
         info.files['README.md'].content = info.files['README.md'].content.replace(
             '[![npm-version]',
-            badge+'\n'+'[![npm-version]'
+            badge+OS.EOL+'[![npm-version]'
         );
     },
     expected:[
@@ -520,12 +521,12 @@ var fixtures=[{
     change:function(info){
         var badge = '[![climate](https://api.codeclimate.com/v1/badges/codenautas/stable-project/maintainability)](https://codeclimate.com/github/codenautas/stable-project)';
         info.files['LEEME.md'].content = info.files['LEEME.md'].content.replace(
-            '<!-- cucardas -->\n',
-            '<!-- cucardas -->\n'+badge+'\n'
+            '<!-- cucardas -->'+OS.EOL,
+            '<!-- cucardas -->'+OS.EOL+badge+OS.EOL
         );
         info.files['README.md'].content = info.files['README.md'].content.replace(
             '[![npm-version]',
-            badge+'\n'+'[![npm-version]'
+            badge+OS.EOL+'[![npm-version]'
         );
     },
     expected:[
@@ -574,7 +575,7 @@ describe('qa-control', function(){
                 ]);
                 expect(info.projectDir).to.eql(projDir);
                 expect(Object.keys(info.files)).to.eql(['.eslintrc.yml','.gitignore','.jshintrc','LEEME.md','LICENSE','README.md','appveyor.yml','package.json','simple.js','stable-project.js']);
-                expect(info.files['package.json'].content).to.match(/^{\n  "name": "stable-project"/);
+                expect(info.files['package.json'].content).to.match(/^{\r?\n  "name": "stable-project"/);
                 expect(info.packageJson.name).to.be('stable-project');
                 expect(info.packageJson["qa-control"]["run-in"]).to.eql("server");
                 expect(info.packageJson["qa-control"]["test-appveyor"]).to.eql(true);
@@ -955,6 +956,7 @@ describe('qa-control main', function(){
                                       +'el archivo de workflow "param1" difiere del template de qa-control\n'
                                       +'qa-control debe estar en devDependencies con la misma versión que qa-control.package-version\n'
                                       +'La versión de qa-control en devDependencies es "param1" pero se esperaba "param2"\n'
+                                      +'Falta el script "test-ci" en package.json\n'
                                       +'¡Qué --bail(e)! Podrían haber más problemas, correr de nuevo después de corregir estos\n');
                 done();
             }).catch(done);
@@ -969,6 +971,7 @@ describe('qa-control main', function(){
                                        +'packageJson.repository must be in format /{[-a-zA-Z0-9_.]+}/[-a-zA-Z0-9_.]+/\n'
                                        +'qa-control must be in devDependencies with the same version as qa-control.package-version\n'
                                        +'qa-control version in devDependencies is "param1" but expected "param2"\n'
+                                       +'lack of test-ci script in package.json\n'
                                        +'--bail(ing)! There could be more issues\n' // TODO: esto debería estar abajo
                                        +'deprecated version\n'
                                        +'invalid value param1 in parameter param2 valid values param3\n'
