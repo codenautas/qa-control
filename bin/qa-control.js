@@ -189,6 +189,7 @@ qaControl.checkDepVerNumberFormat = function checkDepVerNumberFormat(info) {
 qaControl.nodeVerInTravisRE = /[678]/;
 
 qaControl.verbose = false;
+qaControl.fixMode = false;
 qaControl.cucardas_always = false;
 qaControl.repoIs = null;
 qaControl.definition = require("./definition/definition.js")(qaControl);
@@ -252,12 +253,17 @@ var configReading=(function(){
     console.log('stack',err.stack);
 });
 
-qaControl.compareContentIsOk = function (content1, content2, id, message) {
-    const result = qaControl.fixEOL(content1) == qaControl.fixEOL(content2);
+qaControl.compareOrFixContent = function (obtained, expected, pathToFix, id, message) {
+    const result = qaControl.fixEOL(obtained) == qaControl.fixEOL(expected);
     if (qaControl.verbose || process.env.VERBOSE == id && !result) {
-        console.error('!compareContentIsOk:', id, message ?? '');
-        fs.writeFileSync(`local-${id}.content1.txt`, content1, 'utf8');
-        fs.writeFileSync(`local-${id}.content2.txt`, content2, 'utf8');
+        console.error('!compareOrFixContent:', id, message ?? '');
+        fs.writeFileSync(`local-${id}.obtained.txt`, obtained, 'utf8');
+        fs.writeFileSync(`local-${id}.expected.txt`, expected, 'utf8');
+    }
+    if (!result && qaControl.fixMode && pathToFix) {
+        fs.writeFileSync(pathToFix, expected, 'utf8');
+        console.log('FIXED:', pathToFix);
+        return true;
     }
     return result;
 }
@@ -418,6 +424,7 @@ qaControl.stringizeWarnings = function stringizeWarnings(warns, lang) {
 
 qaControl.controlProject=function controlProject(projectDir, opts){
     qaControl.verbose = opts && opts.verbose;
+    qaControl.fixMode = opts && opts.fix;
     qaControl.cucardas_always = opts && opts.cucardas;
     qaControl.repoIs = (opts && opts.repoIs) || null;
     return Promise.resolve().then(function(){
