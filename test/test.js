@@ -1072,3 +1072,84 @@ describe('qa-control --fix', function(){
         });
     });
 });
+
+describe('qa-control coverage (group A)', function(){
+    describe('main()', function(){
+        var realWrite;
+        beforeEach(function(){
+            realWrite = process.stdout.write;
+            process.stdout.write = function(){ return true; };
+        });
+        afterEach(function(){
+            process.stdout.write = realWrite;
+        });
+        it('lists available languages with listLangs', function(){
+            var captured = '';
+            process.stdout.write = function(chunk){ captured += chunk; return true; };
+            return qaControl.main({listLangs:true}).then(function(){
+                process.stdout.write = realWrite;
+                expect(captured).to.match(/\ben\b/);
+                expect(captured).to.match(/\bes\b/);
+            });
+        });
+        it('controls a project and returns the warnings string', function(){
+            return qaControl.main({projectDir:'test/fixtures/stable-project-last-version'}).then(function(warnString){
+                process.stdout.write = realWrite;
+                expect(warnString).to.eql('');
+            }).then(function(){
+                return fs.unlink('test/fixtures/stable-project-last-version/cucardas.log').catch(function(err){
+                    if(err.code !== 'ENOENT') { throw err; }
+                });
+            });
+        });
+    });
+    describe('rule: files_in_package_json', function(){
+        it('reports an invalid files section covering its different reasons', function(){
+            var check = qaControl.definition.rules.files_in_package_json.checks[0].warnings;
+            var info = /** @type {any} */ ({
+                projectDir: 'test/fixtures/stable-project-last-version',
+                files: {},
+                packageJson: { files: ['package.json', '.gitignore', 'simple.js', 'nonexistent.txt'] }
+            });
+            expect(stripScoring(check(info))).to.eql([{warning:'invalid_files_section_in_package_json'}]);
+        });
+    });
+    describe('rule: qa_control_dev_dependency', function(){
+        var check = qaControl.definition.rules.qa_control_dev_dependency.checks[0].warnings;
+        var toolVersion = require('../package.json').version;
+        it('warns when qa-control is missing in devDependencies', function(){
+            var info = /** @type {any} */ ({ packageJson: { 'qa-control': { gha:'ci' }, devDependencies: {} } });
+            expect(stripScoring(check(info))).to.eql([{warning:'lack_of_qa_control_in_dev_dependencies'}]);
+        });
+        it('warns when the qa-control devDependency version does not match', function(){
+            var info = /** @type {any} */ ({ packageJson: { 'qa-control': { gha:'ci' }, devDependencies: { 'qa-control':'0.0.1' } } });
+            expect(stripScoring(check(info))).to.eql([
+                {warning:'qa_control_version_mismatch_in_dev_dependencies_1_expected_2', params:['0.0.1', '^'+toolVersion]}
+            ]);
+        });
+        it('accepts a matching qa-control devDependency version', function(){
+            var info = /** @type {any} */ ({ packageJson: { 'qa-control': { gha:'ci' }, devDependencies: { 'qa-control':'^'+toolVersion } } });
+            expect(stripScoring(check(info))).to.eql([]);
+        });
+    });
+    describe('rule: use_strict', function(){
+        it('skips js files without loaded content', function(){
+            var check = qaControl.definition.rules.use_strict.checks[0].warnings;
+            var info = /** @type {any} */ ({ files: { 'x.js': {} } });
+            expect(check(info)).to.eql([]);
+        });
+    });
+    describe('generateCucardas', function(){
+        it('generates cucardas for a prerelease (beta) version', function(){
+            var packageJson = {
+                name: 'qa-control',
+                version: '1.0.0-beta.1',
+                repository: 'codenautas/qa-control',
+                'qa-control': {}
+            };
+            var out = qaControl.generateCucardas(qaControl.definition.cucardas, packageJson);
+            expect(out).to.be.a('string');
+            expect(out.length > 0).to.be(true);
+        });
+    });
+});
