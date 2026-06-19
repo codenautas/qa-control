@@ -776,6 +776,12 @@ module.exports = function(qaControl){
                                         return [];
                                     }).catch(function(err) {
                                         if(err.code === 'ENOENT') {
+                                            if(qaControl.fixMode) {
+                                                var newPath = Path.join(projWorkflowsDir, fileName);
+                                                fs.outputFileSync(newPath, qaContent, 'utf8');
+                                                console.log('CREATED:', newPath);
+                                                return [];
+                                            }
                                             return [{warning:'lack_of_workflow_file_1', params:[fileName], scoring:{workflows:1}}];
                                         }
                                         throw err;
