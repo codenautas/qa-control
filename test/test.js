@@ -1007,3 +1007,68 @@ describe('qa-control main', function(){
         });
     });
 });
+
+describe('qa-control --fix', function(){
+    var qaWorkflowsDir = Path.join(__dirname, '../.github/workflows');
+    // Las carpetas/archivos de prueba cuelgan de la raíz prefijados con "local-"
+    // (ignorados por .gitignore). No se borran en afterEach: si un test falla,
+    // queda lo generado para poder inspeccionarlo.
+    var localBase = Path.join(__dirname, '..', 'local-test-fix-mode');
+    describe('compareOrFixContent (without fix mode)', function(){
+        var noWritePath = Path.join(localBase, 'must-not-be-written.txt');
+        beforeEach(function(){
+            qaControl.fixMode = false;
+            qaControl.verbose = false;
+            fs.ensureDirSync(localBase);
+            fs.removeSync(noWritePath);
+        });
+        it('returns true when obtained and expected are equal', function(){
+            expect(qaControl.compareOrFixContent('hello\n', 'hello\n', noWritePath, 'eq')).to.be(true);
+            expect(fs.existsSync(noWritePath)).to.be(false);
+        });
+        it('returns true when they differ only in EOL', function(){
+            expect(qaControl.compareOrFixContent('a\r\nb\r\n', 'a\nb\n', noWritePath, 'eol')).to.be(true);
+            expect(fs.existsSync(noWritePath)).to.be(false);
+        });
+        it('returns false and does not write when content differs', function(){
+            expect(qaControl.compareOrFixContent('obtained content', 'expected content', noWritePath, 'diff')).to.be(false);
+            expect(fs.existsSync(noWritePath)).to.be(false);
+        });
+    });
+    describe('controlProject in fix mode', function(){
+        var tempDir;
+        function prepare(name){
+            tempDir = Path.join(localBase, name);
+            fs.removeSync(tempDir);
+            fs.copySync(Path.join(__dirname, 'fixtures', 'with-wrong-qa-control-version'), tempDir);
+        }
+        afterEach(function(){
+            qaControl.fixMode = false;
+        });
+        function sameAsTemplate(fileName){
+            var projContent = fs.readFileSync(Path.join(tempDir, '.github/workflows', fileName), 'utf8');
+            var qaContent = fs.readFileSync(Path.join(qaWorkflowsDir, fileName), 'utf8');
+            return qaControl.fixEOL(projContent) === qaControl.fixEOL(qaContent);
+        }
+        it('fixes differing workflow files and creates missing ones', function(){
+            prepare('fixes-differing-and-missing');
+            return qaControl.controlProject(tempDir, {fix:true}).then(function(){
+                expect(sameAsTemplate('build-and-test.yml')).to.be(true);
+                expect(sameAsTemplate('qa-control.yml')).to.be(true);
+                expect(fs.existsSync(Path.join(tempDir, '.github/workflows/publish.yml'))).to.be(true);
+                expect(sameAsTemplate('publish.yml')).to.be(true);
+            });
+        });
+        it('leaves no workflow warnings after fixing', function(){
+            prepare('no-warnings-after-fix');
+            return qaControl.controlProject(tempDir, {fix:true}).then(function(){
+                return qaControl.controlProject(tempDir, {});
+            }).then(function(warnings){
+                var workflowWarnings = warnings.filter(function(w){
+                    return w.warning === 'workflow_file_1_differs' || w.warning === 'lack_of_workflow_file_1';
+                });
+                expect(workflowWarnings).to.eql([]);
+            });
+        });
+    });
+});
