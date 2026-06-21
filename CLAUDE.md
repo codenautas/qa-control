@@ -71,3 +71,8 @@ _Hay que tratar de mantener actualizada esta sección_
 - Se detectan dependencias no recomendadas: `best-promise`, `lodash`, `promise-plus`.
 - Se comprueba que `.travis.yml` pruebe al menos Node 4 y 6, y que estas versiones no tengan fallos permitidos.
 - Se comprueba que los archivos de traducción de `multilang` estén sincronizados con el `README.md`/`LEEME.md` principal.
+
+### 8. Excepciones de reglas (`silenced`)
+- En la sección `qa-control` del `package.json` se puede declarar un array `silenced` con los nombres internos de los warnings que se quieren suprimir.
+- Cada warning suprimido se filtra del resultado (no se reporta), pero la regla igual se evalúa.
+- Ejemplo: el propio `qa-control` no puede tenerse a sí mismo en `devDependencies`, así que silencia `lack_of_qa_control_in_dev_dependencies`.
