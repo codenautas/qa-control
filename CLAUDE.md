@@ -53,7 +53,7 @@ _Hay que tratar de mantener actualizada esta sección_
 
 ### 4. Badge y cucardas en README/LEEME
 - Debe existir el marcador `<!-- cucardas -->` en el documento principal.
-- Se valida la presencia y el formato de badges/cucardas obligatorias como: `npm-version`, `downloads`, `build`, `dependencies`, `qa-control` y badges de estabilidad (`extending`, `stable`, etc.).
+- Se valida la presencia y el formato de badges/cucardas obligatorias como: `npm-version`, `downloads`, `build`, `dependencies`, `qa-control`.
 - También hay reglas especiales para badges de `linux`, `windows`, `coverage` y `climate` según los metadatos del proyecto.
 
 ### 5. Validación de primeras líneas de archivo principal

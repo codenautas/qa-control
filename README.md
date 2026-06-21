@@ -3,7 +3,6 @@
 Quality assurance tool for node/npm projects
 
 
-![extending](https://img.shields.io/badge/stability-extending-orange.svg)
 [![npm-version](https://img.shields.io/npm/v/qa-control.svg)](https://npmjs.org/package/qa-control)
 [![downloads](https://img.shields.io/npm/dm/qa-control.svg)](https://npmjs.org/package/qa-control)
 [![build](https://github.com/codenautas/qa-control/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/codenautas/qa-control/actions/workflows/build-and-test.yml)
@@ -44,7 +43,7 @@ Done without warnings!
 ```
 
 
-## Usage (code)
+## Advenced  usage
 
 
 ```js
