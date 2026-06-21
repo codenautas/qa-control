@@ -63,6 +63,7 @@ qaControl.msgs={
         wrong_use_strict_spelling_in_file_1: '"use strict" está mal escrito en "$1"',
         lack_of_files_section_in_package_json: 'Falta la sección "files" en package.json',
         invalid_files_section_in_package_json: 'La sección "files" en package.json es inválida',
+        dot_file_1_in_files_section: 'El archivo "$1" en la sección "files" de package.json es un archivo .dot',
         incorrect_ecmascript_versions_in_package_json: 'Las versiones de ECMAScript utilizadas en package.json son incorrectas',
         non_recomended_dependency_1_in_package_json: 'Dependencia no recomendada "$1" en package.json',
         lack_of_workflow_file_1: 'falta el archivo de workflow "$1"',
@@ -253,12 +254,16 @@ var configReading=(function(){
     console.log('stack',err.stack);
 });
 
+qaControl.dumpComparison = function (id, obtained, expected, message) {
+    console.error('!compareOrFixContent:', id, message ?? '');
+    fs.writeFileSync(`local-${id}.obtained.txt`, obtained, 'utf8');
+    fs.writeFileSync(`local-${id}.expected.txt`, expected, 'utf8');
+}
+
 qaControl.compareOrFixContent = function (obtained, expected, pathToFix, id, message) {
-    const result = qaControl.fixEOL(obtained) == qaControl.fixEOL(expected);
-    if (qaControl.verbose || process.env.VERBOSE == id && !result) {
-        console.error('!compareOrFixContent:', id, message ?? '');
-        fs.writeFileSync(`local-${id}.obtained.txt`, obtained, 'utf8');
-        fs.writeFileSync(`local-${id}.expected.txt`, expected, 'utf8');
+    const result = qaControl.fixEOL(obtained) === qaControl.fixEOL(expected);
+    if (qaControl.verbose || process.env.VERBOSE === id && !result) {
+        qaControl.dumpComparison(id, obtained, expected, message);
     }
     if (!result && qaControl.fixMode && pathToFix) {
         fs.writeFileSync(pathToFix, expected, 'utf8');

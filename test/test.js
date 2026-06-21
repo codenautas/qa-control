@@ -950,6 +950,7 @@ describe('qa-control main', function(){
                                       +'"use strict" está mal escrito en "param1"\n'
                                       +'Falta la sección "files" en package.json\n'
                                       +'La sección "files" en package.json es inválida\n'
+                                      +'El archivo "param1" en la sección "files" de package.json es un archivo .dot\n'
                                       +'Las versiones de ECMAScript utilizadas en package.json son incorrectas\n'
                                       +'Dependencia no recomendada "param1" en package.json\n'
                                       +'falta el archivo de workflow "param1"\n'
@@ -998,6 +999,7 @@ describe('qa-control main', function(){
                                        +'wrong use strict spelling in file param1\n'
                                        +'lack of files section in package json\n'
                                        +'invalid files section in package json\n'
+                                       +'dot file param1 in files section\n'
                                        +'incorrect ecmascript versions in package json\n'
                                        +'non recomended dependency param1 in package json\n'
                                        +'lack of workflow file param1\n'
@@ -1111,7 +1113,10 @@ describe('qa-control coverage (group A)', function(){
                 files: {},
                 packageJson: { files: ['package.json', '.gitignore', 'simple.js', 'nonexistent.txt'] }
             });
-            expect(stripScoring(check(info))).to.eql([{warning:'invalid_files_section_in_package_json'}]);
+            expect(stripScoring(check(info))).to.eql([
+                {warning:'dot_file_1_in_files_section', params:['.gitignore']},
+                {warning:'invalid_files_section_in_package_json'}
+            ]);
         });
     });
     describe('rule: qa_control_dev_dependency', function(){

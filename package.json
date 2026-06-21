@@ -71,6 +71,6 @@
     "type": "cmd-tool",
     "ecmaVersion": 6,
     "gha": "all",
-    "silenced": ["lack_of_qa_control_in_dev_dependencies"]
+    "silenced": ["lack_of_qa_control_in_dev_dependencies", "dot_file_1_in_files_section"]
   }
 }

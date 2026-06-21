@@ -608,7 +608,7 @@ module.exports = function(qaControl){
                             for(var fileName in info.packageJson.files) {
                                 var file = info.packageJson.files[fileName];
                                 if(file==='package.json') { detail.push('"'+file+'" is always included by npm'); }
-                                if(file.match(/^(\.)/)) { detail.push('"'+file+'" is a .dot file'); }
+                                if(file.match(/^(\.)/)) { warns.push({warning:'dot_file_1_in_files_section', params:[file], scoring:{mandatories:1}}); }
                                 if(file in qaFiles) {
                                     detail.push('"'+file+'" cannot be in files section');
                                 } else {
