@@ -1153,3 +1153,69 @@ describe('qa-control coverage (group A)', function(){
         });
     });
 });
+
+describe('qa-control coverage (group B: verbose branches)', function(){
+    var stableInfo;
+    var realLog, realErr, realWrite;
+    before(function(){
+        return qaControl.loadProject('test/fixtures/stable-project').then(function(info){
+            stableInfo = info;
+        });
+    });
+    beforeEach(function(){
+        qaControl.verbose = true;
+        qaControl.fixMode = false;
+        realLog = console.log;
+        realErr = console.error;
+        realWrite = process.stdout.write;
+        console.log = function(){};
+        console.error = function(){};
+        process.stdout.write = function(){ return true; };
+    });
+    afterEach(function(){
+        console.log = realLog;
+        console.error = realErr;
+        process.stdout.write = realWrite;
+        qaControl.verbose = false;
+    });
+    it('stringizeWarnings prefixes WARNING in verbose mode', function(){
+        return qaControl.stringizeWarnings([{warning:'no_package_json'}], 'en').then(function(str){
+            expect(str.indexOf('WARNING: ')).to.be(0);
+        });
+    });
+    it('compareOrFixContent dumps obtained/expected files in verbose mode', function(){
+        var id = 'group-b-verbose-dump';
+        fs.removeSync('local-'+id+'.obtained.txt');
+        fs.removeSync('local-'+id+'.expected.txt');
+        var result = qaControl.compareOrFixContent('aaa', 'bbb', null, id, 'msg');
+        expect(result).to.be(false);
+        expect(fs.existsSync('local-'+id+'.obtained.txt')).to.be(true);
+        expect(fs.existsSync('local-'+id+'.expected.txt')).to.be(true);
+    });
+    it('use_strict logs violation details in verbose mode', function(){
+        var check = qaControl.definition.rules.use_strict.checks[0].warnings;
+        var info = /** @type {any} */ ({ files: { 'a.js': { content: 'function f() {\n    "use spirit";\n}\n' } } });
+        expect(stripScoring(check(info))).to.eql([{warning:'wrong_use_strict_spelling_in_file_1', params:['a.js']}]);
+    });
+    it('files_in_package_json logs invalid detail in verbose mode', function(){
+        var check = qaControl.definition.rules.files_in_package_json.checks[0].warnings;
+        var info = /** @type {any} */ ({ projectDir:'test/fixtures/stable-project-last-version', files:{}, packageJson:{ files:['nonexistent.txt'] } });
+        expect(stripScoring(check(info))).to.eql([{warning:'invalid_files_section_in_package_json'}]);
+    });
+    it('first_lines logs the diff in verbose mode', function(){
+        var check = qaControl.definition.rules.first_lines.checks[0].warnings;
+        var info = /** @type {any} */ ({
+            packageJson: { name:'nombreDelModulo', main:'index.js', 'qa-control':{ 'run-in':'server', type:'lib' } },
+            files: { 'index.js': { content: 'totally wrong first line\n' } }
+        });
+        expect(stripScoring(check(info))).to.eql([{warning:'first_lines_does_not_match_in_file_1', params:['index.js']}]);
+    });
+    it('eslint logs details in verbose mode', function(){
+        var check = qaControl.definition.rules.eslint.checks[0].warnings;
+        var info = cloneProject(stableInfo);
+        info.files['simple.js'].content = "var Promise = require('promise');\n\n" + info.files['simple.js'].content;
+        var warns = stripScoring(check(info));
+        var hasEslint = warns.some(function(w){ return w.warning==='eslint_warnings_in_file_1' && w.params[0]==='simple.js'; });
+        expect(hasEslint).to.be(true);
+    });
+});
