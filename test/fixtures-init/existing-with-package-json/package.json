@@ -15,7 +15,7 @@
     "eslint": "1.10.3",
     "fs-extra": "0.26.3",
     "fs-promise": "0.3.1",
-    "js-yaml": "3.4.6",
+    "js-yaml": "3.13.1",
     "jshint": "2.8.0",
     "init-package-json": "1.9.3",
     "lodash": "3.10.1",
