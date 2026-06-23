@@ -68,6 +68,7 @@ qaControl.msgs={
         non_recomended_dependency_1_in_package_json: 'Dependencia no recomendada "$1" en package.json',
         lack_of_workflow_file_1: 'falta el archivo de workflow "$1"',
         workflow_file_1_differs: 'el archivo de workflow "$1" difiere del template de qa-control',
+        appveyor_yml_differs: 'el archivo appveyor.yml difiere del template de qa-control',
         lack_of_qa_control_in_dev_dependencies: 'qa-control debe estar en devDependencies con la misma versión que qa-control.package-version',
         qa_control_version_mismatch_in_dev_dependencies_1_expected_2: 'La versión de qa-control en devDependencies es "$1" pero se esperaba "$2"',
         "lack_of_test_ci_script_in_package_json": 'Falta el script "test-ci" en package.json',

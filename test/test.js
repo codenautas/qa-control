@@ -340,6 +340,16 @@ var fixtures=[{
     ]
 },{
     base:'stable-project',
+    title:'appveyor.yml must match qa-control template',
+    test:'appveyor_yml_differs',
+    change:function(info){
+        info.files['appveyor.yml'].content = info.files['appveyor.yml'].content + '\n# linea que difiere del template\n';
+    },
+    expected:[
+        { warning:'appveyor_yml_differs' }
+    ]
+},{
+    base:'stable-project',
     title:'must handle repository as an object (#34)',
     test:'lack_of_mandatory_file_1',
     change:function(info){
@@ -955,6 +965,7 @@ describe('qa-control main', function(){
                                       +'Dependencia no recomendada "param1" en package.json\n'
                                       +'falta el archivo de workflow "param1"\n'
                                       +'el archivo de workflow "param1" difiere del template de qa-control\n'
+                                      +'el archivo appveyor.yml difiere del template de qa-control\n'
                                       +'qa-control debe estar en devDependencies con la misma versión que qa-control.package-version\n'
                                       +'La versión de qa-control en devDependencies es "param1" pero se esperaba "param2"\n'
                                       +'Falta el script "test-ci" en package.json\n'
@@ -1003,7 +1014,8 @@ describe('qa-control main', function(){
                                        +'incorrect ecmascript versions in package json\n'
                                        +'non recomended dependency param1 in package json\n'
                                        +'lack of workflow file param1\n'
-                                       +'workflow file param1 differs\n');
+                                       +'workflow file param1 differs\n'
+                                       +'appveyor yml differs\n');
                 done();
             }).catch(done);
         });
