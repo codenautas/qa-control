@@ -62,7 +62,8 @@
   },
   "files": [
     "bin",
-    ".github/workflows"
+    ".github/workflows",
+    "appveyor.yml"
   ],
   "qa-control": {
     "package-version": "0.3.0",
