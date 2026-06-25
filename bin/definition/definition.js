@@ -707,7 +707,7 @@ module.exports = function(qaControl){
                                         if(err.code === 'ENOENT') {
                                             if(qaControl.fixMode) {
                                                 var newPath = Path.join(projWorkflowsDir, fileName);
-                                                fs.outputFileSync(newPath, qaContent, 'utf8');
+                                                fs.outputFileSync(newPath, qaControl.fixEOL(qaContent), 'utf8');
                                                 console.log('CREATED:', newPath);
                                                 return [];
                                             }

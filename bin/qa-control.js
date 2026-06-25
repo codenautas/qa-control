@@ -267,7 +267,7 @@ qaControl.compareOrFixContent = function (obtained, expected, pathToFix, id, mes
         qaControl.dumpComparison(id, obtained, expected, message);
     }
     if (!result && qaControl.fixMode && pathToFix) {
-        fs.writeFileSync(pathToFix, expected, 'utf8');
+        fs.writeFileSync(pathToFix, qaControl.fixEOL(expected), 'utf8');
         console.log('FIXED:', pathToFix);
         return true;
     }
