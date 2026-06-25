@@ -384,7 +384,13 @@ module.exports = function(qaControl){
                             }
                         }
                          /*jshint forin: true */
-                        if(warns.length || qaControl.cucardas_always) {
+                        if(qaControl.fixMode && readme.indexOf(qaControl.cucaMarker) !== -1) {
+                            if(qaControl.fixCucardas(info)) {
+                                // las cucardas quedaron corregidas en el documento principal: no se reportan sus warnings
+                                warns = [];
+                            }
+                        }
+                        if((warns.length && !qaControl.fixMode) || qaControl.cucardas_always) {
                             fs.writeFile(Path.normalize(info.projectDir+'/cucardas.log'), qaControl.generateCucardas(cucardas, info.packageJson));
                         }
                         return warns;

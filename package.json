@@ -26,22 +26,22 @@
     "uuid": ">=14.0.0"
   },
   "dependencies": {
-    "appease": "^0.0.2",
-    "best-globals": "^2.1.5",
-    "commander": "^14.0.3",
-    "eslint": "^10.4.0",
+    "appease": "^0.1.4",
+    "best-globals": "^2.2.0",
+    "commander": "^15.0.0",
+    "eslint": "^10.5.0",
     "fs-extra": "^11.3.5",
-    "js-yaml": "^4.2.0",
-    "multilang": "^1.2.1",
-    "semver": "^7.8.0",
+    "js-yaml": "^5.1.0",
+    "multilang": "^1.2.3",
+    "semver": "^7.8.5",
     "strip-bom-string": "^1.0.0"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
-    "@types/node": "^25.9.0",
+    "@types/node": "^26.0.1",
     "expect-called": "^0.4.0",
     "expect.js": "^0.3.1",
-    "mocha": "^11.7.5",
+    "mocha": "^11.7.6",
     "nyc": "^18.0.0",
     "sinon": "^22.0.0",
     "typescript": "^6.0.3"
@@ -75,7 +75,8 @@
     "gha": "all",
     "silenced": [
       "lack_of_qa_control_in_dev_dependencies",
-      "dot_file_1_in_files_section"
+      "dot_file_1_in_files_section",
+      "invalid_files_section_in_package_json"
     ]
   }
 }

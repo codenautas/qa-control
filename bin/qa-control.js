@@ -145,6 +145,36 @@ qaControl.generateCucardas = function generateCucardas(cucardas, packageJson) {
     return cucaFileContent;
 };
 
+// reemplaza el bloque de cucardas del documento principal por el canónico (generateCucardas).
+// Solo actúa si existe el marcador. Devuelve true si modificó el archivo.
+/**
+ * @param {ProjectInfo} info
+ * @returns {boolean}
+ */
+qaControl.fixCucardas = function fixCucardas(info) {
+    var mainDocName = qaControl.mainDoc();
+    var content = info.files[mainDocName].content;
+    if(content.indexOf(qaControl.cucaMarker) === -1) { return false; }
+    var cucardas = qaControl.definition.cucardas;
+    var expectedLines = qaControl.generateCucardas(cucardas, info.packageJson).replace(/\n+$/,'').split('\n');
+    var lines = content.split(/\r\n|\r|\n/);
+    var idx = -1;
+    for(var i=0; i<lines.length; i++) {
+        if(lines[i].indexOf(qaControl.cucaMarker) !== -1) { idx = i; break; }
+    }
+    // el bloque va desde el marcador hasta la primera línea en blanco (exclusive)
+    var end = idx+1;
+    while(end < lines.length && lines[end].trim() !== '') { end++; }
+    var newContent = lines.slice(0, idx).concat(expectedLines, lines.slice(end)).join('\n');
+    if(qaControl.fixEOL(newContent) === qaControl.fixEOL(content)) { return false; }
+    var fixPath = Path.join(info.projectDir, mainDocName);
+    var fixedContent = qaControl.fixEOL(newContent);
+    fs.writeFileSync(fixPath, fixedContent, 'utf8');
+    info.files[mainDocName].content = fixedContent;
+    console.log('FIXED:', fixPath);
+    return true;
+};
+
 /*eslint-disable complexity */
 qaControl.checkLintConfig = function checkLintConfig(info, lintConfigName, warnLackOf, requiredOptions, warnIncorrect, scoring) {
     var warns = [];

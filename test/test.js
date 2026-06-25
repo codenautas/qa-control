@@ -1084,6 +1084,30 @@ describe('qa-control --fix', function(){
                 expect(workflowWarnings).to.eql([]);
             });
         });
+        it('fixes a broken cucarda in the main doc and syncs README in the same run', function(){
+            prepare('fixes-cucardas');
+            var leemePath = Path.join(tempDir, 'LEEME.md');
+            var readmePath = Path.join(tempDir, 'README.md');
+            // rompo el formato de la cucarda npm-version solo en el documento principal
+            var broken = fs.readFileSync(leemePath, 'utf8').replace('npm/v/stable-project.svg', 'npm/v/stable-project-BROKEN.svg');
+            fs.writeFileSync(leemePath, broken, 'utf8');
+            return qaControl.controlProject(tempDir, {fix:true}).then(function(){
+                // la regla cucardas corrige LEEME.md antes de que multilang regenere README.md
+                expect(fs.readFileSync(leemePath, 'utf8')).to.contain('npm/v/stable-project.svg');
+                expect(fs.readFileSync(leemePath, 'utf8')).to.not.contain('BROKEN');
+                expect(fs.readFileSync(readmePath, 'utf8')).to.contain('npm/v/stable-project.svg');
+                expect(fs.readFileSync(readmePath, 'utf8')).to.not.contain('BROKEN');
+                return qaControl.controlProject(tempDir, {});
+            }).then(function(warnings){
+                var cucardaWarnings = warnings.filter(function(w){
+                    return w.warning === 'wrong_format_in_cucarda_1' ||
+                        w.warning === 'lack_of_mandatory_cucarda_1' ||
+                        w.warning === 'forbidden_cucarda_1' ||
+                        w.warning === 'lack_of_cucarda_marker_in_readme';
+                });
+                expect(cucardaWarnings).to.eql([]);
+            });
+        });
     });
 });
 
