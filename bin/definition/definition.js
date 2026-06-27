@@ -43,7 +43,7 @@ function softRegExp(realRegex) {
 
 function usingGHA(packageJson){
     var qaSection = packageJson?.['qa-control'];
-    return qaSection && qaSection.gha && qaSection.gha != 'skip' || qaSection.profile && qaSection.profile != "minimum";
+    return qaSection && qaSection.gha && qaSection.gha !== 'skip' || qaSection.profile && qaSection.profile !== "minimum";
 }
 
 /**
@@ -740,7 +740,11 @@ module.exports = function(qaControl){
                         var qaAppveyorPath = Path.join(__dirname, '../../appveyor.yml');
                         var projAppveyorPath = Path.join(info.projectDir, 'appveyor.yml');
                         return fs.readFile(qaAppveyorPath, 'utf8').then(function(qaContent) {
-                            if(!qaControl.compareOrFixContent(appveyorFile.content, qaContent, projAppveyorPath, 'appveyor_yml_differs', 'appveyor.yml')) {
+                            var obtained = appveyorFile.content;
+                            var match = /^before_test\s*:/m.exec(obtained);
+                            var above = match ? obtained.slice(0, match.index) : obtained;
+                            var preserve = match ? obtained.slice(match.index) : undefined;
+                            if(!qaControl.compareOrFixContent(above, qaContent, projAppveyorPath, 'appveyor_yml_differs', 'appveyor.yml', preserve)) {
                                 return [{warning:'appveyor_yml_differs', scoring:{conventions:1}}];
                             }
                             return [];

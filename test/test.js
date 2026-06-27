@@ -350,6 +350,14 @@ var fixtures=[{
     ]
 },{
     base:'stable-project',
+    title:'appveyor.yml with before_test must validate only the part above',
+    test:'appveyor_yml_differs',
+    change:function(info){
+        info.files['appveyor.yml'].content = info.files['appveyor.yml'].content + '\nbefore_test:\n  - echo hola\n';
+    },
+    expected:[]
+},{
+    base:'stable-project',
     title:'must handle repository as an object (#34)',
     test:'lack_of_mandatory_file_1',
     change:function(info){
@@ -1106,6 +1114,22 @@ describe('qa-control --fix', function(){
                         w.warning === 'lack_of_cucarda_marker_in_readme';
                 });
                 expect(cucardaWarnings).to.eql([]);
+            });
+        });
+        it('fixes appveyor.yml preserving the before_test section', function(){
+            prepare('fixes-appveyor-before-test');
+            var appveyorPath = Path.join(tempDir, 'appveyor.yml');
+            var qaAppveyor = fs.readFileSync(Path.join(__dirname, '..', 'appveyor.yml'), 'utf8');
+            // rompo la parte de arriba y agrego un before_test que debe preservarse
+            var broken = qaAppveyor.replace('build: off', 'build: on') + '\nbefore_test:\n  - echo hola\n';
+            fs.writeFileSync(appveyorPath, broken, 'utf8');
+            return qaControl.controlProject(tempDir, {fix:true}).then(function(){
+                var fixed = fs.readFileSync(appveyorPath, 'utf8');
+                var match = /^before_test\s*:/m.exec(fixed);
+                expect(match).to.not.be(null);
+                var above = fixed.slice(0, match.index);
+                expect(qaControl.fixEOL(above)).to.eql(qaControl.fixEOL(qaAppveyor));
+                expect(fixed).to.contain('echo hola');
             });
         });
     });

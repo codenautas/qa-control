@@ -291,13 +291,13 @@ qaControl.dumpComparison = function (id, obtained, expected, message) {
     fs.writeFileSync(`local-${id}.expected.txt`, expected, 'utf8');
 }
 
-qaControl.compareOrFixContent = function (obtained, expected, pathToFix, id, message) {
+qaControl.compareOrFixContent = function (obtained, expected, pathToFix, id, message, preserveSuffix) {
     const result = qaControl.fixEOL(obtained) === qaControl.fixEOL(expected);
     if (qaControl.verbose || process.env.VERBOSE === id && !result) {
         qaControl.dumpComparison(id, obtained, expected, message);
     }
     if (!result && qaControl.fixMode && pathToFix) {
-        fs.writeFileSync(pathToFix, qaControl.fixEOL(expected), 'utf8');
+        fs.writeFileSync(pathToFix, qaControl.fixEOL(expected) + (preserveSuffix != null ? qaControl.fixEOL(preserveSuffix) : ''), 'utf8');
         console.log('FIXED:', pathToFix);
         return true;
     }
