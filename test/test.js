@@ -169,7 +169,7 @@ var fixtures=[{
     ]
 },{
     base:'stable-project',
-    title:'missing optional cucardas in README.md must not create warnings (#8)',
+    title:'missing applicable cucardas in README.md create warnings (#8)',
     test:'lack_of_mandatory_cucarda_1',
     change:function(info){
         var readme=info.files['LEEME.md'].content;
@@ -180,6 +180,8 @@ var fixtures=[{
                                                 .replace('![climate]','');
     },
     expected:[
+        { warning:'lack_of_mandatory_cucarda_1',params:['windows']},
+        { warning:'lack_of_mandatory_cucarda_1',params:['coverage']},
         { warning:'readme_multilang_not_sincronized_with_file_1', params:['README.md'] }
     ]
 },{
@@ -953,6 +955,7 @@ describe('qa-control main', function(){
                                       +'falta la cucarda oblicatoria param1\n'
                                       +'la cucarda "param1" tiene formato incorrecto\n'
                                       +'la cucarda "param1" no debe usarse en README.md\n'
+                                      +'el bloque de cucardas difiere del esperado (orden, líneas sobrantes o formato)\n'
                                       +'falta la linea obligatoria param1 en el archivo param2\n'
                                       +'param1 no respeta la custombre param2\n'
                                       +'las primeras líneas no coinciden en param1\n'
@@ -1004,6 +1007,7 @@ describe('qa-control main', function(){
                                        +'lack of mandatory cucarda param1\n'
                                        +'wrong format in cucarda param1\n'
                                        +'forbidden cucarda param1\n'
+                                       +'cucardas block differs\n'
                                        +'lack of mandatory line param1 in file param2\n'
                                        +'file param1 does not match custom param2\n'
                                        +'first lines does not match in file param1\n'

@@ -9,6 +9,15 @@
     "warning": "lack_of_mandatory_cucarda_1", "params": ["downloads"]
   },
   {
+    "warning": "lack_of_mandatory_cucarda_1", "params": ["build"]
+  },
+  {
+    "warning": "lack_of_mandatory_cucarda_1", "params": ["coverage"]
+  },
+  {
     "warning": "lack_of_mandatory_cucarda_1", "params": ["security"]
+  },
+  {
+    "warning": "lack_of_mandatory_cucarda_1", "params": ["qa-control"]
   }
 ]

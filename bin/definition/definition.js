@@ -369,7 +369,8 @@ module.exports = function(qaControl){
                                     warns.push({warning:'forbidden_cucarda_1', params:[nombreCucarda], scoring:{cucardas:1}});
                                 }
                             } else if(readme.indexOf(cucaID) === -1) {
-                                if(cucarda.mandatory) {
+                                // pertenece al bloque canónico (igual criterio que generateCucardas): se exige aunque no sea mandatory
+                                if(!cucarda.check || cucarda.check(info.packageJson)) {
                                     warns.push({warning:'lack_of_mandatory_cucarda_1', params:[nombreCucarda], scoring:{cucardas:1}});
                                 }
                             } else {
@@ -384,6 +385,11 @@ module.exports = function(qaControl){
                             }
                         }
                          /*jshint forin: true */
+                        // invariante con --fix: si el fix cambiaría el bloque y ningún warning granular lo reflejó
+                        // (orden, líneas sobrantes, espacios), avisar igual de que hay algo para corregir
+                        if(warns.length === 0 && qaControl.computeCucardasFix(info)) {
+                            warns.push({warning:'cucardas_block_differs', scoring:{cucardas:1}});
+                        }
                         if(qaControl.fixMode && readme.indexOf(qaControl.cucaMarker) !== -1) {
                             if(qaControl.fixCucardas(info)) {
                                 // las cucardas quedaron corregidas en el documento principal: no se reportan sus warnings

@@ -48,6 +48,7 @@ qaControl.msgs={
         lack_of_mandatory_cucarda_1: 'falta la cucarda oblicatoria $1',
         wrong_format_in_cucarda_1: 'la cucarda "$1" tiene formato incorrecto',
         forbidden_cucarda_1: 'la cucarda "$1" no debe usarse en README.md',
+        cucardas_block_differs: 'el bloque de cucardas difiere del esperado (orden, líneas sobrantes o formato)',
         lack_of_mandatory_line_1_in_file_2: 'falta la linea obligatoria $1 en el archivo $2',
         file_1_does_not_match_custom_2: '$1 no respeta la custombre $2',
         first_lines_does_not_match_in_file_1: 'las primeras líneas no coinciden en $1',
@@ -145,16 +146,17 @@ qaControl.generateCucardas = function generateCucardas(cucardas, packageJson) {
     return cucaFileContent;
 };
 
-// reemplaza el bloque de cucardas del documento principal por el canónico (generateCucardas).
-// Solo actúa si existe el marcador. Devuelve true si modificó el archivo.
+// calcula cómo quedaría el documento principal con el bloque de cucardas canónico (generateCucardas).
+// Solo actúa si existe el marcador. Devuelve {mainDocName, fixedContent} si el bloque difiere, o null si ya coincide.
+// Es la única fuente de verdad: la detección la usa para avisar y fixCucardas para escribir.
 /**
  * @param {ProjectInfo} info
- * @returns {boolean}
+ * @returns {{mainDocName:string, fixedContent:string}|null}
  */
-qaControl.fixCucardas = function fixCucardas(info) {
+qaControl.computeCucardasFix = function computeCucardasFix(info) {
     var mainDocName = qaControl.mainDoc();
     var content = info.files[mainDocName].content;
-    if(content.indexOf(qaControl.cucaMarker) === -1) { return false; }
+    if(content.indexOf(qaControl.cucaMarker) === -1) { return null; }
     var cucardas = qaControl.definition.cucardas;
     var expectedLines = qaControl.generateCucardas(cucardas, info.packageJson).replace(/\n+$/,'').split('\n');
     var lines = content.split(/\r\n|\r|\n/);
@@ -166,11 +168,21 @@ qaControl.fixCucardas = function fixCucardas(info) {
     var end = idx+1;
     while(end < lines.length && lines[end].trim() !== '') { end++; }
     var newContent = lines.slice(0, idx).concat(expectedLines, lines.slice(end)).join('\n');
-    if(qaControl.fixEOL(newContent) === qaControl.fixEOL(content)) { return false; }
-    var fixPath = Path.join(info.projectDir, mainDocName);
-    var fixedContent = qaControl.fixEOL(newContent);
-    fs.writeFileSync(fixPath, fixedContent, 'utf8');
-    info.files[mainDocName].content = fixedContent;
+    if(qaControl.fixEOL(newContent) === qaControl.fixEOL(content)) { return null; }
+    return { mainDocName: mainDocName, fixedContent: qaControl.fixEOL(newContent) };
+};
+
+// reemplaza el bloque de cucardas del documento principal por el canónico. Devuelve true si modificó el archivo.
+/**
+ * @param {ProjectInfo} info
+ * @returns {boolean}
+ */
+qaControl.fixCucardas = function fixCucardas(info) {
+    var fix = qaControl.computeCucardasFix(info);
+    if(!fix) { return false; }
+    var fixPath = Path.join(info.projectDir, fix.mainDocName);
+    fs.writeFileSync(fixPath, fix.fixedContent, 'utf8');
+    info.files[fix.mainDocName].content = fix.fixedContent;
     console.log('FIXED:', fixPath);
     return true;
 };
