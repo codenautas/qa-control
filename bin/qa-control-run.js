@@ -17,6 +17,8 @@ program
     .option('-b, --bail', 'Stop at first blocking issue')
     .option('-i, --init', 'Initialize project with qa-control specs')
     .option('-f, --fix', 'Fix files whose content differs from the expected one')
+    .option('--codes', 'Prefix each warning with its internal code (usable in qa-control.silenced)')
+    .option('--silence-all', 'Add every active warning code to qa-control.silenced in package.json')
     .option('--repo-is <owner_or_org/repo>', 'Expected GitHub repository (owner_or_org/repo)')
     .parse(process.argv);
 
@@ -36,6 +38,8 @@ params.lang = opts.lang;
 params.cucardas = opts.cucardas;
 params.bail = opts.bail || false;
 params.fix = opts.fix || false;
+params.codes = opts.codes || false;
+params.silenceAll = opts.silenceAll || false;
 params.repoIs = opts.repoIs || process.env.GITHUB_REPOSITORY || null;
 // console.log(opts); process.exit(0);
 // console.log(params); process.exit(0);

@@ -234,6 +234,7 @@ qaControl.nodeVerInTravisRE = /[678]/;
 
 qaControl.verbose = false;
 qaControl.fixMode = false;
+qaControl.codes = false;
 qaControl.cucardas_always = false;
 qaControl.repoIs = null;
 qaControl.definition = require("./definition/definition.js")(qaControl);
@@ -429,7 +430,7 @@ qaControl.controlInfo=function controlInfo(info, opts){
                         throw new Error("ruleIsAborting");
                     }
                 }
-                info.warningCount += warningsOfThisRule.length;
+                info.warningCount += activeWarnings.length;
                 return resultWarnings;
             });
         });
@@ -464,21 +465,67 @@ qaControl.stringizeWarnings = function stringizeWarnings(warns, lang) {
             if(qaControl.verbose) {
                 warnStr += 'WARNING: ';
             }
+            if(qaControl.codes) {
+                warnStr += warn.warning + ': ';
+            }
             warnStr += msg + '\n';
         });
         return warnStr;
     });
 };
 
+// agrega al array qa-control.silenced del package.json los códigos de los warnings activos
+// detectados en esta corrida (creando el array si no existe). Reescribe package.json con la
+// indentación detectada (opción A: se acepta la normalización de formato, como hace ncu -u).
+/**
+ * @param {ProjectInfo} info
+ * @param {Warning[]} warns
+ */
+qaControl.silenceAll = function silenceAll(info, warns){
+    if(!info.packageJson || !info.files['package.json']) {
+        console.log('SILENCE-ALL: no package.json to update');
+        return;
+    }
+    var qac = info.packageJson['qa-control'];
+    if(!qac) {
+        console.log('SILENCE-ALL: no "qa-control" section in package.json');
+        return;
+    }
+    var current = qac.silenced || [];
+    var added = [];
+    warns.forEach(function(warn){
+        var code = warn.warning;
+        if(code === 'bailing_could_be_more' || code === 'cant_continue') { return; }
+        if(current.indexOf(code) === -1 && added.indexOf(code) === -1) { added.push(code); }
+    });
+    if(!added.length) {
+        console.log('SILENCE-ALL: nothing to silence');
+        return;
+    }
+    qac.silenced = current.concat(added);
+    var raw = info.files['package.json'].content;
+    var indentMatch = raw.match(/\n([ \t]+)\S/);
+    var indent = indentMatch ? indentMatch[1] : '  ';
+    var newContent = qaControl.fixEOL(JSON.stringify(info.packageJson, null, indent) + '\n');
+    var fixPath = Path.join(info.projectDir, 'package.json');
+    fs.writeFileSync(fixPath, newContent, 'utf8');
+    info.files['package.json'].content = newContent;
+    console.log('SILENCED:', fixPath, '-', added.join(', '));
+};
+
 qaControl.controlProject=function controlProject(projectDir, opts){
     qaControl.verbose = opts && opts.verbose;
     qaControl.fixMode = opts && opts.fix;
+    qaControl.codes = opts && opts.codes;
     qaControl.cucardas_always = opts && opts.cucardas;
     qaControl.repoIs = (opts && opts.repoIs) || null;
     return Promise.resolve().then(function(){
         return qaControl.loadProject(projectDir);
     }).then(function(info){
-        return qaControl.controlInfo(info, opts);
+        return qaControl.controlInfo(info, opts).then(function(warns){
+            if(opts && opts.silenceAll) { qaControl.silenceAll(info, warns); }
+            return warns;
+        });
     });
 };
 

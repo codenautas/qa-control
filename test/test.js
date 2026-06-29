@@ -1288,3 +1288,92 @@ describe('qa-control coverage (group B: verbose branches)', function(){
         expect(hasEslint).to.be(true);
     });
 });
+
+describe('qa-control --codes and --silence-all', function(){
+    var localBase = Path.join(__dirname, '..', 'local-test-fix-mode');
+    function prepare(name, base){
+        var tempDir = Path.join(localBase, name);
+        fs.removeSync(tempDir);
+        fs.copySync(Path.join(__dirname, 'fixtures', base), tempDir);
+        return tempDir;
+    }
+    describe('--codes', function(){
+        afterEach(function(){ qaControl.codes = false; });
+        it('prefixes each warning with its internal code', function(){
+            qaControl.codes = true;
+            qaControl.verbose = false;
+            return qaControl.stringizeWarnings([
+                {warning:'no_package_json'},
+                {warning:'lack_of_mandatory_file_1', params:['LICENSE']}
+            ], 'es').then(function(str){
+                expect(str).to.eql(
+                    'no_package_json: falta el archivo package.json\n'+
+                    'lack_of_mandatory_file_1: falta el archivo obligatorio "LICENSE"\n'
+                );
+            });
+        });
+        it('does not prefix codes when the flag is off', function(){
+            qaControl.codes = false;
+            qaControl.verbose = false;
+            return qaControl.stringizeWarnings([{warning:'no_package_json'}], 'es').then(function(str){
+                expect(str).to.eql('falta el archivo package.json\n');
+            });
+        });
+    });
+    describe('a silenced warning does not trigger cant_continue (#root-fix)', function(){
+        it('continues past an early warning when it is silenced and reaches later rules', function(){
+            return qaControl.loadProject('test/fixtures/stable-project-v0.3.0').then(function(info){
+                var clone = cloneProject(info);
+                delete clone.files['LICENSE'];                        // warning temprano
+                clone.packageJson.dependencies['lodash'] = '4.17.1';  // warning tardío
+                clone.packageJson['qa-control'].silenced = ['lack_of_mandatory_file_1'];
+                return qaControl.controlInfo(clone);
+            }).then(function(warns){
+                expect(stripNotices(stripScoring(warns))).to.eql([
+                    {warning:'non_recomended_dependency_1_in_package_json', params:['lodash']}
+                ]);
+            });
+        });
+        it('still aborts with cant_continue when the early warning is active', function(){
+            return qaControl.loadProject('test/fixtures/stable-project-v0.3.0').then(function(info){
+                var clone = cloneProject(info);
+                delete clone.files['LICENSE'];
+                clone.packageJson.dependencies['lodash'] = '4.17.1';
+                return qaControl.controlInfo(clone);
+            }).then(function(warns){
+                expect(stripNotices(stripScoring(warns))).to.eql([
+                    {warning:'lack_of_mandatory_file_1', params:['LICENSE']},
+                    WARNING_CANT_CONTINUE
+                ]);
+            });
+        });
+    });
+    describe('--silence-all', function(){
+        it('adds active warning codes to qa-control.silenced creating the array', function(){
+            var tempDir = prepare('silence-all-lodash', 'stable-project-v0.3.0');
+            var pkgPath = Path.join(tempDir, 'package.json');
+            var pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+            pkg.dependencies['lodash'] = '4.17.1';
+            fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
+            return qaControl.controlProject(tempDir, {silenceAll:true}).then(function(){
+                var after = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+                expect(after['qa-control'].silenced).to.eql(['non_recomended_dependency_1_in_package_json']);
+                // una corrida normal posterior ya no debe reportar el warning silenciado
+                return qaControl.controlProject(tempDir, {});
+            }).then(function(warns){
+                var remaining = warns.filter(function(w){ return w.warning === 'non_recomended_dependency_1_in_package_json'; });
+                expect(remaining).to.eql([]);
+            });
+        });
+        it('excludes the cant_continue and bailing meta warnings', function(){
+            var tempDir = prepare('silence-all-meta', 'stable-project-v0.3.0');
+            fs.removeSync(Path.join(tempDir, 'LICENSE'));
+            return qaControl.controlProject(tempDir, {silenceAll:true}).then(function(){
+                var silenced = JSON.parse(fs.readFileSync(Path.join(tempDir, 'package.json'), 'utf8'))['qa-control'].silenced || [];
+                expect(silenced).to.contain('lack_of_mandatory_file_1');
+                expect(silenced.indexOf('cant_continue')).to.be(-1);
+                expect(silenced.indexOf('bailing_could_be_more')).to.be(-1);
+            });
+        });
+    });
+});
