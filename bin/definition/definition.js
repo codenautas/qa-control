@@ -88,13 +88,13 @@ module.exports = function(qaControl){
         cucardas:{
             'npm-version':{
                 mandatory:true,
-                md:'[![npm-version](https://img.shields.io/npm/v/yyy.svg)](https://npmjs.org/package/yyy)',
+                md:'[![npm-version](https://img.shields.io/npm/v/zzz.svg)](https://npmjs.org/package/zzz)',
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/npm-version.png',
                 docDescription: ''
             },
             downloads:{
                 mandatory:true,
-                md:'[![downloads](https://img.shields.io/npm/dm/yyy.svg)](https://npmjs.org/package/yyy)',
+                md:'[![downloads](https://img.shields.io/npm/dm/zzz.svg)](https://npmjs.org/package/zzz)',
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/downloads.png',
                 docDescription: ''
             },
@@ -126,7 +126,7 @@ module.exports = function(qaControl){
             },
             security:{
                 mandatory:true,
-                md:'[![security](https://socket.dev/api/badge/npm/package/yyy)](https://socket.dev/npm/package/yyy)',
+                md:'[![security](https://socket.dev/api/badge/npm/package/zzz)](https://socket.dev/npm/package/zzz)',
                 imgExample:'https://socket.dev/api/badge/npm/package/my-package',
                 docDescription: ''
             },
@@ -354,7 +354,9 @@ module.exports = function(qaControl){
                         }
                         var cucardas=qaControl.definition.cucardas;
                         var modulo=info.packageJson.name;
-                        var repo=qaControl.getRepositoryUrl(info.packageJson).replace('/'+modulo,'');
+                        var repoParts=qaControl.getRepositoryUrl(info.packageJson).split('/');
+                        var repo=repoParts[0];
+                        var repoName=repoParts[repoParts.length-1];
                          /*jshint forin: false */
                         for(var nombreCucarda in cucardas) {
                             var cucarda = cucardas[nombreCucarda];
@@ -363,7 +365,7 @@ module.exports = function(qaControl){
                             }catch(err){
                                 console.log('######################################', cucarda, err)
                             }
-                            var cucaStr = cucarda.md ? cucarda.md.replace(/\bxxx\b/g,repo).replace(/\byyy\b/g,modulo) : '';
+                            var cucaStr = cucarda.md ? cucarda.md.replace(/\bxxx\b/g,repo).replace(/\byyy\b/g,repoName).replace(/\bzzz\b/g,modulo) : '';
                             if(cucarda.forbidden) {
                                 if(readme.indexOf(cucaID) !== -1) {
                                     warns.push({warning:'forbidden_cucarda_1', params:[nombreCucarda], scoring:{cucardas:1}});

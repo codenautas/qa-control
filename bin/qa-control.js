@@ -118,8 +118,13 @@ qaControl.startsWith = function startsWith(bufTest, bufStart) {
 
 qaControl.getRepositoryUrl = function getRepositoryUrl(packageJson) {
     var repo = packageJson.repository?.url ?? packageJson.repository ?? "";
-    var ghRepo = /(https:\/\/github\.com\/)/.exec(repo);
-    if(ghRepo) { repo = repo.replace(ghRepo[1], ''); }
+    // npm admite varias sintaxis para repository; normalizamos a "owner/repo" cuando el host es github.
+    // cubre: https://, git+https://, git://, ssh y la forma scp-like git@github.com:owner/repo.git
+    var ghUrl = /github\.com[/:]([-a-zA-Z0-9_.]+)\/([-a-zA-Z0-9_.]+?)(?:\.git)?\/?(?:[#?].*)?$/.exec(repo);
+    if(ghUrl) { return ghUrl[1]+'/'+ghUrl[2]; }
+    // forma corta: "owner/repo" o "github:owner/repo"
+    var shortHand = /^(?:github:)?([-a-zA-Z0-9_.]+)\/([-a-zA-Z0-9_.]+?)(?:\.git)?$/.exec(repo);
+    if(shortHand) { return shortHand[1]+'/'+shortHand[2]; }
     return repo;
 };
 
@@ -130,14 +135,16 @@ qaControl.generateCucardas = function generateCucardas(cucardas, packageJson) {
     /** @type {{tag:string|null}} */
     var info = { tag: null }
     var modulo=packageJson.name;
-    var repo=qaControl.getRepositoryUrl(packageJson).replace('/'+modulo,'');
+    var repoParts=qaControl.getRepositoryUrl(packageJson).split('/');
+    var repo=repoParts[0];
+    var repoName=repoParts[repoParts.length-1];
     /*jshint forin: false */
     /*eslint-disable guard-for-in */
     for(var nombreCucarda in cucardas) {
         var cucarda = cucardas[nombreCucarda];
         if(cucarda.forbidden) { continue; }
         if(!cucarda.check || cucarda.check(packageJson)) {
-            var cucaStr = cucarda.md.replace(/\bxxx\b/g,repo).replace(/\byyy\b/g,modulo);
+            var cucaStr = cucarda.md.replace(/\bxxx\b/g,repo).replace(/\byyy\b/g,repoName).replace(/\bzzz\b/g,modulo);
             cucaFileContent += cucaStr +'\n';
         }
     }

@@ -1348,6 +1348,37 @@ describe('qa-control --codes and --silence-all', function(){
             });
         });
     });
+    describe('cucardas when repo name differs from package name (#cucardas)', function(){
+        it('flags only the repo-name badges when invalid_repository is silenced (no eclipsing)', function(){
+            return qaControl.loadProject('./test/fixtures/stable-project').then(function(info){
+                var clone = cloneProject(info);
+                clone.packageJson.repository = 'codenautas/otro-nombre';      // repo-name != name (a propósito)
+                clone.packageJson['qa-control'].silenced = ['invalid_repository_section_in_package_json'];
+                return qaControl.controlInfo(clone);
+            }).then(function(warns){
+                // las cucardas de github/coveralls/appveyor usan el repo-name y quedan mal;
+                // las de npm (npm-version, downloads, security) usan el name y siguen bien
+                expect(stripNotices(stripScoring(warns))).to.eql([
+                    {warning:'wrong_format_in_cucarda_1', params:['linux']},
+                    {warning:'wrong_format_in_cucarda_1', params:['windows']},
+                    {warning:'wrong_format_in_cucarda_1', params:['coverage']},
+                    {warning:'wrong_format_in_cucarda_1', params:['qa-control']}
+                ]);
+            });
+        });
+        it('eclipses cucardas when invalid_repository is active', function(){
+            return qaControl.loadProject('./test/fixtures/stable-project').then(function(info){
+                var clone = cloneProject(info);
+                clone.packageJson.repository = 'codenautas/otro-nombre';
+                return qaControl.controlInfo(clone);
+            }).then(function(warns){
+                expect(stripNotices(stripScoring(warns))).to.eql([
+                    {warning:'invalid_repository_section_in_package_json'},
+                    WARNING_CANT_CONTINUE
+                ]);
+            });
+        });
+    });
     describe('--silence-all', function(){
         it('adds active warning codes to qa-control.silenced creating the array', function(){
             var tempDir = prepare('silence-all-lodash', 'stable-project-v0.3.0');
