@@ -53,7 +53,7 @@ interface QAOptions{
 }
 
 interface QACheck {
-    warnings: (info: ProjectInfo) => Warning[];
+    warnings: (info: ProjectInfo) => Warning[] | Promise<Warning[]>;
 }
 
 interface QARule {
@@ -68,6 +68,8 @@ interface QAFile {
     mandatory?: boolean;
     mandatoryLines?: string[];
     presentIf?: (packageJson: PackageJson) => boolean;
+    group?: string;
+    fixTemplate?: boolean;
 }
 
 interface QASection {

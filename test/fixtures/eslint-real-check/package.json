@@ -1,0 +1,8 @@
+{
+  "name": "eslint-real-check",
+  "version": "0.0.1",
+  "qa-control": {
+    "run-in": "server",
+    "type": "lib"
+  }
+}

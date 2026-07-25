@@ -41,8 +41,7 @@ _Hay que tratar de mantener actualizada esta sección_
 - `.travis.yml`
 - `.gitignore` (con líneas obligatorias: `local-*` y `*-local.*`)
 - `LICENSE`
-- `.jshintrc`
-- `.eslintrc.yml`
+- `eslint.config.{js,mjs,cjs,ts,mts,cts}` (formato flat config moderno de ESLint; basta con que exista alguna de estas variantes; obligatorio salvo que `qa-control.profile` sea `minimum`). No se acepta el formato clásico `.eslintrc.yml`.
 - `appveyor.yml` es obligatorio solo si `qa-control.test-appveyor` está activado.
 
 ### 3. Repositorio y package.json
@@ -61,8 +60,7 @@ _Hay que tratar de mantener actualizada esta sección_
 - Si falta el archivo `main`, falla la validación.
 
 ### 6. Lint y estilo de código
-- Se ejecuta JSHint sobre todos los `.js` con `.jshintrc`.
-- Se ejecuta ESLint sobre todos los `.js` con `.eslintrc.yml`.
+- Se ejecuta la clase `ESLint` (API moderna) sobre todos los `.js` del proyecto, resolviendo su `eslint.config.*` real desde el propio directorio del proyecto (igual que lo haría ESLint corrido por línea de comandos).
 - Se previene el uso de librerías de promesas normales: `promise`, `q`, `rsvp`, `es6promise`.
 - Se verifica la ortografía de `"use strict"` en la forma correcta dentro de funciones y bloques.
 

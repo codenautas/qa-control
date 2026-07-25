@@ -244,7 +244,6 @@ var fixtures=[{
     },
     expected:[
         { warning:'file_1_does_not_match_custom_2',params:['simple.js', 'var_path']},
-        { warning:'eslint_warnings_in_file_1',params:['simple.js']},
     ]
 },{
     base:'stable-project',
@@ -268,7 +267,6 @@ var fixtures=[{
     },
     expected:[
         { warning:'using_normal_promise_in_file_1',params:['simple.js']},
-        { warning:'eslint_warnings_in_file_1',params:['simple.js']},
     ]
 },{
     base:'stable-project',
@@ -282,8 +280,6 @@ var fixtures=[{
     expected:[
         { warning:'using_normal_promise_in_file_1',params:['simple.js']},
         { warning:'using_normal_promise_in_file_1',params:['stable-project.js']},
-        { warning:'eslint_warnings_in_file_1',params:['simple.js']},
-        { warning:'eslint_warnings_in_file_1',params:['stable-project.js']},
     ]
 },{
     base:'stable-project-main-in-subdir',
@@ -470,10 +466,10 @@ var fixtures=[{
     base:'stable-project-v0.3.0',
     title:'lack of mandatory lint files (#65)',
     change:function(info){
-        delete info.files['.eslintrc.yml'];
+        delete info.files['eslint.config.js'];
     },
     expected:[
-        { warning:'lack_of_mandatory_file_1',params:['.eslintrc.yml']},
+        { warning:'lack_of_mandatory_file_1',params:['eslint.config.js']},
         WARNING_CANT_CONTINUE
     ]
 },{
@@ -557,7 +553,7 @@ var fixtures=[{
     title:'minimum profile skips linters and lint config files',
     change:function(info){
         info.packageJson['qa-control']['profile'] = 'minimum';
-        delete info.files['.eslintrc.yml'];
+        delete info.files['eslint.config.js'];
     },
     expected:[]
 },{
@@ -594,7 +590,7 @@ describe('qa-control', function(){
                     'packageJson'
                 ]);
                 expect(info.projectDir).to.eql(projDir);
-                expect(Object.keys(info.files)).to.eql(['.eslintrc.yml','.gitignore','.jshintrc','LEEME.md','LICENSE','README.md','appveyor.yml','package.json','simple.js','stable-project.js']);
+                expect(Object.keys(info.files)).to.eql(['.gitignore','.jshintrc','LEEME.md','LICENSE','README.md','appveyor.yml','eslint.config.js','package.json','simple.js','stable-project.js']);
                 expect(info.files['package.json'].content).to.match(/^{\r?\n  "name": "stable-project"/);
                 expect(info.packageJson.name).to.be('stable-project');
                 expect(info.packageJson["qa-control"]["run-in"]).to.eql("server");
@@ -1136,6 +1132,21 @@ describe('qa-control --fix', function(){
                 expect(fixed).to.contain('echo hola');
             });
         });
+        it('creates eslint.config.js from the qa-control template when missing', function(){
+            prepare('creates-eslint-config');
+            fs.removeSync(Path.join(tempDir, 'eslint.config.js'));
+            return qaControl.controlProject(tempDir, {fix:true}).then(function(){
+                var created = fs.readFileSync(Path.join(tempDir, 'eslint.config.js'), 'utf8');
+                var qaTemplate = fs.readFileSync(Path.join(__dirname, '..', 'bin/init-template/eslint.config.js'), 'utf8');
+                expect(qaControl.fixEOL(created)).to.eql(qaControl.fixEOL(qaTemplate));
+                return qaControl.controlProject(tempDir, {});
+            }).then(function(warnings){
+                var lintConfigWarnings = warnings.filter(function(w){
+                    return w.warning === 'lack_of_mandatory_file_1' && w.params && w.params[0] === 'eslint.config.js';
+                });
+                expect(lintConfigWarnings).to.eql([]);
+            });
+        });
     });
 });
 
@@ -1224,13 +1235,7 @@ describe('qa-control coverage (group A)', function(){
 });
 
 describe('qa-control coverage (group B: verbose branches)', function(){
-    var stableInfo;
     var realLog, realErr, realWrite;
-    before(function(){
-        return qaControl.loadProject('test/fixtures/stable-project').then(function(info){
-            stableInfo = info;
-        });
-    });
     beforeEach(function(){
         qaControl.verbose = true;
         qaControl.fixMode = false;
@@ -1281,11 +1286,43 @@ describe('qa-control coverage (group B: verbose branches)', function(){
     });
     it('eslint logs details in verbose mode', function(){
         var check = qaControl.definition.rules.eslint.checks[0].warnings;
-        var info = cloneProject(stableInfo);
-        info.files['simple.js'].content = "var Promise = require('promise');\n\n" + info.files['simple.js'].content;
-        var warns = stripScoring(check(info));
-        var hasEslint = warns.some(function(w){ return w.warning==='eslint_warnings_in_file_1' && w.params[0]==='simple.js'; });
-        expect(hasEslint).to.be(true);
+        return qaControl.loadProject('test/fixtures/eslint-real-check').then(function(info){
+            return check(info);
+        }).then(function(warns){
+            warns = stripScoring(warns);
+            var hasEslint = warns.some(function(w){ return w.warning==='eslint_warnings_in_file_1' && w.params[0]==='with-warning.js'; });
+            expect(hasEslint).to.be(true);
+        });
+    });
+});
+
+describe('qa-control eslint rule (real ESLint runs)', function(){
+    it('reports the same warnings a real ESLint run would report', function(){
+        var check = qaControl.definition.rules.eslint.checks[0].warnings;
+        return qaControl.loadProject('test/fixtures/eslint-real-check').then(function(info){
+            return check(info);
+        }).then(function(warns){
+            expect(stripScoring(warns)).to.eql([
+                {warning:'eslint_warnings_in_file_1', params:['with-warning.js']}
+            ]);
+        });
+    });
+    it('does not warn about files without ESLint issues', function(){
+        var check = qaControl.definition.rules.eslint.checks[0].warnings;
+        return qaControl.loadProject('test/fixtures/stable-project').then(function(info){
+            return check(info);
+        }).then(function(warns){
+            expect(stripScoring(warns)).to.eql([]);
+        });
+    });
+    it('skips linting entirely under the minimum profile', function(){
+        var check = qaControl.definition.rules.eslint.checks[0].warnings;
+        return qaControl.loadProject('test/fixtures/eslint-real-check').then(function(info){
+            info.packageJson['qa-control'].profile = 'minimum';
+            return check(info);
+        }).then(function(warns){
+            expect(stripScoring(warns)).to.eql([]);
+        });
     });
 });
 

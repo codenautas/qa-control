@@ -2,19 +2,9 @@
 
 var stripBom = require("strip-bom-string");
 var esl = require('eslint');
-var eslintLinter = new esl.Linter();
-function eslintrcToFlatConfig(rc) {
-    var flat = {};
-    if (rc.rules) { flat.rules = rc.rules; }
-    var sourceType = (rc.env && rc.env.node) ? 'commonjs' : 'script';
-    flat.languageOptions = { ecmaVersion: 'latest', sourceType: sourceType };
-    flat.linterOptions = { reportUnusedDisableDirectives: false };
-    return flat;
-}
 var multilang = require('multilang');
 var fs = require('fs-extra');
 var Path = require('path');
-var yaml = require('js-yaml');
 
 /**
  *
@@ -83,7 +73,12 @@ module.exports = function(qaControl){
             'appveyor.yml':{
                 presentIf: testAppVeyor
             },
-            '.eslintrc.yml':{ presentIf: function(pj) { return pj['qa-control'] && pj['qa-control'].profile !== 'minimum'; } }
+            'eslint.config.js':{ group:'eslint-config', fixTemplate:true, presentIf: function(pj) { return pj['qa-control'] && pj['qa-control'].profile !== 'minimum'; } },
+            'eslint.config.mjs':{ group:'eslint-config', presentIf: function(pj) { return pj['qa-control'] && pj['qa-control'].profile !== 'minimum'; } },
+            'eslint.config.cjs':{ group:'eslint-config', presentIf: function(pj) { return pj['qa-control'] && pj['qa-control'].profile !== 'minimum'; } },
+            'eslint.config.ts':{ group:'eslint-config', presentIf: function(pj) { return pj['qa-control'] && pj['qa-control'].profile !== 'minimum'; } },
+            'eslint.config.mts':{ group:'eslint-config', presentIf: function(pj) { return pj['qa-control'] && pj['qa-control'].profile !== 'minimum'; } },
+            'eslint.config.cts':{ group:'eslint-config', presentIf: function(pj) { return pj['qa-control'] && pj['qa-control'].profile !== 'minimum'; } }
         },
         cucardas:{
             'npm-version':{
@@ -252,13 +247,22 @@ module.exports = function(qaControl){
                     warnings:function(info) {
                         var warns =[];
                         var files=qaControl.definition.files;
+                        var reportedGroups={};
                         for(var fileName in files) {
                             if(files.hasOwnProperty(fileName)) {
                                 var file = files[fileName];
-                                if(file.mandatory && !info.files[fileName]) {
-                                    warns.push({warning:'lack_of_mandatory_file_1', params:[fileName], scoring:{mandatories:1}});
-                                } else {
-                                    if(file.presentIf && file.presentIf(info.packageJson) && !info.files[fileName]) {
+                                var isMissing = file.group
+                                    ? !Object.keys(files).some(function(otherName) { return files[otherName].group === file.group && info.files[otherName]; })
+                                    : !info.files[fileName];
+                                var groupName = file.group || fileName;
+                                if(isMissing && !reportedGroups[groupName] && (file.mandatory || (file.presentIf && file.presentIf(info.packageJson)))) {
+                                    reportedGroups[groupName] = true;
+                                    if(file.fixTemplate && qaControl.fixMode) {
+                                        var templatePath = Path.join(__dirname, '../init-template', fileName);
+                                        var destPath = Path.join(info.projectDir, fileName);
+                                        fs.copySync(templatePath, destPath);
+                                        console.log('CREATED:', destPath);
+                                    } else {
                                         warns.push({warning:'lack_of_mandatory_file_1', params:[fileName], scoring:{mandatories:1}});
                                     }
                                 }
@@ -514,25 +518,25 @@ module.exports = function(qaControl){
                 checks:[{
                     warnings:function(info){
                         if(info.packageJson['qa-control'] && info.packageJson['qa-control'].profile === 'minimum') { return []; }
-                        var warns = [];
-                        var eslintOpts = eslintrcToFlatConfig(yaml.load(info.files['.eslintrc.yml'].content));
-                        for(var file in info.files) {
-                            if(file.match(/(.js)$/)) {
-                                var content = info.files[file].content;
-                                var data = eslintLinter.verify(content || '', eslintOpts);
-                                if(data.length) {
+                        var jsFiles = Object.keys(info.files).filter(function(file) { return file.match(/(.js)$/); });
+                        if(!jsFiles.length) { return []; }
+                        var eslint = new esl.ESLint({ cwd: Path.resolve(info.projectDir) });
+                        var filePaths = jsFiles.map(function(file) { return Path.resolve(info.projectDir, file); });
+                        return eslint.lintFiles(filePaths).then(function(results) {
+                            var warns = [];
+                            results.forEach(function(result) {
+                                if(result.errorCount || result.warningCount) {
+                                    var file = Path.relative(info.projectDir, result.filePath).replace(/\\/g, '/');
                                     if(qaControl.verbose){
                                         console.log('ESLINT output:');
-                                        console.log('eslintOpts',eslintOpts);
-                                        console.log('There are '+data.length+ " ESLINT errors");
-                                        console.log(data);
-                                        //console.log(data);
+                                        console.log('There are '+result.messages.length+ " ESLINT errors");
+                                        console.log(result.messages);
                                     }
                                     warns.push({warning:'eslint_warnings_in_file_1', params:[file], scoring:{eslint:1}});
                                 }
-                            }
-                        }
-                        return warns;
+                            });
+                            return warns;
+                        });
                     }
                 }]
             },
