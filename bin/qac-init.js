@@ -2,7 +2,6 @@
 /*jshint eqnull:true */
 /*jshint globalstrict:true */
 /*jshint node:true */
-/*eslint-disable no-console */
 
 var qacInit = {};
 
@@ -58,13 +57,13 @@ qacInit.initDefaults = function initDefaults(initParams) {
     var rv = {
         outDir: initParams.projectDir || process.cwd(),
         msgs: qacInit.cmdMsgs[initParams.lang || 'en'],
-        tplDir: Path.normalize(__dirname+'/init-template'),
+        tplDir: Path.normalize(Path.join(__dirname,'init-template')),
         existingJson:{},
         qacJson:{}
     };
     var oriREADME = Path.normalize(rv.outDir+'/README.md');
-    var oriPackageJson = Path.normalize(rv.outDir+'/package.json');
-    var qacPackageJson = Path.normalize(__dirname+'/init-package.json');
+    var oriPackageJson = Path.normalize(Path.join(rv.outDir,'package.json'));
+    var qacPackageJson = Path.normalize(Path.join(__dirname,'init-package.json'));
     var qacJson;
     return fs.readJson(qacPackageJson).then(function(json) {
         rv.qacJson = json;
@@ -81,7 +80,7 @@ qacInit.initDefaults = function initDefaults(initParams) {
         if(existingReadme) {
             //console.log(existingReadme);
             var lines = existingReadme.split(/\r?\n/);
-            if(lines.length===3 && lines[2]=='') {
+            if(lines.length===3 && lines[2] === '') {
                 lines.splice(2, 1);
             }
             if(lines.length!==2) {
@@ -106,7 +105,7 @@ qacInit.ask = function ask(param, msgs, callback) {
         data = data.toString().trim();
         if(data === '') { data = param.def; }
         if((param.valid && param.valid(data)) || (! param.valid  && data !== '')) {
-            callback(data);
+            return callback(data);
         } else {
             stdout.write('"'+data+'" '+msgs.msg_error_invalid+'\n');
             qacInit.ask(param, msgs, callback);
@@ -136,7 +135,7 @@ function getParam(param, ctx) {
             if(param.post) { ctx.result[param.name] = param.post(ctx); }
         }
     });
-};
+}
 
 qacInit.readParameters = function readParameters(inputParams, params) {
     var ctx = {
@@ -226,7 +225,7 @@ qacInit.configParams = [
         name:'author', prompt:'Author (FirstN[ LastL] <EMail>)', def:'',
         init: function(ctx) {
             this.def = ctx.input.existingJson.author
-                       || (ctx.result.organization == 'codenautas' ? 'Codenautas <codenautas@googlegroups.com>' : '');
+                       || (ctx.result.organization === 'codenautas' ? 'Codenautas <codenautas@googlegroups.com>' : '');
         },
         valid:function(author) {
             var pts = author.split(' ');

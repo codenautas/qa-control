@@ -2,7 +2,7 @@
 
 module.exports = [
     {
-        ignores: ["dist/**"]
+        ignores: ["dist/**", "local*/**", "test/fixtures/**"]
     },
     {
         languageOptions: {
@@ -146,7 +146,7 @@ module.exports = [
             "max-len": 0,
             "max-nested-callbacks": 0,
             "max-params": 0,
-            "max-statements": [2, 30],
+            "max-statements": [2,30],
             "new-cap": 0,
             "new-parens": 0,
             "newline-after-var": 0,

@@ -203,7 +203,7 @@ describe/*.only*/("qa-control --init", function(){
         });
         it("should handle errors in the prompt", function(done) {
             sinon.stub(qci, 'promptForVar').callsFake(function(param, msgs) {
-                if(param.name=='v2') { return Promise.reject('dummy error'); }
+                if(param.name === 'v2') { return Promise.reject('dummy error'); }
                 return Promise.resolve(param.def);
             });
             var params = [ {name:'v1', def:'def1'}, {name:'v2', def:'def2'}];
@@ -217,7 +217,7 @@ describe/*.only*/("qa-control --init", function(){
         });
         it("should default values for valid input", function(done) {
             sinon.stub(qci, 'promptForVar').callsFake(function(param, msgs) {
-                if(param.name=='v2') { return Promise.reject('dummy error'); }
+                if(param.name === 'v2') { return Promise.reject('dummy error'); }
                 return Promise.resolve(param.def);
             });
             var params = [ {name:'v1', def:'def1'}, {name:'v2', def:'def2'}];
@@ -286,7 +286,7 @@ describe/*.only*/("qa-control --init", function(){
         });
         it("should exclude temporary parameters where requested", function() {
             sinon.stub(qci, 'promptForVar').callsFake(function(param, msgs) {
-                return Promise.resolve(param.name=='v2' ? 'promptedV2' : param.def);
+                return Promise.resolve(param.name === 'v2' ? 'promptedV2' : param.def);
             });
             var params = [
                 {name:'v1', def:'def1', noPrompt:true},

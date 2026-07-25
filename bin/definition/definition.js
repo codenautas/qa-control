@@ -143,9 +143,8 @@ module.exports = function(qaControl){
                 match:'function eid(id){ return document.getElementById(id); }'
             },
             var_winos:{
-                // separo los siguientes dos strings en dos partes para que no salte un warning
-                detect:'var '+'winos=',
-                match:"var "+"winOS = Path.sep==='\\\\';"
+                detect:'var winos=',
+                match:"var winOS = Path.sep==='\\\\';"
             },
             var_path:{
                 detect:'var path=',
@@ -250,7 +249,7 @@ module.exports = function(qaControl){
                         var reportedGroups={};
                         for(var fileName in files) {
                             if(files.hasOwnProperty(fileName)) {
-                                var file = files[fileName];
+                                let file = files[fileName];
                                 var isMissing = file.group
                                     ? !Object.keys(files).some(function(otherName) { return files[otherName].group === file.group && info.files[otherName]; })
                                     : !info.files[fileName];
@@ -313,10 +312,10 @@ module.exports = function(qaControl){
                     warnings:function(info) {
                         var warns =[];
                         var files=qaControl.definition.files;
-                        for(var fileName in files) {
+                        for(let fileName in files) {
                             var file=files[fileName];
                             if(file.mandatoryLines) {
-                                var fileContent = info.files[fileName].content;
+                                let fileContent = info.files[fileName].content;
                                 file.mandatoryLines.forEach(function(mandatoryLine) {
                                    // agrego '\n' antes para no utilizar expresiones regulares
                                    if(fileContent.indexOf('\n'+mandatoryLine)===-1) {
@@ -349,6 +348,7 @@ module.exports = function(qaControl){
             cucardas:{
                 eclipsers:['invalid_repository_section_in_package_json', 'lack_of_repository_section_in_package_json'],
                 checks:[{
+                    /* eslint-disable-next-line max-statements, complexity*/
                     warnings:function(info){
                         if(info.packageJson['qa-control'] && info.packageJson['qa-control'].multilang === 'no') { return []; }
                         var warns=[];
@@ -693,7 +693,10 @@ module.exports = function(qaControl){
                         try {
                             toolVersion = fs.readJsonSync(toolPkgPath).version;
                         } catch(e) {
-                            try { toolVersion = require('../../package.json').version; } catch(e2) { toolVersion = null; }
+                            try {
+                                /* eslint-disable-next-line global-require */
+                                toolVersion = require('../../package.json').version; 
+                            } catch(e2) { toolVersion = null; }
                         }
                         if(!toolVersion) { return warns; }
                         var expectedCaret = '^' + toolVersion;

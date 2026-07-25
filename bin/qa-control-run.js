@@ -55,7 +55,7 @@ if(opts.init) {
     process.stdout.write(msgs.msg_initializing+"\n");
     params.verbose = true;
     qacInit.init(params).then(function() {
-        ; // nothing to do
+        // nothing to do
     }).catch(function(err){
         switch(err.message) {
             case 'canceled':

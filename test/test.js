@@ -14,7 +14,7 @@ function stripScoring(warnArray) {
         }
     }
     return warnArray;
-};
+}
 
 function stripNotices(warnArray) {
     for(var w=0; w<warnArray.length; ++w) {
@@ -25,7 +25,7 @@ function stripNotices(warnArray) {
         }
     }
     return warnArray;
-};
+}
 
 const WARNING_CANT_CONTINUE = {warning:'cant_continue'};
 const WARNING_BAILING_CONTINUE = {warning:'bailing_could_be_more'};
@@ -591,7 +591,7 @@ describe('qa-control', function(){
                 ]);
                 expect(info.projectDir).to.eql(projDir);
                 expect(Object.keys(info.files)).to.eql(['.gitignore','.jshintrc','LEEME.md','LICENSE','README.md','appveyor.yml','eslint.config.js','package.json','simple.js','stable-project.js']);
-                expect(info.files['package.json'].content).to.match(/^{\r?\n  "name": "stable-project"/);
+                expect(info.files['package.json'].content).to.match(/^{\r?\n\s\s"name": "stable-project"/);
                 expect(info.packageJson.name).to.be('stable-project');
                 expect(info.packageJson["qa-control"]["run-in"]).to.eql("server");
                 expect(info.packageJson["qa-control"]["test-appveyor"]).to.eql(true);
@@ -863,12 +863,12 @@ describe('qa-control', function(){
                         fs.readJson(base+'/package.json').then(function(o){
                             packageJson=o;
                             return fs.readJson(base+'/warnings.json');
-                        }).catch(function(err) {
+                        }).catch(function() {
                             return false;
                         }).then(function(o){
                             warnings=o;
                             return fs.exists(base+'/cucardas.out');
-                        }).catch(function(err) {
+                        }).catch(function() {
                             return false;
                         }).then(function(o) {
                             cucardasOut = o;
@@ -1196,6 +1196,7 @@ describe('qa-control coverage (group A)', function(){
     });
     describe('rule: qa_control_dev_dependency', function(){
         var check = qaControl.definition.rules.qa_control_dev_dependency.checks[0].warnings;
+        /* eslint-disable-next-line global-require */
         var toolVersion = require('../package.json').version;
         it('warns when qa-control is missing in devDependencies', function(){
             var info = /** @type {any} */ ({ packageJson: { 'qa-control': { gha:'ci' }, devDependencies: {} } });

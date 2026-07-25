@@ -138,8 +138,6 @@ qaControl.generateCucardas = function generateCucardas(cucardas, packageJson) {
     var repoParts=qaControl.getRepositoryUrl(packageJson).split('/');
     var repo=repoParts[0];
     var repoName=repoParts[repoParts.length-1];
-    /*jshint forin: false */
-    /*eslint-disable guard-for-in */
     for(var nombreCucarda in cucardas) {
         var cucarda = cucardas[nombreCucarda];
         if(cucarda.forbidden) { continue; }
@@ -148,8 +146,6 @@ qaControl.generateCucardas = function generateCucardas(cucardas, packageJson) {
             cucaFileContent += cucaStr +'\n';
         }
     }
-    /*jshint forin: true */
-    /*eslint-enable guard-for-in */
     return cucaFileContent;
 };
 
@@ -194,7 +190,6 @@ qaControl.fixCucardas = function fixCucardas(info) {
     return true;
 };
 
-/*eslint-disable complexity */
 qaControl.checkLintConfig = function checkLintConfig(info, lintConfigName, warnLackOf, requiredOptions, warnIncorrect, scoring) {
     var warns = [];
     if(!(lintConfigName in info.packageJson)) {
@@ -218,21 +213,16 @@ qaControl.checkLintConfig = function checkLintConfig(info, lintConfigName, warnL
     }
     return warns;
 };
-/*eslint-enable complexity */
 
 qaControl.checkDepVerNumberFormat = function checkDepVerNumberFormat(info) {
     var warns = [];
     if("dependencies" in info.packageJson) {
-        /*jshint forin: false */
-        /*eslint-disable guard-for-in */
         for(var depName in info.packageJson.dependencies) {
             var versionNumber = info.packageJson.dependencies[depName];
             if(! semver.valid(versionNumber.match(/^([\^~])/) ? versionNumber.substring(1) : versionNumber)) {
                 warns.push({warning:'invalid_dependency_version_number_format_in_dep_1', params:[depName], scoring:{conventions:1}});
             }
         }
-        /*jshint forin: true */
-        /*eslint-enable guard-for-in */
     }
     return warns;
 };
@@ -346,11 +336,7 @@ qaControl.loadProject = function loadProject(projectDir) {
     }).then(function(files) {
         info.files = {};
         files = files.filter(function(f){ return f !== 'cucardas.log'; });
-         /*jshint forin: false */
-         /*eslint-disable guard-for-in */
         for(var f in files) { info.files[files[f]] = {}; }
-         /*jshint forin: true */
-         /*eslint-enable guard-for-in */
         if(files.indexOf('package.json') !== -1) {
             info.packageJson = /** @type {PackageJson} */ ({});
         }
@@ -541,11 +527,7 @@ qaControl.main=function main(parameters) {
         if(parameters.listLangs) {
             var msgLang =qaControl.cmdMsgs[parameters.lang || 'en'].msg_langs;
             process.stdout.write(msgLang+':');
-             /*jshint forin: false */
-             /*eslint-disable guard-for-in */
             for(var lang in qaControl.msgs) { process.stdout.write(" "+lang); }
-             /*jshint forin: true */
-             /*eslint-enable guard-for-in */
             process.stdout.write("\n");
         } else {
             qaControl.lang = parameters.lang || "en";

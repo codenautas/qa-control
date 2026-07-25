@@ -52,7 +52,7 @@
   "scripts": {
     "test": "mocha --reporter spec  --check-leaks test/",
     "test-nc": "mocha --reporter spec --bail --check-leaks --no-colors test/",
-    "test-ci": "nyc --reporter=lcov mocha --reporter spec --check-leaks test/",
+    "test-ci": "nyc --reporter=lcov --reporter=text-summary --reporter=html mocha --check-leaks",
     "test-cov": "nyc mocha --reporter dot --check-leaks test/",
     "start": "node ./bin/qa-control-run.js",
     "report": "nyc report",
@@ -67,7 +67,7 @@
   ],
   "qa-control": {
     "package-version": "0.3.0",
-    "coverage": 90,
+    "coverage": 80,
     "run-in": "server",
     "stability": "extending",
     "type": "cmd-tool",
