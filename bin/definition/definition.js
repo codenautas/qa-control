@@ -521,15 +521,13 @@ module.exports = function(qaControl){
                         var jsFiles = Object.keys(info.files).filter(function(file) { return file.match(/(.js)$/); });
                         if(!jsFiles.length) { return []; }
                         var eslint = new esl.ESLint({ cwd: Path.resolve(info.projectDir) });
-                        var filePaths = jsFiles.map(function(file) { return Path.resolve(info.projectDir, file); });
-                        return eslint.lintFiles(filePaths).then(function(results) {
+                        return eslint.lintFiles([Path.resolve(info.projectDir)]).then(function(results) {
                             var warns = [];
                             results.forEach(function(result) {
                                 if(result.errorCount || result.warningCount) {
                                     var file = Path.relative(info.projectDir, result.filePath).replace(/\\/g, '/');
                                     if(qaControl.verbose){
-                                        console.log('ESLINT output:');
-                                        console.log('There are '+result.messages.length+ " ESLINT errors");
+                                        console.log('ESLINT '+result.messages.length+' finding in "'+file+'":');
                                         console.log(result.messages);
                                     }
                                     warns.push({warning:'eslint_warnings_in_file_1', params:[file], scoring:{eslint:1}});
