@@ -2,11 +2,8 @@
 * text=auto
 
 bin/init-template/LEEME.md.tpl -text
-test/fixtures-init/templates/LEEME.out -text
-test/fixtures-init/templates/LEEME.tpl -text
 
 bin/init-template/eslint.config.js text eol=lf
-test/fixtures-init/initialized/eslint.config.js text eol=lf
 test/fixtures/eslint-real-check/clean.js text eol=lf
 test/fixtures/eslint-real-check/eslint.config.js text eol=lf
 test/fixtures/eslint-real-check/package.json text eol=lf

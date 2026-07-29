@@ -176,6 +176,9 @@ module.exports = function(qaControl){
                 checks:[{
                     warnings:function(info){
                         if(!info.packageJson?.['qa-control']){
+                            if(qaControl.fixMode && qaControl.addQaControlSection(info)) {
+                                return [];
+                            }
                             return [{warning:info.files?.['package.json']?.content?.match(/codenautas/)?
                                         'no_qa_control_section_in_codenautas_project':
                                         'no_qa_control_section_in_package_json', scoring:{fatal:1}}];

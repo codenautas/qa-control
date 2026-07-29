@@ -6,6 +6,7 @@ var fs = require('fs-extra');
 var Path = require('path');
 var yaml = require('js-yaml');
 var OS = require('os');
+var qaControlPackageJson = require('../package.json');
 
 function stripScoring(warnArray) {
     for(var w=0; w<warnArray.length; ++w) {
@@ -1420,6 +1421,46 @@ describe('qa-control --codes and --silence-all', function(){
                 expect(silenced).to.contain('lack_of_mandatory_file_1');
                 expect(silenced.indexOf('cant_continue')).to.be(-1);
                 expect(silenced.indexOf('bailing_could_be_more')).to.be(-1);
+            });
+        });
+    });
+    describe('--fix adds the qa-control section', function(){
+        function prepareWithoutSection(name){
+            var tempDir = prepare(name, 'stable-project-v0.3.0');
+            var pkgPath = Path.join(tempDir, 'package.json');
+            var pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+            delete pkg['qa-control'];
+            fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
+            return tempDir;
+        }
+        it('creates the section with the mandatory defaults', function(){
+            var tempDir = prepareWithoutSection('fixes-missing-qa-control-section');
+            var pkgPath = Path.join(tempDir, 'package.json');
+            return qaControl.controlProject(tempDir, {fix:true}).then(function(){
+                var qac = JSON.parse(fs.readFileSync(pkgPath, 'utf8'))['qa-control'];
+                expect(qac['run-in']).to.eql('server');
+                expect(qac.type).to.eql('lib');
+                expect(qac['package-version']).to.eql(qaControlPackageJson.version);
+            });
+        });
+        it('does not abort anymore, so later rules are reached', function(){
+            var tempDir = prepareWithoutSection('fixes-section-reaches-later-rules');
+            fs.removeSync(Path.join(tempDir, 'LICENSE'));
+            return qaControl.controlProject(tempDir, {fix:true}).then(function(warns){
+                var codes = warns.map(function(w){ return w.warning; });
+                expect(codes.indexOf('no_qa_control_section_in_codenautas_project')).to.be(-1);
+                expect(codes).to.contain('lack_of_mandatory_file_1');
+            });
+        });
+        it('keeps reporting the warning when --fix is off', function(){
+            var tempDir = prepareWithoutSection('reports-missing-qa-control-section');
+            var pkgPath = Path.join(tempDir, 'package.json');
+            var before = fs.readFileSync(pkgPath, 'utf8');
+            return qaControl.controlProject(tempDir, {}).then(function(warns){
+                var codes = warns.map(function(w){ return w.warning; });
+                // el fixture menciona a codenautas, por eso la variante del warning
+                expect(codes).to.contain('no_qa_control_section_in_codenautas_project');
+                expect(fs.readFileSync(pkgPath, 'utf8')).to.eql(before);
             });
         });
     });

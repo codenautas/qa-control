@@ -65,6 +65,12 @@
     ".github/workflows",
     "appveyor.yml"
   ],
+  "nyc": {
+    "exclude": [
+      "test/**",
+      "local-*/**"
+    ]
+  },
   "qa-control": {
     "package-version": "0.3.0",
     "coverage": 80,

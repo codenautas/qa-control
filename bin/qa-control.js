@@ -10,6 +10,7 @@ var stripBom = require('strip-bom-string');
 var yaml = require('js-yaml');
 var semver = require("semver");
 var bestGlobals = require("best-globals");
+var ownPackageJson = require("../package.json");
 
 // lodash replacements (para best-globals?)
 function forEach(obj, func) {
@@ -480,6 +481,34 @@ qaControl.silenceAll = function silenceAll(info, warns){
     fs.writeFileSync(fixPath, newContent, 'utf8');
     info.files['package.json'].content = newContent;
     console.log('SILENCED:', fixPath, '-', added.join(', '));
+};
+
+// agrega la sección "qa-control" al package.json con los valores por defecto de las secciones
+// obligatorias. "type" no se puede inferir del proyecto: se escribe "lib" y se avisa para que
+// el usuario lo revise. Devuelve true si la sección quedó agregada.
+/**
+ * @param {ProjectInfo} info
+ * @returns {boolean}
+ */
+qaControl.addQaControlSection = function addQaControlSection(info){
+    if(!info.packageJson || !info.files['package.json']) {
+        console.log('FIX: no package.json to update');
+        return false;
+    }
+    info.packageJson['qa-control'] = {
+        'package-version': ownPackageJson.version,
+        'run-in': 'server',
+        type: 'lib'
+    };
+    var raw = info.files['package.json'].content;
+    var indentMatch = raw.match(/\n([ \t]+)\S/);
+    var indent = indentMatch ? indentMatch[1] : '  ';
+    var newContent = qaControl.fixEOL(JSON.stringify(info.packageJson, null, indent) + '\n');
+    var fixPath = Path.join(info.projectDir, 'package.json');
+    fs.writeFileSync(fixPath, newContent, 'utf8');
+    info.files['package.json'].content = newContent;
+    console.log('CREATED:', fixPath, '- "qa-control" section (check "type": "lib")');
+    return true;
 };
 
 qaControl.controlProject=function controlProject(projectDir, opts){
