@@ -95,7 +95,6 @@ interface QADefinition {
     customs: Record<string, {detect:string, match:string}>;
     eslint_options: any;
     rules: Record<string, QARule>;
-    firstLines?: Record<string, Record<string, string>>;
 }
 
 interface Fixture {

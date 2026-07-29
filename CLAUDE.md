@@ -55,9 +55,8 @@ _Hay que tratar de mantener actualizada esta sección_
 - Se valida la presencia y el formato de badges/cucardas obligatorias como: `npm-version`, `downloads`, `build`, `dependencies`, `qa-control`.
 - También hay reglas especiales para badges de `linux`, `windows`, `coverage` y `climate` según los metadatos del proyecto.
 
-### 5. Validación de primeras líneas de archivo principal
-- El contenido inicial del archivo `main` declarado en `package.json` debe coincidir con un template de primera línea según el tipo del proyecto (`run-in`, `type`).
-- Si falta el archivo `main`, falla la validación.
+### 5. Existencia del archivo principal
+- El archivo `main` declarado en `package.json` (o `index.js` por defecto) debe existir. No se valida su contenido.
 
 ### 6. Lint y estilo de código
 - Se ejecuta la clase `ESLint` (API moderna) sobre todos los `.js` del proyecto, resolviendo su `eslint.config.*` real desde el propio directorio del proyecto (igual que lo haría ESLint corrido por línea de comandos).

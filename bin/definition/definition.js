@@ -1,6 +1,5 @@
 "use strict";
 
-var stripBom = require("strip-bom-string");
 var esl = require('eslint');
 var multilang = require('multilang');
 var fs = require('fs-extra');
@@ -453,47 +452,14 @@ module.exports = function(qaControl){
                     }
                 }]
             },
-            first_lines:{
+            main_file_exists:{
                 checks:[{
                     warnings:function(info) {
-                        if(info.packageJson['qa-control'] && info.packageJson['qa-control'].profile === 'minimum') { return []; }
-                        var warns=[];
-                        var qaControlSection=info.packageJson['qa-control'] ?? {};
-                        var whichRunIn=qaControlSection['run-in'];
-                        var whichType=qaControlSection.type;
-                        var firstLines=qaControl.definition.firstLines[whichRunIn][whichType];
-                        if(firstLines) {
-                            var ProjectName = qaControl.jsProjectName(info.packageJson.name);
-                            var projectName = qaControl.first("toLowerCase")(ProjectName);
-                            var mainName = ('main' in info.packageJson) ? info.packageJson.main : 'index.js';
-                            if(!(mainName in info.files)) {
-                                warns.push({warning:'packagejson_main_file_1_does_not_exists', params:[mainName], scoring:{warning:1}});
-                            } else {
-                                var fileContent = stripBom(info.files[mainName].content);
-
-                                if(!qaControl.startsWith(fileContent, firstLines.replace(/nombreDelModulo/g, ProjectName)) &&
-                                      !qaControl.startsWith(fileContent, firstLines.replace(/nombreDelModulo/g, projectName))
-                                ) {
-                                    if(qaControl.verbose){
-                                        var code=qaControl.fixEOL(fileContent);
-                                        var model1=qaControl.fixEOL(firstLines.replace(/nombreDelModulo/g, projectName));
-                                        var model2=qaControl.fixEOL(firstLines.replace(/nombreDelModulo/g, ProjectName));
-                                        for(var i=0; i<model1.length; i++){
-                                            if(code[i]!== model1[i] && code[i] !== model2[i]){
-                                                console.log('RUN-IN', whichRunIn);
-                                                console.log('DIF STARTS IN:',JSON.stringify(code.substring(i, Math.min(model1.length, i+20))));
-                                                console.log('MODEL 1      :',JSON.stringify(model1.substring(i, Math.min(model1.length, i+20))));
-                                                console.log('MODEL 2      :',JSON.stringify(model2.substring(i, Math.min(model1.length, i+20))));
-                                                console.log('FOR MODULE NAME:',projectName,'OR',ProjectName);
-                                                break;
-                                            }
-                                        }
-                                    }
-                                    warns.push({warning:'first_lines_does_not_match_in_file_1', params:[mainName], scoring:{warning:1}});
-                                }
-                            }
+                        var mainName = ('main' in info.packageJson) ? info.packageJson.main : 'index.js';
+                        if(!(mainName in info.files)) {
+                            return [{warning:'packagejson_main_file_1_does_not_exists', params:[mainName], scoring:{warning:1}}];
                         }
-                        return warns;
+                        return [];
                     }
                 }]
             },
@@ -514,7 +480,7 @@ module.exports = function(qaControl){
                 }]
             },
             eslint:{
-                eclipsers:['packagejson_main_file_1_does_not_exists', 'first_lines_does_not_match_in_file_1'],
+                eclipsers:['packagejson_main_file_1_does_not_exists'],
                 checks:[{
                     warnings:function(info){
                         if(info.packageJson['qa-control'] && info.packageJson['qa-control'].profile === 'minimum') { return []; }

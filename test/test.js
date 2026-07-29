@@ -204,14 +204,6 @@ var fixtures=[{
     ]
 },{
     base:'stable-project',
-    title:'first lines does not match in file (#14)',
-    test:'first_lines_does_not_match_in_file_1',
-    change:function(info){
-        info.files['stable-project.js'].content='// a comment in the first line\n'+info.files['stable-project.js'].content;
-    },
-    expected:[{ warning:'first_lines_does_not_match_in_file_1',params:['stable-project.js']}]
-},{
-    base:'stable-project',
     title:'lack of mandatory lines in .gitignore (#10)',
     test:'lack_of_mandatory_line_1_in_file_2',
     change:function(info){
@@ -576,9 +568,6 @@ describe('qa-control', function(){
         it('waits for config already readed', function(){
             return qaControl.loadProject('./test/fixtures/stable-project').then(function(info){
                 expect(qaControl.configReady).to.ok();
-                expect(
-                    qaControl.definition.firstLines['server']['lib']
-                ).to.match(/^"use strict";/);
             });
         });
         it('loads ok', function(){
@@ -620,7 +609,6 @@ describe('qa-control', function(){
                 expect(en['wrong_format_in_cucarda_1']).to.be('wrong format in cucarda $1');
                 expect(en['lack_of_mandatory_line_1_in_file_2']).to.be('lack of mandatory line $1 in file $2');
                 expect(en['file_1_does_not_match_custom_2']).to.be('file $1 does not match custom $2');
-                expect(en['first_lines_does_not_match_in_file_1']).to.be('first lines does not match in file $1');
                 expect(en['repository_name_not_found']).to.be('packageJson.repository must be in format /{[-a-zA-Z0-9_.]+}\/[-a-zA-Z0-9_.]+/');
                 expect(en['using_normal_promise_in_file_1']).to.be('using normal promise in file $1');
                 expect(en['packagejson_main_file_1_does_not_exists']).to.be('packagejson main file $1 does not exists');
@@ -954,7 +942,6 @@ describe('qa-control main', function(){
                                       +'el bloque de cucardas difiere del esperado (orden, líneas sobrantes o formato)\n'
                                       +'falta la linea obligatoria param1 en el archivo param2\n'
                                       +'param1 no respeta la custombre param2\n'
-                                      +'las primeras líneas no coinciden en param1\n'
                                       +'packageJson.repository no tiene el formato /{[-a-zA-Z0-9_.]+}/[-a-zA-Z0-9_.]+/\n'
                                       +'se han usado Promise(s) normales en "param1"\n'
                                       +'no existe el archivo "main" (param1) declarado en package.json\n'
@@ -1006,7 +993,6 @@ describe('qa-control main', function(){
                                        +'cucardas block differs\n'
                                        +'lack of mandatory line param1 in file param2\n'
                                        +'file param1 does not match custom param2\n'
-                                       +'first lines does not match in file param1\n'
                                        +'using normal promise in file param1\n'
                                        +'packagejson main file param1 does not exists\n'
                                        +'eslint warnings in file param1\n'
@@ -1276,14 +1262,6 @@ describe('qa-control coverage (group B: verbose branches)', function(){
         var check = qaControl.definition.rules.files_in_package_json.checks[0].warnings;
         var info = /** @type {any} */ ({ projectDir:'test/fixtures/stable-project-last-version', files:{}, packageJson:{ files:['nonexistent.txt'] } });
         expect(stripScoring(check(info))).to.eql([{warning:'invalid_files_section_in_package_json'}]);
-    });
-    it('first_lines logs the diff in verbose mode', function(){
-        var check = qaControl.definition.rules.first_lines.checks[0].warnings;
-        var info = /** @type {any} */ ({
-            packageJson: { name:'nombreDelModulo', main:'index.js', 'qa-control':{ 'run-in':'server', type:'lib' } },
-            files: { 'index.js': { content: 'totally wrong first line\n' } }
-        });
-        expect(stripScoring(check(info))).to.eql([{warning:'first_lines_does_not_match_in_file_1', params:['index.js']}]);
     });
     it('eslint logs details in verbose mode', function(){
         var check = qaControl.definition.rules.eslint.checks[0].warnings;

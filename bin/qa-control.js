@@ -12,13 +12,6 @@ var semver = require("semver");
 var bestGlobals = require("best-globals");
 
 // lodash replacements (para best-globals?)
-function map(obj, func) {
-    var index = -1;
-    var res = [];
-    for(var key in obj) { if(obj[key]) { res[++index] = func(obj[key], key, obj); } }
-    return res;
-}
-
 function forEach(obj, func) {
     for(var key in obj) { if(obj[key]) { func(obj[key], key, obj); } }
 }
@@ -51,7 +44,6 @@ qaControl.msgs={
         cucardas_block_differs: 'el bloque de cucardas difiere del esperado (orden, líneas sobrantes o formato)',
         lack_of_mandatory_line_1_in_file_2: 'falta la linea obligatoria $1 en el archivo $2',
         file_1_does_not_match_custom_2: '$1 no respeta la custombre $2',
-        first_lines_does_not_match_in_file_1: 'las primeras líneas no coinciden en $1',
         repository_name_not_found: 'packageJson.repository no tiene el formato /{[-a-zA-Z0-9_.]+}\/[-a-zA-Z0-9_.]+/',
         using_normal_promise_in_file_1: 'se han usado Promise(s) normales en "$1"',
         packagejson_main_file_1_does_not_exists: 'no existe el archivo "main" ($1) declarado en package.json',
@@ -266,23 +258,7 @@ qaControl.jsProjectName = function jsProjectName(projectName) {
 };
 
 qaControl.configReady=false;
-var configReading=(function(){
-    var definition = qaControl.definition;
-    definition.firstLines=definition.firstLines||{};
-    return Promise.all(map(definition.sections['run-in'].values,function(runInProperties, runInValue){
-        return Promise.all(map(definition.sections.type.values,function(typeProperties, typeValue){
-            return fs.readFile(Path.join(__dirname,'definition','first-lines-'+runInValue+'-'+typeValue+'.txt'),{encoding: 'utf8'}).catch(function(err){
-                if(err.code!=='ENOENT'){
-                    throw err;
-                }
-                return fs.readFile(Path.join(__dirname,'definition','first-lines-'+runInValue+'.txt'),{encoding: 'utf8'});
-            }).then(function(content){
-                definition.firstLines[runInValue]=definition.firstLines[runInValue]||{};
-                definition.firstLines[runInValue][typeValue]=content;
-            });
-        }));
-    }));
-})().then(function(){
+var configReading=Promise.resolve().then(function(){
     return qaControl.fixMessages(qaControl.msgs.en);
 }).then(function(){
     // only for test, in production this sleep must gone
