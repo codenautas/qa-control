@@ -72,9 +72,9 @@ module.exports = function(qaControl){
             'appveyor.yml':{
                 presentIf: testAppVeyor
             },
-            'eslint.config.js':{ group:'eslint-config', fixTemplate:true, presentIf: function(pj) { return pj['qa-control'] && pj['qa-control'].profile !== 'minimum'; } },
+            'eslint.config.cjs':{ group:'eslint-config', fixTemplate:true, presentIf: function(pj) { return pj['qa-control'] && pj['qa-control'].profile !== 'minimum'; } },
             'eslint.config.mjs':{ group:'eslint-config', presentIf: function(pj) { return pj['qa-control'] && pj['qa-control'].profile !== 'minimum'; } },
-            'eslint.config.cjs':{ group:'eslint-config', presentIf: function(pj) { return pj['qa-control'] && pj['qa-control'].profile !== 'minimum'; } },
+            'eslint.config.js':{ group:'eslint-config', presentIf: function(pj) { return pj['qa-control'] && pj['qa-control'].profile !== 'minimum'; } },
             'eslint.config.ts':{ group:'eslint-config', presentIf: function(pj) { return pj['qa-control'] && pj['qa-control'].profile !== 'minimum'; } },
             'eslint.config.mts':{ group:'eslint-config', presentIf: function(pj) { return pj['qa-control'] && pj['qa-control'].profile !== 'minimum'; } },
             'eslint.config.cts':{ group:'eslint-config', presentIf: function(pj) { return pj['qa-control'] && pj['qa-control'].profile !== 'minimum'; } }
@@ -503,6 +503,12 @@ module.exports = function(qaControl){
                                 }
                             });
                             return warns;
+                        }).catch(function(err) {
+                            if(qaControl.verbose){
+                                console.log('ESLINT could not run:');
+                                console.log(err.stack);
+                            }
+                            return [{warning:'eslint_could_not_run', scoring:{eslint:1}}];
                         });
                     }
                 }]

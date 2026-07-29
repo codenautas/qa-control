@@ -462,7 +462,7 @@ var fixtures=[{
         delete info.files['eslint.config.js'];
     },
     expected:[
-        { warning:'lack_of_mandatory_file_1',params:['eslint.config.js']},
+        { warning:'lack_of_mandatory_file_1',params:['eslint.config.cjs']},
         WARNING_CANT_CONTINUE
     ]
 },{
@@ -947,6 +947,7 @@ describe('qa-control main', function(){
                                       +'se han usado Promise(s) normales en "param1"\n'
                                       +'no existe el archivo "main" (param1) declarado en package.json\n'
                                       +'el archivo "param1" tiene warnings de ESLint\n'
+                                      +'no se pudo correr ESLint, verifique la extensión del archivo de configuración\n'
                                       +'README.md no esta sincronizado con "param1" para multilang\n'
                                       +'Falta la sección "repository" en package.json\n'
                                       +'La sección "repository" en package.json es inválida\n'
@@ -979,6 +980,7 @@ describe('qa-control main', function(){
                                        +'qa-control must be in devDependencies with the same version as qa-control.package-version\n'
                                        +'qa-control version in devDependencies is "param1" but expected "param2"\n'
                                        +'lack of test-ci script in package.json\n'
+                                       +'could not run ESLint, check the configuration file extension\n'
                                        +'--bail(ing)! There could be more issues\n' // TODO: esto debería estar abajo
                                        +'deprecated version\n'
                                        +'invalid value param1 in parameter param2 valid values param3\n'
@@ -1119,12 +1121,12 @@ describe('qa-control --fix', function(){
                 expect(fixed).to.contain('echo hola');
             });
         });
-        it('creates eslint.config.js from the qa-control template when missing', function(){
+        it('creates eslint.config.cjs from the qa-control template when missing', function(){
             prepare('creates-eslint-config');
             fs.removeSync(Path.join(tempDir, 'eslint.config.js'));
             return qaControl.controlProject(tempDir, {fix:true}).then(function(){
-                var created = fs.readFileSync(Path.join(tempDir, 'eslint.config.js'), 'utf8');
-                var qaTemplate = fs.readFileSync(Path.join(__dirname, '..', 'bin/init-template/eslint.config.js'), 'utf8');
+                var created = fs.readFileSync(Path.join(tempDir, 'eslint.config.cjs'), 'utf8');
+                var qaTemplate = fs.readFileSync(Path.join(__dirname, '..', 'bin/init-template/eslint.config.cjs'), 'utf8');
                 expect(qaControl.fixEOL(created)).to.eql(qaControl.fixEOL(qaTemplate));
                 return qaControl.controlProject(tempDir, {});
             }).then(function(warnings){

@@ -25,6 +25,7 @@ qaControl.msgs={
         lack_of_qa_control_in_dev_dependencies: 'qa-control must be in devDependencies with the same version as qa-control.package-version',
         qa_control_version_mismatch_in_dev_dependencies_1_expected_2: 'qa-control version in devDependencies is "$1" but expected "$2"',
         lack_of_test_ci_script_in_package_json: 'lack of test-ci script in package.json',
+        eslint_could_not_run: 'could not run ESLint, check the configuration file extension',
         bailing_could_be_more: '--bail(ing)! There could be more issues'
     },
     es:{
@@ -49,6 +50,7 @@ qaControl.msgs={
         using_normal_promise_in_file_1: 'se han usado Promise(s) normales en "$1"',
         packagejson_main_file_1_does_not_exists: 'no existe el archivo "main" ($1) declarado en package.json',
         eslint_warnings_in_file_1: 'el archivo "$1" tiene warnings de ESLint',
+        eslint_could_not_run: 'no se pudo correr ESLint, verifique la extensión del archivo de configuración',
         readme_multilang_not_sincronized_with_file_1: 'README.md no esta sincronizado con "$1" para multilang',
         lack_of_repository_section_in_package_json: 'Falta la sección "repository" en package.json',
         invalid_repository_section_in_package_json: 'La sección "repository" en package.json es inválida',
