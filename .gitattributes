@@ -1,8 +1,6 @@
 # Normalize to LF in the repo on commit; check out with the OS-native EOL.
 * text=auto
 
-bin/init-template/LEEME.md.tpl -text
-
 bin/init-template/eslint.config.js text eol=lf
 test/fixtures/eslint-real-check/clean.js text eol=lf
 test/fixtures/eslint-real-check/eslint.config.js text eol=lf

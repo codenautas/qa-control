@@ -664,7 +664,7 @@ module.exports = function(qaControl){
                         } catch(e) {
                             try {
                                 /* eslint-disable-next-line global-require */
-                                toolVersion = require('../../package.json').version; 
+                                toolVersion = require('../../package.json').version;
                             } catch(e2) { toolVersion = null; }
                         }
                         if(!toolVersion) { return warns; }
