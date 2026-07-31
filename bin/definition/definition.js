@@ -70,6 +70,7 @@ module.exports = function(qaControl){
             },
             'LICENSE':{ mandatory:true },
             'appveyor.yml':{
+                fixTemplate:'appveyor.yml',
                 presentIf: testAppVeyor
             },
             'eslint.config.cjs':{ group:'eslint-config', fixTemplate:true, presentIf: function(pj) { return pj['qa-control'] && pj['qa-control'].profile !== 'minimum'; } },
@@ -259,7 +260,9 @@ module.exports = function(qaControl){
                                 if(isMissing && !reportedGroups[groupName] && (file.mandatory || (file.presentIf && file.presentIf(info.packageJson)))) {
                                     reportedGroups[groupName] = true;
                                     if(file.fixTemplate && qaControl.fixMode) {
-                                        var templatePath = Path.join(__dirname, '../init-template', fileName);
+                                        var templatePath = typeof file.fixTemplate === 'string'
+                                            ? Path.join(__dirname, '../..', file.fixTemplate)
+                                            : Path.join(__dirname, '../init-template', fileName);
                                         var destPath = Path.join(info.projectDir, fileName);
                                         fs.copySync(templatePath, destPath);
                                         console.log('CREATED:', destPath);

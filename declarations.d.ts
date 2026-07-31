@@ -69,7 +69,8 @@ interface QAFile {
     mandatoryLines?: string[];
     presentIf?: (packageJson: PackageJson) => boolean;
     group?: string;
-    fixTemplate?: boolean;
+    /** true: se copia desde bin/init-template/<nombre del archivo>. string: ruta del template relativa a la raíz de qa-control. */
+    fixTemplate?: boolean|string;
 }
 
 interface QASection {

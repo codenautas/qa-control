@@ -1121,6 +1121,22 @@ describe('qa-control --fix', function(){
                 expect(fixed).to.contain('echo hola');
             });
         });
+        it('creates appveyor.yml from the qa-control template when missing', function(){
+            prepare('creates-appveyor');
+            fs.removeSync(Path.join(tempDir, 'appveyor.yml'));
+            return qaControl.controlProject(tempDir, {fix:true}).then(function(){
+                var created = fs.readFileSync(Path.join(tempDir, 'appveyor.yml'), 'utf8');
+                var qaAppveyor = fs.readFileSync(Path.join(__dirname, '..', 'appveyor.yml'), 'utf8');
+                expect(qaControl.fixEOL(created)).to.eql(qaControl.fixEOL(qaAppveyor));
+                return qaControl.controlProject(tempDir, {});
+            }).then(function(warnings){
+                var appveyorWarnings = warnings.filter(function(w){
+                    return w.warning === 'appveyor_yml_differs' ||
+                        w.warning === 'lack_of_mandatory_file_1' && w.params && w.params[0] === 'appveyor.yml';
+                });
+                expect(appveyorWarnings).to.eql([]);
+            });
+        });
         it('creates eslint.config.cjs from the qa-control template when missing', function(){
             prepare('creates-eslint-config');
             fs.removeSync(Path.join(tempDir, 'eslint.config.js'));
