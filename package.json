@@ -57,6 +57,7 @@
     "start": "node ./bin/qa-control-run.js",
     "report": "nyc report",
     "qac": "node bin/qa-control-run.js . -v",
+    "sync-workflows": "node bin/sync-workflows.js",
     "typecheck": "tsc",
     "all": "npm test && npm run test-cov && npm run report && npm run qac"
   },
