@@ -397,6 +397,8 @@ var fixtures=[{
     change:function(info) {},
     expected:[
         { warning: 'workflow_file_1_differs', params: [ 'build-and-test.yml' ] },
+        { warning: 'lack_of_workflow_file_1', params: [ 'create-new-version.yml' ] },
+        { warning: 'lack_of_workflow_file_1', params: [ 'publish-manual.yml' ] },
         { warning: 'lack_of_workflow_file_1', params: [ 'publish.yml' ] },
         { warning: 'workflow_file_1_differs', params: [ 'qa-control.yml' ] }
     ]
