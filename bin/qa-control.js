@@ -136,22 +136,45 @@ qaControl.getRepositoryUrl = function getRepositoryUrl(packageJson) {
     return repo;
 };
 
+// expande los comodines del "md" de una cucarda: xxx = owner, yyy = nombre del repo,
+// zzz = nombre del paquete (xxx_yyy antes que xxx para que no se rompa el par).
+// Es la única fuente de verdad: la usan generateCucardas y la regla que controla el README.
+/**
+ * @param {string} md
+ * @param {PackageJson} packageJson
+ * @returns {string}
+ */
+qaControl.expandCucarda = function expandCucarda(md, packageJson) {
+    var repoParts = qaControl.getRepositoryUrl(packageJson).split('/');
+    var repo = repoParts[0];
+    var repoName = repoParts[repoParts.length-1];
+    return md.replace(/\bxxx_yyy\b/g, repo+'_'+repoName)
+             .replace(/\bxxx\b/g, repo)
+             .replace(/\byyy\b/g, repoName)
+             .replace(/\bzzz\b/g, packageJson.name);
+};
+
+// una cucarda pertenece al bloque canónico si no está prohibida y su "check" (si tiene) da
+// verdadero. Es el criterio que comparten generateCucardas y la regla que controla el README:
+// si difirieran, el fix generaría un bloque distinto del que se exige.
+/**
+ * @param {QACucarda} cucarda
+ * @param {PackageJson} packageJson
+ * @returns {boolean}
+ */
+qaControl.cucardaBelongs = function cucardaBelongs(cucarda, packageJson) {
+    if(cucarda.forbidden) { return false; }
+    return !cucarda.check || !!cucarda.check(packageJson);
+};
+
 // devuelve el contenido para el archivo de salida (p.e. cucardas.log)
 qaControl.cucaMarker = '<!-- cucardas -->';
 qaControl.generateCucardas = function generateCucardas(cucardas, packageJson) {
     var cucaFileContent = qaControl.cucaMarker+'\n';
-    /** @type {{tag:string|null}} */
-    var info = { tag: null }
-    var module=packageJson.name;
-    var repoParts=qaControl.getRepositoryUrl(packageJson).split('/');
-    var repo=repoParts[0];
-    var repoName=repoParts[repoParts.length-1];
     for(var nombreCucarda in cucardas) {
         var cucarda = cucardas[nombreCucarda];
-        if(cucarda.forbidden) { continue; }
-        if(!cucarda.check || cucarda.check(packageJson)) {
-            var cucaStr = cucarda.md.replace(/\bxxx_yyy\b/g,`${repo}_${repoName}`).replace(/\bxxx\b/g,repo).replace(/\byyy\b/g,repoName).replace(/\bzzz\b/g,module);
-            cucaFileContent += cucaStr +'\n';
+        if(qaControl.cucardaBelongs(cucarda, packageJson)) {
+            cucaFileContent += qaControl.expandCucarda(cucarda.md, packageJson) +'\n';
         }
     }
     return cucaFileContent;
@@ -563,14 +586,38 @@ qaControl.silenceAll = function silenceAll(info, warns){
         return;
     }
     qac.silenced = current.concat(added);
-    var raw = info.files['package.json'].content;
-    var indentMatch = raw.match(/\n([ \t]+)\S/);
-    var indent = indentMatch ? indentMatch[1] : '  ';
-    var newContent = qaControl.fixEOL(JSON.stringify(info.packageJson, null, indent) + '\n');
+    var newContent = qaControl.stringifyPackageJson(info, info.packageJson);
     var fixPath = Path.join(info.projectDir, 'package.json');
     fs.writeFileSync(fixPath, newContent, 'utf8');
     info.files['package.json'].content = newContent;
     console.log('SILENCED:', fixPath, '-', added.join(', '));
+};
+
+// serializa un package.json respetando la indentación detectada en el original
+/**
+ * @param {ProjectInfo} info
+ * @param {PackageJson} packageJson
+ * @returns {string}
+ */
+qaControl.stringifyPackageJson = function stringifyPackageJson(info, packageJson){
+    var indentMatch = info.files['package.json'].content.match(/\n([ \t]+)\S/);
+    var indent = indentMatch ? indentMatch[1] : '  ';
+    return qaControl.fixEOL(JSON.stringify(packageJson, null, indent) + '\n');
+};
+
+// arma el fix que reescribe el package.json del proyecto con el contenido dado
+/**
+ * @param {ProjectInfo} info
+ * @param {PackageJson} packageJson
+ * @returns {WarningFix}
+ */
+qaControl.packageJsonFix = function packageJsonFix(info, packageJson){
+    return {
+        action: 'write',
+        path: Path.join(info.projectDir, 'package.json'),
+        content: qaControl.stringifyPackageJson(info, packageJson),
+        updateFile: 'package.json'
+    };
 };
 
 // calcula el package.json con la sección "qa-control" agregada, con los valores por defecto de
@@ -582,20 +629,11 @@ qaControl.silenceAll = function silenceAll(info, warns){
  */
 qaControl.computeQaControlSectionFix = function computeQaControlSectionFix(info){
     if(!info.packageJson || !info.files['package.json']) { return null; }
-    var newPackageJson = Object.assign({}, info.packageJson, {'qa-control':{
+    return qaControl.packageJsonFix(info, Object.assign({}, info.packageJson, {'qa-control':{
         'package-version': ownPackageJson.version,
         'run-in': 'server',
         type: 'lib'
-    }});
-    var raw = info.files['package.json'].content;
-    var indentMatch = raw.match(/\n([ \t]+)\S/);
-    var indent = indentMatch ? indentMatch[1] : '  ';
-    return {
-        action: 'write',
-        path: Path.join(info.projectDir, 'package.json'),
-        content: qaControl.fixEOL(JSON.stringify(newPackageJson, null, indent) + '\n'),
-        updateFile: 'package.json'
-    };
+    }}));
 };
 
 // calcula el package.json sin la clave indicada de la sección "qa-control", conservando la
@@ -609,16 +647,7 @@ qaControl.computeQaControlKeyRemovalFix = function computeQaControlKeyRemovalFix
     if(!info.packageJson || !info.files['package.json']) { return null; }
     var qaSection = Object.assign({}, info.packageJson['qa-control']);
     delete qaSection[key];
-    var newPackageJson = Object.assign({}, info.packageJson, {'qa-control':qaSection});
-    var raw = info.files['package.json'].content;
-    var indentMatch = raw.match(/\n([ \t]+)\S/);
-    var indent = indentMatch ? indentMatch[1] : '  ';
-    return {
-        action: 'write',
-        path: Path.join(info.projectDir, 'package.json'),
-        content: qaControl.fixEOL(JSON.stringify(newPackageJson, null, indent) + '\n'),
-        updateFile: 'package.json'
-    };
+    return qaControl.packageJsonFix(info, Object.assign({}, info.packageJson, {'qa-control':qaSection}));
 };
 
 // detecta (sin corregir), y con --fix aplica solo lo detectado y vuelve a detectar desde cero

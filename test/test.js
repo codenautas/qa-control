@@ -1027,6 +1027,19 @@ describe('qa-control --fix', function(){
     // (ignorados por .gitignore). No se borran en afterEach: si un test falla,
     // queda lo generado para poder inspeccionarlo.
     var localBase = Path.join(__dirname, '..', 'local-test-fix-mode');
+    // copia el fixture junto con los workflows de qa-control (para que solo difiera lo que
+    // cambia changePkg en el package.json) y devuelve el directorio temporal
+    function prepareWithWorkflows(name, changePkg){
+        var tempDir = Path.join(localBase, name);
+        fs.removeSync(tempDir);
+        fs.copySync(Path.join(__dirname, 'fixtures', 'with-wrong-qa-control-version'), tempDir);
+        fs.copySync(qaWorkflowsDir, Path.join(tempDir, '.github/workflows'));
+        var pkgPath = Path.join(tempDir, 'package.json');
+        var pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+        changePkg(pkg);
+        fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2)+'\n', 'utf8');
+        return tempDir;
+    }
     describe('compareContent (never writes)', function(){
         var noWritePath = Path.join(localBase, 'must-not-be-written.txt');
         beforeEach(function(){
@@ -1162,15 +1175,8 @@ describe('qa-control --fix', function(){
     describe('qa-control.gha as an object', function(){
         var tempDir;
         function prepare(name, gha){
-            tempDir = Path.join(localBase, name);
-            fs.removeSync(tempDir);
-            fs.copySync(Path.join(__dirname, 'fixtures', 'with-wrong-qa-control-version'), tempDir);
             // parto de los workflows del propio qa-control para que solo difiera lo sobrescrito
-            fs.copySync(qaWorkflowsDir, Path.join(tempDir, '.github/workflows'));
-            var pkgPath = Path.join(tempDir, 'package.json');
-            var pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
-            pkg['qa-control'].gha = gha;
-            fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2)+'\n', 'utf8');
+            tempDir = prepareWithWorkflows(name, function(pkg){ pkg['qa-control'].gha = gha; });
         }
         function workflowLine(fileName, key){
             var content = fs.readFileSync(Path.join(tempDir, '.github/workflows', fileName), 'utf8');
@@ -1219,14 +1225,7 @@ describe('qa-control --fix', function(){
     describe('private and publishable projects', function(){
         var tempDir;
         function prepare(name, changePkg){
-            tempDir = Path.join(localBase, name);
-            fs.removeSync(tempDir);
-            fs.copySync(Path.join(__dirname, 'fixtures', 'with-wrong-qa-control-version'), tempDir);
-            fs.copySync(qaWorkflowsDir, Path.join(tempDir, '.github/workflows'));
-            var pkgPath = Path.join(tempDir, 'package.json');
-            var pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
-            changePkg(pkg);
-            fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2)+'\n', 'utf8');
+            tempDir = prepareWithWorkflows(name, changePkg);
         }
         function warningsNamed(warnings, name){
             return warnings.filter(function(w){ return w.warning === name; })

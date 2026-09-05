@@ -14,6 +14,16 @@ function testAppVeyor(packageJson){
     return !!packageJson?.['qa-control']?.["test-appveyor"];
 }
 
+// el perfil "minimum" no exige configuración de lint
+/**
+ * @param {PackageJson} packageJson
+ * @returns {boolean}
+ */
+function usingLintConfig(packageJson){
+    var qaSection = packageJson?.['qa-control'];
+    return !!qaSection && qaSection.profile !== 'minimum';
+}
+
 /** @param {string} realRegex */
 function softRegExp(realRegex) {
     var re=realRegex.replace(/\\/g, '\\\\')
@@ -118,12 +128,12 @@ module.exports = function(qaControl){
                 fixTemplate:'appveyor.yml',
                 presentIf: testAppVeyor
             },
-            'eslint.config.cjs':{ group:'eslint-config', fixTemplate:true, presentIf: function(pj) { return pj['qa-control'] && pj['qa-control'].profile !== 'minimum'; } },
-            'eslint.config.mjs':{ group:'eslint-config', presentIf: function(pj) { return pj['qa-control'] && pj['qa-control'].profile !== 'minimum'; } },
-            'eslint.config.js':{ group:'eslint-config', presentIf: function(pj) { return pj['qa-control'] && pj['qa-control'].profile !== 'minimum'; } },
-            'eslint.config.ts':{ group:'eslint-config', presentIf: function(pj) { return pj['qa-control'] && pj['qa-control'].profile !== 'minimum'; } },
-            'eslint.config.mts':{ group:'eslint-config', presentIf: function(pj) { return pj['qa-control'] && pj['qa-control'].profile !== 'minimum'; } },
-            'eslint.config.cts':{ group:'eslint-config', presentIf: function(pj) { return pj['qa-control'] && pj['qa-control'].profile !== 'minimum'; } }
+            'eslint.config.cjs':{ group:'eslint-config', fixTemplate:true, presentIf: usingLintConfig },
+            'eslint.config.mjs':{ group:'eslint-config', presentIf: usingLintConfig },
+            'eslint.config.js':{ group:'eslint-config', presentIf: usingLintConfig },
+            'eslint.config.ts':{ group:'eslint-config', presentIf: usingLintConfig },
+            'eslint.config.mts':{ group:'eslint-config', presentIf: usingLintConfig },
+            'eslint.config.cts':{ group:'eslint-config', presentIf: usingLintConfig }
         },
         cucardas:{
             'npm-version':{
@@ -421,7 +431,7 @@ module.exports = function(qaControl){
             cucardas:{
                 eclipsers:['invalid_repository_section_in_package_json', 'lack_of_repository_section_in_package_json'],
                 checks:[{
-                    /* eslint-disable-next-line max-statements, complexity*/
+                    /* eslint-disable-next-line complexity*/
                     warnings:function(info){
                         if(info.packageJson['qa-control'] && info.packageJson['qa-control'].multilang === 'no') { return []; }
                         var warns=[];
@@ -430,10 +440,6 @@ module.exports = function(qaControl){
                             warns.push({warning:'lack_of_cucarda_marker_in_readme'});
                         }
                         var cucardas=qaControl.definition.cucardas;
-                        var modulo=info.packageJson.name;
-                        var repoParts=qaControl.getRepositoryUrl(info.packageJson).split('/');
-                        var repo=repoParts[0];
-                        var repoName=repoParts[repoParts.length-1];
                          /*jshint forin: false */
                         for(var nombreCucarda in cucardas) {
                             var cucarda = cucardas[nombreCucarda];
@@ -442,14 +448,14 @@ module.exports = function(qaControl){
                             }catch(err){
                                 console.log('######################################', cucarda, err)
                             }
-                            var cucaStr = cucarda.md ? cucarda.md.replace(/\bxxx\b/g,repo).replace(/\byyy\b/g,repoName).replace(/\bzzz\b/g,modulo) : '';
+                            var cucaStr = cucarda.md ? qaControl.expandCucarda(cucarda.md, info.packageJson) : '';
                             if(cucarda.forbidden) {
                                 if(readme.indexOf(cucaID) !== -1) {
                                     warns.push({warning:'forbidden_cucarda_1', params:[nombreCucarda], scoring:{cucardas:1}});
                                 }
                             } else if(readme.indexOf(cucaID) === -1) {
-                                // pertenece al bloque canónico (igual criterio que generateCucardas): se exige aunque no sea mandatory
-                                if(!cucarda.check || cucarda.check(info.packageJson)) {
+                                // si pertenece al bloque canónico se exige, aunque no sea mandatory
+                                if(qaControl.cucardaBelongs(cucarda, info.packageJson)) {
                                     warns.push({warning:'lack_of_mandatory_cucarda_1', params:[nombreCucarda], scoring:{cucardas:1}});
                                 }
                             } else {
