@@ -7,7 +7,6 @@ Quality assurance tool for node/npm projects
 [![downloads](https://img.shields.io/npm/dm/qa-control.svg)](https://npmjs.org/package/qa-control)
 [![build](https://github.com/codenautas/qa-control/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/codenautas/qa-control/actions/workflows/build-and-test.yml)
 [![coverage](https://img.shields.io/coveralls/codenautas/qa-control/master.svg)](https://coveralls.io/r/codenautas/qa-control)
-[![security](https://socket.dev/api/badge/npm/package/qa-control)](https://socket.dev/npm/package/qa-control)
 [![qa-control](https://github.com/codenautas/qa-control/actions/workflows/qa-control.yml/badge.svg)](https://github.com/codenautas/qa-control/actions/workflows/qa-control.yml)
 
 

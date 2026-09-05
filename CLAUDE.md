@@ -24,6 +24,25 @@ Devuelve en la consola la lista de problemas encontrados
 Hay una lista de reglas que hay que cumplir. Las opciones por proyecto se deben setear en el package.json
 en la sección "qa-control".
 
+### El modo `--fix`
+
+Corregir está separado de detectar, en tres fases:
+
+1. **detección**: las reglas no corrigen nada; cada warning que se puede reparar lleva adjunto
+   (en la propiedad no enumerable `fix`, ver `qaControl.withFix`) lo que ya se leyó y calculó
+   para repararlo.
+2. **fix** (`qaControl.applyFixes`): aplica solo las reparaciones de los warnings reportados.
+   No evalúa reglas ni busca problemas nuevos.
+3. **re-detección**: vuelve a leer el proyecto del disco y reporta lo que quedó pendiente.
+
+Corregir un problema puede destrabar reglas que se habían cortado por `cant_continue`, así que
+`--fix` puede necesitar correrse varias veces: cada corrida arregla exactamente lo que se
+reportaría sin `--fix`.
+
+Borrar archivos es la única corrección que destruye información y se controla con
+`--deletes=yes|no|ask` (por defecto `ask`, que pregunta por consola; sin terminal interactiva
+no borra).
+
 ## Reglas de la versión 0.3.0
 
 _Hay que tratar de mantener actualizada esta sección_
@@ -47,6 +66,7 @@ _Hay que tratar de mantener actualizada esta sección_
 ### 3. Repositorio y package.json
 - `package.json.repository` debe existir y tener formato `owner/repo` válido.
 - El nombre de repositorio debe coincidir con el nombre del paquete.
+- En un proyecto privado (`package.json.private: true`) `repository` es opcional: si no está, no se controla.
 - Se valida la sección `files` de `package.json` para evitar incluir archivos QA privados y verificar que los archivos listados existan.
 - Se rechaza `jshintConfig` y `eslintConfig` embebidos en `package.json`.
 
@@ -69,7 +89,21 @@ _Hay que tratar de mantener actualizada esta sección_
 - Se comprueba que `.travis.yml` pruebe al menos Node 4 y 6, y que estas versiones no tengan fallos permitidos.
 - Se comprueba que los archivos de traducción de `multilang` estén sincronizados con el `README.md`/`LEEME.md` principal.
 
-### 8. Excepciones de reglas (`silenced`)
+### 8. Proyectos privados y publicables
+Son dos ejes independientes:
+
+- **privado**: `package.json.private: true`. El código fuente no se publica.
+- **publicable**: el paquete se publica en npm. Lo es todo proyecto no privado, y también uno
+  privado que lo declare con `qa-control.publish: {"private-source": true}` (fuente cerrada,
+  paquete publicado).
+
+Reglas que dependen de estos ejes:
+- Si **no es publicable**: las cucardas `npm-version` y `downloads` no se piden (apuntan a
+  `npmjs.org`), y los workflows `publish.yml` y `publish-manual.yml` no deben existir.
+- Si es **privado**: `qa-control.sonar` no corresponde (SonarCloud analiza repositorios públicos)
+  y la cucarda `sonar` no se pide. `repository` pasa a ser opcional.
+
+### 9. Excepciones de reglas (`silenced`)
 - En la sección `qa-control` del `package.json` se puede declarar un array `silenced` con los nombres internos de los warnings que se quieren suprimir.
 - Cada warning suprimido se filtra del resultado (no se reporta), pero la regla igual se evalúa.
 - Ejemplo: el propio `qa-control` no puede tenerse a sí mismo en `devDependencies`, así que silencia `lack_of_qa_control_in_dev_dependencies`.

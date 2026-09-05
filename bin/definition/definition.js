@@ -35,6 +35,29 @@ function usingGHA(packageJson){
     return qaSection && qaSection.gha && qaSection.gha !== 'skip' || qaSection.profile && qaSection.profile !== "minimum";
 }
 
+// workflows que solo tienen sentido si el paquete se publica en npm
+var publishWorkflows = ['publish.yml', 'publish-manual.yml'];
+
+// el código fuente no se publica: lo dice package.json.private
+/**
+ * @param {PackageJson} packageJson
+ * @returns {boolean}
+ */
+function isPrivate(packageJson){
+    return packageJson?.private === true;
+}
+
+// el paquete se publica en npm. Un proyecto privado igual puede publicar si lo declara con
+// qa-control.publish["private-source"] (fuente cerrada, paquete publicado).
+/**
+ * @param {PackageJson} packageJson
+ * @returns {boolean}
+ */
+function isPublishable(packageJson){
+    if(!isPrivate(packageJson)) { return true; }
+    return packageJson?.['qa-control']?.publish?.['private-source'] === true;
+}
+
 /**
  * @param {object} qaControl
  * @returns {QADefinition}
@@ -83,12 +106,15 @@ module.exports = function(qaControl){
         cucardas:{
             'npm-version':{
                 mandatory:true,
+                // apunta al paquete en npmjs.org: no tiene sentido si el paquete no se publica
+                check: isPublishable,
                 md:'[![npm-version](https://img.shields.io/npm/v/zzz.svg)](https://npmjs.org/package/zzz)',
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/npm-version.png',
                 docDescription: ''
             },
             downloads:{
                 mandatory:true,
+                check: isPublishable,
                 md:'[![downloads](https://img.shields.io/npm/dm/zzz.svg)](https://npmjs.org/package/zzz)',
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/downloads.png',
                 docDescription: ''
@@ -120,10 +146,11 @@ module.exports = function(qaControl){
                 docDescription: ''
             },
             sonar:{
+                // sonarcloud analiza repositorios públicos: en un fuente privado no se pide
                 check:function(packageJson){
-                    return packageJson?.['qa-control']?.sonar;
+                    return !isPrivate(packageJson) && packageJson?.['qa-control']?.sonar;
                 },
-                md:'[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=xxx_yyy&metric=alert_status)](https://sonarcloud.io/summary/overall?id=xxx_yyy)',
+                md:'[![sonar](https://sonarcloud.io/api/project_badges/measure?project=xxx_yyy&metric=alert_status)](https://sonarcloud.io/summary/overall?id=xxx_yyy)',
                 imgExample:'https://socket.dev/api/badge/npm/package/my-package',
                 docDescription: ''
             },
@@ -199,6 +226,8 @@ module.exports = function(qaControl){
                     warnings:function(info) {
                         var warns = [];
                         if(!('repository' in info.packageJson)) {
+                            // en un proyecto privado repository es opcional: si no está, no se controla
+                            if(isPrivate(info.packageJson)) { return []; }
                             warns.push({warning:'lack_of_repository_section_in_package_json', scoring:{mandatories:1}});
                         } else {
                             if(! qaControl.getRepositoryUrl(info.packageJson).match(/^([-a-zA-Z0-9_.]+\/[-a-zA-Z0-9_.]+)$/)){
@@ -226,6 +255,8 @@ module.exports = function(qaControl){
                 checks:[{
                     warnings:function(info) {
                         var warns = [];
+                        // sin repository no hay nada que comparar (en un privado es válido que falte)
+                        if(!('repository' in info.packageJson) && isPrivate(info.packageJson)) { return []; }
                         var repoParts = qaControl.getRepositoryUrl(info.packageJson).split('/');
                         var projName = repoParts[repoParts.length-1];
                         if(projName !== info.packageJson.name) {
@@ -303,6 +334,18 @@ module.exports = function(qaControl){
                     }
                 }],
                 couldBail:true
+            },
+            sonar_in_private:{
+                checks:[{
+                    warnings:function(info){
+                        // sonarcloud analiza repositorios públicos: en un fuente privado la clave sobra
+                        if(!isPrivate(info.packageJson) || !info.packageJson?.['qa-control']?.sonar) { return []; }
+                        var warn = {warning:'sonar_in_private_package_json', scoring:{warnings:1}};
+                        var removalFix = qaControl.computeQaControlKeyRemovalFix(info, 'sonar');
+                        if(removalFix) { qaControl.withFix(warn, removalFix); }
+                        return [warn];
+                    }
+                }]
             },
             cant_continue:{
                 checks:[{
@@ -700,8 +743,18 @@ module.exports = function(qaControl){
                         if (!usingGHA(info.packageJson)) { return []; }
                         var qaWorkflowsDir = Path.join(__dirname, '../../.github/workflows');
                         var projWorkflowsDir = Path.join(info.projectDir, '.github/workflows');
+                        var publishable = isPublishable(info.packageJson);
                         return fs.readdir(qaWorkflowsDir).then(function(qaFiles) {
                             return Promise.all(qaFiles.map(function(fileName) {
+                                // si el paquete no se publica, los workflows de publicación no van
+                                if(!publishable && publishWorkflows.indexOf(fileName) !== -1) {
+                                    var forbiddenPath = Path.join(projWorkflowsDir, fileName);
+                                    return fs.pathExists(forbiddenPath).then(function(exists) {
+                                        if(!exists) { return []; }
+                                        return [qaControl.withFix({warning:'forbidden_workflow_file_1_in_non_publishable', params:[fileName], scoring:{workflows:1}},
+                                                 {action:'delete', path:forbiddenPath})];
+                                    });
+                                }
                                 return fs.readFile(Path.join(qaWorkflowsDir, fileName), 'utf8').then(function(qaContent) {
                                     return fs.readFile(Path.join(projWorkflowsDir, fileName), 'utf8').then(function(projContent) {
                                         var fixPath = Path.join(projWorkflowsDir, fileName);

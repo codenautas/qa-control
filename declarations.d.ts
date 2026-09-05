@@ -4,7 +4,8 @@ declare module 'fs-extra';
 /** cómo reparar un warning. Lo arma la detección con lo que ya leyó/calculó y lo aplica applyFixes. */
 type WarningFix =
     {action:'copy', from:string, to:string} |
-    {action:'write', path:string, content:string, preserve?:string, updateFile?:string};
+    {action:'write', path:string, content:string, preserve?:string, updateFile?:string} |
+    {action:'delete', path:string};
 
 interface Warning {
     warning: string;
@@ -30,11 +31,14 @@ interface QAControlSection {
     multilang?: string;
     gha?: 'skip'|'all'
     sonar?: boolean;
+    /** opciones de publicación. "private-source": el fuente es privado pero el paquete se publica igual */
+    publish?: { 'private-source'?: boolean };
 }
 
 interface PackageJson {
     name: string;
     version: string;
+    private?: boolean;
     main?: string;
     repository?: string | { url: string };
     dependencies?: Record<string, string>;

@@ -6,6 +6,7 @@ var qaControl = {};
 var fs = require('fs-extra');
 var Path = require('path');
 var os = require('os');
+var readline = require('readline');
 var stripBom = require('strip-bom-string');
 var yaml = require('js-yaml');
 var semver = require("semver");
@@ -26,6 +27,8 @@ qaControl.msgs={
         qa_control_version_mismatch_in_dev_dependencies_1_expected_2: 'qa-control version in devDependencies is "$1" but expected "$2"',
         lack_of_test_ci_script_in_package_json: 'lack of test-ci script in package.json',
         eslint_could_not_run: 'could not run ESLint, check the configuration file extension',
+        sonar_in_private_package_json: '"qa-control.sonar" does not apply in a private project',
+        forbidden_workflow_file_1_in_non_publishable: 'the project is not published: workflow "$1" does not apply',
         bailing_could_be_more: '--bail(ing)! There could be more issues'
     },
     es:{
@@ -68,6 +71,8 @@ qaControl.msgs={
         lack_of_qa_control_in_dev_dependencies: 'qa-control debe estar en devDependencies con la misma versión que qa-control.package-version',
         qa_control_version_mismatch_in_dev_dependencies_1_expected_2: 'La versión de qa-control en devDependencies es "$1" pero se esperaba "$2"',
         "lack_of_test_ci_script_in_package_json": 'Falta el script "test-ci" en package.json',
+        sonar_in_private_package_json: 'no corresponde "qa-control.sonar" en un proyecto privado',
+        forbidden_workflow_file_1_in_non_publishable: 'el proyecto no se publica: no corresponde el workflow "$1"',
         bailing_could_be_more: '¡Qué --bail(e)! Podrían haber más problemas, correr de nuevo después de corregir estos',
     }
 };
@@ -85,7 +90,10 @@ qaControl.cmdMsgs = {
         msg_reading_main: 'Reading "main" from',
         msg_controlling: 'Controlling project information with definitions rules version ',
         msg_checking: 'Checking rule',
-        msg_fixed_issues: 'reported issues fixed'
+        msg_fixed_issues: 'reported issues fixed',
+        msg_delete_question: 'delete',
+        msg_deletes_disabled: 'run with --deletes=yes to delete it',
+        msg_deletes_needs_tty: '--deletes=ask needs an interactive terminal'
     },
     es: {
         msg_done:'Listo',
@@ -99,7 +107,10 @@ qaControl.cmdMsgs = {
         msg_reading_main: 'Leyendo "main" de',
         msg_controlling: 'Controlando la información del proyecto con definiciones de reglas versión ',
         msg_checking: 'Verificando regla',
-        msg_fixed_issues: 'problemas arreglados (de los previamente encontrados)'
+        msg_fixed_issues: 'problemas arreglados (de los previamente encontrados)',
+        msg_delete_question: 'borrar',
+        msg_deletes_disabled: 'correr con --deletes=yes para borrarlo',
+        msg_deletes_needs_tty: '--deletes=ask necesita una terminal interactiva'
     }
 };
 
@@ -213,6 +224,8 @@ qaControl.nodeVerInTravisRE = /[678]/;
 
 qaControl.verbose = false;
 qaControl.fixMode = false;
+// 'ask' | 'yes' | 'no': política para las correcciones que borran archivos
+qaControl.deletes = 'ask';
 qaControl.codes = false;
 qaControl.cucardas_always = false;
 qaControl.repoIs = null;
@@ -288,35 +301,84 @@ qaControl.compareContent = function (obtained, expected, id, message) {
     return result;
 }
 
+// pregunta por consola si se borra un archivo. Solo se usa con --deletes=ask, que requiere una
+// terminal interactiva: sin TTY no hay quién responda y no se borra.
+/**
+ * @param {string} path
+ * @returns {Promise<boolean>}
+ */
+qaControl.askDelete = function askDelete(path) {
+    var cmsgs = qaControl.cmdMsgs[qaControl.lang];
+    if(!process.stdin.isTTY) {
+        console.log('NOT DELETED:', path, '-', cmsgs.msg_deletes_needs_tty);
+        return Promise.resolve(false);
+    }
+    return new Promise(function(resolve, reject) {
+        var rl = readline.createInterface({input:process.stdin, output:process.stdout});
+        rl.question(cmsgs.msg_delete_question+' '+path+' [y/N] ', function(answer) {
+            rl.close();
+            resolve(/^\s*(y|s)/i.test(answer));
+        });
+        rl.on('error', reject);
+    });
+};
+
+// decide si se borra un archivo según --deletes: 'yes' borra, 'no' informa lo que borraría,
+// 'ask' (por defecto) pregunta. Borrar es la única corrección que destruye información, por eso
+// no se hace sin confirmación explícita.
+/**
+ * @param {string} path
+ * @returns {Promise<boolean>}
+ */
+qaControl.confirmDelete = function confirmDelete(path) {
+    var cmsgs = qaControl.cmdMsgs[qaControl.lang];
+    if(qaControl.deletes === 'yes') { return Promise.resolve(true); }
+    if(qaControl.deletes === 'no') {
+        console.log('NOT DELETED:', path, '-', cmsgs.msg_deletes_disabled);
+        return Promise.resolve(false);
+    }
+    return qaControl.askDelete(path);
+};
+
 // aplica las reparaciones que la detección adjuntó a los warnings (propiedad "fix"). Solo se corrige
 // lo que se reportó: applyFixes no busca problemas nuevos ni vuelve a evaluar reglas.
 // Devuelve la cantidad de warnings efectivamente reparados.
 /**
  * @param {ProjectInfo} info
  * @param {Warning[]} warns
- * @returns {number}
+ * @returns {Promise<number>}
  */
 qaControl.applyFixes = function applyFixes(info, warns) {
     var fixedCount = 0;
-    warns.forEach(function(warn) {
-        var fix = warn.fix;
-        if(!fix) { return; }
-        if(fix.action === 'copy') {
-            fs.copySync(fix.from, fix.to);
-            console.log('CREATED:', fix.to);
-        } else {
-            var content = qaControl.fixEOL(fix.content) + (fix.preserve != null ? qaControl.fixEOL(fix.preserve) : '');
-            var existed = fs.existsSync(fix.path);
-            fs.outputFileSync(fix.path, content, 'utf8');
-            console.log(existed ? 'FIXED:' : 'CREATED:', fix.path);
-            // algunas reglas posteriores leen el contenido desde info.files (por ejemplo multilang)
-            if(fix.updateFile && info.files[fix.updateFile]) {
-                info.files[fix.updateFile].content = content;
+    return warns.reduce(function(chain, warn) {
+        return chain.then(function() {
+            var fix = warn.fix;
+            if(!fix) { return; }
+            if(fix.action === 'copy') {
+                fs.copySync(fix.from, fix.to);
+                console.log('CREATED:', fix.to);
+            } else if(fix.action === 'delete') {
+                return qaControl.confirmDelete(fix.path).then(function(confirmed) {
+                    if(!confirmed) { return; }
+                    fs.removeSync(fix.path);
+                    console.log('DELETED:', fix.path);
+                    fixedCount++;
+                });
+            } else {
+                var content = qaControl.fixEOL(fix.content) + (fix.preserve != null ? qaControl.fixEOL(fix.preserve) : '');
+                var existed = fs.existsSync(fix.path);
+                fs.outputFileSync(fix.path, content, 'utf8');
+                console.log(existed ? 'FIXED:' : 'CREATED:', fix.path);
+                // algunas reglas posteriores leen el contenido desde info.files (por ejemplo multilang)
+                if(fix.updateFile && info.files[fix.updateFile]) {
+                    info.files[fix.updateFile].content = content;
+                }
             }
-        }
-        fixedCount++;
+            fixedCount++;
+        });
+    }, Promise.resolve()).then(function() {
+        return fixedCount;
     });
-    return fixedCount;
 };
 
 qaControl.loadProject = function loadProject(projectDir) {
@@ -536,6 +598,29 @@ qaControl.computeQaControlSectionFix = function computeQaControlSectionFix(info)
     };
 };
 
+// calcula el package.json sin la clave indicada de la sección "qa-control", conservando la
+// indentación del original. No escribe nada: devuelve el fix para que lo aplique applyFixes.
+/**
+ * @param {ProjectInfo} info
+ * @param {string} key
+ * @returns {WarningFix|null}
+ */
+qaControl.computeQaControlKeyRemovalFix = function computeQaControlKeyRemovalFix(info, key){
+    if(!info.packageJson || !info.files['package.json']) { return null; }
+    var qaSection = Object.assign({}, info.packageJson['qa-control']);
+    delete qaSection[key];
+    var newPackageJson = Object.assign({}, info.packageJson, {'qa-control':qaSection});
+    var raw = info.files['package.json'].content;
+    var indentMatch = raw.match(/\n([ \t]+)\S/);
+    var indent = indentMatch ? indentMatch[1] : '  ';
+    return {
+        action: 'write',
+        path: Path.join(info.projectDir, 'package.json'),
+        content: qaControl.fixEOL(JSON.stringify(newPackageJson, null, indent) + '\n'),
+        updateFile: 'package.json'
+    };
+};
+
 // detecta (sin corregir), y con --fix aplica solo lo detectado y vuelve a detectar desde cero
 // (releyendo el proyecto del disco) para informar lo que quedó pendiente. La corrección de un
 // problema puede destrabar reglas que se cortaron por cant_continue: esas se ven en la corrida
@@ -546,6 +631,7 @@ qaControl.controlProject=function controlProject(projectDir, opts){
     qaControl.codes = opts && opts.codes;
     qaControl.cucardas_always = opts && opts.cucardas;
     qaControl.repoIs = (opts && opts.repoIs) || null;
+    qaControl.deletes = (opts && opts.deletes) || 'ask';
     function detect(){
         return qaControl.loadProject(projectDir).then(function(info){
             return qaControl.controlInfo(info, opts).then(function(warns){
@@ -558,16 +644,17 @@ qaControl.controlProject=function controlProject(projectDir, opts){
             if(opts && opts.silenceAll) { qaControl.silenceAll(first.info, first.warns); }
             return first.warns;
         }
-        var fixedCount = qaControl.applyFixes(first.info, first.warns);
-        if(!fixedCount) {
-            if(opts && opts.silenceAll) { qaControl.silenceAll(first.info, first.warns); }
-            return first.warns;
-        }
-        var cmsgs = qaControl.cmdMsgs[qaControl.lang];
-        console.log(fixedCount, cmsgs.msg_fixed_issues);
-        return detect().then(function(second){
-            if(opts && opts.silenceAll) { qaControl.silenceAll(second.info, second.warns); }
-            return second.warns;
+        return qaControl.applyFixes(first.info, first.warns).then(function(fixedCount){
+            if(!fixedCount) {
+                if(opts && opts.silenceAll) { qaControl.silenceAll(first.info, first.warns); }
+                return first.warns;
+            }
+            var cmsgs = qaControl.cmdMsgs[qaControl.lang];
+            console.log(fixedCount, cmsgs.msg_fixed_issues);
+            return detect().then(function(second){
+                if(opts && opts.silenceAll) { qaControl.silenceAll(second.info, second.warns); }
+                return second.warns;
+            });
         });
     });
 };

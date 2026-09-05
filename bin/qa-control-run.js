@@ -15,6 +15,7 @@ program
     .option('-c, --cucardas', 'Always generate cucardas.log')
     .option('-b, --bail', 'Stop at first blocking issue')
     .option('-f, --fix', 'Fix files whose content differs from the expected one')
+    .option('--deletes [mode]', 'With --fix, whether to delete files that must not exist: yes, no or ask', 'ask')
     .option('--codes', 'Prefix each warning with its internal code (usable in qa-control.silenced)')
     .option('--silence-all', 'Add every active warning code to qa-control.silenced in package.json')
     .option('--repo-is <owner_or_org/repo>', 'Expected GitHub repository (owner_or_org/repo)')
@@ -23,7 +24,8 @@ program
 var opts = program.opts();
 
 if( ( !opts.listLangs && (program.args.length===0 && !opts.projectDir))
-    || (opts.lang && false === opts.lang in qaControl.msgs) )
+    || (opts.lang && false === opts.lang in qaControl.msgs)
+    || ['yes','no','ask'].indexOf(opts.deletes) === -1 )
 {
     program.help();
 }
@@ -36,6 +38,7 @@ params.lang = opts.lang;
 params.cucardas = opts.cucardas;
 params.bail = opts.bail || false;
 params.fix = opts.fix || false;
+params.deletes = opts.deletes;
 params.codes = opts.codes || false;
 params.silenceAll = opts.silenceAll || false;
 params.repoIs = opts.repoIs || process.env.GITHUB_REPOSITORY || null;

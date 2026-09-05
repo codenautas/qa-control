@@ -159,13 +159,11 @@ var fixtures=[{
     change:function(info){
         var readme=info.files['LEEME.md'].content;
         info.files['LEEME.md'].content = readme.replace('![npm-version]','')
-                                                .replace('![downloads]','')
-                                                .replace('![security]','');
+                                                .replace('![downloads]','');
     },
     expected:[
         { warning:'lack_of_mandatory_cucarda_1',params:['npm-version']},
         { warning:'lack_of_mandatory_cucarda_1',params:['downloads']},
-        { warning:'lack_of_mandatory_cucarda_1',params:['security']},
         { warning:'readme_multilang_not_sincronized_with_file_1', params:['README.md']}
     ]
 },{
@@ -192,15 +190,13 @@ var fixtures=[{
     change:function(info){
         var readme=info.files['LEEME.md'].content;
         info.files['LEEME.md'].content = readme.replace('![npm-version](https://img.shields.io/npm','![npm-version](https://HHHimg.shields.io/npm')
-                                                .replace('[![downloads](https://img.shields.io/npm/','[![downloads](https://im__shields.io/npm/')
-                                                .replace('[![security](https://socket.dev','[![security](https://EEsocket.dev');
+                                                .replace('[![downloads](https://img.shields.io/npm/','[![downloads](https://im__shields.io/npm/');
         delete info.packageJson['qa-control']["coverage"];
     },
     expected:[
         { warning:'wrong_format_in_cucarda_1',params:['npm-version']},
         { warning:'wrong_format_in_cucarda_1',params:['downloads']},
         { warning:'wrong_format_in_cucarda_1',params:['coverage']},
-        { warning:'wrong_format_in_cucarda_1',params:['security']},
         { warning:'readme_multilang_not_sincronized_with_file_1', params:['README.md']}
     ]
 },{
@@ -967,6 +963,8 @@ describe('qa-control main', function(){
                                       +'qa-control debe estar en devDependencies con la misma versión que qa-control.package-version\n'
                                       +'La versión de qa-control en devDependencies es "param1" pero se esperaba "param2"\n'
                                       +'Falta el script "test-ci" en package.json\n'
+                                      +'no corresponde "qa-control.sonar" en un proyecto privado\n'
+                                      +'el proyecto no se publica: no corresponde el workflow "param1"\n'
                                       +'¡Qué --bail(e)! Podrían haber más problemas, correr de nuevo después de corregir estos\n');
                 done();
             }).catch(done);
@@ -983,6 +981,8 @@ describe('qa-control main', function(){
                                        +'qa-control version in devDependencies is "param1" but expected "param2"\n'
                                        +'lack of test-ci script in package.json\n'
                                        +'could not run ESLint, check the configuration file extension\n'
+                                       +'"qa-control.sonar" does not apply in a private project\n'
+                                       +'the project is not published: workflow "param1" does not apply\n'
                                        +'--bail(ing)! There could be more issues\n' // TODO: esto debería estar abajo
                                        +'deprecated version\n'
                                        +'invalid value param1 in parameter param2 valid values param3\n'
@@ -1398,7 +1398,7 @@ describe('qa-control --codes and --silence-all', function(){
                 return qaControl.controlInfo(clone);
             }).then(function(warns){
                 // las cucardas de github/coveralls/appveyor usan el repo-name y quedan mal;
-                // las de npm (npm-version, downloads, security) usan el name y siguen bien
+                // las de npm (npm-version, downloads) usan el name y siguen bien
                 expect(stripNotices(stripScoring(warns))).to.eql([
                     {warning:'wrong_format_in_cucarda_1', params:['linux']},
                     {warning:'wrong_format_in_cucarda_1', params:['windows']},
