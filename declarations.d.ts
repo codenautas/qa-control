@@ -29,6 +29,7 @@ interface QAControlSection {
     profile?: 'minimum'|'default';
     multilang?: string;
     gha?: 'skip'|'all'
+    sonar?: boolean;
 }
 
 interface PackageJson {

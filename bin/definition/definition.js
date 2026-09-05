@@ -119,9 +119,11 @@ module.exports = function(qaControl){
                 imgExample:'https://raw.githubusercontent.com/codenautas/codenautas/master/img/coverage.png',
                 docDescription: ''
             },
-            security:{
-                mandatory:true,
-                md:'[![security](https://socket.dev/api/badge/npm/package/zzz)](https://socket.dev/npm/package/zzz)',
+            sonar:{
+                check:function(packageJson){
+                    return packageJson?.['qa-control']?.sonar;
+                },
+                md:'[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=xxx_yyy&metric=alert_status)](https://sonarcloud.io/summary/overall?id=xxx_yyy)',
                 imgExample:'https://socket.dev/api/badge/npm/package/my-package',
                 docDescription: ''
             },
@@ -129,6 +131,9 @@ module.exports = function(qaControl){
                 mandatory:false,
                 md:'[![qa-control](https://github.com/xxx/yyy/actions/workflows/qa-control.yml/badge.svg)](https://github.com/xxx/yyy/actions/workflows/qa-control.yml)',
                 docDescription: ''
+            },
+            security:{
+                forbidden: true
             },
             'outdated-deps':{
                 forbidden:true
