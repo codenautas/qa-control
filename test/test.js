@@ -1027,7 +1027,7 @@ describe('qa-control --fix', function(){
     // (ignorados por .gitignore). No se borran en afterEach: si un test falla,
     // queda lo generado para poder inspeccionarlo.
     var localBase = Path.join(__dirname, '..', 'local-test-fix-mode');
-    describe('compareOrFixContent (without fix mode)', function(){
+    describe('compareContent (never writes)', function(){
         var noWritePath = Path.join(localBase, 'must-not-be-written.txt');
         beforeEach(function(){
             qaControl.fixMode = false;
@@ -1036,15 +1036,16 @@ describe('qa-control --fix', function(){
             fs.removeSync(noWritePath);
         });
         it('returns true when obtained and expected are equal', function(){
-            expect(qaControl.compareOrFixContent('hello\n', 'hello\n', noWritePath, 'eq')).to.be(true);
+            expect(qaControl.compareContent('hello\n', 'hello\n', 'eq')).to.be(true);
             expect(fs.existsSync(noWritePath)).to.be(false);
         });
         it('returns true when they differ only in EOL', function(){
-            expect(qaControl.compareOrFixContent('a\r\nb\r\n', 'a\nb\n', noWritePath, 'eol')).to.be(true);
+            expect(qaControl.compareContent('a\r\nb\r\n', 'a\nb\n', 'eol')).to.be(true);
             expect(fs.existsSync(noWritePath)).to.be(false);
         });
-        it('returns false and does not write when content differs', function(){
-            expect(qaControl.compareOrFixContent('obtained content', 'expected content', noWritePath, 'diff')).to.be(false);
+        it('returns false and does not write when content differs, even in fix mode', function(){
+            qaControl.fixMode = true;
+            expect(qaControl.compareContent('obtained content', 'expected content', 'diff')).to.be(false);
             expect(fs.existsSync(noWritePath)).to.be(false);
         });
     });
@@ -1083,7 +1084,7 @@ describe('qa-control --fix', function(){
                 expect(workflowWarnings).to.eql([]);
             });
         });
-        it('fixes a broken cucarda in the main doc and syncs README in the same run', function(){
+        it('fixes a broken cucarda in the main doc and syncs README in a following run', function(){
             prepare('fixes-cucardas');
             var leemePath = Path.join(tempDir, 'LEEME.md');
             var readmePath = Path.join(tempDir, 'README.md');
@@ -1091,9 +1092,12 @@ describe('qa-control --fix', function(){
             var broken = fs.readFileSync(leemePath, 'utf8').replace('npm/v/stable-project.svg', 'npm/v/stable-project-BROKEN.svg');
             fs.writeFileSync(leemePath, broken, 'utf8');
             return qaControl.controlProject(tempDir, {fix:true}).then(function(){
-                // la regla cucardas corrige LEEME.md antes de que multilang regenere README.md
+                // la detección no corrige: multilang comparó contra el LEEME.md todavía roto,
+                // así que README.md se sincroniza recién en la corrida siguiente
                 expect(fs.readFileSync(leemePath, 'utf8')).to.contain('npm/v/stable-project.svg');
                 expect(fs.readFileSync(leemePath, 'utf8')).to.not.contain('BROKEN');
+                return qaControl.controlProject(tempDir, {fix:true});
+            }).then(function(){
                 expect(fs.readFileSync(readmePath, 'utf8')).to.contain('npm/v/stable-project.svg');
                 expect(fs.readFileSync(readmePath, 'utf8')).to.not.contain('BROKEN');
                 return qaControl.controlProject(tempDir, {});
@@ -1265,11 +1269,11 @@ describe('qa-control coverage (group B: verbose branches)', function(){
             expect(str.indexOf('WARNING: ')).to.be(0);
         });
     });
-    it('compareOrFixContent dumps obtained/expected files in verbose mode', function(){
+    it('compareContent dumps obtained/expected files in verbose mode', function(){
         var id = 'group-b-verbose-dump';
         fs.removeSync('local-'+id+'.obtained.txt');
         fs.removeSync('local-'+id+'.expected.txt');
-        var result = qaControl.compareOrFixContent('aaa', 'bbb', null, id, 'msg');
+        var result = qaControl.compareContent('aaa', 'bbb', id, 'msg');
         expect(result).to.be(false);
         expect(fs.existsSync('local-'+id+'.obtained.txt')).to.be(true);
         expect(fs.existsSync('local-'+id+'.expected.txt')).to.be(true);

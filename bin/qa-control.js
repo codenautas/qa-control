@@ -84,7 +84,8 @@ qaControl.cmdMsgs = {
         msg_skipping: 'Skipping directory',
         msg_reading_main: 'Reading "main" from',
         msg_controlling: 'Controlling project information with definitions rules version ',
-        msg_checking: 'Checking rule'
+        msg_checking: 'Checking rule',
+        msg_fixed_issues: 'reported issues fixed'
     },
     es: {
         msg_done:'Listo',
@@ -97,7 +98,8 @@ qaControl.cmdMsgs = {
         msg_skipping: 'Salteando directorio',
         msg_reading_main: 'Leyendo "main" de',
         msg_controlling: 'Controlando la información del proyecto con definiciones de reglas versión ',
-        msg_checking: 'Verificando regla'
+        msg_checking: 'Verificando regla',
+        msg_fixed_issues: 'problemas arreglados (de los previamente encontrados)'
     }
 };
 
@@ -146,7 +148,7 @@ qaControl.generateCucardas = function generateCucardas(cucardas, packageJson) {
 
 // calcula cómo quedaría el documento principal con el bloque de cucardas canónico (generateCucardas).
 // Solo actúa si existe el marcador. Devuelve {mainDocName, fixedContent} si el bloque difiere, o null si ya coincide.
-// Es la única fuente de verdad: la detección la usa para avisar y fixCucardas para escribir.
+// Es la única fuente de verdad: la detección la usa para avisar y para armar el fix que aplica applyFixes.
 /**
  * @param {ProjectInfo} info
  * @returns {{mainDocName:string, fixedContent:string}|null}
@@ -168,21 +170,6 @@ qaControl.computeCucardasFix = function computeCucardasFix(info) {
     var newContent = lines.slice(0, idx).concat(expectedLines, lines.slice(end)).join('\n');
     if(qaControl.fixEOL(newContent) === qaControl.fixEOL(content)) { return null; }
     return { mainDocName: mainDocName, fixedContent: qaControl.fixEOL(newContent) };
-};
-
-// reemplaza el bloque de cucardas del documento principal por el canónico. Devuelve true si modificó el archivo.
-/**
- * @param {ProjectInfo} info
- * @returns {boolean}
- */
-qaControl.fixCucardas = function fixCucardas(info) {
-    var fix = qaControl.computeCucardasFix(info);
-    if(!fix) { return false; }
-    var fixPath = Path.join(info.projectDir, fix.mainDocName);
-    fs.writeFileSync(fixPath, fix.fixedContent, 'utf8');
-    info.files[fix.mainDocName].content = fix.fixedContent;
-    console.log('FIXED:', fixPath);
-    return true;
 };
 
 qaControl.checkLintConfig = function checkLintConfig(info, lintConfigName, warnLackOf, requiredOptions, warnIncorrect, scoring) {
@@ -275,23 +262,62 @@ var configReading=Promise.resolve().then(function(){
 });
 
 qaControl.dumpComparison = function (id, obtained, expected, message) {
-    console.error('!compareOrFixContent:', id, message ?? '');
+    console.error('!compareContent:', id, message ?? '');
     fs.writeFileSync(`local-${id}.obtained.txt`, obtained, 'utf8');
     fs.writeFileSync(`local-${id}.expected.txt`, expected, 'utf8');
 }
 
-qaControl.compareOrFixContent = function (obtained, expected, pathToFix, id, message, preserveSuffix) {
+// adjunta al warning cómo repararlo. La propiedad no es enumerable: el warning se sigue comparando
+// y serializando como si solo tuviera warning/params/scoring, y applyFixes la lee para corregir.
+/**
+ * @param {Warning} warn
+ * @param {WarningFix} fix
+ * @returns {Warning}
+ */
+qaControl.withFix = function withFix(warn, fix) {
+    Object.defineProperty(warn, 'fix', {value:fix, enumerable:false, writable:true, configurable:true});
+    return warn;
+}
+
+// compara sin escribir: la corrección la aplica applyFixes con el fix que arma la regla
+qaControl.compareContent = function (obtained, expected, id, message) {
     const result = qaControl.fixEOL(obtained) === qaControl.fixEOL(expected);
     if (qaControl.verbose || process.env.VERBOSE === id && !result) {
         qaControl.dumpComparison(id, obtained, expected, message);
     }
-    if (!result && qaControl.fixMode && pathToFix) {
-        fs.writeFileSync(pathToFix, qaControl.fixEOL(expected) + (preserveSuffix != null ? qaControl.fixEOL(preserveSuffix) : ''), 'utf8');
-        console.log('FIXED:', pathToFix);
-        return true;
-    }
     return result;
 }
+
+// aplica las reparaciones que la detección adjuntó a los warnings (propiedad "fix"). Solo se corrige
+// lo que se reportó: applyFixes no busca problemas nuevos ni vuelve a evaluar reglas.
+// Devuelve la cantidad de warnings efectivamente reparados.
+/**
+ * @param {ProjectInfo} info
+ * @param {Warning[]} warns
+ * @returns {number}
+ */
+qaControl.applyFixes = function applyFixes(info, warns) {
+    var fixedCount = 0;
+    warns.forEach(function(warn) {
+        var fix = warn.fix;
+        if(!fix) { return; }
+        if(fix.action === 'copy') {
+            fs.copySync(fix.from, fix.to);
+            console.log('CREATED:', fix.to);
+        } else {
+            var content = qaControl.fixEOL(fix.content) + (fix.preserve != null ? qaControl.fixEOL(fix.preserve) : '');
+            var existed = fs.existsSync(fix.path);
+            fs.outputFileSync(fix.path, content, 'utf8');
+            console.log(existed ? 'FIXED:' : 'CREATED:', fix.path);
+            // algunas reglas posteriores leen el contenido desde info.files (por ejemplo multilang)
+            if(fix.updateFile && info.files[fix.updateFile]) {
+                info.files[fix.updateFile].content = content;
+            }
+        }
+        fixedCount++;
+    });
+    return fixedCount;
+};
 
 qaControl.loadProject = function loadProject(projectDir) {
     var info = /** @type {ProjectInfo} */ ({projectDir:projectDir});
@@ -485,46 +511,63 @@ qaControl.silenceAll = function silenceAll(info, warns){
     console.log('SILENCED:', fixPath, '-', added.join(', '));
 };
 
-// agrega la sección "qa-control" al package.json con los valores por defecto de las secciones
-// obligatorias. "type" no se puede inferir del proyecto: se escribe "lib" y se avisa para que
-// el usuario lo revise. Devuelve true si la sección quedó agregada.
+// calcula el package.json con la sección "qa-control" agregada, con los valores por defecto de
+// las secciones obligatorias. "type" no se puede inferir del proyecto: se escribe "lib" para que
+// el usuario lo revise. No escribe nada: devuelve el fix para que lo aplique applyFixes.
 /**
  * @param {ProjectInfo} info
- * @returns {boolean}
+ * @returns {WarningFix|null}
  */
-qaControl.addQaControlSection = function addQaControlSection(info){
-    if(!info.packageJson || !info.files['package.json']) {
-        console.log('FIX: no package.json to update');
-        return false;
-    }
-    info.packageJson['qa-control'] = {
+qaControl.computeQaControlSectionFix = function computeQaControlSectionFix(info){
+    if(!info.packageJson || !info.files['package.json']) { return null; }
+    var newPackageJson = Object.assign({}, info.packageJson, {'qa-control':{
         'package-version': ownPackageJson.version,
         'run-in': 'server',
         type: 'lib'
-    };
+    }});
     var raw = info.files['package.json'].content;
     var indentMatch = raw.match(/\n([ \t]+)\S/);
     var indent = indentMatch ? indentMatch[1] : '  ';
-    var newContent = qaControl.fixEOL(JSON.stringify(info.packageJson, null, indent) + '\n');
-    var fixPath = Path.join(info.projectDir, 'package.json');
-    fs.writeFileSync(fixPath, newContent, 'utf8');
-    info.files['package.json'].content = newContent;
-    console.log('CREATED:', fixPath, '- "qa-control" section (check "type": "lib")');
-    return true;
+    return {
+        action: 'write',
+        path: Path.join(info.projectDir, 'package.json'),
+        content: qaControl.fixEOL(JSON.stringify(newPackageJson, null, indent) + '\n'),
+        updateFile: 'package.json'
+    };
 };
 
+// detecta (sin corregir), y con --fix aplica solo lo detectado y vuelve a detectar desde cero
+// (releyendo el proyecto del disco) para informar lo que quedó pendiente. La corrección de un
+// problema puede destrabar reglas que se cortaron por cant_continue: esas se ven en la corrida
+// siguiente, por eso --fix puede necesitar correrse varias veces.
 qaControl.controlProject=function controlProject(projectDir, opts){
     qaControl.verbose = opts && opts.verbose;
     qaControl.fixMode = opts && opts.fix;
     qaControl.codes = opts && opts.codes;
     qaControl.cucardas_always = opts && opts.cucardas;
     qaControl.repoIs = (opts && opts.repoIs) || null;
-    return Promise.resolve().then(function(){
-        return qaControl.loadProject(projectDir);
-    }).then(function(info){
-        return qaControl.controlInfo(info, opts).then(function(warns){
-            if(opts && opts.silenceAll) { qaControl.silenceAll(info, warns); }
-            return warns;
+    function detect(){
+        return qaControl.loadProject(projectDir).then(function(info){
+            return qaControl.controlInfo(info, opts).then(function(warns){
+                return {info:info, warns:warns};
+            });
+        });
+    }
+    return Promise.resolve().then(detect).then(function(first){
+        if(!qaControl.fixMode) {
+            if(opts && opts.silenceAll) { qaControl.silenceAll(first.info, first.warns); }
+            return first.warns;
+        }
+        var fixedCount = qaControl.applyFixes(first.info, first.warns);
+        if(!fixedCount) {
+            if(opts && opts.silenceAll) { qaControl.silenceAll(first.info, first.warns); }
+            return first.warns;
+        }
+        var cmsgs = qaControl.cmdMsgs[qaControl.lang];
+        console.log(fixedCount, cmsgs.msg_fixed_issues);
+        return detect().then(function(second){
+            if(opts && opts.silenceAll) { qaControl.silenceAll(second.info, second.warns); }
+            return second.warns;
         });
     });
 };

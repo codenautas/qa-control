@@ -1,10 +1,17 @@
 // fs-promise es un paquete legacy con declaraciones de TypeScript incompletas
 declare module 'fs-extra';
 
+/** cómo reparar un warning. Lo arma la detección con lo que ya leyó/calculó y lo aplica applyFixes. */
+type WarningFix =
+    {action:'copy', from:string, to:string} |
+    {action:'write', path:string, content:string, preserve?:string, updateFile?:string};
+
 interface Warning {
     warning: string;
     params?: string[];
     scoring?: Record<string, number>;
+    /** no enumerable (ver qaControl.withFix): no participa de comparaciones ni serializaciones del warning */
+    fix?: WarningFix;
 }
 
 interface FileInfo {

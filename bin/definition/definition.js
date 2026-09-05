@@ -177,12 +177,12 @@ module.exports = function(qaControl){
                 checks:[{
                     warnings:function(info){
                         if(!info.packageJson?.['qa-control']){
-                            if(qaControl.fixMode && qaControl.addQaControlSection(info)) {
-                                return [];
-                            }
-                            return [{warning:info.files?.['package.json']?.content?.match(/codenautas/)?
+                            var warn = {warning:info.files?.['package.json']?.content?.match(/codenautas/)?
                                         'no_qa_control_section_in_codenautas_project':
-                                        'no_qa_control_section_in_package_json', scoring:{fatal:1}}];
+                                        'no_qa_control_section_in_package_json', scoring:{fatal:1}};
+                            var sectionFix = qaControl.computeQaControlSectionFix(info);
+                            if(sectionFix) { qaControl.withFix(warn, sectionFix); }
+                            return [warn];
                         }
                         return [];
                     }
@@ -259,16 +259,14 @@ module.exports = function(qaControl){
                                 var groupName = file.group || fileName;
                                 if(isMissing && !reportedGroups[groupName] && (file.mandatory || (file.presentIf && file.presentIf(info.packageJson)))) {
                                     reportedGroups[groupName] = true;
-                                    if(file.fixTemplate && qaControl.fixMode) {
+                                    var warn = {warning:'lack_of_mandatory_file_1', params:[fileName], scoring:{mandatories:1}};
+                                    if(file.fixTemplate) {
                                         var templatePath = typeof file.fixTemplate === 'string'
                                             ? Path.join(__dirname, '../..', file.fixTemplate)
                                             : Path.join(__dirname, '../init-template', fileName);
-                                        var destPath = Path.join(info.projectDir, fileName);
-                                        fs.copySync(templatePath, destPath);
-                                        console.log('CREATED:', destPath);
-                                    } else {
-                                        warns.push({warning:'lack_of_mandatory_file_1', params:[fileName], scoring:{mandatories:1}});
+                                        qaControl.withFix(warn, {action:'copy', from:templatePath, to:Path.join(info.projectDir, fileName)});
                                     }
+                                    warns.push(warn);
                                 }
                             }
                         }
@@ -398,14 +396,19 @@ module.exports = function(qaControl){
                          /*jshint forin: true */
                         // invariante con --fix: si el fix cambiaría el bloque y ningún warning granular lo reflejó
                         // (orden, líneas sobrantes, espacios), avisar igual de que hay algo para corregir
-                        if(warns.length === 0 && qaControl.computeCucardasFix(info)) {
+                        var cucardasFix = qaControl.computeCucardasFix(info);
+                        if(warns.length === 0 && cucardasFix) {
                             warns.push({warning:'cucardas_block_differs', scoring:{cucardas:1}});
                         }
-                        if(qaControl.fixMode && readme.indexOf(qaControl.cucaMarker) !== -1) {
-                            if(qaControl.fixCucardas(info)) {
-                                // las cucardas quedaron corregidas en el documento principal: no se reportan sus warnings
-                                warns = [];
-                            }
+                        // el fix es uno solo para todo el bloque de cucardas: se adjunta al primer warning
+                        // para que applyFixes lo escriba una única vez
+                        if(cucardasFix && warns.length) {
+                            qaControl.withFix(warns[0], {
+                                action:'write',
+                                path: Path.join(info.projectDir, cucardasFix.mainDocName),
+                                content: cucardasFix.fixedContent,
+                                updateFile: cucardasFix.mainDocName
+                            });
                         }
                         if((warns.length && !qaControl.fixMode) || qaControl.cucardas_always) {
                             fs.writeFile(Path.normalize(info.projectDir+'/cucardas.log'), qaControl.generateCucardas(cucardas, info.packageJson));
@@ -531,8 +534,9 @@ module.exports = function(qaControl){
                                 var mlContent = multilang.changeNamedDoc(file, content, lang);
                                 var warning = 'readme_multilang_not_sincronized_with_file_1';
                                 var fixPath = Path.join(info.projectDir, file);
-                                if (!qaControl.compareOrFixContent(info.files[file].content, mlContent, fixPath, warning)) {
-                                    warns.push({warning, params:[file], scoring:{multilang:1}});
+                                if (!qaControl.compareContent(info.files[file].content, mlContent, warning)) {
+                                    warns.push(qaControl.withFix({warning, params:[file], scoring:{multilang:1}},
+                                                {action:'write', path:fixPath, content:mlContent, updateFile:file}));
                                 }
                             }
                         }
@@ -696,19 +700,15 @@ module.exports = function(qaControl){
                                 return fs.readFile(Path.join(qaWorkflowsDir, fileName), 'utf8').then(function(qaContent) {
                                     return fs.readFile(Path.join(projWorkflowsDir, fileName), 'utf8').then(function(projContent) {
                                         var fixPath = Path.join(projWorkflowsDir, fileName);
-                                        if(!qaControl.compareOrFixContent(projContent, qaContent, fixPath, 'workflow_file_1_differs', fileName)) {
-                                            return [{warning:'workflow_file_1_differs', params:[fileName], scoring:{workflows:1}}];
+                                        if(!qaControl.compareContent(projContent, qaContent, 'workflow_file_1_differs', fileName)) {
+                                            return [qaControl.withFix({warning:'workflow_file_1_differs', params:[fileName], scoring:{workflows:1}},
+                                                     {action:'write', path:fixPath, content:qaContent})];
                                         }
                                         return [];
                                     }).catch(function(err) {
                                         if(err.code === 'ENOENT') {
-                                            if(qaControl.fixMode) {
-                                                var newPath = Path.join(projWorkflowsDir, fileName);
-                                                fs.outputFileSync(newPath, qaControl.fixEOL(qaContent), 'utf8');
-                                                console.log('CREATED:', newPath);
-                                                return [];
-                                            }
-                                            return [{warning:'lack_of_workflow_file_1', params:[fileName], scoring:{workflows:1}}];
+                                            return [qaControl.withFix({warning:'lack_of_workflow_file_1', params:[fileName], scoring:{workflows:1}},
+                                                     {action:'write', path:Path.join(projWorkflowsDir, fileName), content:qaContent})];
                                         }
                                         throw err;
                                     });
@@ -735,8 +735,9 @@ module.exports = function(qaControl){
                             var match = /^before_test\s*:/m.exec(obtained);
                             var above = match ? obtained.slice(0, match.index) : obtained;
                             var preserve = match ? obtained.slice(match.index) : undefined;
-                            if(!qaControl.compareOrFixContent(above, qaContent, projAppveyorPath, 'appveyor_yml_differs', 'appveyor.yml', preserve)) {
-                                return [{warning:'appveyor_yml_differs', scoring:{conventions:1}}];
+                            if(!qaControl.compareContent(above, qaContent, 'appveyor_yml_differs', 'appveyor.yml')) {
+                                return [qaControl.withFix({warning:'appveyor_yml_differs', scoring:{conventions:1}},
+                                         {action:'write', path:projAppveyorPath, content:qaContent, preserve:preserve})];
                             }
                             return [];
                         });
