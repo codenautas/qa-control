@@ -38,6 +38,28 @@ function usingGHA(packageJson){
 // workflows que solo tienen sentido si el paquete se publica en npm
 var publishWorkflows = ['publish.yml', 'publish-manual.yml'];
 
+// claves de qa-control.gha que sobrescriben una línea del workflow esperado
+var ghaOverridableKeys = ['node_version', 'skip-tests-until-date'];
+
+// aplica al contenido esperado de un workflow los valores declarados en qa-control.gha cuando es
+// un objeto. Cada clave reemplaza el valor de la línea homónima, conservando su indentación.
+// Solo se reemplaza donde la línea ya existe: no se agregan claves a un workflow que no las tiene.
+/**
+ * @param {string} content
+ * @param {PackageJson} packageJson
+ * @returns {string}
+ */
+function applyGHAOverrides(content, packageJson){
+    var gha = packageJson?.['qa-control']?.gha;
+    if(!gha || typeof gha !== 'object') { return content; }
+    ghaOverridableKeys.forEach(function(key){
+        if(!(key in gha)) { return; }
+        var re = new RegExp('^([ \\t]*'+key.replace(/[-]/g,'\\$&')+'[ \\t]*:).*$', 'gm');
+        content = content.replace(re, "$1 '"+gha[key]+"'");
+    });
+    return content;
+}
+
 // el código fuente no se publica: lo dice package.json.private
 /**
  * @param {PackageJson} packageJson
@@ -755,7 +777,9 @@ module.exports = function(qaControl){
                                                  {action:'delete', path:forbiddenPath})];
                                     });
                                 }
-                                return fs.readFile(Path.join(qaWorkflowsDir, fileName), 'utf8').then(function(qaContent) {
+                                return fs.readFile(Path.join(qaWorkflowsDir, fileName), 'utf8').then(function(qaTemplate) {
+                                    // el esperado es el template con los valores propios del proyecto (qa-control.gha)
+                                    var qaContent = applyGHAOverrides(qaTemplate, info.packageJson);
                                     return fs.readFile(Path.join(projWorkflowsDir, fileName), 'utf8').then(function(projContent) {
                                         var fixPath = Path.join(projWorkflowsDir, fileName);
                                         if(!qaControl.compareContent(projContent, qaContent, 'workflow_file_1_differs', fileName)) {

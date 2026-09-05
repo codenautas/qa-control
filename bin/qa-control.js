@@ -142,7 +142,7 @@ qaControl.generateCucardas = function generateCucardas(cucardas, packageJson) {
     var cucaFileContent = qaControl.cucaMarker+'\n';
     /** @type {{tag:string|null}} */
     var info = { tag: null }
-    var modulo=packageJson.name;
+    var module=packageJson.name;
     var repoParts=qaControl.getRepositoryUrl(packageJson).split('/');
     var repo=repoParts[0];
     var repoName=repoParts[repoParts.length-1];
@@ -150,7 +150,7 @@ qaControl.generateCucardas = function generateCucardas(cucardas, packageJson) {
         var cucarda = cucardas[nombreCucarda];
         if(cucarda.forbidden) { continue; }
         if(!cucarda.check || cucarda.check(packageJson)) {
-            var cucaStr = cucarda.md.replace(/\bxxx\b/g,repo).replace(/\byyy\b/g,repoName).replace(/\bzzz\b/g,modulo);
+            var cucaStr = cucarda.md.replace(/\bxxx_yyy\b/g,`${repo}_${repoName}`).replace(/\bxxx\b/g,repo).replace(/\byyy\b/g,repoName).replace(/\bzzz\b/g,module);
             cucaFileContent += cucaStr +'\n';
         }
     }

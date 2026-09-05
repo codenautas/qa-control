@@ -89,7 +89,20 @@ _Hay que tratar de mantener actualizada esta sección_
 - Se comprueba que `.travis.yml` pruebe al menos Node 4 y 6, y que estas versiones no tengan fallos permitidos.
 - Se comprueba que los archivos de traducción de `multilang` estén sincronizados con el `README.md`/`LEEME.md` principal.
 
-### 8. Proyectos privados y publicables
+### 8. GitHub Actions (`qa-control.gha`)
+- `"skip"`: no se controlan los workflows.
+- Cualquier otro valor (`"all"`, `true`, ...): se controla que los workflows coincidan con los
+  templates de qa-control.
+- **Un objeto** equivale a `"all"`, pero con los valores indicados sobrescritos en los workflows
+  esperados. Cada clave reemplaza el valor de la línea homónima donde ya exista (no se agregan
+  claves a un workflow que no las declara). Claves soportadas: `node_version` y
+  `skip-tests-until-date`.
+
+```json
+"gha": { "node_version": "24" }
+```
+
+### 9. Proyectos privados y publicables
 Son dos ejes independientes:
 
 - **privado**: `package.json.private: true`. El código fuente no se publica.
@@ -103,7 +116,7 @@ Reglas que dependen de estos ejes:
 - Si es **privado**: `qa-control.sonar` no corresponde (SonarCloud analiza repositorios públicos)
   y la cucarda `sonar` no se pide. `repository` pasa a ser opcional.
 
-### 9. Excepciones de reglas (`silenced`)
+### 10. Excepciones de reglas (`silenced`)
 - En la sección `qa-control` del `package.json` se puede declarar un array `silenced` con los nombres internos de los warnings que se quieren suprimir.
 - Cada warning suprimido se filtra del resultado (no se reporta), pero la regla igual se evalúa.
 - Ejemplo: el propio `qa-control` no puede tenerse a sí mismo en `devDependencies`, así que silencia `lack_of_qa_control_in_dev_dependencies`.

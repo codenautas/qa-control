@@ -1159,6 +1159,136 @@ describe('qa-control --fix', function(){
             });
         });
     });
+    describe('qa-control.gha as an object', function(){
+        var tempDir;
+        function prepare(name, gha){
+            tempDir = Path.join(localBase, name);
+            fs.removeSync(tempDir);
+            fs.copySync(Path.join(__dirname, 'fixtures', 'with-wrong-qa-control-version'), tempDir);
+            // parto de los workflows del propio qa-control para que solo difiera lo sobrescrito
+            fs.copySync(qaWorkflowsDir, Path.join(tempDir, '.github/workflows'));
+            var pkgPath = Path.join(tempDir, 'package.json');
+            var pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+            pkg['qa-control'].gha = gha;
+            fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2)+'\n', 'utf8');
+        }
+        function workflowLine(fileName, key){
+            var content = fs.readFileSync(Path.join(tempDir, '.github/workflows', fileName), 'utf8');
+            var match = new RegExp('^[ \\t]*'+key+'[ \\t]*:.*$', 'm').exec(content);
+            return match && match[0].trim();
+        }
+        afterEach(function(){
+            qaControl.fixMode = false;
+        });
+        it('an empty object behaves like "all": the workflows are still controlled', function(){
+            prepare('gha-empty-object', {});
+            return qaControl.controlProject(tempDir, {}).then(function(warnings){
+                var workflowWarnings = warnings.filter(function(w){
+                    return w.warning === 'workflow_file_1_differs' || w.warning === 'lack_of_workflow_file_1';
+                });
+                expect(workflowWarnings).to.eql([]);
+            });
+        });
+        it('node_version replaces the line in every workflow that declares it', function(){
+            prepare('gha-node-version', {node_version:'22'});
+            return qaControl.controlProject(tempDir, {}).then(function(warnings){
+                var differing = warnings.filter(function(w){ return w.warning === 'workflow_file_1_differs'; })
+                                        .map(function(w){ return w.params[0]; });
+                expect(differing).to.eql(['create-new-version.yml', 'publish-manual.yml', 'publish.yml']);
+                return qaControl.controlProject(tempDir, {fix:true});
+            }).then(function(){
+                expect(workflowLine('publish.yml', 'node_version')).to.eql("node_version: '22'");
+                expect(workflowLine('create-new-version.yml', 'node_version')).to.eql("node_version: '22'");
+                return qaControl.controlProject(tempDir, {});
+            }).then(function(warnings){
+                expect(warnings.filter(function(w){ return w.warning === 'workflow_file_1_differs'; })).to.eql([]);
+            });
+        });
+        it('skip-tests-until-date replaces the line where it exists', function(){
+            prepare('gha-skip-tests', {'skip-tests-until-date':'2026-12-31'});
+            return qaControl.controlProject(tempDir, {fix:true}).then(function(){
+                expect(workflowLine('publish.yml', 'skip-tests-until-date')).to.eql("skip-tests-until-date: '2026-12-31'");
+                // no se agrega la clave a los workflows que no la declaran
+                expect(workflowLine('publish-manual.yml', 'skip-tests-until-date')).to.be(null);
+                return qaControl.controlProject(tempDir, {});
+            }).then(function(warnings){
+                expect(warnings.filter(function(w){ return w.warning === 'workflow_file_1_differs'; })).to.eql([]);
+            });
+        });
+    });
+    describe('private and publishable projects', function(){
+        var tempDir;
+        function prepare(name, changePkg){
+            tempDir = Path.join(localBase, name);
+            fs.removeSync(tempDir);
+            fs.copySync(Path.join(__dirname, 'fixtures', 'with-wrong-qa-control-version'), tempDir);
+            fs.copySync(qaWorkflowsDir, Path.join(tempDir, '.github/workflows'));
+            var pkgPath = Path.join(tempDir, 'package.json');
+            var pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+            changePkg(pkg);
+            fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2)+'\n', 'utf8');
+        }
+        function warningsNamed(warnings, name){
+            return warnings.filter(function(w){ return w.warning === name; })
+                           .map(function(w){ return w.params && w.params[0]; });
+        }
+        afterEach(function(){
+            qaControl.fixMode = false;
+            qaControl.deletes = 'ask';
+        });
+        it('forbids the publish workflows when the package is not published', function(){
+            prepare('private-forbids-publish', function(pkg){ pkg.private = true; });
+            return qaControl.controlProject(tempDir, {}).then(function(warnings){
+                expect(warningsNamed(warnings, 'forbidden_workflow_file_1_in_non_publishable'))
+                    .to.eql(['publish-manual.yml', 'publish.yml']);
+            });
+        });
+        it('keeps the publish workflows when a private source still publishes', function(){
+            prepare('private-source-publishes', function(pkg){
+                pkg.private = true;
+                pkg['qa-control'].publish = {'private-source':true};
+            });
+            return qaControl.controlProject(tempDir, {}).then(function(warnings){
+                expect(warningsNamed(warnings, 'forbidden_workflow_file_1_in_non_publishable')).to.eql([]);
+            });
+        });
+        it('deletes the publish workflows only with --deletes=yes', function(){
+            prepare('private-deletes', function(pkg){ pkg.private = true; });
+            var publishPath = Path.join(tempDir, '.github/workflows/publish.yml');
+            return qaControl.controlProject(tempDir, {fix:true, deletes:'no'}).then(function(){
+                expect(fs.existsSync(publishPath)).to.be(true);
+                return qaControl.controlProject(tempDir, {fix:true, deletes:'yes'});
+            }).then(function(){
+                expect(fs.existsSync(publishPath)).to.be(false);
+                expect(fs.existsSync(Path.join(tempDir, '.github/workflows/publish-manual.yml'))).to.be(false);
+                // los workflows que no son de publicación siguen estando
+                expect(fs.existsSync(Path.join(tempDir, '.github/workflows/build-and-test.yml'))).to.be(true);
+            });
+        });
+        it('reports qa-control.sonar in a private project and the fix removes the key', function(){
+            prepare('private-sonar', function(pkg){
+                pkg.private = true;
+                pkg['qa-control'].sonar = true;
+            });
+            return qaControl.controlProject(tempDir, {}).then(function(warnings){
+                expect(warningsNamed(warnings, 'sonar_in_private_package_json')).to.eql([undefined]);
+                return qaControl.controlProject(tempDir, {fix:true, deletes:'no'});
+            }).then(function(){
+                var pkg = JSON.parse(fs.readFileSync(Path.join(tempDir, 'package.json'), 'utf8'));
+                expect('sonar' in pkg['qa-control']).to.be(false);
+            });
+        });
+        it('does not require repository in a private project', function(){
+            prepare('private-no-repository', function(pkg){
+                pkg.private = true;
+                delete pkg.repository;
+            });
+            return qaControl.controlProject(tempDir, {}).then(function(warnings){
+                expect(warningsNamed(warnings, 'lack_of_repository_section_in_package_json')).to.eql([]);
+                expect(warningsNamed(warnings, 'invalid_repository_section_in_package_json')).to.eql([]);
+            });
+        });
+    });
 });
 
 describe('qa-control coverage (group A)', function(){

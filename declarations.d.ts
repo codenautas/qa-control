@@ -29,7 +29,8 @@ interface QAControlSection {
     silenced?: string[];
     profile?: 'minimum'|'default';
     multilang?: string;
-    gha?: 'skip'|'all'
+    /** un objeto equivale a "all" con los valores indicados sobrescritos en los workflows */
+    gha?: 'skip'|'all'|{ node_version?: string|number, 'skip-tests-until-date'?: string }
     sonar?: boolean;
     /** opciones de publicación. "private-source": el fuente es privado pero el paquete se publica igual */
     publish?: { 'private-source'?: boolean };

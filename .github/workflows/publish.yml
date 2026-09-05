@@ -14,3 +14,4 @@ jobs:
     uses: codenautas/.github/.github/workflows/npm-publish-new-version.yaml@v2
     with:
       node_version: '24'
+      skip-tests-until-date: '2000-01-01'
