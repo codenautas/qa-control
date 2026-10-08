@@ -50,9 +50,13 @@ _Hay que tratar de mantener actualizada esta sección_
 ### 1. Estructura y metadatos básicos
 - Debe existir `package.json`.
 - Debe existir la sección `qa-control` en `package.json`.
-- `qa-control.package-version` debe ser un semver válido y no estar en versiones deprecadas (`<0.0.1`).
 - `qa-control.run-in` debe ser uno de: `server`, `both`, `client`.
 - `qa-control.type` debe ser uno de: `app`, `lib`, `cmd-tool`, `web`.
+- Solo se aceptan las claves conocidas de la sección `qa-control`: `run-in`, `type`, `profile`, `gha`,
+  `publish`, `multilang`, `coverage`, `sonar`, `test-appveyor`, `silenced`, `fileNameMainDoc` y `purpose`.
+  - Las obsoletas (`package-version`, `stability`, `stage`, `ecmaVersion`) se reportan y `--fix` las quita.
+  - Cualquier otra es desconocida: se reporta sin fix (puede ser un error de tipeo, p.e. `silence`).
+- `qa-control.fileNameMainDoc` indica el documento principal (por defecto `LEEME.md`).
 
 ### 2. Archivos obligatorios
 - `README.md`
@@ -92,15 +96,20 @@ _Hay que tratar de mantener actualizada esta sección_
 ### 8. GitHub Actions (`qa-control.gha`)
 - `"skip"`: no se controlan los workflows.
 - Cualquier otro valor (`"all"`, `true`, ...): se controla que los workflows coincidan con los
-  templates de qa-control.
+  templates de qa-control, y que no haya otros workflows (los sobrantes se reportan y `--fix` los
+  borra, según `--deletes`).
 - **Un objeto** equivale a `"all"`, pero con los valores indicados sobrescritos en los workflows
-  esperados. Cada clave reemplaza el valor de la línea homónima donde ya exista (no se agregan
-  claves a un workflow que no las declara). Claves soportadas: `node_version` y
-  `skip-tests-until-date`.
+  esperados. Se puede sobrescribir cualquier clave de una sección `with:` de los workflows: cada
+  clave reemplaza el valor de la clave homónima donde ya exista (no se agregan claves a un workflow
+  que no las declara). Los strings se escriben entre comillas simples; los booleanos y números, sin
+  comillas. Una clave que no está en ninguna sección `with:` se reporta.
 
 ```json
-"gha": { "node_version": "24" }
+"gha": { "node_version": "24.x", "skip_tests": true }
 ```
+
+Los templates (`.github/workflows` de este repositorio) se bajan de `codenautas/.github`
+(carpeta `.in-each-repo`) con `npm run sync-workflows` (por defecto desde `main`).
 
 ### 9. Proyectos privados y publicables
 Son dos ejes independientes:
@@ -112,11 +121,18 @@ Son dos ejes independientes:
 
 Reglas que dependen de estos ejes:
 - Si **no es publicable**: las cucardas `npm-version` y `downloads` no se piden (apuntan a
-  `npmjs.org`), y los workflows `publish.yml` y `publish-manual.yml` no deben existir.
+  `npmjs.org`), y el workflow `publish.yml` no debe existir.
 - Si es **privado**: `qa-control.sonar` no corresponde (SonarCloud analiza repositorios públicos)
   y la cucarda `sonar` no se pide. `repository` pasa a ser opcional.
 
 ### 10. Excepciones de reglas (`silenced`)
-- En la sección `qa-control` del `package.json` se puede declarar un array `silenced` con los nombres internos de los warnings que se quieren suprimir.
+- En la sección `qa-control` del `package.json` se puede declarar un array `silenced` con los warnings que se quieren suprimir. Cada elemento es:
+  - un string con el nombre interno del warning: lo suprime siempre;
+  - un array `[nombre, param1, ...]`: lo suprime solo cuando los parámetros coinciden con los primeros del warning.
 - Cada warning suprimido se filtra del resultado (no se reporta), pero la regla igual se evalúa.
 - Ejemplo: el propio `qa-control` no puede tenerse a sí mismo en `devDependencies`, así que silencia `lack_of_qa_control_in_dev_dependencies`.
+- `--silence-all` agrega los warnings activos: los que tienen parámetros en la forma `[nombre, params...]`.
+
+```json
+"silenced": ["lack_of_qa_control_in_dev_dependencies", ["unexpected_workflow_file_1", "deploy.yml"]]
+```

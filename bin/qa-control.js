@@ -11,7 +11,6 @@ var stripBom = require('strip-bom-string');
 var yaml = require('js-yaml');
 var semver = require("semver");
 var bestGlobals = require("best-globals");
-var ownPackageJson = require("../package.json");
 
 // lodash replacements (para best-globals?)
 function forEach(obj, func) {
@@ -23,12 +22,17 @@ qaControl.msgs={
     en:{
         lack_of_mandatory_section_1: 'lack of mandatory section "$1" in qa-control section of package.json',
         repository_name_not_found: 'packageJson.repository must be in format /{[-a-zA-Z0-9_.]+}\/[-a-zA-Z0-9_.]+/',
-        lack_of_qa_control_in_dev_dependencies: 'qa-control must be in devDependencies with the same version as qa-control.package-version',
+        lack_of_qa_control_in_dev_dependencies: 'qa-control must be in devDependencies',
         qa_control_version_mismatch_in_dev_dependencies_1_expected_2: 'qa-control version in devDependencies is "$1" but expected "$2"',
         lack_of_test_ci_script_in_package_json: 'lack of test-ci script in package.json',
         eslint_could_not_run: 'could not run ESLint, check the configuration file extension',
         sonar_in_private_package_json: '"qa-control.sonar" does not apply in a private project',
         forbidden_workflow_file_1_in_non_publishable: 'the project is not published: workflow "$1" does not apply',
+        unexpected_workflow_file_1: 'the workflow "$1" is not one of the qa-control workflows',
+        obsolete_key_1_in_qa_control: 'the key "$1" in the qa-control section of package.json is obsolete',
+        unknown_key_1_in_qa_control: 'unknown key "$1" in the qa-control section of package.json',
+        unknown_key_1_in_qa_control_gha: 'the key "$1" of qa-control.gha is not a "with:" parameter of any workflow',
+        invalid_entry_1_in_qa_control_silenced: 'invalid entry $1 in qa-control.silenced (must be a warning code or an array [code, params...])',
         bailing_could_be_more: '--bail(ing)! There could be more issues'
     },
     es:{
@@ -68,11 +72,16 @@ qaControl.msgs={
         lack_of_workflow_file_1: 'falta el archivo de workflow "$1"',
         workflow_file_1_differs: 'el archivo de workflow "$1" difiere del template de qa-control',
         appveyor_yml_differs: 'el archivo appveyor.yml difiere del template de qa-control',
-        lack_of_qa_control_in_dev_dependencies: 'qa-control debe estar en devDependencies con la misma versión que qa-control.package-version',
+        lack_of_qa_control_in_dev_dependencies: 'qa-control debe estar en devDependencies',
         qa_control_version_mismatch_in_dev_dependencies_1_expected_2: 'La versión de qa-control en devDependencies es "$1" pero se esperaba "$2"',
         "lack_of_test_ci_script_in_package_json": 'Falta el script "test-ci" en package.json',
         sonar_in_private_package_json: 'no corresponde "qa-control.sonar" en un proyecto privado',
         forbidden_workflow_file_1_in_non_publishable: 'el proyecto no se publica: no corresponde el workflow "$1"',
+        unexpected_workflow_file_1: 'el workflow "$1" no es uno de los workflows de qa-control',
+        obsolete_key_1_in_qa_control: 'la clave "$1" de la sección qa-control del package.json es obsoleta',
+        unknown_key_1_in_qa_control: 'clave desconocida "$1" en la sección qa-control del package.json',
+        unknown_key_1_in_qa_control_gha: 'la clave "$1" de qa-control.gha no es un parámetro "with:" de ningún workflow',
+        invalid_entry_1_in_qa_control_silenced: 'entrada inválida $1 en qa-control.silenced (debe ser un código de warning o un array [código, parámetros...])',
         bailing_could_be_more: '¡Qué --bail(e)! Podrían haber más problemas, correr de nuevo después de corregir estos',
     }
 };
@@ -188,7 +197,7 @@ qaControl.generateCucardas = function generateCucardas(cucardas, packageJson) {
  * @returns {{mainDocName:string, fixedContent:string}|null}
  */
 qaControl.computeCucardasFix = function computeCucardasFix(info) {
-    var mainDocName = qaControl.mainDoc();
+    var mainDocName = qaControl.mainDoc(info.packageJson);
     var content = info.files[mainDocName].content;
     if(content.indexOf(qaControl.cucaMarker) === -1) { return null; }
     var cucardas = qaControl.definition.cucardas;
@@ -256,8 +265,28 @@ qaControl.definition = require("./definition/definition.js")(qaControl);
 
 qaControl.lang = process.env.qa_control_lang || 'en';
 
-qaControl.mainDoc = function mainDoc() {
-    return qaControl.definition.fileNameMainDoc;
+// el documento principal del proyecto: el que declara qa-control.fileNameMainDoc o, si no, el de la definición
+/**
+ * @param {PackageJson} packageJson
+ * @returns {string}
+ */
+qaControl.mainDoc = function mainDoc(packageJson) {
+    return packageJson?.['qa-control']?.fileNameMainDoc ?? qaControl.definition.fileNameMainDoc;
+};
+
+// un elemento de qa-control.silenced es un código (silencia ese warning siempre) o un array
+// [código, param1, ...] que lo silencia solo si los parámetros coinciden con los primeros del warning
+/**
+ * @param {SilencedEntry[]} silenced
+ * @param {Warning} warn
+ * @returns {boolean}
+ */
+qaControl.isSilenced = function isSilenced(silenced, warn) {
+    return silenced.some(function(entry) {
+        if(typeof entry === 'string') { return entry === warn.warning; }
+        if(!Array.isArray(entry) || entry[0] !== warn.warning) { return false; }
+        return entry.slice(1).every(function(param, i) { return (warn.params || [])[i] === param; });
+    });
 };
 
 qaControl.fixMessages = function fixMessages(messagesToFix) {
@@ -499,7 +528,7 @@ qaControl.controlInfo=function controlInfo(info, opts){
                 if(qaControl.verbose) { process.stdout.write(cmsgs.msg_checking+" '"+ruleName+"'...\n"); }
                 return checkInfo.warnings(info);
             }).then(function(warningsOfThisRule) {
-                var activeWarnings = warningsOfThisRule.filter(function(w){ return silenced.indexOf(w.warning) === -1; });
+                var activeWarnings = warningsOfThisRule.filter(function(w){ return !qaControl.isSilenced(silenced, w); });
                 if(activeWarnings.length) {
                     resultWarnings=resultWarnings.concat(activeWarnings);
                     activeWarnings.forEach(function(warning){
@@ -557,9 +586,10 @@ qaControl.stringizeWarnings = function stringizeWarnings(warns, lang) {
     });
 };
 
-// agrega al array qa-control.silenced del package.json los códigos de los warnings activos
-// detectados en esta corrida (creando el array si no existe). Reescribe package.json con la
-// indentación detectada (opción A: se acepta la normalización de formato, como hace ncu -u).
+// agrega al array qa-control.silenced del package.json los warnings activos detectados en esta
+// corrida (creando el array si no existe): los que tienen parámetros como [código, params...] para
+// no silenciar otros casos del mismo warning, y los demás por su código. Reescribe package.json con
+// la indentación detectada (opción A: se acepta la normalización de formato, como hace ncu -u).
 /**
  * @param {ProjectInfo} info
  * @param {Warning[]} warns
@@ -575,11 +605,14 @@ qaControl.silenceAll = function silenceAll(info, warns){
         return;
     }
     var current = qac.silenced || [];
+    /** @type {SilencedEntry[]} */
     var added = [];
     warns.forEach(function(warn){
         var code = warn.warning;
         if(code === 'bailing_could_be_more' || code === 'cant_continue') { return; }
-        if(current.indexOf(code) === -1 && added.indexOf(code) === -1) { added.push(code); }
+        if(!qaControl.isSilenced(current.concat(added), warn)) {
+            added.push(warn.params && warn.params.length ? [code].concat(warn.params) : code);
+        }
     });
     if(!added.length) {
         console.log('SILENCE-ALL: nothing to silence');
@@ -590,7 +623,7 @@ qaControl.silenceAll = function silenceAll(info, warns){
     var fixPath = Path.join(info.projectDir, 'package.json');
     fs.writeFileSync(fixPath, newContent, 'utf8');
     info.files['package.json'].content = newContent;
-    console.log('SILENCED:', fixPath, '-', added.join(', '));
+    console.log('SILENCED:', fixPath, '-', added.map(function(entry){ return JSON.stringify(entry); }).join(', '));
 };
 
 // serializa un package.json respetando la indentación detectada en el original
@@ -630,23 +663,22 @@ qaControl.packageJsonFix = function packageJsonFix(info, packageJson){
 qaControl.computeQaControlSectionFix = function computeQaControlSectionFix(info){
     if(!info.packageJson || !info.files['package.json']) { return null; }
     return qaControl.packageJsonFix(info, Object.assign({}, info.packageJson, {'qa-control':{
-        'package-version': ownPackageJson.version,
         'run-in': 'server',
         type: 'lib'
     }}));
 };
 
-// calcula el package.json sin la clave indicada de la sección "qa-control", conservando la
+// calcula el package.json sin las claves indicadas de la sección "qa-control", conservando la
 // indentación del original. No escribe nada: devuelve el fix para que lo aplique applyFixes.
 /**
  * @param {ProjectInfo} info
- * @param {string} key
+ * @param {string[]} keys
  * @returns {WarningFix|null}
  */
-qaControl.computeQaControlKeyRemovalFix = function computeQaControlKeyRemovalFix(info, key){
+qaControl.computeQaControlKeyRemovalFix = function computeQaControlKeyRemovalFix(info, keys){
     if(!info.packageJson || !info.files['package.json']) { return null; }
     var qaSection = Object.assign({}, info.packageJson['qa-control']);
-    delete qaSection[key];
+    keys.forEach(function(key){ delete qaSection[/** @type {keyof QAControlSection} */ (key)]; });
     return qaControl.packageJsonFix(info, Object.assign({}, info.packageJson, {'qa-control':qaSection}));
 };
 

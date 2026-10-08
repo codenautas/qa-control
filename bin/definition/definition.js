@@ -46,14 +46,67 @@ function usingGHA(packageJson){
 }
 
 // workflows que solo tienen sentido si el paquete se publica en npm
-var publishWorkflows = ['publish.yml', 'publish-manual.yml'];
+var publishWorkflows = ['publish.yml'];
 
-// claves de qa-control.gha que sobrescriben una línea del workflow esperado
-var ghaOverridableKeys = ['node_version', 'skip-tests-until-date'];
+// claves válidas de la sección "qa-control" del package.json, además de las declaradas en "sections"
+var validQaControlKeys = ['profile', 'gha', 'publish', 'multilang', 'coverage', 'sonar', 'test-appveyor', 'silenced', 'fileNameMainDoc', 'purpose'];
+
+// claves de la sección "qa-control" que ya no se usan: se reportan y --fix las quita
+var obsoleteQaControlKeys = ['package-version', 'stability', 'stage', 'ecmaVersion'];
+
+// recorre las líneas de un workflow y pasa por mapKey cada clave que esté directamente dentro de una
+// sección "with:" (los parámetros de un workflow reutilizable). mapKey recibe la línea, el prefijo
+// hasta los dos puntos inclusive y el nombre de la clave, y devuelve la línea que va en su lugar.
+/**
+ * @param {string} content
+ * @param {(line:string, prefix:string, key:string) => string} mapKey
+ * @returns {string}
+ */
+function mapWithKeys(content, mapKey){
+    /** @type {number|null} */
+    var withIndent = null;
+    /** @type {number|null} */
+    var keyIndent = null;
+    return content.split(/\r?\n/).map(function(line){
+        var withMatch = /^([ \t]*)with[ \t]*:[ \t]*$/.exec(line);
+        if(withMatch) {
+            withIndent = withMatch[1].length;
+            keyIndent = null;
+            return line;
+        }
+        if(withIndent === null || /^[ \t]*(#.*)?$/.test(line)) { return line; }
+        var indent = /^[ \t]*/.exec(line)?.[0].length ?? 0;
+        if(indent <= withIndent) {
+            withIndent = null;
+            return line;
+        }
+        // las claves son los hijos directos de "with:"; lo que está más indentado es parte de un valor
+        if(keyIndent === null) { keyIndent = indent; }
+        var keyMatch = /^([ \t]*([-\w]+)[ \t]*:)/.exec(line);
+        if(indent !== keyIndent || !keyMatch) { return line; }
+        return mapKey(line, keyMatch[1], keyMatch[2]);
+    }).join('\n');
+}
+
+// las claves que se pueden sobrescribir con qa-control.gha: las de las secciones "with:" del workflow
+/**
+ * @param {string} content
+ * @returns {string[]}
+ */
+function withKeysOf(content){
+    /** @type {string[]} */
+    var keys = [];
+    mapWithKeys(content, function(line, _prefix, key){
+        keys.push(key);
+        return line;
+    });
+    return keys;
+}
 
 // aplica al contenido esperado de un workflow los valores declarados en qa-control.gha cuando es
-// un objeto. Cada clave reemplaza el valor de la línea homónima, conservando su indentación.
-// Solo se reemplaza donde la línea ya existe: no se agregan claves a un workflow que no las tiene.
+// un objeto. Cada clave reemplaza el valor de la clave homónima de las secciones "with:", conservando
+// su indentación. No se agregan claves a un workflow que no las tiene. Los strings se escriben entre
+// comillas simples; los booleanos y números, sin comillas (para que el workflow reciba ese tipo).
 /**
  * @param {string} content
  * @param {PackageJson} packageJson
@@ -62,12 +115,12 @@ var ghaOverridableKeys = ['node_version', 'skip-tests-until-date'];
 function applyGHAOverrides(content, packageJson){
     var gha = packageJson?.['qa-control']?.gha;
     if(!gha || typeof gha !== 'object') { return content; }
-    ghaOverridableKeys.forEach(function(key){
-        if(!(key in gha)) { return; }
-        var re = new RegExp('^([ \\t]*'+key.replace(/[-]/g,'\\$&')+'[ \\t]*:).*$', 'gm');
-        content = content.replace(re, "$1 '"+gha[key]+"'");
+    var overrides = gha;
+    return mapWithKeys(content, function(line, prefix, key){
+        if(!(key in overrides)) { return line; }
+        var value = overrides[key];
+        return prefix+' '+(typeof value === 'string' ? "'"+value.replace(/'/g, "''")+"'" : JSON.stringify(value));
     });
-    return content;
 }
 
 // el código fuente no se publica: lo dice package.json.private
@@ -367,13 +420,44 @@ module.exports = function(qaControl){
                 }],
                 couldBail:true
             },
+            known_qa_control_keys:{
+                checks:[{
+                    warnings:function(info){
+                        var warns=[];
+                        var qaControlSection=info.packageJson?.['qa-control'] ?? {};
+                        var validKeys=Object.keys(qaControl.definition.sections).concat(validQaControlKeys);
+                        var obsoleteKeys=Object.keys(qaControlSection).filter(function(key){ return obsoleteQaControlKeys.indexOf(key) !== -1; });
+                        Object.keys(qaControlSection).forEach(function(key){
+                            if(obsoleteKeys.indexOf(key) !== -1) {
+                                warns.push({warning:'obsolete_key_1_in_qa_control', params:[key], scoring:{warnings:1}});
+                            } else if(validKeys.indexOf(key) === -1) {
+                                // sin fix: puede ser un error de tipeo (p.e. "silence") que tiene información
+                                warns.push({warning:'unknown_key_1_in_qa_control', params:[key], scoring:{warnings:1}});
+                            }
+                        });
+                        // un único fix quita todas las obsoletas: si cada warning reescribiera el package.json
+                        // desde el original, cada uno volvería a poner las que quitaron los anteriores
+                        var firstObsolete = warns.find(function(warn){ return warn.warning === 'obsolete_key_1_in_qa_control'; });
+                        var removalFix = firstObsolete && qaControl.computeQaControlKeyRemovalFix(info, obsoleteKeys);
+                        if(firstObsolete && removalFix) { qaControl.withFix(firstObsolete, removalFix); }
+                        (qaControlSection.silenced || []).forEach(function(entry){
+                            var valid = typeof entry === 'string' ||
+                                Array.isArray(entry) && entry.length > 0 && entry.every(function(part){ return typeof part === 'string'; });
+                            if(!valid) {
+                                warns.push({warning:'invalid_entry_1_in_qa_control_silenced', params:[JSON.stringify(entry)], scoring:{warnings:1}});
+                            }
+                        });
+                        return warns;
+                    }
+                }]
+            },
             sonar_in_private:{
                 checks:[{
                     warnings:function(info){
                         // sonarcloud analiza repositorios públicos: en un fuente privado la clave sobra
                         if(!isPrivate(info.packageJson) || !info.packageJson?.['qa-control']?.sonar) { return []; }
                         var warn = {warning:'sonar_in_private_package_json', scoring:{warnings:1}};
-                        var removalFix = qaControl.computeQaControlKeyRemovalFix(info, 'sonar');
+                        var removalFix = qaControl.computeQaControlKeyRemovalFix(info, ['sonar']);
                         if(removalFix) { qaControl.withFix(warn, removalFix); }
                         return [warn];
                     }
@@ -417,10 +501,10 @@ module.exports = function(qaControl){
                 checks:[{
                     warnings:function(info){
                         if(info.packageJson['qa-control'] && info.packageJson['qa-control'].multilang === 'no') { return []; }
-                        if(!info.files[qaControl.mainDoc()].content.match(/<!--multilang v[0-9]+\s+(.+)(-->)/)) {
+                        if(!info.files[qaControl.mainDoc(info.packageJson)].content.match(/<!--multilang v[0-9]+\s+(.+)(-->)/)) {
                             return [{
                                 warning:'no_multilang_section_in_1',
-                                params:[qaControl.mainDoc()],
+                                params:[qaControl.mainDoc(info.packageJson)],
                                 scoring:{multilang:1}
                             }];
                         }
@@ -435,7 +519,7 @@ module.exports = function(qaControl){
                     warnings:function(info){
                         if(info.packageJson['qa-control'] && info.packageJson['qa-control'].multilang === 'no') { return []; }
                         var warns=[];
-                        var readme=info.files[qaControl.mainDoc()].content;
+                        var readme=info.files[qaControl.mainDoc(info.packageJson)].content;
                         if(readme.indexOf(qaControl.cucaMarker) === -1) {
                             warns.push({warning:'lack_of_cucarda_marker_in_readme'});
                         }
@@ -600,7 +684,7 @@ module.exports = function(qaControl){
                     warnings:function(info) {
                         if(info.packageJson['qa-control'] && info.packageJson['qa-control'].multilang === 'no') { return []; }
                         var warns = [];
-                        var defReadme = qaControl.mainDoc();
+                        var defReadme = qaControl.mainDoc(info.packageJson);
                         var content = info.files[defReadme].content;
                         var obtainedLangs = multilang.obtainLangs(content);
                         /*jshint forin: false */
@@ -773,7 +857,7 @@ module.exports = function(qaControl){
                         var projWorkflowsDir = Path.join(info.projectDir, '.github/workflows');
                         var publishable = isPublishable(info.packageJson);
                         return fs.readdir(qaWorkflowsDir).then(function(qaFiles) {
-                            return Promise.all(qaFiles.map(function(fileName) {
+                            var expectedChecks = Promise.all(qaFiles.map(function(fileName) {
                                 // si el paquete no se publica, los workflows de publicación no van
                                 if(!publishable && publishWorkflows.indexOf(fileName) !== -1) {
                                     var forbiddenPath = Path.join(projWorkflowsDir, fileName);
@@ -802,6 +886,31 @@ module.exports = function(qaControl){
                                     });
                                 });
                             }));
+                            // sobra cualquier workflow que no venga de qa-control (GitHub solo lee los archivos de la carpeta)
+                            var unexpectedChecks = fs.readdir(projWorkflowsDir, {withFileTypes:true}).catch(function(err) {
+                                if(err.code === 'ENOENT') { return []; }
+                                throw err;
+                            }).then(function(/** @type {import('fs').Dirent[]} */ entries) {
+                                return entries.filter(function(entry) {
+                                    return entry.isFile() && qaFiles.indexOf(entry.name) === -1;
+                                }).map(function(entry) {
+                                    return qaControl.withFix({warning:'unexpected_workflow_file_1', params:[entry.name], scoring:{workflows:1}},
+                                             {action:'delete', path:Path.join(projWorkflowsDir, entry.name)});
+                                });
+                            });
+                            // qa-control.gha solo puede sobrescribir claves de las secciones "with:" de los workflows
+                            var gha = info.packageJson['qa-control']?.gha;
+                            var ghaKeysCheck = !gha || typeof gha !== 'object' ? Promise.resolve([]) : Promise.all(qaFiles.map(function(fileName) {
+                                return fs.readFile(Path.join(qaWorkflowsDir, fileName), 'utf8').then(withKeysOf);
+                            })).then(function(/** @type {string[][]} */ keysByFile) {
+                                var withKeys = keysByFile.reduce(function(acc, keys) { return acc.concat(keys); }, []);
+                                return Object.keys(gha).filter(function(key) { return withKeys.indexOf(key) === -1; }).map(function(key) {
+                                    return {warning:'unknown_key_1_in_qa_control_gha', params:[key], scoring:{workflows:1}};
+                                });
+                            });
+                            return Promise.all([expectedChecks, unexpectedChecks, ghaKeysCheck]).then(function(parts) {
+                                return parts[0].concat([parts[1], parts[2]]);
+                            });
                         }).then(function(results) {
                             return results.reduce(function(acc, arr) { return acc.concat(arr); }, []);
                         }).catch(function(err) {

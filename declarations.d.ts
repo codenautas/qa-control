@@ -19,18 +19,22 @@ interface FileInfo {
     content?: string;
 }
 
+/** un código de warning (lo silencia siempre) o [código, param1, ...] (solo si coinciden los primeros parámetros) */
+type SilencedEntry = string | string[];
+
 interface QAControlSection {
     purpose?: string;
     'test-appveyor'?: boolean;
     'run-in'?: string;
     type?: string;
-    'package-version'?: string;
     coverage?: number;
-    silenced?: string[];
+    silenced?: SilencedEntry[];
     profile?: 'minimum'|'default';
     multilang?: string;
-    /** un objeto equivale a "all" con los valores indicados sobrescritos en los workflows */
-    gha?: 'skip'|'all'|{ node_version?: string|number, 'skip-tests-until-date'?: string }
+    /** el documento principal del proyecto (por defecto el de la definición: LEEME.md) */
+    fileNameMainDoc?: string;
+    /** un objeto equivale a "all" con los valores indicados sobrescritos en las secciones "with:" de los workflows */
+    gha?: 'skip'|'all'|Record<string, string|number|boolean>
     sonar?: boolean;
     /** opciones de publicación. "private-source": el fuente es privado pero el paquete se publica igual */
     publish?: { 'private-source'?: boolean };

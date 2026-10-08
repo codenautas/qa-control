@@ -6,7 +6,6 @@ var fs = require('fs-extra');
 var Path = require('path');
 var yaml = require('js-yaml');
 var OS = require('os');
-var qaControlPackageJson = require('../package.json');
 
 function stripScoring(warnArray) {
     for(var w=0; w<warnArray.length; ++w) {
@@ -394,7 +393,6 @@ var fixtures=[{
     expected:[
         { warning: 'workflow_file_1_differs', params: [ 'build-and-test.yml' ] },
         { warning: 'lack_of_workflow_file_1', params: [ 'create-new-version.yml' ] },
-        { warning: 'lack_of_workflow_file_1', params: [ 'publish-manual.yml' ] },
         { warning: 'lack_of_workflow_file_1', params: [ 'publish.yml' ] },
         { warning: 'workflow_file_1_differs', params: [ 'qa-control.yml' ] }
     ]
@@ -960,11 +958,16 @@ describe('qa-control main', function(){
                                       +'falta el archivo de workflow "param1"\n'
                                       +'el archivo de workflow "param1" difiere del template de qa-control\n'
                                       +'el archivo appveyor.yml difiere del template de qa-control\n'
-                                      +'qa-control debe estar en devDependencies con la misma versión que qa-control.package-version\n'
+                                      +'qa-control debe estar en devDependencies\n'
                                       +'La versión de qa-control en devDependencies es "param1" pero se esperaba "param2"\n'
                                       +'Falta el script "test-ci" en package.json\n'
                                       +'no corresponde "qa-control.sonar" en un proyecto privado\n'
                                       +'el proyecto no se publica: no corresponde el workflow "param1"\n'
+                                      +'el workflow "param1" no es uno de los workflows de qa-control\n'
+                                      +'la clave "param1" de la sección qa-control del package.json es obsoleta\n'
+                                      +'clave desconocida "param1" en la sección qa-control del package.json\n'
+                                      +'la clave "param1" de qa-control.gha no es un parámetro "with:" de ningún workflow\n'
+                                      +'entrada inválida param1 en qa-control.silenced (debe ser un código de warning o un array [código, parámetros...])\n'
                                       +'¡Qué --bail(e)! Podrían haber más problemas, correr de nuevo después de corregir estos\n');
                 done();
             }).catch(done);
@@ -977,12 +980,17 @@ describe('qa-control main', function(){
                 //console.log(warnStr);
                 expect(warnStr).to.eql('lack of mandatory section "param1" in qa-control section of package.json\n'
                                        +'packageJson.repository must be in format /{[-a-zA-Z0-9_.]+}/[-a-zA-Z0-9_.]+/\n'
-                                       +'qa-control must be in devDependencies with the same version as qa-control.package-version\n'
+                                       +'qa-control must be in devDependencies\n'
                                        +'qa-control version in devDependencies is "param1" but expected "param2"\n'
                                        +'lack of test-ci script in package.json\n'
                                        +'could not run ESLint, check the configuration file extension\n'
                                        +'"qa-control.sonar" does not apply in a private project\n'
                                        +'the project is not published: workflow "param1" does not apply\n'
+                                       +'the workflow "param1" is not one of the qa-control workflows\n'
+                                       +'the key "param1" in the qa-control section of package.json is obsolete\n'
+                                       +'unknown key "param1" in the qa-control section of package.json\n'
+                                       +'the key "param1" of qa-control.gha is not a "with:" parameter of any workflow\n'
+                                       +'invalid entry param1 in qa-control.silenced (must be a warning code or an array [code, params...])\n'
                                        +'--bail(ing)! There could be more issues\n' // TODO: esto debería estar abajo
                                        +'deprecated version\n'
                                        +'invalid value param1 in parameter param2 valid values param3\n'
@@ -1200,7 +1208,7 @@ describe('qa-control --fix', function(){
             return qaControl.controlProject(tempDir, {}).then(function(warnings){
                 var differing = warnings.filter(function(w){ return w.warning === 'workflow_file_1_differs'; })
                                         .map(function(w){ return w.params[0]; });
-                expect(differing).to.eql(['create-new-version.yml', 'publish-manual.yml', 'publish.yml']);
+                expect(differing).to.eql(['create-new-version.yml', 'publish.yml']);
                 return qaControl.controlProject(tempDir, {fix:true});
             }).then(function(){
                 expect(workflowLine('publish.yml', 'node_version')).to.eql("node_version: '22'");
@@ -1210,15 +1218,126 @@ describe('qa-control --fix', function(){
                 expect(warnings.filter(function(w){ return w.warning === 'workflow_file_1_differs'; })).to.eql([]);
             });
         });
-        it('skip-tests-until-date replaces the line where it exists', function(){
-            prepare('gha-skip-tests', {'skip-tests-until-date':'2026-12-31'});
+        it('writes booleans without quotes and only where the key exists', function(){
+            prepare('gha-skip-tests', {skip_tests:true});
             return qaControl.controlProject(tempDir, {fix:true}).then(function(){
-                expect(workflowLine('publish.yml', 'skip-tests-until-date')).to.eql("skip-tests-until-date: '2026-12-31'");
+                expect(workflowLine('build-and-test.yml', 'skip_tests')).to.eql("skip_tests: true");
                 // no se agrega la clave a los workflows que no la declaran
-                expect(workflowLine('publish-manual.yml', 'skip-tests-until-date')).to.be(null);
+                expect(workflowLine('publish.yml', 'skip_tests')).to.be(null);
                 return qaControl.controlProject(tempDir, {});
             }).then(function(warnings){
                 expect(warnings.filter(function(w){ return w.warning === 'workflow_file_1_differs'; })).to.eql([]);
+            });
+        });
+        it('reports a key that is not a "with:" parameter of any workflow', function(){
+            prepare('gha-unknown-key', {'skip-tests-until-date':'2026-12-31'});
+            return qaControl.controlProject(tempDir, {}).then(function(warnings){
+                expect(stripScoring(warnings.filter(function(w){ return w.warning.indexOf('workflow') !== -1 || w.warning === 'unknown_key_1_in_qa_control_gha'; })))
+                    .to.eql([{warning:'unknown_key_1_in_qa_control_gha', params:['skip-tests-until-date']}]);
+            });
+        });
+        it('does not replace keys outside the "with:" sections', function(){
+            prepare('gha-outside-with', {name:'otro'});
+            return qaControl.controlProject(tempDir, {}).then(function(warnings){
+                expect(stripScoring(warnings.filter(function(w){ return w.warning.indexOf('workflow') !== -1 || w.warning === 'unknown_key_1_in_qa_control_gha'; })))
+                    .to.eql([{warning:'unknown_key_1_in_qa_control_gha', params:['name']}]);
+            });
+        });
+    });
+    describe('unexpected workflows', function(){
+        var tempDir;
+        function prepare(name, changePkg){
+            tempDir = prepareWithWorkflows(name, changePkg);
+            fs.writeFileSync(Path.join(tempDir, '.github/workflows/deploy.yml'), 'name: deploy\n', 'utf8');
+            fs.writeFileSync(Path.join(tempDir, '.github/workflows/publish-manual.yml'), 'name: Publish (manual)\n', 'utf8');
+        }
+        function unexpectedWorkflows(warnings){
+            return warnings.filter(function(w){ return w.warning === 'unexpected_workflow_file_1'; })
+                           .map(function(w){ return w.params[0]; });
+        }
+        afterEach(function(){
+            qaControl.fixMode = false;
+            qaControl.deletes = 'ask';
+        });
+        it('reports the workflows that do not come from qa-control', function(){
+            prepare('unexpected-workflows', function(){});
+            return qaControl.controlProject(tempDir, {}).then(function(warnings){
+                expect(unexpectedWorkflows(warnings)).to.eql(['deploy.yml', 'publish-manual.yml']);
+            });
+        });
+        it('deletes them only with --deletes=yes', function(){
+            prepare('unexpected-workflows-deletes', function(){});
+            var deployPath = Path.join(tempDir, '.github/workflows/deploy.yml');
+            return qaControl.controlProject(tempDir, {fix:true, deletes:'no'}).then(function(){
+                expect(fs.existsSync(deployPath)).to.be(true);
+                return qaControl.controlProject(tempDir, {fix:true, deletes:'yes'});
+            }).then(function(warnings){
+                expect(fs.existsSync(deployPath)).to.be(false);
+                expect(fs.existsSync(Path.join(tempDir, '.github/workflows/publish-manual.yml'))).to.be(false);
+                expect(fs.existsSync(Path.join(tempDir, '.github/workflows/build-and-test.yml'))).to.be(true);
+                expect(unexpectedWorkflows(warnings)).to.eql([]);
+            });
+        });
+        it('silences only the workflow named in the silenced entry', function(){
+            prepare('unexpected-workflows-silenced', function(pkg){
+                pkg['qa-control'].silenced = (pkg['qa-control'].silenced || []).concat([['unexpected_workflow_file_1', 'deploy.yml']]);
+            });
+            return qaControl.controlProject(tempDir, {}).then(function(warnings){
+                expect(unexpectedWorkflows(warnings)).to.eql(['publish-manual.yml']);
+            });
+        });
+    });
+    describe('keys of the qa-control section', function(){
+        var tempDir;
+        function warningsNamed(warnings, name){
+            return warnings.filter(function(w){ return w.warning === name; })
+                           .map(function(w){ return w.params && w.params[0]; });
+        }
+        afterEach(function(){
+            qaControl.fixMode = false;
+        });
+        it('reports the obsolete keys and the fix removes all of them at once', function(){
+            tempDir = prepareWithWorkflows('obsolete-qa-control-keys', function(pkg){
+                pkg['qa-control'].stability = 'extending';
+                pkg['qa-control'].ecmaVersion = 6;
+                pkg['qa-control']['package-version'] = '0.3.0';
+            });
+            return qaControl.controlProject(tempDir, {}).then(function(warnings){
+                expect(warningsNamed(warnings, 'obsolete_key_1_in_qa_control')).to.eql(['stability', 'ecmaVersion', 'package-version']);
+                return qaControl.controlProject(tempDir, {fix:true});
+            }).then(function(warnings){
+                expect(warningsNamed(warnings, 'obsolete_key_1_in_qa_control')).to.eql([]);
+                var qac = JSON.parse(fs.readFileSync(Path.join(tempDir, 'package.json'), 'utf8'))['qa-control'];
+                expect(Object.keys(qac).filter(function(key){ return ['stability', 'ecmaVersion', 'package-version'].indexOf(key) !== -1; })).to.eql([]);
+            });
+        });
+        it('reports an unknown key and the fix does not remove it', function(){
+            tempDir = prepareWithWorkflows('unknown-qa-control-key', function(pkg){
+                pkg['qa-control'].silence = ['lack_of_mandatory_file_1'];
+            });
+            var pkgPath = Path.join(tempDir, 'package.json');
+            var before = fs.readFileSync(pkgPath, 'utf8');
+            return qaControl.controlProject(tempDir, {fix:true}).then(function(warnings){
+                expect(warningsNamed(warnings, 'unknown_key_1_in_qa_control')).to.eql(['silence']);
+                expect(fs.readFileSync(pkgPath, 'utf8')).to.eql(before);
+            });
+        });
+        it('accepts the valid keys', function(){
+            tempDir = prepareWithWorkflows('valid-qa-control-keys', function(pkg){
+                pkg['qa-control'].fileNameMainDoc = 'LEEME.md';
+                pkg['qa-control'].multilang = 'si';
+            });
+            return qaControl.controlProject(tempDir, {}).then(function(warnings){
+                expect(warningsNamed(warnings, 'unknown_key_1_in_qa_control')).to.eql([]);
+                expect(warningsNamed(warnings, 'obsolete_key_1_in_qa_control')).to.eql([]);
+            });
+        });
+        it('reports invalid entries in silenced', function(){
+            tempDir = prepareWithWorkflows('invalid-silenced-entries', function(pkg){
+                pkg['qa-control'].silenced = (pkg['qa-control'].silenced || []).concat([['unexpected_workflow_file_1', 'deploy.yml'], [], 7]);
+            });
+            return qaControl.controlProject(tempDir, {}).then(function(warnings){
+                expect(warningsNamed(warnings, 'invalid_entry_1_in_qa_control_silenced')).to.eql(['[]', '7']);
             });
         });
     });
@@ -1239,7 +1358,9 @@ describe('qa-control --fix', function(){
             prepare('private-forbids-publish', function(pkg){ pkg.private = true; });
             return qaControl.controlProject(tempDir, {}).then(function(warnings){
                 expect(warningsNamed(warnings, 'forbidden_workflow_file_1_in_non_publishable'))
-                    .to.eql(['publish-manual.yml', 'publish.yml']);
+                    .to.eql(['publish.yml']);
+                // el workflow prohibido no se informa además como sobrante
+                expect(warningsNamed(warnings, 'unexpected_workflow_file_1')).to.eql([]);
             });
         });
         it('keeps the publish workflows when a private source still publishes', function(){
@@ -1259,7 +1380,6 @@ describe('qa-control --fix', function(){
                 return qaControl.controlProject(tempDir, {fix:true, deletes:'yes'});
             }).then(function(){
                 expect(fs.existsSync(publishPath)).to.be(false);
-                expect(fs.existsSync(Path.join(tempDir, '.github/workflows/publish-manual.yml'))).to.be(false);
                 // los workflows que no son de publicación siguen estando
                 expect(fs.existsSync(Path.join(tempDir, '.github/workflows/build-and-test.yml'))).to.be(true);
             });
@@ -1351,6 +1471,19 @@ describe('qa-control coverage (group A)', function(){
         it('accepts a matching qa-control devDependency version', function(){
             var info = /** @type {any} */ ({ packageJson: { 'qa-control': { gha:'ci' }, devDependencies: { 'qa-control':'^'+toolVersion } } });
             expect(stripScoring(check(info))).to.eql([]);
+        });
+    });
+    describe('main doc (qa-control.fileNameMainDoc)', function(){
+        it('defaults to the one in the definition', function(){
+            expect(qaControl.mainDoc(/** @type {any} */ ({'qa-control':{}}))).to.eql('LEEME.md');
+        });
+        it('uses the one declared in package.json', function(){
+            var check = qaControl.definition.rules.no_multilang_section_in_1.checks[0].warnings;
+            var info = /** @type {any} */ ({
+                files: { 'README.md': {content:'# sin multilang\n'} },
+                packageJson: { 'qa-control': { fileNameMainDoc:'README.md' } }
+            });
+            expect(stripScoring(check(info))).to.eql([{warning:'no_multilang_section_in_1', params:['README.md']}]);
         });
     });
     describe('rule: use_strict', function(){
@@ -1504,6 +1637,20 @@ describe('qa-control --codes and --silence-all', function(){
                 ]);
             });
         });
+        it('an entry with params silences only the warnings with those params', function(){
+            return qaControl.loadProject('test/fixtures/stable-project-v0.3.0').then(function(info){
+                var clone = cloneProject(info);
+                delete clone.files['LICENSE'];
+                clone.packageJson.dependencies['lodash'] = '4.17.1';
+                clone.packageJson['qa-control'].silenced = [['lack_of_mandatory_file_1', 'README.md']];
+                return qaControl.controlInfo(clone);
+            }).then(function(warns){
+                expect(stripNotices(stripScoring(warns))).to.eql([
+                    {warning:'lack_of_mandatory_file_1', params:['LICENSE']},
+                    WARNING_CANT_CONTINUE
+                ]);
+            });
+        });
         it('still aborts with cant_continue when the early warning is active', function(){
             return qaControl.loadProject('test/fixtures/stable-project-v0.3.0').then(function(info){
                 var clone = cloneProject(info);
@@ -1550,7 +1697,7 @@ describe('qa-control --codes and --silence-all', function(){
         });
     });
     describe('--silence-all', function(){
-        it('adds active warning codes to qa-control.silenced creating the array', function(){
+        it('adds active warnings with their params to qa-control.silenced creating the array', function(){
             var tempDir = prepare('silence-all-lodash', 'stable-project-v0.3.0');
             var pkgPath = Path.join(tempDir, 'package.json');
             var pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
@@ -1558,7 +1705,7 @@ describe('qa-control --codes and --silence-all', function(){
             fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
             return qaControl.controlProject(tempDir, {silenceAll:true}).then(function(){
                 var after = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
-                expect(after['qa-control'].silenced).to.eql(['non_recomended_dependency_1_in_package_json']);
+                expect(after['qa-control'].silenced).to.eql([['non_recomended_dependency_1_in_package_json', 'lodash']]);
                 // una corrida normal posterior ya no debe reportar el warning silenciado
                 return qaControl.controlProject(tempDir, {});
             }).then(function(warns){
@@ -1571,7 +1718,7 @@ describe('qa-control --codes and --silence-all', function(){
             fs.removeSync(Path.join(tempDir, 'LICENSE'));
             return qaControl.controlProject(tempDir, {silenceAll:true}).then(function(){
                 var silenced = JSON.parse(fs.readFileSync(Path.join(tempDir, 'package.json'), 'utf8'))['qa-control'].silenced || [];
-                expect(silenced).to.contain('lack_of_mandatory_file_1');
+                expect(silenced.map(function(entry){ return JSON.stringify(entry); })).to.contain(JSON.stringify(['lack_of_mandatory_file_1', 'LICENSE']));
                 expect(silenced.indexOf('cant_continue')).to.be(-1);
                 expect(silenced.indexOf('bailing_could_be_more')).to.be(-1);
             });
@@ -1593,7 +1740,8 @@ describe('qa-control --codes and --silence-all', function(){
                 var qac = JSON.parse(fs.readFileSync(pkgPath, 'utf8'))['qa-control'];
                 expect(qac['run-in']).to.eql('server');
                 expect(qac.type).to.eql('lib');
-                expect(qac['package-version']).to.eql(qaControlPackageJson.version);
+                // package-version es obsoleta: no se escribe
+                expect('package-version' in qac).to.be(false);
             });
         });
         it('does not abort anymore, so later rules are reached', function(){
