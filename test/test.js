@@ -576,7 +576,7 @@ describe('qa-control', function(){
                     'packageJson'
                 ]);
                 expect(info.projectDir).to.eql(projDir);
-                expect(Object.keys(info.files)).to.eql(['.gitignore','.jshintrc','LEEME.md','LICENSE','README.md','appveyor.yml','eslint.config.js','package.json','simple.js','stable-project.js']);
+                expect(Object.keys(info.files)).to.eql(['.gitignore','LEEME.md','LICENSE','README.md','appveyor.yml','eslint.config.js','package.json','simple.js','stable-project.js']);
                 expect(info.files['package.json'].content).to.match(/^{\r?\n\s\s"name": "stable-project"/);
                 expect(info.packageJson.name).to.be('stable-project');
                 expect(info.packageJson["qa-control"]["run-in"]).to.eql("server");
@@ -609,6 +609,7 @@ describe('qa-control', function(){
                 expect(en['repository_name_not_found']).to.be('packageJson.repository must be in format /{[-a-zA-Z0-9_.]+}\/[-a-zA-Z0-9_.]+/');
                 expect(en['using_normal_promise_in_file_1']).to.be('using normal promise in file $1');
                 expect(en['packagejson_main_file_1_does_not_exists']).to.be('packagejson main file $1 does not exists');
+                expect(en['eslint_errors_in_file_1']).to.be('eslint errors in file $1');
                 expect(en['eslint_warnings_in_file_1']).to.be('eslint warnings in file $1');
                 expect(en['readme_multilang_not_sincronized_with_file_1']).to.be('readme multilang not sincronized with file $1');
                 expect(en['lack_of_repository_section_in_package_json']).to.be('lack of repository section in package json');
@@ -942,6 +943,7 @@ describe('qa-control main', function(){
                                       +'packageJson.repository no tiene el formato /{[-a-zA-Z0-9_.]+}/[-a-zA-Z0-9_.]+/\n'
                                       +'se han usado Promise(s) normales en "param1"\n'
                                       +'no existe el archivo "main" (param1) declarado en package.json\n'
+                                      +'el archivo "param1" tiene errores de ESLint\n'
                                       +'el archivo "param1" tiene warnings de ESLint\n'
                                       +'no se pudo correr ESLint, verifique la extensión del archivo de configuración\n'
                                       +'no se pudo correr ESLint: no está instalado el módulo "param1" que usa la configuración (¿falta npm install?)\n'
@@ -968,6 +970,7 @@ describe('qa-control main', function(){
                                       +'no corresponde "qa-control.sonar" en un proyecto privado\n'
                                       +'el proyecto no se publica: no corresponde el workflow "param1"\n'
                                       +'el workflow "param1" no es uno de los workflows de qa-control\n'
+                                      +'el archivo "param1" es de una herramienta que ya no se usa\n'
                                       +'la clave "param1" de la sección qa-control del package.json es obsoleta\n'
                                       +'clave desconocida "param1" en la sección qa-control del package.json\n'
                                       +'la clave "param1" de qa-control.gha no es un parámetro "with:" de ningún workflow\n'
@@ -995,6 +998,7 @@ describe('qa-control main', function(){
                                        +'"qa-control.sonar" does not apply in a private project\n'
                                        +'the project is not published: workflow "param1" does not apply\n'
                                        +'the workflow "param1" is not one of the qa-control workflows\n'
+                                       +'the file "param1" belongs to a tool that is no longer used\n'
                                        +'the key "param1" in the qa-control section of package.json is obsolete\n'
                                        +'unknown key "param1" in the qa-control section of package.json\n'
                                        +'the key "param1" of qa-control.gha is not a "with:" parameter of any workflow\n'
@@ -1016,6 +1020,7 @@ describe('qa-control main', function(){
                                        +'file param1 does not match custom param2\n'
                                        +'using normal promise in file param1\n'
                                        +'packagejson main file param1 does not exists\n'
+                                       +'eslint errors in file param1\n'
                                        +'eslint warnings in file param1\n'
                                        +'readme multilang not sincronized with file param1\n'
                                        +'lack of repository section in package json\n'
@@ -1295,6 +1300,59 @@ describe('qa-control --fix', function(){
             });
         });
     });
+    describe('obsolete files', function(){
+        var tempDir;
+        var obsoleteFiles = ['.codeclimate.yml', '.travis.yml', '.jshintrc', '.jslintrc'];
+        function prepare(name){
+            tempDir = prepareWithWorkflows(name, function(){});
+            obsoleteFiles.forEach(function(fileName){
+                fs.writeFileSync(Path.join(tempDir, fileName), 'obsolete\n', 'utf8');
+            });
+        }
+        function obsoleteReported(warnings){
+            return warnings.filter(function(w){ return w.warning === 'obsolete_file_1'; })
+                           .map(function(w){ return w.params[0]; });
+        }
+        afterEach(function(){
+            qaControl.fixMode = false;
+            qaControl.deletes = 'ask';
+        });
+        it('reports the files of tools that are no longer used', function(){
+            prepare('obsolete-files');
+            return qaControl.controlProject(tempDir, {}).then(function(warnings){
+                expect(obsoleteReported(warnings)).to.eql(obsoleteFiles);
+            });
+        });
+        it('deletes them only with --deletes=yes', function(){
+            prepare('obsolete-files-deletes');
+            return qaControl.controlProject(tempDir, {fix:true, deletes:'no'}).then(function(){
+                obsoleteFiles.forEach(function(fileName){
+                    expect(fs.existsSync(Path.join(tempDir, fileName))).to.be(true);
+                });
+                return qaControl.controlProject(tempDir, {fix:true, deletes:'yes'});
+            }).then(function(warnings){
+                obsoleteFiles.forEach(function(fileName){
+                    expect(fs.existsSync(Path.join(tempDir, fileName))).to.be(false);
+                });
+                expect(obsoleteReported(warnings)).to.eql([]);
+            });
+        });
+    });
+    describe('ESLint errors and warnings', function(){
+        it('silencing the warnings keeps reporting the errors', function(){
+            var tempDir = prepareWithWorkflows('eslint-silenced-warnings', function(pkg){
+                pkg['qa-control'].silenced = (pkg['qa-control'].silenced || []).concat(['eslint_warnings_in_file_1']);
+            });
+            var eslintFixture = Path.join(__dirname, 'fixtures', 'eslint-real-check');
+            ['eslint.config.js', 'with-error.js', 'with-warning.js'].forEach(function(fileName){
+                fs.copySync(Path.join(eslintFixture, fileName), Path.join(tempDir, fileName));
+            });
+            return qaControl.controlProject(tempDir, {}).then(function(warnings){
+                expect(stripScoring(warnings.filter(function(w){ return /^eslint_/.test(w.warning); })))
+                    .to.eql([{warning:'eslint_errors_in_file_1', params:['with-error.js']}]);
+            });
+        });
+    });
     describe('keys of the qa-control section', function(){
         var tempDir;
         function warningsNamed(warnings, name){
@@ -1564,19 +1622,20 @@ describe('qa-control coverage (group B: verbose branches)', function(){
             return check(info);
         }).then(function(warns){
             warns = stripScoring(warns);
-            var hasEslint = warns.some(function(w){ return w.warning==='eslint_warnings_in_file_1' && w.params[0]==='with-warning.js'; });
+            var hasEslint = warns.some(function(w){ return w.warning==='eslint_errors_in_file_1' && w.params[0]==='with-error.js'; });
             expect(hasEslint).to.be(true);
         });
     });
 });
 
 describe('qa-control eslint rule (real ESLint runs)', function(){
-    it('reports the same warnings a real ESLint run would report', function(){
+    it('reports the same findings a real ESLint run would report, separating errors from warnings', function(){
         var check = qaControl.definition.rules.eslint.checks[0].warnings;
         return qaControl.loadProject('test/fixtures/eslint-real-check').then(function(info){
             return check(info);
         }).then(function(warns){
             expect(stripScoring(warns)).to.eql([
+                {warning:'eslint_errors_in_file_1', params:['with-error.js']},
                 {warning:'eslint_warnings_in_file_1', params:['with-warning.js']}
             ]);
         });
@@ -1679,7 +1738,7 @@ describe('qa-control typescript_eslint rule', function(){
         }).then(function(info){
             return qaControl.definition.rules.eslint.checks[0].warnings(info);
         }).then(function(warns){
-            expect(stripScoring(warns)).to.eql([{warning:'eslint_warnings_in_file_1', params:['src/two.ts']}]);
+            expect(stripScoring(warns)).to.eql([{warning:'eslint_errors_in_file_1', params:['src/two.ts']}]);
         });
     });
     it('does not fix a configuration that differs from the template', function(){

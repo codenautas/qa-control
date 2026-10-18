@@ -120,6 +120,10 @@ var validQaControlKeys = ['profile', 'gha', 'publish', 'multilang', 'coverage', 
 // claves de la sección "qa-control" que ya no se usan: se reportan y --fix las quita
 var obsoleteQaControlKeys = ['package-version', 'stability', 'stage', 'ecmaVersion'];
 
+// archivos de herramientas que ya no se usan (Travis, Code Climate, JSHint y JSLint; hoy se usan GHA y ESLint):
+// se reportan para no confundir y --fix los borra (según --deletes)
+var obsoleteFiles = ['.codeclimate.yml', '.travis.yml', '.jshintrc', '.jslintrc'];
+
 // recorre las líneas de un workflow y pasa por mapKey cada clave que esté directamente dentro de una
 // sección "with:" (los parámetros de un workflow reutilizable). mapKey recibe la línea, el prefijo
 // hasta los dos puntos inclusive y el nombre de la clave, y devuelve la línea que va en su lugar.
@@ -809,7 +813,9 @@ module.exports = function(qaControl){
                                         console.log('ESLINT '+result.messages.length+' finding in "'+file+'":');
                                         console.log(result.messages);
                                     }
-                                    warns.push({warning:'eslint_warnings_in_file_1', params:[file], scoring:{eslint:1}});
+                                    // separados para poder silenciar los warnings sin dejar de reportar los errores
+                                    var warning = result.errorCount ? 'eslint_errors_in_file_1' : 'eslint_warnings_in_file_1';
+                                    warns.push({warning:warning, params:[file], scoring:{eslint:1}});
                                 }
                             });
                             return warns;
@@ -965,6 +971,18 @@ module.exports = function(qaControl){
                             });
                         }
                         return warns;
+                    }
+                }]
+            },
+            obsolete_files:{
+                checks:[{
+                    warnings:function(info) {
+                        return obsoleteFiles.filter(function(fileName) {
+                            return info.files[fileName];
+                        }).map(function(fileName) {
+                            return qaControl.withFix({warning:'obsolete_file_1', params:[fileName], scoring:{conventions:1}},
+                                     {action:'delete', path:Path.join(info.projectDir, fileName)});
+                        });
                     }
                 }]
             },

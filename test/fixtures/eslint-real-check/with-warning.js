@@ -1,3 +1,6 @@
 "use strict";
 
-var unused = 1;
+var value = 1;
+if(value == 1) {
+    module.exports = value;
+}

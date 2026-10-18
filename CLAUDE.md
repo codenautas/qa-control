@@ -61,7 +61,6 @@ _Hay que tratar de mantener actualizada esta sección_
 ### 2. Archivos obligatorios
 - `README.md`
 - `LEEME.md`
-- `.travis.yml`
 - `.gitignore` (con líneas obligatorias: `local-*` y `*-local.*`)
 - `LICENSE`
 - `eslint.config.{js,mjs,cjs,ts,mts,cts}` (formato flat config moderno de ESLint; basta con que exista alguna de estas variantes; obligatorio salvo que `qa-control.profile` sea `minimum`). No se acepta el formato clásico `.eslintrc.yml`.
@@ -84,6 +83,7 @@ _Hay que tratar de mantener actualizada esta sección_
 
 ### 6. Lint y estilo de código
 - Se ejecuta la clase `ESLint` (API moderna) sobre todos los `.js` del proyecto, resolviendo su `eslint.config.*` real desde el propio directorio del proyecto (igual que lo haría ESLint corrido por línea de comandos).
+  - Por cada archivo con hallazgos se reporta un solo warning: `eslint_errors_in_file_1` si tiene al menos un error, o `eslint_warnings_in_file_1` si solo tiene warnings. Así se pueden silenciar los warnings sin dejar de reportar los errores.
   - Si ESLint no puede correr porque la configuración usa un módulo que no está instalado, se informa ese módulo (`eslint_could_not_run_lack_of_module_1`); con cualquier otro error, `eslint_could_not_run`.
 - Si el proyecto tiene `typescript` en `dependencies` o `devDependencies` (no cuenta `peerDependencies`), los `.ts`, `.mts` y `.cts` (incluidos los `.d.ts`) se analizan con typescript-eslint, cargado desde el `eslint.config.*` del proyecto: así qa-control y `npx eslint` analizan lo mismo.
   - Se reporta el primer `.ts` que la configuración no cubre (los excluidos por `ignores` no cuentan). `--fix` lo arregla solo si la configuración es la del template salvo la línea `ignores`: la reemplaza por el template con el bloque de TypeScript (`bin/init-template/eslint.config.typescript-block.txt`), conservando los `ignores`.
@@ -95,8 +95,9 @@ _Hay que tratar de mantener actualizada esta sección_
 
 ### 7. Validaciones adicionales
 - Se validan las versiones de dependencias en `package.json` para que sean semver válidos.
-- Se detectan dependencias no recomendadas: `best-promise`, `lodash`, `promise-plus`.
-- Se comprueba que `.travis.yml` pruebe al menos Node 4 y 6, y que estas versiones no tengan fallos permitidos.
+- Se detectan dependencias no recomendadas: `best-promise`, `jslint`, `lodash`, `promise-plus`.
+- Se reportan los archivos de herramientas que ya no se usan (`obsolete_file_1`): `.codeclimate.yml`, `.travis.yml`,
+  `.jshintrc` y `.jslintrc` (hoy se usan GHA y ESLint). `--fix` los borra, según `--deletes`.
 - Se comprueba que los archivos de traducción de `multilang` estén sincronizados con el `README.md`/`LEEME.md` principal.
 
 ### 8. GitHub Actions (`qa-control.gha`)

@@ -7,7 +7,8 @@ module.exports = [
             sourceType: "commonjs"
         },
         rules: {
-            "no-unused-vars": 2
+            "no-unused-vars": 2,
+            "eqeqeq": 1
         }
     }
 ];
