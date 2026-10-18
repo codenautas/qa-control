@@ -84,6 +84,12 @@ _Hay que tratar de mantener actualizada esta sección_
 
 ### 6. Lint y estilo de código
 - Se ejecuta la clase `ESLint` (API moderna) sobre todos los `.js` del proyecto, resolviendo su `eslint.config.*` real desde el propio directorio del proyecto (igual que lo haría ESLint corrido por línea de comandos).
+  - Si ESLint no puede correr porque la configuración usa un módulo que no está instalado, se informa ese módulo (`eslint_could_not_run_lack_of_module_1`); con cualquier otro error, `eslint_could_not_run`.
+- Si el proyecto tiene `typescript` en `dependencies` o `devDependencies` (no cuenta `peerDependencies`), los `.ts`, `.mts` y `.cts` (incluidos los `.d.ts`) se analizan con typescript-eslint, cargado desde el `eslint.config.*` del proyecto: así qa-control y `npx eslint` analizan lo mismo.
+  - Se reporta el primer `.ts` que la configuración no cubre (los excluidos por `ignores` no cuentan). `--fix` lo arregla solo si la configuración es la del template salvo la línea `ignores`: la reemplaza por el template con el bloque de TypeScript (`bin/init-template/eslint.config.typescript-block.txt`), conservando los `ignores`.
+  - `typescript-eslint` debe estar en `devDependencies` (`--fix` lo agrega con la versión de las devDependencies de qa-control).
+  - typescript-eslint necesita la API de TypeScript 6: con TypeScript 7 se pide la configuración "running side by side with TypeScript 6.0" del [anuncio de TypeScript 7.0](https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/): `"typescript": "npm:@typescript/typescript6@..."` y `"@typescript/native": "npm:typescript@<versión 7>"`. `--fix` escribe los dos alias.
+  - Si falta el `eslint.config.cjs`, `--fix` crea el template con el bloque de TypeScript.
 - Se previene el uso de librerías de promesas normales: `promise`, `q`, `rsvp`, `es6promise`.
 - Se verifica la ortografía de `"use strict"` en la forma correcta dentro de funciones y bloques.
 

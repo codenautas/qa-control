@@ -4,6 +4,7 @@ var esl = require('eslint');
 var multilang = require('multilang');
 var fs = require('fs-extra');
 var Path = require('path');
+var semver = require('semver');
 
 /**
  *
@@ -22,6 +23,71 @@ function testAppVeyor(packageJson){
 function usingLintConfig(packageJson){
     var qaSection = packageJson?.['qa-control'];
     return !!qaSection && qaSection.profile !== 'minimum';
+}
+
+// usa TypeScript si lo declara en dependencies o devDependencies (tenerlo como peerDependency no
+// implica tener código .ts)
+/**
+ * @param {PackageJson} packageJson
+ * @returns {boolean}
+ */
+function usingTypeScript(packageJson){
+    return !!(packageJson?.dependencies?.typescript || packageJson?.devDependencies?.typescript);
+}
+
+// versión que qa-control declara (y con la que prueba) en sus propias devDependencies
+/**
+ * @param {string} name
+ * @returns {string}
+ */
+function qaControlDevDependency(name){
+    var version = fs.readJsonSync(Path.join(__dirname, '../../package.json')).devDependencies?.[name];
+    if(!version) { throw new Error('qa-control: lack of "'+name+'" in its own devDependencies'); }
+    return version;
+}
+
+var initTemplateDir = Path.join(__dirname, '../init-template');
+
+// el eslint.config.cjs del template; si el proyecto usa TypeScript, con el bloque que analiza
+// los .ts (eslint.config.typescript-block.txt) agregado al final
+/**
+ * @param {PackageJson} packageJson
+ * @returns {string}
+ */
+function eslintConfigTemplate(packageJson){
+    var template = fs.readFileSync(Path.join(initTemplateDir, 'eslint.config.cjs'), 'utf8').replace(/\r\n/g, '\n');
+    if(!usingTypeScript(packageJson)) { return template; }
+    var tsBlock = fs.readFileSync(Path.join(initTemplateDir, 'eslint.config.typescript-block.txt'), 'utf8').replace(/\r\n/g, '\n');
+    var header = /^"use strict";\n\n/;
+    var end = /\n\];\n$/;
+    if(!header.test(template) || !end.test(template)) {
+        throw new Error('qa-control: unexpected start or end in the eslint.config.cjs template');
+    }
+    return template
+        .replace(header, '"use strict";\n\nconst tseslint = require("typescript-eslint");\n\n')
+        .replace(end, ',\n' + tsBlock + '];\n');
+}
+
+// la línea "ignores" es propia de cada proyecto: las configuraciones se comparan sin ella
+var eslintIgnoresLine = /^( *ignores:).*$/m;
+
+// los .ts, .mts y .cts del proyecto (incluidos los .d.ts), sin entrar en node_modules ni .git
+/**
+ * @param {string} dir
+ * @returns {Promise<string[]>}
+ */
+function typeScriptFiles(dir){
+    return fs.readdir(dir, {withFileTypes:true}).then(function(entries){
+        return Promise.all(entries.map(function(entry){
+            var path = Path.join(dir, entry.name);
+            if(entry.isDirectory()) {
+                return entry.name === 'node_modules' || entry.name === '.git' ? [] : typeScriptFiles(path);
+            }
+            return /\.[mc]?ts$/.test(entry.name) ? [path] : [];
+        }));
+    }).then(function(lists){
+        return [].concat.apply([], lists);
+    });
 }
 
 /** @param {string} realRegex */
@@ -181,7 +247,8 @@ module.exports = function(qaControl){
                 fixTemplate:'appveyor.yml',
                 presentIf: testAppVeyor
             },
-            'eslint.config.cjs':{ group:'eslint-config', fixTemplate:true, presentIf: usingLintConfig },
+            'eslint.config.cjs':{ group:'eslint-config', fixTemplate:true, presentIf: usingLintConfig,
+                fixContent: function(pj) { return usingTypeScript(pj) ? eslintConfigTemplate(pj) : null; } },
             'eslint.config.mjs':{ group:'eslint-config', presentIf: usingLintConfig },
             'eslint.config.js':{ group:'eslint-config', presentIf: usingLintConfig },
             'eslint.config.ts':{ group:'eslint-config', presentIf: usingLintConfig },
@@ -381,7 +448,10 @@ module.exports = function(qaControl){
                                 if(isMissing && !reportedGroups[groupName] && (file.mandatory || (file.presentIf && file.presentIf(info.packageJson)))) {
                                     reportedGroups[groupName] = true;
                                     var warn = {warning:'lack_of_mandatory_file_1', params:[fileName], scoring:{mandatories:1}};
-                                    if(file.fixTemplate) {
+                                    var fixContent = file.fixContent ? file.fixContent(info.packageJson) : null;
+                                    if(fixContent != null) {
+                                        qaControl.withFix(warn, {action:'write', path:Path.join(info.projectDir, fileName), content:fixContent});
+                                    } else if(file.fixTemplate) {
                                         var templatePath = typeof file.fixTemplate === 'string'
                                             ? Path.join(__dirname, '../..', file.fixTemplate)
                                             : Path.join(__dirname, '../init-template', fileName);
@@ -648,6 +718,80 @@ module.exports = function(qaControl){
                     }
                 }]
             },
+            // los .ts se analizan con typescript-eslint cargado desde el eslint.config.* del proyecto, así
+            // qa-control y "npx eslint" analizan lo mismo. typescript-eslint necesita la API de TypeScript 6:
+            // con TypeScript 7 el proyecto usa los alias de "running side by side with TypeScript 6.0"
+            // (https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/)
+            typescript_eslint:{
+                checks:[{
+                    warnings:function(info){
+                        if(!usingLintConfig(info.packageJson) || !usingTypeScript(info.packageJson)) { return []; }
+                        var warns = [];
+                        // los cambios al package.json se calculan juntos: cada warning lleva el fix completo
+                        var changedSections = {};
+                        var devDependencies = Object.assign({}, info.packageJson.devDependencies);
+                        if(!('typescript-eslint' in devDependencies)) {
+                            devDependencies['typescript-eslint'] = qaControlDevDependency('typescript-eslint');
+                            changedSections.devDependencies = devDependencies;
+                            warns.push({warning:'lack_of_typescript_eslint_in_dev_dependencies', scoring:{dependencies:1}});
+                        }
+                        var sectionName = info.packageJson.devDependencies?.typescript ? 'devDependencies' : 'dependencies';
+                        var section = changedSections[sectionName] || Object.assign({}, info.packageJson[sectionName]);
+                        var typescriptRange = semver.validRange(section.typescript);
+                        if(typescriptRange && semver.minVersion(typescriptRange).major >= 7) {
+                            section['@typescript/native'] = 'npm:typescript@' + section.typescript;
+                            section.typescript = qaControlDevDependency('typescript');
+                            changedSections[sectionName] = section;
+                            warns.push({warning:'typescript_7_without_typescript6_alias', scoring:{dependencies:1}});
+                        }
+                        if(warns.length) {
+                            var packageFix = qaControl.packageJsonFix(info, Object.assign({}, info.packageJson, changedSections));
+                            warns.forEach(function(warn){ qaControl.withFix(warn, packageFix); });
+                        }
+                        var projectDir = Path.resolve(info.projectDir);
+                        var eslint = new esl.ESLint({ cwd: projectDir });
+                        // ESLint da por ignorado tanto lo que excluyen los "ignores" como lo que ninguna configuración
+                        // cubre. Esta instancia cubre todos los .ts: lo que da por ignorado es por los "ignores".
+                        var eslintCoveringTs = new esl.ESLint({ cwd: projectDir, overrideConfig: {files:['**/*.ts', '**/*.mts', '**/*.cts']} });
+                        return typeScriptFiles(projectDir).then(function(files){
+                            return files.reduce(function(chain, file){
+                                return chain.then(function(uncovered){
+                                    if(uncovered) { return uncovered; }
+                                    return eslintCoveringTs.isPathIgnored(file).then(function(ignored){
+                                        if(ignored) { return null; }
+                                        return eslint.calculateConfigForFile(file).then(function(config){
+                                            return config ? null : file;
+                                        });
+                                    });
+                                });
+                            }, Promise.resolve(/** @type {string|null} */ (null)));
+                        }).then(function(uncovered){
+                            if(!uncovered) { return warns; }
+                            var warn = {warning:'eslint_does_not_analyze_ts_file_1', params:[Path.relative(projectDir, uncovered).replace(/\\/g, '/')], scoring:{eslint:1}};
+                            // se repara solo si la configuración es la del template (salvo los "ignores")
+                            var configName = Object.keys(qaControl.definition.files).find(function(name){
+                                return qaControl.definition.files[name].group === 'eslint-config' && info.files[name];
+                            });
+                            var content = configName && info.files[configName].content;
+                            var jsTemplate = eslintConfigTemplate({});
+                            if(content != null && qaControl.fixEOL(content.replace(eslintIgnoresLine, '$1')) === qaControl.fixEOL(jsTemplate.replace(eslintIgnoresLine, '$1'))) {
+                                var ignoresLine = content.match(eslintIgnoresLine)[0];
+                                qaControl.withFix(warn, {action:'write', path:Path.join(projectDir, configName),
+                                    content:eslintConfigTemplate(info.packageJson).replace(eslintIgnoresLine, function(){ return ignoresLine; })});
+                            }
+                            warns.push(warn);
+                            return warns;
+                        }, function(err){
+                            // la configuración no se pudo cargar: lo informa la regla eslint (eslint_could_not_run)
+                            if(qaControl.verbose){
+                                console.log('ESLINT could not check the TypeScript files:');
+                                console.log(err.stack);
+                            }
+                            return warns;
+                        });
+                    }
+                }]
+            },
             eslint:{
                 eclipsers:['packagejson_main_file_1_does_not_exists'],
                 checks:[{
@@ -673,6 +817,11 @@ module.exports = function(qaControl){
                             if(qaControl.verbose){
                                 console.log('ESLINT could not run:');
                                 console.log(err.stack);
+                            }
+                            // un módulo que la configuración usa y no está instalado (require o import)
+                            var lackOfModule = /^(MODULE_NOT_FOUND|ERR_MODULE_NOT_FOUND)$/.test(err && err.code) && /Cannot find (?:module|package) '([^']+)'/.exec(err.message);
+                            if(lackOfModule) {
+                                return [{warning:'eslint_could_not_run_lack_of_module_1', params:[lackOfModule[1]], scoring:{eslint:1}}];
                             }
                             return [{warning:'eslint_could_not_run', scoring:{eslint:1}}];
                         });

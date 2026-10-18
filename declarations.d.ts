@@ -111,7 +111,7 @@ interface QADefinition {
     files: Record<string, QAFile>;
     cucardas: Record<string, QACucarda>;
     customs: Record<string, {detect:string, match:string}>;
-    eslint_options: any;
+    eslint_options: any; // eslint-disable-line @typescript-eslint/no-explicit-any
     rules: Record<string, QARule>;
 }
 
@@ -123,7 +123,7 @@ interface Fixture {
     skipped?: boolean;
     notices?: boolean;
     expectedParams?: string[];
-    change: (info: any) => void;
+    change: (info: any) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
     expected?: Warning[];
     scoring?: boolean;
 }

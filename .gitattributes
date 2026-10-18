@@ -2,6 +2,7 @@
 * text=auto
 
 bin/init-template/eslint.config.cjs text eol=lf
+bin/init-template/eslint.config.typescript-block.txt text eol=lf
 test/fixtures/eslint-real-check/clean.js text eol=lf
 test/fixtures/eslint-real-check/eslint.config.js text eol=lf
 test/fixtures/eslint-real-check/package.json text eol=lf

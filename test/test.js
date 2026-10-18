@@ -944,6 +944,10 @@ describe('qa-control main', function(){
                                       +'no existe el archivo "main" (param1) declarado en package.json\n'
                                       +'el archivo "param1" tiene warnings de ESLint\n'
                                       +'no se pudo correr ESLint, verifique la extensión del archivo de configuración\n'
+                                      +'no se pudo correr ESLint: no está instalado el módulo "param1" que usa la configuración (¿falta npm install?)\n'
+                                      +'la configuración de ESLint no analiza el archivo TypeScript "param1"\n'
+                                      +'falta typescript-eslint en devDependencies para analizar los archivos TypeScript\n'
+                                      +'typescript-eslint necesita TypeScript 6: "typescript" debe ser el alias a @typescript/typescript6 y TypeScript 7 va en "@typescript/native"\n'
                                       +'README.md no esta sincronizado con "param1" para multilang\n'
                                       +'Falta la sección "repository" en package.json\n'
                                       +'La sección "repository" en package.json es inválida\n'
@@ -984,6 +988,10 @@ describe('qa-control main', function(){
                                        +'qa-control version in devDependencies is "param1" but expected "param2"\n'
                                        +'lack of test-ci script in package.json\n'
                                        +'could not run ESLint, check the configuration file extension\n'
+                                       +'could not run ESLint: the module "param1" used by the configuration is not installed (lack of npm install?)\n'
+                                       +'the ESLint configuration does not analyze the TypeScript file "param1"\n'
+                                       +'typescript-eslint must be in devDependencies to analyze the TypeScript files\n'
+                                       +'typescript-eslint needs TypeScript 6: "typescript" must be the alias to @typescript/typescript6 and TypeScript 7 goes in "@typescript/native"\n'
                                        +'"qa-control.sonar" does not apply in a private project\n'
                                        +'the project is not published: workflow "param1" does not apply\n'
                                        +'the workflow "param1" is not one of the qa-control workflows\n'
@@ -1588,6 +1596,152 @@ describe('qa-control eslint rule (real ESLint runs)', function(){
             return check(info);
         }).then(function(warns){
             expect(stripScoring(warns)).to.eql([]);
+        });
+    });
+    [
+        {configName:'eslint.config.cjs', content:'"use strict";\nvar notInstalled = require("not-installed-module");\nmodule.exports = [notInstalled];\n'},
+        {configName:'eslint.config.mjs', content:'import notInstalled from "not-installed-module";\nexport default [notInstalled];\n'}
+    ].forEach(function(variant){
+        it('reports the module that is not installed when '+variant.configName+' uses it', function(){
+            var check = qaControl.definition.rules.eslint.checks[0].warnings;
+            var tempDir = Path.join(__dirname, '..', 'local-test-fix-mode', 'eslint-lack-of-module');
+            fs.removeSync(tempDir);
+            fs.copySync(Path.join(__dirname, 'fixtures', 'eslint-real-check'), tempDir);
+            fs.removeSync(Path.join(tempDir, 'eslint.config.js'));
+            fs.writeFileSync(Path.join(tempDir, variant.configName), variant.content);
+            return qaControl.loadProject(tempDir).then(function(info){
+                return check(info);
+            }).then(function(warns){
+                fs.removeSync(tempDir);
+                expect(stripScoring(warns)).to.eql([{warning:'eslint_could_not_run_lack_of_module_1', params:['not-installed-module']}]);
+            });
+        });
+    });
+});
+
+describe('qa-control typescript_eslint rule', function(){
+    var check = qaControl.definition.rules.typescript_eslint.checks[0].warnings;
+    var localBase = Path.join(__dirname, '..', 'local-test-fix-mode');
+    var jsTemplate = fs.readFileSync(Path.join(__dirname, '..', 'bin', 'init-template', 'eslint.config.cjs'), 'utf8');
+    var qaDevDependencies = fs.readJsonSync(Path.join(__dirname, '..', 'package.json')).devDependencies;
+    var NOT_ANALYZED = {warning:'eslint_does_not_analyze_ts_file_1', params:['src/one.ts']};
+    // las carpetas se borran al terminar cada test: su eslint.config.cjs es el más cercano para sus archivos
+    // (ESLint no aplica ahí los "ignores" de la raíz) y qa-control corrido sobre sí mismo las reportaría
+    var tempDirs = [];
+    afterEach(function(){
+        tempDirs.forEach(function(tempDir){ fs.removeSync(tempDir); });
+        tempDirs = [];
+    });
+    // copia el fixture y le agrega el eslint.config.cjs del template de JavaScript con los "ignores" indicados
+    function prepare(name, ignores){
+        var tempDir = Path.join(localBase, name);
+        tempDirs.push(tempDir);
+        fs.removeSync(tempDir);
+        fs.copySync(Path.join(__dirname, 'fixtures', 'typescript-project'), tempDir);
+        if(ignores != null) {
+            fs.writeFileSync(Path.join(tempDir, 'eslint.config.cjs'), jsTemplate.replace(/^( *ignores:).*$/m, '$1 '+ignores));
+        }
+        return tempDir;
+    }
+    it('reports a .ts that the configuration does not analyze and --fix uses the TypeScript template', function(){
+        var tempDir = prepare('ts-not-analyzed', '["dist/**", "local*/**"]');
+        return qaControl.loadProject(tempDir).then(function(info){
+            return Promise.resolve(check(info)).then(function(warns){
+                // dist/generated.d.ts no se reporta: lo excluyen los "ignores"
+                expect(stripScoring(warns)).to.eql([NOT_ANALYZED]);
+                return qaControl.applyFixes(info, warns);
+            });
+        }).then(function(fixed){
+            expect(fixed).to.be(1);
+            var content = fs.readFileSync(Path.join(tempDir, 'eslint.config.cjs'), 'utf8');
+            expect(content).to.contain('ignores: ["dist/**", "local*/**"]');
+            expect(content).to.contain('const tseslint = require("typescript-eslint");');
+            return qaControl.loadProject(tempDir);
+        }).then(function(info){
+            return Promise.resolve(check(info)).then(function(warns){
+                expect(warns).to.eql([]);
+                return qaControl.definition.rules.eslint.checks[0].warnings(info);
+            });
+        }).then(function(warns){
+            // con el template de TypeScript, ESLint corre sobre los .ts y src/one.ts no tiene problemas
+            expect(stripScoring(warns)).to.eql([]);
+        });
+    });
+    it('the TypeScript template detects a floating promise', function(){
+        var tempDir = prepare('ts-floating-promise', '["dist/**"]');
+        fs.writeFileSync(Path.join(tempDir, 'src', 'two.ts'), 'import { one } from "./one";\nexport function two(): void {\n    one();\n}\n');
+        return qaControl.loadProject(tempDir).then(function(info){
+            return Promise.resolve(check(info)).then(function(warns){
+                return qaControl.applyFixes(info, warns);
+            });
+        }).then(function(){
+            return qaControl.loadProject(tempDir);
+        }).then(function(info){
+            return qaControl.definition.rules.eslint.checks[0].warnings(info);
+        }).then(function(warns){
+            expect(stripScoring(warns)).to.eql([{warning:'eslint_warnings_in_file_1', params:['src/two.ts']}]);
+        });
+    });
+    it('does not fix a configuration that differs from the template', function(){
+        var tempDir = prepare('ts-own-config', '["dist/**"]');
+        var configPath = Path.join(tempDir, 'eslint.config.cjs');
+        fs.writeFileSync(configPath, fs.readFileSync(configPath, 'utf8').replace('"no-debugger": 2,', '"no-debugger": 1,'));
+        return qaControl.loadProject(tempDir).then(function(info){
+            return check(info);
+        }).then(function(warns){
+            expect(stripScoring(warns)).to.eql([NOT_ANALYZED]);
+            expect(warns[0].fix).to.be(undefined);
+        });
+    });
+    it('asks for typescript-eslint and the TypeScript 6 alias, and --fix writes both in package.json', function(){
+        var tempDir = prepare('ts-package-json', '["dist/**"]');
+        return qaControl.loadProject(tempDir).then(function(info){
+            delete info.packageJson.devDependencies['typescript-eslint'];
+            info.packageJson.devDependencies.typescript = '^7.0.2';
+            return check(info);
+        }).then(function(warns){
+            expect(stripScoring(warns)).to.eql([
+                {warning:'lack_of_typescript_eslint_in_dev_dependencies'},
+                {warning:'typescript_7_without_typescript6_alias'},
+                NOT_ANALYZED
+            ]);
+            // los dos warnings del package.json llevan el mismo fix, con los dos cambios
+            expect(warns[0].fix).to.be(warns[1].fix);
+            var devDependencies = JSON.parse(warns[0].fix.content).devDependencies;
+            expect(devDependencies).to.eql({
+                typescript: qaDevDependencies.typescript,
+                'typescript-eslint': qaDevDependencies['typescript-eslint'],
+                '@typescript/native': 'npm:typescript@^7.0.2'
+            });
+        });
+    });
+    it('accepts TypeScript 7 with the TypeScript 6 alias', function(){
+        var tempDir = prepare('ts-with-alias', '["dist/**"]');
+        return qaControl.loadProject(tempDir).then(function(info){
+            info.packageJson.devDependencies.typescript = 'npm:@typescript/typescript6@^6.0.2';
+            info.packageJson.devDependencies['@typescript/native'] = 'npm:typescript@^7.0.2';
+            return check(info);
+        }).then(function(warns){
+            expect(stripScoring(warns)).to.eql([NOT_ANALYZED]);
+        });
+    });
+    it('does not apply to projects without TypeScript', function(){
+        var tempDir = prepare('ts-without-typescript', '["dist/**"]');
+        return qaControl.loadProject(tempDir).then(function(info){
+            delete info.packageJson.devDependencies.typescript;
+            return check(info);
+        }).then(function(warns){
+            expect(warns).to.eql([]);
+        });
+    });
+    it('--fix writes the TypeScript template when the configuration is missing', function(){
+        var tempDir = prepare('ts-without-config', null);
+        return qaControl.loadProject(tempDir).then(function(info){
+            return qaControl.definition.rules.mandatory_files.checks[0].warnings(info);
+        }).then(function(warns){
+            var warn = warns.find(function(w){ return w.params && w.params[0] === 'eslint.config.cjs'; });
+            expect(warn.fix.action).to.be('write');
+            expect(warn.fix.content).to.contain('const tseslint = require("typescript-eslint");');
         });
     });
 });

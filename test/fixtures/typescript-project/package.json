@@ -1,0 +1,12 @@
+{
+  "name": "typescript-project",
+  "version": "0.0.1",
+  "qa-control": {
+    "run-in": "server",
+    "type": "lib"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.71.2"
+  }
+}
