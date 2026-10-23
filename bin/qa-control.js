@@ -20,6 +20,40 @@ function forEach(obj, func) {
 
 qaControl.msgs={
     en:{
+        deprecated_version: 'the version is too old',
+        invalid_value_1_in_parameter_2_valid_values_3: 'invalid value "$1" for parameter "$2" in the qa-control section. Valid values: $3',
+        lack_of_mandatory_file_1: 'lack of mandatory file "$1"',
+        no_qa_control_section_in_codenautas_project: 'lack of "qa-control" section in package.json and it looks like a codenautas project',
+        no_multilang_section_in_1: 'lack of multilang section in file $1',
+        no_package_json: 'lack of package.json file',
+        no_qa_control_section_in_package_json: 'lack of qa-control section in package.json',
+        lack_of_cucarda_marker_in_readme: 'lack of "cucardas" section in README.md',
+        lack_of_mandatory_cucarda_1: 'lack of mandatory cucarda $1',
+        wrong_format_in_cucarda_1: 'the cucarda "$1" has a wrong format',
+        forbidden_cucarda_1: 'the cucarda "$1" must not be used in README.md',
+        cucardas_block_differs: 'the cucardas block differs from the expected one (order, extra lines or format)',
+        lack_of_mandatory_line_1_in_file_2: 'lack of mandatory line $1 in file $2',
+        file_1_does_not_match_custom_2: '$1 does not match the custom $2',
+        using_normal_promise_in_file_1: 'normal Promise(s) used in "$1"',
+        packagejson_main_file_1_does_not_exists: 'the "main" file ($1) declared in package.json does not exist',
+        eslint_errors_in_file_1: 'the file "$1" has ESLint errors',
+        eslint_warnings_in_file_1: 'the file "$1" has ESLint warnings',
+        readme_multilang_not_sincronized_with_file_1: 'README.md is not synchronized with "$1" for multilang',
+        lack_of_repository_section_in_package_json: 'lack of "repository" section in package.json',
+        invalid_repository_section_in_package_json: 'the "repository" section in package.json is invalid',
+        repository_does_not_match_1: 'the repository does not match the expected "$1"',
+        invalid_dependency_version_number_format_in_dep_1: 'wrong version number format in "$1"',
+        wrong_use_strict_spelling_in_file_1: '"use strict" is misspelled in "$1"',
+        lack_of_files_section_in_package_json: 'lack of "files" section in package.json',
+        invalid_files_section_in_package_json: 'the "files" section in package.json is invalid',
+        dot_file_1_in_files_section: 'the file "$1" in the "files" section of package.json is a .dot file',
+        unexpected_eslintconfig_section_in_package_json: 'the eslintConfig section must not be in package.json',
+        incorrect_ecmascript_versions_in_package_json: 'the ECMAScript versions used in package.json are incorrect',
+        non_recomended_dependency_1_in_package_json: 'non recommended dependency "$1" in package.json',
+        lack_of_workflow_file_1: 'lack of workflow file "$1"',
+        workflow_file_1_differs: 'the workflow file "$1" differs from the qa-control template',
+        appveyor_yml_differs: 'the appveyor.yml file differs from the qa-control template',
+        cant_continue: 'cannot continue checking until the previous issues are fixed',
         lack_of_mandatory_section_1: 'lack of mandatory section "$1" in qa-control section of package.json',
         repository_name_not_found: 'packageJson.repository must be in format /{[-a-zA-Z0-9_.]+}\/[-a-zA-Z0-9_.]+/',
         lack_of_qa_control_in_dev_dependencies: 'qa-control must be in devDependencies',
@@ -77,6 +111,7 @@ qaControl.msgs={
         lack_of_files_section_in_package_json: 'Falta la sección "files" en package.json',
         invalid_files_section_in_package_json: 'La sección "files" en package.json es inválida',
         dot_file_1_in_files_section: 'El archivo "$1" en la sección "files" de package.json es un archivo .dot',
+        unexpected_eslintconfig_section_in_package_json: 'la sección eslintConfig no debe estar en package.json',
         incorrect_ecmascript_versions_in_package_json: 'Las versiones de ECMAScript utilizadas en package.json son incorrectas',
         non_recomended_dependency_1_in_package_json: 'Dependencia no recomendada "$1" en package.json',
         lack_of_workflow_file_1: 'falta el archivo de workflow "$1"',
@@ -93,6 +128,7 @@ qaControl.msgs={
         unknown_key_1_in_qa_control: 'clave desconocida "$1" en la sección qa-control del package.json',
         unknown_key_1_in_qa_control_gha: 'la clave "$1" de qa-control.gha no es un parámetro "with:" de ningún workflow',
         invalid_entry_1_in_qa_control_silenced: 'entrada inválida $1 en qa-control.silenced (debe ser un código de warning o un array [código, parámetros...])',
+        cant_continue: 'no se puede continuar el control hasta corregir los problemas anteriores',
         bailing_could_be_more: '¡Qué --bail(e)! Podrían haber más problemas, correr de nuevo después de corregir estos',
     }
 };
@@ -300,18 +336,6 @@ qaControl.isSilenced = function isSilenced(silenced, warn) {
     });
 };
 
-qaControl.fixMessages = function fixMessages(messagesToFix) {
-    return Promise.resolve().then(function() {
-        /*jshint forin: false */
-        for(var warn in qaControl.msgs.es) {
-            if(false === warn in messagesToFix) {
-                messagesToFix[warn] = warn.replace(/_(\d+)/g,' -$1').replace(/-/g, '$').replace(/_/g,' ');
-            }
-        }
-         /*jshint forin: true */
-    });
-};
-
 qaControl.first = function first(toWhat){
     return function(part){
         return part.substring(0, 1)[toWhat]()+part.substring(1);
@@ -325,8 +349,6 @@ qaControl.jsProjectName = function jsProjectName(projectName) {
 
 qaControl.configReady=false;
 var configReading=Promise.resolve().then(function(){
-    return qaControl.fixMessages(qaControl.msgs.en);
-}).then(function(){
     // only for test, in production this sleep must gone
     return bestGlobals.sleep(500);
 }).then(function(){
@@ -576,15 +598,15 @@ qaControl.stringizeWarnings = function stringizeWarnings(warns, lang) {
         if(qaControl.verbose && warns.length) { process.stdout.write("Making warnings readable...\n"); }
         var messages = qaControl.msgs[lang];
         warns.forEach(function(warn) {
-            var msg = messages[warn.warning] || warn.warning;
+            var msg = messages[warn.warning] || qaControl.msgs.en[warn.warning] || warn.warning;
             //console.log("message", msg, warn);
-            var numParams = warn.warning.match(/\d/g);
-            if(numParams) {
-                //console.log(warn.warning, msg, " tiene ", numParams.length, " parametros y params tiene ", warn.params)
-                 for(var p=0; p<numParams.length; ++p) {
-                    msg = msg.replace('$'+(p+1), warn.params[p]);
-                }
-            }
+            // los parámetros son los $N que aparecen en el texto (el código del warning no indica nada sobre parámetros).
+            // Si el warning no trae el parámetro N, el $N queda visible en el mensaje.
+            var params = warn.params || [];
+            msg = msg.replace(/\$(\d+)/g, function(placeholder, number) {
+                var index = Number(number) - 1;
+                return index < params.length ? String(params[index]) : placeholder;
+            });
             if(qaControl.verbose) {
                 warnStr += 'WARNING: ';
             }

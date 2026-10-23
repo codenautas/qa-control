@@ -7,6 +7,54 @@ var Path = require('path');
 var yaml = require('js-yaml');
 var OS = require('os');
 
+// Registro de los ids de warnings que se generan durante los tests: al terminar se controla que todos
+// tengan mensaje en inglés y en castellano. Para registrarlos se envuelven las funciones de las reglas
+// y controlInfo (que agrega bailing_could_be_more). Se hace al cargar este archivo, antes de que los
+// describe tomen las funciones de las reglas.
+/** @type {Record<string, string>} id del warning -> primer test que lo generó */
+var generatedWarningIds = {};
+var currentTestTitle = '(fuera de un test)';
+/** @param {Warning[]} warns */
+function registerWarningIds(warns) {
+    warns.forEach(function(warn) {
+        if(!(warn.warning in generatedWarningIds)) {
+            generatedWarningIds[warn.warning] = currentTestTitle;
+        }
+    });
+    return warns;
+}
+/**
+ * @param {Function} original
+ * @returns {Function} la misma función, registrando los warnings que devuelve (en forma directa o en una promesa)
+ */
+function registeringWarnings(original) {
+    return function() {
+        var result = original.apply(this, arguments);
+        // algunas reglas devuelven el array directamente y algunos tests lo usan sin esperar una promesa
+        return result && typeof result.then === 'function' ? result.then(registerWarningIds) : registerWarningIds(result);
+    };
+}
+Object.keys(qaControl.definition.rules).forEach(function(ruleName) {
+    qaControl.definition.rules[ruleName].checks.forEach(function(checkInfo) {
+        checkInfo.warnings = registeringWarnings(checkInfo.warnings);
+    });
+});
+qaControl.controlInfo = registeringWarnings(qaControl.controlInfo);
+beforeEach(function() {
+    currentTestTitle = this.currentTest ? this.currentTest.fullTitle() : '(fuera de un test)';
+});
+after(function() {
+    var lackingMessages = [];
+    Object.keys(generatedWarningIds).forEach(function(id) {
+        ['en', 'es'].forEach(function(lang) {
+            if(!(id in qaControl.msgs[lang])) {
+                lackingMessages.push('falta el mensaje "'+id+'" en "'+lang+'" (generado en el test "'+generatedWarningIds[id]+'")');
+            }
+        });
+    });
+    expect(lackingMessages).to.eql([]);
+});
+
 function stripScoring(warnArray) {
     for(var w=0; w<warnArray.length; ++w) {
         if('scoring' in warnArray[w]) {
@@ -586,39 +634,9 @@ describe('qa-control', function(){
                 expect(info.files['LEEME.md'].content).to.match(/^<!--multilang v0 es:LEEME.md en:README.md -->/);
             });
         });
-        it('generates english messages from spanish warnings', function(){
-            return qaControl.loadProject('./test/fixtures/stable-project').then(function(info){
-                var en=qaControl.msgs.en;
-                var es=qaControl.msgs.es;
-                expect(Object.keys(en).sort()).to.eql(Object.keys(es).sort());
-                //console.log(qaControl.msgs.en);
-                expect(en['deprecated_version']).to.be('deprecated version');
-                expect(en['invalid_value_1_in_parameter_2_valid_values_3']).to.be('invalid value $1 in parameter $2 valid values $3');
-                expect(en['lack_of_mandatory_file_1']).to.be('lack of mandatory file $1');
-                //expect(en['lack_of_mandatory_parameter']).to.be('lack of mandatory parameter');
-                expect(en['lack_of_mandatory_section_1']).to.be('lack of mandatory section "$1" in qa-control section of package.json');
-                expect(en['no_qa_control_section_in_codenautas_project']).to.be('no qa control section in codenautas project');
-                expect(en['no_multilang_section_in_1']).to.be('no multilang section in $1');
-                expect(en['no_package_json']).to.be('no package json');
-                expect(en['no_qa_control_section_in_package_json']).to.be('no qa control section in package json');
-                expect(en['lack_of_cucarda_marker_in_readme']).to.be('lack of cucarda marker in readme');
-                expect(en['lack_of_mandatory_cucarda_1']).to.be('lack of mandatory cucarda $1');
-                expect(en['wrong_format_in_cucarda_1']).to.be('wrong format in cucarda $1');
-                expect(en['lack_of_mandatory_line_1_in_file_2']).to.be('lack of mandatory line $1 in file $2');
-                expect(en['file_1_does_not_match_custom_2']).to.be('file $1 does not match custom $2');
-                expect(en['repository_name_not_found']).to.be('packageJson.repository must be in format /{[-a-zA-Z0-9_.]+}\/[-a-zA-Z0-9_.]+/');
-                expect(en['using_normal_promise_in_file_1']).to.be('using normal promise in file $1');
-                expect(en['packagejson_main_file_1_does_not_exists']).to.be('packagejson main file $1 does not exists');
-                expect(en['eslint_errors_in_file_1']).to.be('eslint errors in file $1');
-                expect(en['eslint_warnings_in_file_1']).to.be('eslint warnings in file $1');
-                expect(en['readme_multilang_not_sincronized_with_file_1']).to.be('readme multilang not sincronized with file $1');
-                expect(en['lack_of_repository_section_in_package_json']).to.be('lack of repository section in package json');
-                expect(en['invalid_repository_section_in_package_json']).to.be('invalid repository section in package json');
-                expect(en['repository_does_not_match_1']).to.be('repository does not match $1');
-                expect(en['invalid_dependency_version_number_format_in_dep_1']).to.be('invalid dependency version number format in dep $1');
-                expect(en['wrong_use_strict_spelling_in_file_1']).to.be('wrong use strict spelling in file $1');
-                expect(en['non_recomended_dependency_1_in_package_json']).to.be('non recomended dependency $1 in package json');
-            });
+        it('english and spanish have the same messages', function(){
+            expect(Object.keys(qaControl.msgs.en).sort()).to.eql(Object.keys(qaControl.msgs.es).sort());
+            expect(Object.keys(qaControl.cmdMsgs.en).sort()).to.eql(Object.keys(qaControl.cmdMsgs.es).sort());
         });
     });
     describe('test qa-control by fixtures', function(){
@@ -904,10 +922,11 @@ function generateWarningsArray(lang) {
     for(var msgName in messages) {
         var msg = messages[msgName];
         var warn = { warning:msgName };
-        var numParams = msgName.match(/\d+/g);
+        // los parámetros son los $N del texto, no los dígitos del código del warning
+        var numParams = (msg.match(/\$\d+/g) || []).length;
         if(numParams) {
             var params = [];
-            for(var p=0; p<numParams.length; ++p) {
+            for(var p=0; p<numParams; ++p) {
                 params.push('param'+(p+1));
             }
             warn['params'] = params;
@@ -920,10 +939,7 @@ function generateWarningsArray(lang) {
 describe('qa-control main', function(){
     describe('tests of warning output', function(){
         it('stringize warnings in lang "es"', function(done){
-            qaControl.fixMessages(qaControl.msgs.en).then(function(){
-                //console.log(qaControl.msgs.en);
-                return qaControl.stringizeWarnings(generateWarningsArray('es'), 'es');
-            }).then(function(warnStr){
+            qaControl.stringizeWarnings(generateWarningsArray('es'), 'es').then(function(warnStr){
                 //console.log(warnStr);
                 expect(warnStr).to.eql('la version es demasiado vieja\n'
                                       +'valor invalido "param1" para el parametro "param2" en la sección qa-control. Valores válidos: param3\n'
@@ -959,6 +975,7 @@ describe('qa-control main', function(){
                                       +'Falta la sección "files" en package.json\n'
                                       +'La sección "files" en package.json es inválida\n'
                                       +'El archivo "param1" en la sección "files" de package.json es un archivo .dot\n'
+                                      +'la sección eslintConfig no debe estar en package.json\n'
                                       +'Las versiones de ECMAScript utilizadas en package.json son incorrectas\n'
                                       +'Dependencia no recomendada "param1" en package.json\n'
                                       +'falta el archivo de workflow "param1"\n'
@@ -975,17 +992,49 @@ describe('qa-control main', function(){
                                       +'clave desconocida "param1" en la sección qa-control del package.json\n'
                                       +'la clave "param1" de qa-control.gha no es un parámetro "with:" de ningún workflow\n'
                                       +'entrada inválida param1 en qa-control.silenced (debe ser un código de warning o un array [código, parámetros...])\n'
+                                      +'no se puede continuar el control hasta corregir los problemas anteriores\n'
                                       +'¡Qué --bail(e)! Podrían haber más problemas, correr de nuevo después de corregir estos\n');
                 done();
             }).catch(done);
         });
         it('stringize warnings in lang "en"', function(done){
-            qaControl.fixMessages(qaControl.msgs.en).then(function(){
-                //console.log(qaControl.msgs.en);
-                return qaControl.stringizeWarnings(generateWarningsArray('en'), 'en');
-            }).then(function(warnStr){
+            qaControl.stringizeWarnings(generateWarningsArray('en'), 'en').then(function(warnStr){
                 //console.log(warnStr);
-                expect(warnStr).to.eql('lack of mandatory section "param1" in qa-control section of package.json\n'
+                expect(warnStr).to.eql('the version is too old\n'
+                                       +'invalid value "param1" for parameter "param2" in the qa-control section. Valid values: param3\n'
+                                       +'lack of mandatory file "param1"\n'
+                                       +'lack of "qa-control" section in package.json and it looks like a codenautas project\n'
+                                       +'lack of multilang section in file param1\n'
+                                       +'lack of package.json file\n'
+                                       +'lack of qa-control section in package.json\n'
+                                       +'lack of "cucardas" section in README.md\n'
+                                       +'lack of mandatory cucarda param1\n'
+                                       +'the cucarda "param1" has a wrong format\n'
+                                       +'the cucarda "param1" must not be used in README.md\n'
+                                       +'the cucardas block differs from the expected one (order, extra lines or format)\n'
+                                       +'lack of mandatory line param1 in file param2\n'
+                                       +'param1 does not match the custom param2\n'
+                                       +'normal Promise(s) used in "param1"\n'
+                                       +'the "main" file (param1) declared in package.json does not exist\n'
+                                       +'the file "param1" has ESLint errors\n'
+                                       +'the file "param1" has ESLint warnings\n'
+                                       +'README.md is not synchronized with "param1" for multilang\n'
+                                       +'lack of "repository" section in package.json\n'
+                                       +'the "repository" section in package.json is invalid\n'
+                                       +'the repository does not match the expected "param1"\n'
+                                       +'wrong version number format in "param1"\n'
+                                       +'"use strict" is misspelled in "param1"\n'
+                                       +'lack of "files" section in package.json\n'
+                                       +'the "files" section in package.json is invalid\n'
+                                       +'the file "param1" in the "files" section of package.json is a .dot file\n'
+                                       +'the eslintConfig section must not be in package.json\n'
+                                       +'the ECMAScript versions used in package.json are incorrect\n'
+                                       +'non recommended dependency "param1" in package.json\n'
+                                       +'lack of workflow file "param1"\n'
+                                       +'the workflow file "param1" differs from the qa-control template\n'
+                                       +'the appveyor.yml file differs from the qa-control template\n'
+                                       +'cannot continue checking until the previous issues are fixed\n'
+                                       +'lack of mandatory section "param1" in qa-control section of package.json\n'
                                        +'packageJson.repository must be in format /{[-a-zA-Z0-9_.]+}/[-a-zA-Z0-9_.]+/\n'
                                        +'qa-control must be in devDependencies\n'
                                        +'qa-control version in devDependencies is "param1" but expected "param2"\n'
@@ -1003,41 +1052,27 @@ describe('qa-control main', function(){
                                        +'unknown key "param1" in the qa-control section of package.json\n'
                                        +'the key "param1" of qa-control.gha is not a "with:" parameter of any workflow\n'
                                        +'invalid entry param1 in qa-control.silenced (must be a warning code or an array [code, params...])\n'
-                                       +'--bail(ing)! There could be more issues\n' // TODO: esto debería estar abajo
-                                       +'deprecated version\n'
-                                       +'invalid value param1 in parameter param2 valid values param3\n'
-                                       +'lack of mandatory file param1\n'
-                                       +'no qa control section in codenautas project\n'
-                                       +'no multilang section in param1\n'
-                                       +'no package json\n'
-                                       +'no qa control section in package json\n'
-                                       +'lack of cucarda marker in readme\n'
-                                       +'lack of mandatory cucarda param1\n'
-                                       +'wrong format in cucarda param1\n'
-                                       +'forbidden cucarda param1\n'
-                                       +'cucardas block differs\n'
-                                       +'lack of mandatory line param1 in file param2\n'
-                                       +'file param1 does not match custom param2\n'
-                                       +'using normal promise in file param1\n'
-                                       +'packagejson main file param1 does not exists\n'
-                                       +'eslint errors in file param1\n'
-                                       +'eslint warnings in file param1\n'
-                                       +'readme multilang not sincronized with file param1\n'
-                                       +'lack of repository section in package json\n'
-                                       +'invalid repository section in package json\n'
-                                       +'repository does not match param1\n'
-                                       +'invalid dependency version number format in dep param1\n'
-                                       +'wrong use strict spelling in file param1\n'
-                                       +'lack of files section in package json\n'
-                                       +'invalid files section in package json\n'
-                                       +'dot file param1 in files section\n'
-                                       +'incorrect ecmascript versions in package json\n'
-                                       +'non recomended dependency param1 in package json\n'
-                                       +'lack of workflow file param1\n'
-                                       +'workflow file param1 differs\n'
-                                       +'appveyor yml differs\n');
+                                       +'--bail(ing)! There could be more issues\n');
                 done();
             }).catch(done);
+        });
+        it('takes the parameters from the $N in the text, not from the digits of the code', function(){
+            return qaControl.stringizeWarnings([{warning:'typescript_7_without_typescript6_alias'}], 'en').then(function(warnStr){
+                expect(warnStr).to.eql(qaControl.msgs.en.typescript_7_without_typescript6_alias+'\n');
+            });
+        });
+        it('leaves the $N visible when the warning does not have that parameter', function(){
+            return qaControl.stringizeWarnings([{warning:'lack_of_mandatory_line_1_in_file_2', params:['local-*']}], 'en').then(function(warnStr){
+                expect(warnStr).to.eql('lack of mandatory line local-* in file $2\n');
+            });
+        });
+        it('completes with english the messages that another language does not have', function(){
+            qaControl.msgs.xx = {no_package_json: 'xx no package.json'};
+            return qaControl.stringizeWarnings([{warning:'no_package_json'}, {warning:'lack_of_mandatory_file_1', params:['LICENSE']}], 'xx').then(function(warnStr){
+                expect(warnStr).to.eql('xx no package.json\nlack of mandatory file "LICENSE"\n');
+            }).finally(function(){
+                delete qaControl.msgs.xx;
+            });
         });
     });
 });
