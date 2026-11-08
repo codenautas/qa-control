@@ -97,7 +97,15 @@ _Hay que tratar de mantener actualizada esta sección_
 - Se validan las versiones de dependencias en `package.json` para que sean semver válidos.
 - Se detectan dependencias no recomendadas: `best-promise`, `jslint`, `lodash`, `promise-plus`.
 - Se reportan los archivos de herramientas que ya no se usan (`obsolete_file_1`): `.codeclimate.yml`, `.travis.yml`,
-  `.jshintrc` y `.jslintrc` (hoy se usan GHA y ESLint). `--fix` los borra, según `--deletes`.
+  `travis-test-config.yaml`, `.jshintrc`, `.jslintrc` y `.eslintrc.yml` (hoy se usan GHA y el formato flat de ESLint).
+  `--fix` los borra, según `--deletes`.
+- Si `scripts.start` es de la forma `node <archivo>`, el archivo (o `<archivo>.js`) debe existir
+  (`start_script_file_1_not_found`, sin `--fix`).
+- `appveyor.yml` debe ser igual al template (`appveyor.yml` de qa-control), seguido de `appveyor-postgres-sufix.yml`
+  si `qa-control.gha.postgres` está definido (y no es `''` ni `'no'`). No se comparan los bloques propios del proyecto:
+  cada uno empieza con una línea `# custom:` (que puede estar indentada) y sigue con las líneas de igual o mayor
+  indentación (una línea `# custom:` sin indentar abarca hasta el final del archivo). `--fix` escribe el template solo
+  si el archivo no tiene bloques `# custom:`.
 - Se comprueba que los archivos de traducción de `multilang` estén sincronizados con el `README.md`/`LEEME.md` principal.
 
 ### 8. GitHub Actions (`qa-control.gha`)

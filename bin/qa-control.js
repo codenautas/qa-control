@@ -68,6 +68,7 @@ qaControl.msgs={
         forbidden_workflow_file_1_in_non_publishable: 'the project is not published: workflow "$1" does not apply',
         unexpected_workflow_file_1: 'the workflow "$1" is not one of the qa-control workflows',
         obsolete_file_1: 'the file "$1" belongs to a tool that is no longer used',
+        start_script_file_1_not_found: 'the file "$1" of the start script does not exist',
         obsolete_key_1_in_qa_control: 'the key "$1" in the qa-control section of package.json is obsolete',
         unknown_key_1_in_qa_control: 'unknown key "$1" in the qa-control section of package.json',
         unknown_key_1_in_qa_control_gha: 'the key "$1" of qa-control.gha is not a "with:" parameter of any workflow',
@@ -124,6 +125,7 @@ qaControl.msgs={
         forbidden_workflow_file_1_in_non_publishable: 'el proyecto no se publica: no corresponde el workflow "$1"',
         unexpected_workflow_file_1: 'el workflow "$1" no es uno de los workflows de qa-control',
         obsolete_file_1: 'el archivo "$1" es de una herramienta que ya no se usa',
+        start_script_file_1_not_found: 'no existe el archivo "$1" del script start',
         obsolete_key_1_in_qa_control: 'la clave "$1" de la sección qa-control del package.json es obsoleta',
         unknown_key_1_in_qa_control: 'clave desconocida "$1" en la sección qa-control del package.json',
         unknown_key_1_in_qa_control_gha: 'la clave "$1" de qa-control.gha no es un parámetro "with:" de ningún workflow',
@@ -450,7 +452,7 @@ qaControl.applyFixes = function applyFixes(info, warns) {
                     fixedCount++;
                 });
             } else {
-                var content = qaControl.fixEOL(fix.content) + (fix.preserve != null ? qaControl.fixEOL(fix.preserve) : '');
+                var content = qaControl.fixEOL(fix.content);
                 var existed = fs.existsSync(fix.path);
                 fs.outputFileSync(fix.path, content, 'utf8');
                 console.log(existed ? 'FIXED:' : 'CREATED:', fix.path);

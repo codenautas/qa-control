@@ -15,6 +15,58 @@ function testAppVeyor(packageJson){
     return !!packageJson?.['qa-control']?.["test-appveyor"];
 }
 
+// los tests usan PostgreSQL si qa-control.gha lo declara (vacío o 'no': sin PostgreSQL, igual que en los workflows)
+/**
+ * @param {PackageJson} packageJson
+ * @returns {boolean}
+ */
+function usingPostgres(packageJson){
+    var gha = packageJson?.['qa-control']?.gha;
+    return !!gha && typeof gha === 'object' && gha.postgres != null && gha.postgres !== '' && gha.postgres !== 'no';
+}
+
+// el appveyor.yml esperado: el template, y si los tests usan PostgreSQL, seguido del sufijo que lo levanta
+/**
+ * @param {PackageJson} packageJson
+ * @returns {string}
+ */
+function appveyorTemplate(packageJson){
+    var template = fs.readFileSync(Path.join(__dirname, '../../appveyor.yml'), 'utf8');
+    if(!usingPostgres(packageJson)) { return template; }
+    return template + fs.readFileSync(Path.join(__dirname, '../../appveyor-postgres-sufix.yml'), 'utf8');
+}
+
+var customMarker = /^([ ]*)# custom:\s*$/;
+
+// quita del appveyor.yml las partes propias del proyecto: cada bloque empieza con una línea "# custom:" (que puede
+// estar indentada) y sigue con las líneas de igual o mayor indentación; las líneas vacías del medio no lo cortan
+/**
+ * @param {string} content
+ * @returns {string}
+ */
+function removeCustomBlocks(content){
+    var result = [];
+    var customIndent = null;
+    var pendingEmptyLines = [];
+    content.split(/\r?\n/).forEach(function(line) {
+        var marker = customMarker.exec(line);
+        if(marker) {
+            customIndent = marker[1].length;
+            pendingEmptyLines = [];
+            return;
+        }
+        if(customIndent !== null) {
+            if(line.trim() === '') { pendingEmptyLines.push(line); return; }
+            if(/^[ ]*/.exec(line)[0].length >= customIndent) { pendingEmptyLines = []; return; }
+            customIndent = null;
+            result = result.concat(pendingEmptyLines);
+            pendingEmptyLines = [];
+        }
+        result.push(line);
+    });
+    return result.concat(pendingEmptyLines).join('\n');
+}
+
 // el perfil "minimum" no exige configuración de lint
 /**
  * @param {PackageJson} packageJson
@@ -120,9 +172,9 @@ var validQaControlKeys = ['profile', 'gha', 'publish', 'multilang', 'coverage', 
 // claves de la sección "qa-control" que ya no se usan: se reportan y --fix las quita
 var obsoleteQaControlKeys = ['package-version', 'stability', 'stage', 'ecmaVersion'];
 
-// archivos de herramientas que ya no se usan (Travis, Code Climate, JSHint y JSLint; hoy se usan GHA y ESLint):
-// se reportan para no confundir y --fix los borra (según --deletes)
-var obsoleteFiles = ['.codeclimate.yml', '.travis.yml', '.jshintrc', '.jslintrc'];
+// archivos de herramientas que ya no se usan (Travis, Code Climate, JSHint, JSLint y la configuración clásica de ESLint;
+// hoy se usan GHA y el formato flat de ESLint): se reportan para no confundir y --fix los borra (según --deletes)
+var obsoleteFiles = ['.codeclimate.yml', '.travis.yml', '.jshintrc', '.jslintrc', '.eslintrc.yml', 'travis-test-config.yaml'];
 
 // recorre las líneas de un workflow y pasa por mapKey cada clave que esté directamente dentro de una
 // sección "with:" (los parámetros de un workflow reutilizable). mapKey recibe la línea, el prefijo
@@ -248,8 +300,8 @@ module.exports = function(qaControl){
             },
             'LICENSE':{ mandatory:true },
             'appveyor.yml':{
-                fixTemplate:'appveyor.yml',
-                presentIf: testAppVeyor
+                presentIf: testAppVeyor,
+                fixContent: appveyorTemplate
             },
             'eslint.config.cjs':{ group:'eslint-config', fixTemplate:true, presentIf: usingLintConfig,
                 fixContent: function(pj) { return usingTypeScript(pj) ? eslintConfigTemplate(pj) : null; } },
@@ -406,6 +458,22 @@ module.exports = function(qaControl){
                     }
                 }],
                 couldBail:true
+            },
+            start_script:{
+                checks:[{
+                    warnings:function(info) {
+                        // solo se controla la forma "node archivo" (como node, acepta el archivo sin la extensión .js)
+                        var start = info.packageJson?.scripts?.start;
+                        var match = typeof start === 'string' ? /^node\s+([^-\s]\S*)/.exec(start.trim()) : null;
+                        if(!match) { return []; }
+                        var fileName = match[1];
+                        var filePath = Path.join(info.projectDir, fileName);
+                        return Promise.all([fs.pathExists(filePath), fs.pathExists(filePath + '.js')]).then(function(exists) {
+                            if(exists[0] || exists[1]) { return []; }
+                            return [{warning:'start_script_file_1_not_found', params:[fileName], scoring:{conventions:1}}];
+                        });
+                    }
+                }]
             },
             invalid_repository_in_package_json:{
                 checks:[{
@@ -1092,19 +1160,16 @@ module.exports = function(qaControl){
                     warnings:function(info) {
                         var appveyorFile = info.files['appveyor.yml'];
                         if(!appveyorFile || appveyorFile.content === undefined) { return []; }
-                        var qaAppveyorPath = Path.join(__dirname, '../../appveyor.yml');
                         var projAppveyorPath = Path.join(info.projectDir, 'appveyor.yml');
-                        return fs.readFile(qaAppveyorPath, 'utf8').then(function(qaContent) {
-                            var obtained = appveyorFile.content;
-                            var match = /^before_test\s*:/m.exec(obtained);
-                            var above = match ? obtained.slice(0, match.index) : obtained;
-                            var preserve = match ? obtained.slice(match.index) : undefined;
-                            if(!qaControl.compareContent(above, qaContent, 'appveyor_yml_differs', 'appveyor.yml')) {
-                                return [qaControl.withFix({warning:'appveyor_yml_differs', scoring:{conventions:1}},
-                                         {action:'write', path:projAppveyorPath, content:qaContent, preserve:preserve})];
-                            }
+                        var obtained = appveyorFile.content;
+                        var expected = appveyorTemplate(info.packageJson);
+                        if(qaControl.compareContent(removeCustomBlocks(obtained), expected, 'appveyor_yml_differs', 'appveyor.yml')) {
                             return [];
-                        });
+                        }
+                        var warn = {warning:'appveyor_yml_differs', scoring:{conventions:1}};
+                        // con bloques "# custom:" no se sabe dónde reubicarlos, por ahora no se corrige
+                        var hasCustomBlocks = obtained.split(/\r?\n/).some(function(line) { return customMarker.test(line); });
+                        return [hasCustomBlocks ? warn : qaControl.withFix(warn, {action:'write', path:projAppveyorPath, content:expected})];
                     }
                 }]
             }

@@ -4,7 +4,7 @@ declare module 'fs-extra';
 /** cómo reparar un warning. Lo arma la detección con lo que ya leyó/calculó y lo aplica applyFixes. */
 type WarningFix =
     {action:'copy', from:string, to:string} |
-    {action:'write', path:string, content:string, preserve?:string, updateFile?:string} |
+    {action:'write', path:string, content:string, updateFile?:string} |
     {action:'delete', path:string};
 
 interface Warning {

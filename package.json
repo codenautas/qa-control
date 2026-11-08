@@ -65,7 +65,8 @@
   "files": [
     "bin",
     ".github/workflows",
-    "appveyor.yml"
+    "appveyor.yml",
+    "appveyor-postgres-sufix.yml"
   ],
   "nyc": {
     "exclude": [

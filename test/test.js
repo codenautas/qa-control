@@ -384,10 +384,50 @@ var fixtures=[{
     ]
 },{
     base:'stable-project',
-    title:'appveyor.yml with before_test must validate only the part above',
+    title:'appveyor.yml does not compare the "# custom:" blocks (at any indentation)',
     test:'appveyor_yml_differs',
     change:function(info){
-        info.files['appveyor.yml'].content = info.files['appveyor.yml'].content + '\nbefore_test:\n  - echo hola\n';
+        info.files['appveyor.yml'].content = info.files['appveyor.yml'].content
+            .replace('  - npm ci', '  - npm ci\n  # custom:\n  - echo hola\n\n  - echo chau')
+            + '# custom:\nbefore_test:\n  - echo hola\n';
+    },
+    expected:[]
+},{
+    base:'stable-project',
+    title:'appveyor.yml compares the lines that follow a "# custom:" block with less indentation',
+    test:'appveyor_yml_differs',
+    change:function(info){
+        info.files['appveyor.yml'].content = info.files['appveyor.yml'].content
+            .replace('  - npm ci', '  - npm ci\n  # custom:\n  - echo hola\nextra_key: 1');
+    },
+    expected:[
+        { warning:'appveyor_yml_differs' }
+    ]
+},{
+    base:'stable-project',
+    title:'the file of a start script of the form "node file" must exist',
+    test:'start_script_file_1_not_found',
+    change:function(info){
+        info.packageJson.scripts.start = 'node example/server.js';
+    },
+    expected:[
+        { warning:'start_script_file_1_not_found', params:['example/server.js'] },
+        WARNING_CANT_CONTINUE
+    ]
+},{
+    base:'stable-project',
+    title:'a start script of the form "node file" with an existing file (with or without .js)',
+    test:'start_script_file_1_not_found',
+    change:function(info){
+        info.packageJson.scripts.start = 'node simple --port 3000';
+    },
+    expected:[]
+},{
+    base:'stable-project',
+    title:'a start script that is not of the form "node file" is not controlled',
+    test:'start_script_file_1_not_found',
+    change:function(info){
+        info.packageJson.scripts.start = 'server4test';
     },
     expected:[]
 },{
@@ -988,6 +1028,7 @@ describe('qa-control main', function(){
                                       +'el proyecto no se publica: no corresponde el workflow "param1"\n'
                                       +'el workflow "param1" no es uno de los workflows de qa-control\n'
                                       +'el archivo "param1" es de una herramienta que ya no se usa\n'
+                                      +'no existe el archivo "param1" del script start\n'
                                       +'la clave "param1" de la sección qa-control del package.json es obsoleta\n'
                                       +'clave desconocida "param1" en la sección qa-control del package.json\n'
                                       +'la clave "param1" de qa-control.gha no es un parámetro "with:" de ningún workflow\n'
@@ -1048,6 +1089,7 @@ describe('qa-control main', function(){
                                        +'the project is not published: workflow "param1" does not apply\n'
                                        +'the workflow "param1" is not one of the qa-control workflows\n'
                                        +'the file "param1" belongs to a tool that is no longer used\n'
+                                       +'the file "param1" of the start script does not exist\n'
                                        +'the key "param1" in the qa-control section of package.json is obsolete\n'
                                        +'unknown key "param1" in the qa-control section of package.json\n'
                                        +'the key "param1" of qa-control.gha is not a "with:" parameter of any workflow\n'
@@ -1180,20 +1222,24 @@ describe('qa-control --fix', function(){
                 expect(cucardaWarnings).to.eql([]);
             });
         });
-        it('fixes appveyor.yml preserving the before_test section', function(){
-            prepare('fixes-appveyor-before-test');
+        it('fixes appveyor.yml when it does not have "# custom:" blocks', function(){
+            prepare('fixes-appveyor');
             var appveyorPath = Path.join(tempDir, 'appveyor.yml');
             var qaAppveyor = fs.readFileSync(Path.join(__dirname, '..', 'appveyor.yml'), 'utf8');
-            // rompo la parte de arriba y agrego un before_test que debe preservarse
-            var broken = qaAppveyor.replace('build: off', 'build: on') + '\nbefore_test:\n  - echo hola\n';
-            fs.writeFileSync(appveyorPath, broken, 'utf8');
+            fs.writeFileSync(appveyorPath, qaAppveyor.replace('npm ci', 'npm install'), 'utf8');
             return qaControl.controlProject(tempDir, {fix:true}).then(function(){
-                var fixed = fs.readFileSync(appveyorPath, 'utf8');
-                var match = /^before_test\s*:/m.exec(fixed);
-                expect(match).to.not.be(null);
-                var above = fixed.slice(0, match.index);
-                expect(qaControl.fixEOL(above)).to.eql(qaControl.fixEOL(qaAppveyor));
-                expect(fixed).to.contain('echo hola');
+                expect(qaControl.fixEOL(fs.readFileSync(appveyorPath, 'utf8'))).to.eql(qaControl.fixEOL(qaAppveyor));
+            });
+        });
+        it('does not fix appveyor.yml when it has "# custom:" blocks', function(){
+            prepare('does-not-fix-appveyor-custom');
+            var appveyorPath = Path.join(tempDir, 'appveyor.yml');
+            var qaAppveyor = fs.readFileSync(Path.join(__dirname, '..', 'appveyor.yml'), 'utf8');
+            var broken = qaAppveyor.replace('npm ci', 'npm install') + '# custom:\nbefore_test:\n  - echo hola\n';
+            fs.writeFileSync(appveyorPath, broken, 'utf8');
+            return qaControl.controlProject(tempDir, {fix:true}).then(function(warnings){
+                expect(fs.readFileSync(appveyorPath, 'utf8')).to.eql(broken);
+                expect(warnings.filter(function(w){ return w.warning === 'appveyor_yml_differs'; }).length).to.eql(1);
             });
         });
         it('creates appveyor.yml from the qa-control template when missing', function(){
@@ -1335,9 +1381,59 @@ describe('qa-control --fix', function(){
             });
         });
     });
+    describe('appveyor.yml with PostgreSQL (qa-control.gha.postgres)', function(){
+        var tempDir;
+        var qaAppveyor = fs.readFileSync(Path.join(__dirname, '..', 'appveyor.yml'), 'utf8');
+        var qaSufix = fs.readFileSync(Path.join(__dirname, '..', 'appveyor-postgres-sufix.yml'), 'utf8');
+        function prepare(name, appveyorContent){
+            tempDir = prepareWithWorkflows(name, function(pkg){ pkg['qa-control'].gha = {postgres:'lts'}; });
+            if(appveyorContent == null){
+                fs.removeSync(Path.join(tempDir, 'appveyor.yml'));
+            }else{
+                fs.writeFileSync(Path.join(tempDir, 'appveyor.yml'), appveyorContent, 'utf8');
+            }
+        }
+        function appveyorWarnings(warnings){
+            return warnings.filter(function(w){
+                return w.warning === 'appveyor_yml_differs' ||
+                    w.warning === 'lack_of_mandatory_file_1' && w.params && w.params[0] === 'appveyor.yml';
+            }).map(function(w){ return w.warning; });
+        }
+        afterEach(function(){
+            qaControl.fixMode = false;
+        });
+        it('requires the PostgreSQL suffix after the template', function(){
+            prepare('appveyor-postgres-lack', qaAppveyor);
+            return qaControl.controlProject(tempDir, {}).then(function(warnings){
+                expect(appveyorWarnings(warnings)).to.eql(['appveyor_yml_differs']);
+            });
+        });
+        it('accepts the template and the suffix with a "# custom:" block of the project', function(){
+            prepare('appveyor-postgres-ok', qaAppveyor + qaSufix + '  # custom:\n  - set TRAVIS=appveyor\n');
+            return qaControl.controlProject(tempDir, {}).then(function(warnings){
+                expect(appveyorWarnings(warnings)).to.eql([]);
+            });
+        });
+        it('fixes it adding the suffix', function(){
+            prepare('appveyor-postgres-fix', qaAppveyor);
+            return qaControl.controlProject(tempDir, {fix:true}).then(function(warnings){
+                expect(appveyorWarnings(warnings)).to.eql([]);
+                var fixed = fs.readFileSync(Path.join(tempDir, 'appveyor.yml'), 'utf8');
+                expect(qaControl.fixEOL(fixed)).to.eql(qaControl.fixEOL(qaAppveyor + qaSufix));
+            });
+        });
+        it('creates it with the suffix when it is missing', function(){
+            prepare('appveyor-postgres-create', null);
+            return qaControl.controlProject(tempDir, {fix:true}).then(function(warnings){
+                expect(appveyorWarnings(warnings)).to.eql([]);
+                var created = fs.readFileSync(Path.join(tempDir, 'appveyor.yml'), 'utf8');
+                expect(qaControl.fixEOL(created)).to.eql(qaControl.fixEOL(qaAppveyor + qaSufix));
+            });
+        });
+    });
     describe('obsolete files', function(){
         var tempDir;
-        var obsoleteFiles = ['.codeclimate.yml', '.travis.yml', '.jshintrc', '.jslintrc'];
+        var obsoleteFiles = ['.codeclimate.yml', '.travis.yml', '.jshintrc', '.jslintrc', '.eslintrc.yml', 'travis-test-config.yaml'];
         function prepare(name){
             tempDir = prepareWithWorkflows(name, function(){});
             obsoleteFiles.forEach(function(fileName){
