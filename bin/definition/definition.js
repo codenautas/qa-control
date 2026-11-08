@@ -336,7 +336,7 @@ module.exports = function(qaControl){
             },
             var_path:{
                 detect:'var path=',
-                match:"var Path = require('path');"
+                match:/var Path = require\(['"]path['"]\);/
             }
         },
         eslint_options: {
