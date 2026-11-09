@@ -110,7 +110,7 @@ interface QADefinition {
     sections: Record<string, QASection>;
     files: Record<string, QAFile>;
     cucardas: Record<string, QACucarda>;
-    customs: Record<string, {detect:string, match:string|RegExp}>;
+    customs: Record<string, {detect:string|RegExp, match:string|RegExp}>;
     eslint_options: any; // eslint-disable-line @typescript-eslint/no-explicit-any
     rules: Record<string, QARule>;
 }

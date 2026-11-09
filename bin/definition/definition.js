@@ -387,8 +387,8 @@ module.exports = function(qaControl){
                 match:"var winOS = Path.sep==='\\\\';"
             },
             var_path:{
-                detect:'var path=',
-                match:/var Path = require\(['"]path['"]\);/
+                detect:/var path\s*=\s*require/,
+                match:/(?:var|let) Path = require\(['"](?:node:)?path['"]\);/
             }
         },
         eslint_options: {
